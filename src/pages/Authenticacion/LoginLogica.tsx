@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../store/authSlice';
 
 const useLogin = () => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -24,9 +27,8 @@ const useLogin = () => {
             }
 
             const { token, user } = result.data;
-            console.log('Login exitoso:', { token, user });
             alert(`Bienvenido ${user.email}! Token: ${token}`);
-
+            dispatch(setUser({ user, token })); //Almacenamiento del usuario en Redux
             navigate('/');
         } catch (err) {
             if (err instanceof Error) {

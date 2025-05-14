@@ -5,7 +5,7 @@ export const handlers = [
     http.post('/api/login', async ({ request }) => {
         const { email, password } = (await request.json()) as { email: string; password: string };
 
-        if (email === 'test@example.com' && password === '7!u6${956Wed') {
+        if (email === 'test@hazi.com' && password === '7!u6${956Wed') {
             return HttpResponse.json(
                 {
                     success: true,
