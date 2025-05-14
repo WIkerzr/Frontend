@@ -7,7 +7,7 @@ interface LoginFormProps {
     setEmail: React.Dispatch<React.SetStateAction<string>>;
     password: string;
     setPassword: React.Dispatch<React.SetStateAction<string>>;
-    onSubmit: React.FormEventHandler<HTMLFormElement>; // Aquí definimos el tipo
+    onSubmit: React.FormEventHandler<HTMLFormElement>;
     error: string;
 }
 

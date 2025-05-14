@@ -30,7 +30,6 @@ const useLogin = () => {
 
             const { token, user } = result.data;
 
-            console.log(user);
             localStorage.setItem('user', JSON.stringify(user)); //Almacenamiento en localStorage
             setUser(user);
             dispatch(setAuthUser({ user, token })); //Almacenamiento del usuario en Redux

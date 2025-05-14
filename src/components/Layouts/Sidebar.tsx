@@ -23,8 +23,6 @@ const Sidebar = () => {
     const { user } = useUser();
     const rol = user?.rol.toLowerCase();
 
-    console.log(rol);
-
     const [currentMenu, setCurrentMenu] = useState<string>('');
     //const [errorSubMenu, setErrorSubMenu] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);

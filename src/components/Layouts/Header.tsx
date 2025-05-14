@@ -93,9 +93,9 @@ const Header = () => {
                         <span className="text-white-dark min-w-max ">2025</span>
                     </div>
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
-                        <div className="flex justify-end w-full">
-                            <img className="mr-20 max-h-[40px] w-auto" src="/assets/images/Mendinet-logo.png" alt="logo" />
-                            <img className="mr-20 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
+                        <div className="flex justify-end w-full overflow-hidden">
+                            <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/Mendinet-logo.png" alt="logo" />
+                            <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
                         </div>
                         {/* Borrar selector rol temporal */}
                         <div>
@@ -162,7 +162,7 @@ const Header = () => {
                         <div>
                             <select id="idioma" className="form-select text-white-dark min-w-max mr-5" style={{ minWidth: 'calc(100% + 10px)' }}>
                                 <option value="ES">ES</option>
-                                <option value="EUS">EUS</option>
+                                <option value="EU">EU</option>
                             </select>
                         </div>
                         <div className="dropdown shrink-0 flex">
@@ -177,7 +177,7 @@ const Header = () => {
                                         </div>
                                     </li>
                                     <li>
-                                        <Link to="/perfil" className="dark:hover:text-white">
+                                        <Link to="/profile" className="dark:hover:text-white">
                                             <IconUser className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0" />
                                             Mi perfil
                                         </Link>

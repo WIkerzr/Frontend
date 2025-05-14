@@ -6,6 +6,7 @@ const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
 const PlanesGestion = lazy(() => import('../pages/ADR/PlanesGestion'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
 const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
+const Profile = lazy(() => import('../pages/profile/profile'));
 
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Usuarios'));
@@ -60,6 +61,11 @@ const routes = [
         path: '/Authenticacion/Login',
         element: <Login />,
         layout: 'blank',
+    },
+    {
+        path: '/profile',
+        element: <Profile />,
+        layout: 'Profile',
     },
 ];
 
