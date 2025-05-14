@@ -1,4 +1,4 @@
-import Login from './Login';
+import Login from './LoginForm';
 import LoginLogica from './LoginLogica';
 
 const LoginBoxed = () => {

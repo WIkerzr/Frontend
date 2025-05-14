@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../store/authSlice';
+import { setAuthUser } from '../../store/authSlice';
+import { useUser } from '../../contexts/UserContext';
 
 const useLogin = () => {
+    const { setUser } = useUser();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -27,8 +29,12 @@ const useLogin = () => {
             }
 
             const { token, user } = result.data;
-            alert(`Bienvenido ${user.email}! Token: ${token}`);
-            dispatch(setUser({ user, token })); //Almacenamiento del usuario en Redux
+
+            console.log(user);
+            localStorage.setItem('user', JSON.stringify(user)); //Almacenamiento en localStorage
+            setUser(user);
+            dispatch(setAuthUser({ user, token })); //Almacenamiento del usuario en Redux
+
             navigate('/');
         } catch (err) {
             if (err instanceof Error) {

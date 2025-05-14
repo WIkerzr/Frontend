@@ -12,7 +12,19 @@ export const handlers = [
                     message: 'Login successful',
                     data: {
                         token: 'mock-jwt-token',
-                        user: { email, id: 1 },
+                        user: { email, name: 'Jon', rol: 'hazi' },
+                    },
+                },
+                { status: 200 }
+            );
+        } else if (email === 'test@anana.com' && password === '7!u6${956Wed') {
+            return HttpResponse.json(
+                {
+                    success: true,
+                    message: 'Login successful',
+                    data: {
+                        token: 'mock-jwt-token',
+                        user: { email, name: 'Natalia', rol: 'adr' },
                     },
                 },
                 { status: 200 }

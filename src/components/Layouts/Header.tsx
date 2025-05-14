@@ -13,17 +13,17 @@ import IconMoon from '../Icon/IconMoon';
 import IconLaptop from '../Icon/IconLaptop';
 import IconUser from '../Icon/IconUser';
 import IconLogout from '../Icon/IconLogout';
+import { useUser } from '../../contexts/UserContext';
 
 //IMPORTANT Temporal
 const ADRS = [{ adr: 'Añana' }, { adr: 'Busturialdea' }, { adr: 'Cantábrica' }, { adr: 'Debabarrena' }, { adr: 'Debagoiena' }, { adr: 'Donostialdea' }];
-const años = [{ ano: 2024 }, { ano: 2025 }];
 //Hasta aqui
 
 const Header = () => {
-    //IMPORTANT Temporal
-    const nombreUsuario = 'Jhon Doe';
-    const usuario = 'Añana';
-    //Hasta aqui
+    const { setUser } = useUser();
+    const { user } = useUser();
+    const rol = user?.rol.toLowerCase();
+    const nombreUsuario = user?.name;
 
     const location = useLocation();
     useEffect(() => {
@@ -70,16 +70,24 @@ const Header = () => {
                         </button>
                     </div>
 
-                    <div>
-                        <select id="adr" className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                            <option value="Todos">Todas</option>
-                            {ADRS.map((item: any) => (
-                                <option key={item.adr} value={item.adr}>
-                                    {item.adr}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {rol != 'adr' ? (
+                        <div>
+                            <select id="adr" className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                <option value="notSelect">Sin seleccionar</option>
+                                {ADRS.map((item: any) => (
+                                    <option key={item.adr} value={item.adr}>
+                                        {item.adr}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                {rol}
+                            </div>
+                        </div>
+                    )}
 
                     <div>
                         <span className="text-white-dark min-w-max ">2025</span>
@@ -87,7 +95,39 @@ const Header = () => {
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <div className="flex justify-end w-full">
                             <img className="mr-20 max-h-[40px] w-auto" src="/assets/images/Mendinet-logo.png" alt="logo" />
-                            <img className="mr-20 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.png" alt="logo" />
+                            <img className="mr-20 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
+                        </div>
+                        {/* Borrar selector rol temporal */}
+                        <div>
+                            <select
+                                value={rol}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    let datos;
+                                    switch (value) {
+                                        case 'adr':
+                                            datos = { email: 'test@adr.com', name: 'Jon', rol: 'adr' };
+                                            break;
+                                        case 'hazi':
+                                            datos = { email: 'test@hazi.com', name: 'Jon', rol: 'hazi' };
+                                            break;
+                                        case 'gobiernovasco':
+                                            datos = { email: 'test@gv.com', name: 'Jon', rol: 'gobiernovasco' };
+                                            break;
+                                        default:
+                                            datos = { email: '', name: '', rol: '' };
+                                    }
+
+                                    localStorage.setItem('user', JSON.stringify(datos));
+                                    setUser(datos);
+                                }}
+                                className="form-select text-white-dark"
+                                style={{ minWidth: '100px', backgroundColor: '#fff3cd', borderRadius: '8px', border: '1px solid #ffeeba' }}
+                            >
+                                <option value="adr">ADR</option>
+                                <option value="hazi">HAZI</option>
+                                <option value="gobiernovasco">GOBIERNO</option>
+                            </select>
                         </div>
                         <div>
                             {themeConfig.theme === 'light' ? (
@@ -112,23 +152,10 @@ const Header = () => {
                                         'flex items-center p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60'
                                     }`}
                                     onClick={() => {
-                                        dispatch(toggleTheme('system'));
-                                    }}
-                                >
-                                    <IconMoon />
-                                </button>
-                            )}
-                            {themeConfig.theme === 'system' && (
-                                <button
-                                    className={`${
-                                        themeConfig.theme === 'system' &&
-                                        'flex items-center p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60'
-                                    }`}
-                                    onClick={() => {
                                         dispatch(toggleTheme('light'));
                                     }}
                                 >
-                                    <IconLaptop />
+                                    <IconMoon />
                                 </button>
                             )}
                         </div>
@@ -145,7 +172,7 @@ const Header = () => {
                                         <div className="flex items-center px-4 py-4">
                                             <div className="ltr:pl-4 rtl:pr-4 truncate">
                                                 <h4 className="text-base">{nombreUsuario}</h4>
-                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{usuario}</h4>
+                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{rol!.toUpperCase()}</h4>
                                             </div>
                                         </div>
                                     </li>
