@@ -26,12 +26,12 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
             <form className="panel h-full" onSubmit={onSubmit}>
                 <h2 className="text-lg font-semibold mb-4">{t('datosUsuarios')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input nombreInput="nombre" type="text" value={userData.name} onChange={onChange} name="name"></Input>
-                    <Input nombreInput="apellido1" type="text" value={userData.apellido1} onChange={onChange} name="apellido1"></Input>
-                    <Input nombreInput="apellido2" type="text" value={userData.apellido2} onChange={onChange} name="apellido2"></Input>
+                    <Input nombreInput="nombre" type="text" value={userData.name} onChange={onChange} name="name" />
+                    <Input nombreInput="apellido1" type="text" value={userData.apellido1} onChange={onChange} name="apellido1" />
+                    <Input nombreInput="apellido2" type="text" value={userData.apellido2} onChange={onChange} name="apellido2" />
                     <div>
                         <label className="block text-sm font-medium mb-1">{t('rol')}</label>
-                        <select className="form-select w-full" name="rol" value={userData.rol} onChange={onChange}>
+                        <select className="form-select w-full" name="rol" value={userData.rol} onChange={onChange} disabled>
                             <option value="adr">{t('adr')}</option>
                             <option value="hazi">{t('hazi')}</option>
                             <option value="gobVasco">{t('gobVasco')}</option>
@@ -46,14 +46,15 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             <input type="text" placeholder="E-mail@E-mail.com" className="form-input ltr:rounded-l-none rtl:rounded-r-none" value={userData.email} name="email" onChange={onChange} />
                         </div>
                     </div>
-                    <Input nombreInput="ambito" type="text" value={userData.ambito} onChange={onChange} name="ambito"></Input>
+                    <Input nombreInput="ambito" type="text" value={userData.ambito} onChange={onChange} name="ambito" />
                 </div>
+                {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (
                     <div className={`mt-4 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
                         <p className="text-green-500">{successMessage}</p>
                     </div>
                 )}
-                <BtnFormsSaveCancel options="save"></BtnFormsSaveCancel>
+                <BtnFormsSaveCancel options="save" />
             </form>
         </div>
     );

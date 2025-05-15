@@ -33,7 +33,6 @@ const useLogin = () => {
             localStorage.setItem('user', JSON.stringify(user)); //Almacenamiento en localStorage
             setUser(user);
             dispatch(setAuthUser({ user, token })); //Almacenamiento del usuario en Redux
-
             navigate('/');
         } catch (err) {
             if (err instanceof Error) {

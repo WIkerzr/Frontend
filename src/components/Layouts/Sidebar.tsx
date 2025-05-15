@@ -21,7 +21,7 @@ import { useUser } from '../../contexts/UserContext';
 const Sidebar = () => {
     //IMPORTANT Temporal borrar
     const { user } = useUser();
-    const rol = user?.rol.toLowerCase();
+    const rol = user?.rol;
 
     const [currentMenu, setCurrentMenu] = useState<string>('');
     //const [errorSubMenu, setErrorSubMenu] = useState(false);

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
-import PasswordForm from './passwordform';
+import PasswordForm from './passwordForm';
 
 const PasswordFormLogic = () => {
     const [passwordData, setPasswordData] = useState({
@@ -26,8 +26,9 @@ const PasswordFormLogic = () => {
             setSuccessMessage(null);
         }
     };
-    const handleSubmitUserPassword = (e: React.FormEvent) => {
+    const handleSubmitUserPassword = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
         if (passwordData.contraNueva !== passwordData.repetirContra) {
             setErrorMessage(t('ContraseñaNoCoincide'));
@@ -35,19 +36,43 @@ const PasswordFormLogic = () => {
             setIsSubmitting(false);
             return;
         }
-        setErrorMessage(null);
-        setSuccessMessage(t('CambiosGuardados'));
-        setTimeout(() => {
-            setFadeOut(true);
+
+        try {
+            const stored = localStorage.getItem('user');
+            if (!stored) throw new Error(t('usuarioNoAutenticado'));
+
+            const parsed = JSON.parse(stored);
+            const email = parsed.email;
+
+            const response = await fetch('/api/user/password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    newPassword: passwordData.contraNueva,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(t('errorEnviarServidor'));
+            }
+
+            setErrorMessage(null);
+            setSuccessMessage(t('CambiosGuardados'));
             setTimeout(() => {
-                setSuccessMessage(null);
-                setFadeOut(false);
-            }, 1000);
-        }, 5000);
-        console.log('Formulario enviado');
-        console.log('Contraseña nueva:', passwordData.contraNueva);
-        console.log('Repetir contraseña:', passwordData.repetirContra);
-        setIsSubmitting(false);
+                setFadeOut(true);
+                setTimeout(() => {
+                    setSuccessMessage(null);
+                    setFadeOut(false);
+                }, 1000);
+            }, 5000);
+        } catch (err: any) {
+            setErrorMessage(err.message || 'Error inesperado');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (

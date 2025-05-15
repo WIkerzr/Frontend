@@ -14,6 +14,7 @@ import IconLaptop from '../Icon/IconLaptop';
 import IconUser from '../Icon/IconUser';
 import IconLogout from '../Icon/IconLogout';
 import { useUser } from '../../contexts/UserContext';
+import LogoutItem from '../../pages/Authenticacion/logout';
 
 //IMPORTANT Temporal
 const ADRS = [{ adr: 'Añana' }, { adr: 'Busturialdea' }, { adr: 'Cantábrica' }, { adr: 'Debabarrena' }, { adr: 'Debagoiena' }, { adr: 'Donostialdea' }];
@@ -22,7 +23,7 @@ const ADRS = [{ adr: 'Añana' }, { adr: 'Busturialdea' }, { adr: 'Cantábrica' }
 const Header = () => {
     const { setUser } = useUser();
     const { user } = useUser();
-    const rol = user?.rol.toLowerCase();
+    const rol = user?.rol;
     const nombreUsuario = user?.name;
 
     const location = useLocation();
@@ -172,7 +173,7 @@ const Header = () => {
                                         <div className="flex items-center px-4 py-4">
                                             <div className="ltr:pl-4 rtl:pr-4 truncate">
                                                 <h4 className="text-base">{nombreUsuario}</h4>
-                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{rol!.toUpperCase()}</h4>
+                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{rol!}</h4>
                                             </div>
                                         </div>
                                     </li>
@@ -182,12 +183,7 @@ const Header = () => {
                                             Mi perfil
                                         </Link>
                                     </li>
-                                    <li className="border-t border-white-light dark:border-white-light/10">
-                                        <Link to="/Authenticacion/Login" className="text-danger !py-3">
-                                            <IconLogout className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 rotate-90 shrink-0" />
-                                            <span>{t('cerrarSesion')}</span>
-                                        </Link>
-                                    </li>
+                                    <LogoutItem />
                                 </ul>
                             </Dropdown>
                         </div>

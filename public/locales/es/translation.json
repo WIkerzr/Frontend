@@ -47,6 +47,8 @@
     "hazi": "Hazi",
     "gobVasco": "Gobierno Vasco/Federación",
 
+    "errorEnviarServidor": "Error al enviar al servidor",
+
     "sales": "Ventas",
     "analytics": "Analítica",
     "apps": "Aplicaciones",
