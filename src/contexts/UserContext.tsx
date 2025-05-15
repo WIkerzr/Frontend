@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from 'react';
 export interface InterfaceUser {
     name: string;
     email: string;
-    rol: string;
+    role: string;
 }
 
 interface UserContextType {

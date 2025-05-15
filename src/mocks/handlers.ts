@@ -1,70 +1,12 @@
 import { http, HttpResponse } from 'msw';
+import { users } from './usersList';
 
-const users = [
-    {
-        name: 'Jon',
-        apellido1: 'Turner',
-        apellido2: 'Carter',
-        rol: 'hazi',
-        email: 'jon.turner@hazi.com',
-        ambito: '-',
-        password: 'HaziPass123!',
-    },
-    {
-        name: 'Natalia',
-        apellido1: 'Lopez',
-        apellido2: 'Martinez',
-        rol: 'adr',
-        email: 'natalia.lopez@adr.com',
-        ambito: 'Amurrio',
-        password: 'AdrSecure456!',
-    },
-    {
-        name: 'Iker',
-        apellido1: 'Gomez',
-        apellido2: 'Fernandez',
-        rol: 'gobVasco',
-        email: 'iker.gomez@gv.eus',
-        ambito: '-',
-        password: 'GovSecure789!',
-    },
-    {
-        name: 'Laura',
-        apellido1: 'Sanchez',
-        apellido2: 'Ruiz',
-        rol: 'adr',
-        email: 'laura.sanchez@adr.com',
-        ambito: 'Zamudio',
-        password: 'LauraZamudio22!',
-    },
-    {
-        name: 'David',
-        apellido1: 'Martín',
-        apellido2: 'Perez',
-        rol: 'hazi',
-        email: 'david.martin@hazi.com',
-        ambito: '-',
-        password: 'DavidHazi90#',
-    },
-    {
-        name: 'Amaia',
-        apellido1: 'Uribe',
-        apellido2: 'Agirre',
-        rol: 'adr',
-        email: 'amaia.uribe@adr.com',
-        ambito: 'Durango',
-        password: 'Durango123!',
-    },
-];
-
-// Simula una API .NET WebAPI
 export const handlers = [
     http.post('/api/login', async ({ request }) => {
         const body = (await request.json()) as { email: string; password: string };
-
         const user = users.find((u) => u.email === body.email && u.password === body.password);
 
-        if (user) {
+        if (user && user.status != false) {
             return HttpResponse.json(
                 {
                     success: true,
@@ -73,21 +15,27 @@ export const handlers = [
                         token: 'mock-jwt-token',
                         user: {
                             name: user.name,
-                            apellido1: user.apellido1,
-                            apellido2: user.apellido2,
-                            rol: user.rol,
+                            lastName: user.lastName,
+                            secondSurname: user.secondSurname,
+                            role: user.role,
                             email: user.email,
-                            ambito: user.ambito,
+                            ambit: user.ambit,
                         },
                     },
                 },
                 { status: 200 }
             );
         } else {
+            let errorMessage = 'Email o contraseña no válida';
+
+            if (user?.status == false) {
+                errorMessage = 'Usuario deshabilitado';
+            }
+
             return HttpResponse.json(
                 {
                     success: false,
-                    message: 'Email o contraseña no válida',
+                    message: errorMessage,
                 },
                 { status: 401 }
             );
@@ -96,18 +44,19 @@ export const handlers = [
 
     http.put('/api/user', async ({ request }) => {
         const updatedUser = (await request.json()) as {
-            originalEmail: string;
+            idEmail: string;
             name: string;
             lastName: string;
             secondSurname: string;
-            rol: 'hazi' | 'adr' | 'gobVasco';
+            role: 'hazi' | 'adr' | 'gobiernoVasco';
             email: string;
             ambit: string;
+            status: boolean;
         };
 
-        const { originalEmail, name, lastName, secondSurname, rol, email, ambit } = updatedUser;
+        const { idEmail, name, lastName, secondSurname, role, email, ambit, status } = updatedUser;
 
-        const index = users.findIndex((u) => u.email === originalEmail);
+        const index = users.findIndex((u) => u.email === idEmail);
 
         if (index === -1) {
             return HttpResponse.json(
@@ -121,12 +70,13 @@ export const handlers = [
 
         users[index] = {
             ...users[index],
-            name,
-            apellido1: lastName,
-            apellido2: secondSurname,
-            rol,
-            email,
-            ambito: ambit,
+            name: name,
+            lastName: lastName,
+            secondSurname: secondSurname,
+            role: role,
+            email: email,
+            ambit: ambit,
+            status: typeof status === 'boolean' ? status : users[index].status,
         };
 
         return HttpResponse.json(
@@ -145,7 +95,7 @@ export const handlers = [
             newPassword: string;
         };
 
-        const { email: email, newPassword } = body;
+        const { email, newPassword } = body;
 
         const userIndex = users.findIndex((u) => u.email === email);
 
@@ -165,6 +115,52 @@ export const handlers = [
             {
                 success: true,
                 message: 'Contraseña actualizada correctamente',
+            },
+            { status: 200 }
+        );
+    }),
+
+    http.get('/api/users', () => {
+        const usersWithoutPassword = users.map(({ password, ...rest }) => rest);
+
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(
+                    HttpResponse.json(
+                        {
+                            success: true,
+                            users: usersWithoutPassword,
+                        },
+                        { status: 200 }
+                    )
+                );
+            }, 3000);
+        });
+    }),
+
+    http.delete('/api/deleteUser', async ({ request }) => {
+        const { idEmail } = (await request.json()) as { idEmail: string };
+
+        const index = users.findIndex((u) => u.email === idEmail);
+
+        if (index === -1) {
+            return HttpResponse.json(
+                {
+                    success: false,
+                    message: 'Usuario no encontrado',
+                },
+                { status: 404 }
+            );
+        }
+
+        // Elimina el usuario del array
+        const deletedUser = users.splice(index, 1)[0];
+
+        return HttpResponse.json(
+            {
+                success: true,
+                message: 'Usuario eliminado correctamente',
+                data: deletedUser, // opcional, útil para confirmar al cliente
             },
             { status: 200 }
         );

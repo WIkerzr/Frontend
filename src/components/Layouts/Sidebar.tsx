@@ -21,7 +21,7 @@ import { useUser } from '../../contexts/UserContext';
 const Sidebar = () => {
     //IMPORTANT Temporal borrar
     const { user } = useUser();
-    const rol = user?.rol;
+    const role = user?.role;
 
     const [currentMenu, setCurrentMenu] = useState<string>('');
     //const [errorSubMenu, setErrorSubMenu] = useState(false);
@@ -82,7 +82,7 @@ const Sidebar = () => {
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
                             {/* Configuracion */}
-                            {rol === 'hazi' && (
+                            {role === 'hazi' && (
                                 <li className="menu nav-item">
                                     <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
                                         <div className="flex items-center">
@@ -113,7 +113,7 @@ const Sidebar = () => {
                             {/* //ADR */}
                             <li className="nav-item">
                                 <ul>
-                                    {rol !== 'gobiernovasco' && (
+                                    {role !== 'gobiernoVasco' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/cuadroMando" className="group">
                                                 <div className="flex items-center">
@@ -123,7 +123,7 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                     )}
-                                    {rol !== 'gobiernovasco' && (
+                                    {role !== 'gobiernoVasco' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/acciones" className="group">
                                                 <div className="flex items-center">
@@ -133,7 +133,7 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                     )}
-                                    {rol !== 'gobiernovasco' && (
+                                    {role !== 'gobiernoVasco' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/accionesAccesorias" className="group">
                                                 <div className="flex items-center">
@@ -143,7 +143,7 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                     )}
-                                    {rol !== 'gobiernovasco' && (
+                                    {role !== 'gobiernoVasco' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/servicios" className="group">
                                                 <div className="flex items-center">

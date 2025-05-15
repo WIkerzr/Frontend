@@ -23,7 +23,7 @@ const ADRS = [{ adr: 'Añana' }, { adr: 'Busturialdea' }, { adr: 'Cantábrica' }
 const Header = () => {
     const { setUser } = useUser();
     const { user } = useUser();
-    const rol = user?.rol;
+    const role = user?.role;
     const nombreUsuario = user?.name;
 
     const location = useLocation();
@@ -71,7 +71,7 @@ const Header = () => {
                         </button>
                     </div>
 
-                    {rol != 'adr' ? (
+                    {role != 'adr' ? (
                         <div>
                             <select id="adr" className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
                                 <option value="notSelect">Sin seleccionar</option>
@@ -85,7 +85,7 @@ const Header = () => {
                     ) : (
                         <div>
                             <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                {rol}
+                                {role}
                             </div>
                         </div>
                     )}
@@ -101,22 +101,22 @@ const Header = () => {
                         {/* Borrar selector rol temporal */}
                         <div>
                             <select
-                                value={rol}
+                                value={role}
                                 onChange={(e) => {
                                     const value = e.target.value;
                                     let datos;
                                     switch (value) {
                                         case 'adr':
-                                            datos = { email: 'test@adr.com', name: 'Jon', rol: 'adr' };
+                                            datos = { email: 'test@adr.com', name: 'Jon', role: 'adr' };
                                             break;
                                         case 'hazi':
-                                            datos = { email: 'test@hazi.com', name: 'Jon', rol: 'hazi' };
+                                            datos = { email: 'test@hazi.com', name: 'Jon', role: 'hazi' };
                                             break;
-                                        case 'gobiernovasco':
-                                            datos = { email: 'test@gv.com', name: 'Jon', rol: 'gobiernovasco' };
+                                        case 'gobiernoVasco':
+                                            datos = { email: 'test@gv.com', name: 'Jon', role: 'gobiernoVasco' };
                                             break;
                                         default:
-                                            datos = { email: '', name: '', rol: '' };
+                                            datos = { email: '', name: '', role: '' };
                                     }
 
                                     localStorage.setItem('user', JSON.stringify(datos));
@@ -127,7 +127,7 @@ const Header = () => {
                             >
                                 <option value="adr">ADR</option>
                                 <option value="hazi">HAZI</option>
-                                <option value="gobiernovasco">GOBIERNO</option>
+                                <option value="gobiernoVasco">GOBIERNO</option>
                             </select>
                         </div>
                         <div>
@@ -173,7 +173,7 @@ const Header = () => {
                                         <div className="flex items-center px-4 py-4">
                                             <div className="ltr:pl-4 rtl:pr-4 truncate">
                                                 <h4 className="text-base">{nombreUsuario}</h4>
-                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{rol!}</h4>
+                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{role!}</h4>
                                             </div>
                                         </div>
                                     </li>

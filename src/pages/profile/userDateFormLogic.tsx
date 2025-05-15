@@ -2,47 +2,69 @@ import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
 import UserDataForm from './userDateForm';
+import { TableUsersHazi } from '../../types/users';
 
-const FormUserDateLogic = () => {
-    type Rol = 'hazi' | 'adr' | 'gobVasco';
+const UserDateFormLogic: React.FC<{
+    refIdEmail?: string;
+    roleDisabled?: boolean;
+    recargeToSave?: () => void;
+}> = ({ refIdEmail, roleDisabled = true, recargeToSave }) => {
+    type role = 'hazi' | 'adr' | 'gobiernoVasco';
 
-    const getInitialUserData = (): {
-        name: string;
-        apellido1: string;
-        apellido2: string;
-        rol: Rol;
-        email: string;
-        ambito: string;
-    } => {
-        const stored = localStorage.getItem('user');
-        if (stored) {
+    const getInitialUserData = (): TableUsersHazi => {
+        if (refIdEmail) {
+            const usersRaw = localStorage.getItem('users');
             try {
-                const parsed = JSON.parse(stored);
-                return {
-                    name: parsed.name || '',
-                    apellido1: parsed.apellido1 || '',
-                    apellido2: parsed.apellido2 || '',
-                    rol: parsed.rol || 'gobVasco',
-                    email: parsed.email || '',
-                    ambito: parsed.ambito || '-',
-                };
+                const users: TableUsersHazi[] = JSON.parse(usersRaw!);
+
+                const matched = users.find((user) => user.email === refIdEmail);
+                if (matched) {
+                    return {
+                        name: matched.name || '',
+                        lastName: matched.lastName || '',
+                        secondSurname: matched.secondSurname || '',
+                        role: matched.role || 'gobiernoVasco',
+                        email: matched.email || '',
+                        ambit: matched.ambit || '-',
+                        status: matched.status || false,
+                    };
+                }
             } catch (e) {
                 console.error('Error parsing localStorage user:', e);
+            }
+        } else {
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    return {
+                        name: parsed.name || '',
+                        lastName: parsed.lastName || '',
+                        secondSurname: parsed.secondSurname || '',
+                        role: parsed.role || 'gobiernoVasco',
+                        email: parsed.email || '',
+                        ambit: parsed.ambit || '-',
+                        status: false,
+                    };
+                } catch (e) {
+                    console.error('Error parsing localStorage user:', e);
+                }
             }
         }
         return {
             name: '',
-            apellido1: '',
-            apellido2: '',
-            rol: 'gobVasco',
+            lastName: '',
+            secondSurname: '',
+            role: 'gobiernoVasco',
             email: '',
-            ambito: '-',
+            ambit: '-',
+            status: false,
         };
     };
 
     const initialData = getInitialUserData();
     const [UserData, setUserData] = useState(initialData);
-    const [originalEmail] = useState(initialData.email);
+    const [idEmail] = useState(initialData.email);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [fadeOut, setFadeOut] = useState<boolean>(false);
@@ -75,13 +97,12 @@ const FormUserDateLogic = () => {
                 },
                 body: JSON.stringify({
                     name: UserData.name,
-                    lastName: UserData.apellido1,
-                    secondSurname: UserData.apellido2,
-                    //rol bloqueado asi que se queda con el original
-                    rol: initialData.rol,
+                    lastName: UserData.lastName,
+                    secondSurname: UserData.secondSurname,
+                    role: refIdEmail ? UserData.role : initialData.role,
                     email: UserData.email,
-                    ambit: UserData.ambito,
-                    originalEmail,
+                    ambit: UserData.ambit,
+                    idEmail,
                 }),
             });
 
@@ -89,21 +110,25 @@ const FormUserDateLogic = () => {
                 throw new Error(t('errorEnviarServidor'));
             }
 
-            //Guardar cambios actualizados en localStorage
-            localStorage.setItem(
-                'user',
-                JSON.stringify({
-                    name: UserData.name,
-                    apellido1: UserData.apellido1,
-                    apellido2: UserData.apellido2,
-                    //rol bloqueado asi que se queda con el original
-                    rol: initialData.rol,
-                    email: UserData.email,
-                    ambito: UserData.ambito,
-                })
-            );
+            if (!refIdEmail) {
+                //Guardar cambios actualizados en localStorage si esta en perfil o no
+                localStorage.setItem(
+                    'user',
+                    JSON.stringify({
+                        name: UserData.name,
+                        lastName: UserData.lastName,
+                        secondSurname: UserData.secondSurname,
+                        role: refIdEmail ? UserData.role : initialData.role,
+                        email: UserData.email,
+                        ambit: UserData.ambit,
+                    })
+                );
+            }
 
             setSuccessMessage(t('CambiosGuardados'));
+            if (refIdEmail) {
+                return recargeToSave && recargeToSave();
+            }
             setTimeout(() => {
                 setFadeOut(true);
                 setTimeout(() => {
@@ -118,7 +143,17 @@ const FormUserDateLogic = () => {
         }
     };
 
-    return <UserDataForm onSubmit={handleSubmitUser} userData={UserData} onChange={handleUserChange} errorMessage={errorMessage} successMessage={successMessage} fadeOut={fadeOut} />;
+    return (
+        <UserDataForm
+            onSubmit={handleSubmitUser}
+            userData={UserData}
+            onChange={handleUserChange}
+            errorMessage={errorMessage}
+            successMessage={successMessage}
+            fadeOut={fadeOut}
+            roleDisabled={roleDisabled}
+        />
+    );
 };
 
-export default FormUserDateLogic;
+export default UserDateFormLogic;
