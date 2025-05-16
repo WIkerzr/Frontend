@@ -21,6 +21,10 @@
 
     "Editar": "Editar",
     "Borrar": "Borrar",
+    "Contraseña": "Contraseña",
+    "ContraseñaNoCoincide": "Las contraseñas no coinciden.",
+    "CambiosGuardados": "Cambios guardados correctamente.",
+    "CambioContraseña": "Cambio de contraseña",
 
     "agregarUsuario": "Agregar nuevo usuario",
 
@@ -28,6 +32,26 @@
     "Indicadores": "Indicadores",
     "Realizacion": "Realización",
     "Resultado": "Resultado",
+    "ambit": "Ámbito",
+    "guardar": "Guardar",
+    "seguridad": "Seguridad",
+    "contraNueva": "Contraseña nueva",
+    "repetirContra": "Repetir contraseña",
+
+    "loading": "Cargando...",
+    "datosUsuarios": "Datos usuario",
+    "name": "Nombre",
+    "email": "E-mail",
+    "lastName": "Primer apellido",
+    "secondSurname": "Segundo apellido",
+    "role": "Rol",
+    "adr": "ADR",
+    "hazi": "Hazi",
+    "gobiernoVasco": "Gobierno Vasco/Federación",
+
+    "errorActualizarUsuario": "Error al actualizar usuario:",
+    "errorEnviarServidor": "Error al enviar al servidor",
+    "errorObtenerUsuarios": "Error al obtener usuarios",
 
     "sales": "Ventas",
     "analytics": "Analítica",

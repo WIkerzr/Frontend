@@ -13,6 +13,7 @@ interface EditUserProps {
     refIdEmail: string;
     recargeToSave: () => void;
 }
+type NewUserProps = Omit<EditUserProps, 'refIdEmail'>;
 
 const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, recargeToSave }, ref) => {
     const [showModal, setShowModal] = useState(false);
@@ -135,6 +136,47 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, r
     );
 });
 
+const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToSave }, ref) => {
+    const [showModal, setShowModal] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+    useEffect(() => {
+        setTimeout(() => {
+            handleClose();
+        }, 1500);
+    }, [recargeToSave]);
+
+    const handleOpen = () => setShowModal(true);
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowModal(false);
+            setIsClosing(false);
+        }, 300);
+    };
+
+    return (
+        <>
+            <button type="button" onClick={handleOpen} ref={ref}>
+                <IconPencil />
+            </button>
+
+            {showModal && (
+                <div
+                    className={`fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+                    onClick={handleClose}
+                >
+                    <div
+                        className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <UserDateFormLogic refIdEmail={'newEmail'} roleDisabled={false} recargeToSave={recargeToSave} />
+                    </div>
+                </div>
+            )}
+        </>
+    );
+});
+
 const Index = () => {
     const { t } = useTranslation();
     const [users, setUsers] = useState<TableUsersHazi[]>([]);
@@ -179,9 +221,7 @@ const Index = () => {
         <div className="flex w-full gap-5">
             <div className="panel h-full w-full">
                 <div className="flex justify-center mb-5">
-                    <button type="button" className="btn btn-primary w-1/2">
-                        {t('agregarUsuario')}
-                    </button>
+                    <NewUser recargeToSave={handleRefresh} />
                 </div>
                 <div className="table-responsive mb-5">
                     <table>
