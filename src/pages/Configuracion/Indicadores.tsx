@@ -49,12 +49,12 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicadorTabla, nombreIndicador 
                                     <td className="text-center">
                                         {data.editable ? (
                                             <div className="flex justify-end space-x-3">
-                                                <Tippy content={t('Editar')}>
+                                                <Tippy content={t('editar')}>
                                                     <button type="button">
                                                         <IconPencil />
                                                     </button>
                                                 </Tippy>
-                                                <Tippy content={t('Borrar')}>
+                                                <Tippy content={t('borrar')}>
                                                     <button type="button">
                                                         <IconTrash />
                                                     </button>

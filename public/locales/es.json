@@ -19,8 +19,8 @@
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
 
-    "Editar": "Editar",
-    "Borrar": "Borrar",
+    "editar": "Editar",
+    "borrar": "Borrar",
     "Contraseña": "Contraseña",
     "ContraseñaNoCoincide": "Las contraseñas no coinciden.",
     "CambiosGuardados": "Cambios guardados correctamente.",
@@ -52,6 +52,10 @@
     "errorActualizarUsuario": "Error al actualizar usuario:",
     "errorEnviarServidor": "Error al enviar al servidor",
     "errorObtenerUsuarios": "Error al obtener usuarios",
+    "noSePudoEliminarUsuario": "No se pudo eliminar el usuario",
+    "errorEliminarUsuario": "Error inesperado al eliminar el usuario",
+    "cambiarEstado": "Cambiar Estado",
+    "usuarioEliminadoCorrectamente": "Usuario eliminado correctamente",
 
     "sales": "Ventas",
     "analytics": "Analítica",

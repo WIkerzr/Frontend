@@ -52,6 +52,7 @@
     "errorActualizarUsuario": "Error al actualizar usuario:",
     "errorEnviarServidor": "Error al enviar al servidor",
     "errorObtenerUsuarios": "Error al obtener usuarios",
+    "cambiarEstado": "Cambiar Estado",
 
     "sales": "Ventas",
     "analytics": "Analítica",

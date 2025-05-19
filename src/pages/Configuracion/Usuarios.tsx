@@ -86,7 +86,7 @@ const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ keyN
     return (
         <td ref={ref} className="whitespace-nowrap">
             {keyName === 'status' ? (
-                <button type="button" onClick={handleToggle} className="cursor-pointer" title={t('CambiarEstado')}>
+                <button type="button" onClick={handleToggle} className="cursor-pointer" title={t('cambiarEstado')}>
                     {localStatus ? '🟢' : '🔴'}
                 </button>
             ) : (
@@ -114,7 +114,7 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, r
             });
 
             if (!response.ok) {
-                throw new Error(t('No se pudo eliminar el usuario'));
+                throw new Error(t('noSePudoEliminarUsuario'));
             }
 
             const data = await response.json();
@@ -123,9 +123,9 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, r
                 recargeToSave();
             }
 
-            alert(t('Usuario eliminado correctamente'));
+            alert(t('usuarioEliminadoCorrectamente'));
         } catch (error: any) {
-            alert(error.message || t('Error inesperado al eliminar el usuario'));
+            alert(error.message || t('errorEliminarUsuario'));
         }
     };
 
@@ -137,6 +137,8 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, r
 });
 
 const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToSave }, ref) => {
+    const { t } = useTranslation();
+
     const [showModal, setShowModal] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     useEffect(() => {
@@ -156,8 +158,8 @@ const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToSave }, 
 
     return (
         <>
-            <button type="button" onClick={handleOpen} ref={ref}>
-                <IconPencil />
+            <button type="button" className="btn btn-primary w-1/2" onClick={handleOpen}>
+                {t('agregarUsuario')}
             </button>
 
             {showModal && (
@@ -241,10 +243,10 @@ const Index = () => {
                                     ))}
                                     <td className="text-center">
                                         <div className="flex justify-end space-x-3">
-                                            <Tippy content={t('Editar')}>
+                                            <Tippy content={t('editar')}>
                                                 <EditUser refIdEmail={row.email} recargeToSave={handleRefresh} />
                                             </Tippy>
-                                            <Tippy content={t('Borrar')}>
+                                            <Tippy content={t('borrar')}>
                                                 <DeleteUser refIdEmail={row.email} recargeToSave={handleRefresh} />
                                             </Tippy>
                                         </div>
