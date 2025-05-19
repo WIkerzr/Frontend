@@ -138,6 +138,63 @@ export const handlers = [
         });
     }),
 
+    http.post('/api/newUser', async ({ request }) => {
+        const body = (await request.json()) as {
+            name: string;
+            lastName: string;
+            secondSurname: string;
+            role: 'hazi' | 'adr' | 'gobiernoVasco';
+            email: string;
+            ambit: string;
+        };
+
+        const { name, lastName, secondSurname, role, email, ambit } = body;
+
+        // Validación mínima
+        if (!name || !lastName || !role || !email || !ambit) {
+            return HttpResponse.json(
+                {
+                    success: false,
+                    message: 'Faltan campos obligatorios',
+                },
+                { status: 400 }
+            );
+        }
+
+        const id = users.length + 1;
+
+        const newUser = {
+            name,
+            lastName,
+            secondSurname,
+            role,
+            email,
+            ambit,
+            password: `${lastName}1`,
+            status: true,
+        };
+
+        users.push(newUser);
+
+        return HttpResponse.json(
+            {
+                success: true,
+                message: 'Usuario creado exitosamente',
+                user: {
+                    id,
+                    name,
+                    lastName,
+                    secondSurname,
+                    role,
+                    email,
+                    ambit,
+                    status: newUser.status,
+                },
+            },
+            { status: 201 }
+        );
+    }),
+
     http.delete('/api/deleteUser', async ({ request }) => {
         const { idEmail } = (await request.json()) as { idEmail: string };
 
