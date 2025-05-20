@@ -55,6 +55,8 @@
     "adr": "ADR",
     "hazi": "Hazi",
     "gobiernoVasco": "Eusko Jaurlaritza/Federazioa",
+"paginacion": "{{totalRecords}} sarrerekin {{from}} {{to}} erakusten",
+    "recorsPerPage":"Orri bakoitzeko erregistroak",
 
     "errorGuardar": "❌ Errorea gordetzean: ",
     "errorActualizarUsuario": "Errorea erabiltzailea eguneratzean:",

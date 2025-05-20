@@ -10,6 +10,9 @@ export interface User {
     password: string;
     status: boolean;
 }
+export interface UserID extends Omit<User, 'password'> {
+    id: number;
+}
 
 export type PublicUser = Omit<User, 'password'>;
 export type TableUsersHazi = Omit<User, 'password'>;

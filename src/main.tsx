@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { UserProvider } from './contexts/UserContext';
+import { MantineProvider } from '@mantine/core';
 
 // Perfect Scrollbar
 import 'react-perfect-scrollbar/dist/css/styles.css';
@@ -24,7 +25,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Suspense>
             <Provider store={store}>
                 <UserProvider>
-                    <RouterProvider router={router} />
+                    <MantineProvider>
+                        <RouterProvider router={router} />
+                    </MantineProvider>
                 </UserProvider>
             </Provider>
         </Suspense>

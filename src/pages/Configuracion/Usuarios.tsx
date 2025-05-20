@@ -1,10 +1,8 @@
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css';
-import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { TableUsersHazi } from '../../types/users';
+import { NewUser, UsersTable } from './componentes';
+import { TableUsersHazi, UserID } from '../../types/users';
+import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
-import { ChangeStatus, DeleteUser, EditUser, NewUser } from './componentes';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -51,50 +49,14 @@ const Index = () => {
     if (error) return <ErrorMessage message={error} />;
     if (users.length === 0) return <div>No hay datos para mostrar</div>;
 
-    const headers = Object.keys(users[0]) as (keyof TableUsersHazi)[];
-    const headersOrdered = [...headers].sort((a, b) => {
-        if (a === 'status') return -1;
-        if (b === 'status') return 1;
-        return 0;
-    });
-
+    const usersConId: UserID[] = users.map((user, index) => ({ id: index + 1, ...user }));
     return (
         <div className="flex w-full gap-5">
             <div className="panel h-full w-full">
                 <div className="flex justify-center mb-5">
                     <NewUser recargeToSave={handleRefresh} />
                 </div>
-                <div className="table-responsive mb-5">
-                    <table>
-                        <thead>
-                            <tr>
-                                {headersOrdered.map((key) => (
-                                    <th key={key as string}>{key === 'status' ? '' : t(key)}</th>
-                                ))}
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((row) => (
-                                <tr key={row.email}>
-                                    {headersOrdered.map((key) => (
-                                        <ChangeStatus key={`${row.email}-${key}`} keyName={key} value={row} onSuccess={handleRefresh} />
-                                    ))}
-                                    <td className="text-center">
-                                        <div className="flex justify-end space-x-3">
-                                            <Tippy content={t('editar')}>
-                                                <EditUser user={row} recargeToSave={handleRefresh} />
-                                            </Tippy>
-                                            <Tippy content={t('borrar')}>
-                                                <DeleteUser user={row} recargeToSave={handleRefresh} />
-                                            </Tippy>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <UsersTable users={usersConId} onSuccess={handleRefresh} />
             </div>
         </div>
     );

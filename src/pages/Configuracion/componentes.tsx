@@ -1,3 +1,10 @@
+import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import { useDispatch, useSelector } from 'react-redux';
+import { IRootState } from '../../store';
+import { setPageTitle } from '../../store/themeConfigSlice';
+import { sortBy } from 'lodash';
+import { UserID } from '../../types/users';
+import Tippy from '@tippyjs/react';
 import { forwardRef, useEffect, useState } from 'react';
 import { Indicador } from '../../types/Indicadores';
 import { useTranslation } from 'react-i18next';
@@ -157,8 +164,9 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         idEmail,
                     }),
                 });
-
-                updateUserInLocalStorage(UserData, 'editar');
+                if (response.ok) {
+                    updateUserInLocalStorage(UserData, 'editar');
+                }
             } else if (accion === 'nuevo') {
                 response = await fetch('/api/newUser', {
                     method: 'POST',
@@ -175,23 +183,25 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         status: true,
                     }),
                 });
-                updateUserInLocalStorage(UserData, 'nuevo');
+                if (response.ok) {
+                    updateUserInLocalStorage(UserData, 'nuevo');
+                }
             }
 
             if (response && !response.ok) {
                 throw new Error(t('errorEnviarServidor'));
-            }
+            } else {
+                setSuccessMessage(t('CambiosGuardados'));
 
-            setSuccessMessage(t('CambiosGuardados'));
-
-            setTimeout(() => {
-                setFadeOut(true);
                 setTimeout(() => {
-                    setSuccessMessage(null);
-                    setFadeOut(false);
-                }, 1000);
-            }, 5000);
-            return recargeToSave && recargeToSave();
+                    setFadeOut(true);
+                    setTimeout(() => {
+                        setSuccessMessage(null);
+                        setFadeOut(false);
+                    }, 1000);
+                }, 5000);
+                return recargeToSave && recargeToSave();
+            }
         } catch (err: any) {
             setErrorMessage(err.message || 'Error inesperado');
         } finally {
@@ -315,7 +325,6 @@ interface NewUserProps {
 }
 
 interface ChangeStatusProps {
-    keyName: keyof TableUsersHazi;
     value: TableUsersHazi;
     onSuccess?: () => void;
 }
@@ -361,7 +370,7 @@ export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, re
     );
 });
 
-export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ keyName, value, onSuccess }, ref) => {
+export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ value, onSuccess }, ref) => {
     const { t } = useTranslation();
     const [localStatus, setLocalStatus] = useState<boolean>(!!value.status);
 
@@ -398,15 +407,9 @@ export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(
     };
 
     return (
-        <td ref={ref} className="whitespace-nowrap">
-            {keyName === 'status' ? (
-                <button type="button" onClick={handleToggle} className="cursor-pointer" title={t('cambiarEstado')}>
-                    {localStatus ? '🟢' : '🔴'}
-                </button>
-            ) : (
-                String(value[keyName] ?? '')
-            )}
-        </td>
+        <button type="button" onClick={handleToggle} className="cursor-pointer" title={t('cambiarEstado')}>
+            {localStatus ? '🟢' : '🔴'}
+        </button>
     );
 });
 
@@ -491,5 +494,103 @@ export const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToS
                 </div>
             )}
         </>
+    );
+});
+
+interface tableProps {
+    users: UserID[];
+    onSuccess: () => void;
+}
+
+export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, onSuccess }, ref) => {
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(setPageTitle('Order Sorting Table'));
+    });
+    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
+
+    const [page, setPage] = useState(1);
+    const PAGE_SIZES = [10, 20, 30, 50, 100];
+    const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
+    const [initialRecords, setInitialRecords] = useState(sortBy(users, 'id'));
+    const [recordsData, setRecordsData] = useState(initialRecords);
+
+    const [search, setSearch] = useState('');
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
+
+    useEffect(() => {
+        setPage(1);
+    }, [pageSize]);
+
+    useEffect(() => {
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize;
+        setRecordsData([...initialRecords.slice(from, to)]);
+    }, [page, pageSize, initialRecords]);
+
+    useEffect(() => {
+        setInitialRecords(() => {
+            return users.filter((item) => {
+                return item.status || item.name || item.lastName || item.secondSurname || item.email || item.role || item.ambit;
+            });
+        });
+    }, [search, users]);
+
+    useEffect(() => {
+        const data = sortBy(initialRecords, sortStatus.columnAccessor);
+        setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
+        setPage(1);
+    }, [sortStatus]);
+    return (
+        <div>
+            <div className="panel mt-6">
+                <div className="datatables">
+                    <DataTable
+                        highlightOnHover
+                        className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'}`}
+                        records={recordsData}
+                        columns={[
+                            {
+                                accessor: 'status',
+                                title: '',
+                                render: (row) => <ChangeStatus key={`status-${row.email}`} value={row} />,
+                            },
+                            { accessor: 'name', title: t('name'), sortable: true },
+                            { accessor: 'lastName', title: t('lastName'), sortable: true },
+                            { accessor: 'secondSurname', title: t('secondSurname'), sortable: true },
+                            { accessor: 'email', sortable: true },
+                            { accessor: 'role', title: t('role'), sortable: true },
+                            { accessor: 'ambit', title: t('ambit'), sortable: true },
+                            {
+                                accessor: 'vacio2',
+                                title: '',
+                                render: (row) => (
+                                    <div className="flex justify-end space-x-3">
+                                        <Tippy content={t('editar')}>
+                                            <EditUser user={row} recargeToSave={onSuccess} />
+                                        </Tippy>
+                                        <Tippy content={t('borrar')}>
+                                            <DeleteUser user={row} recargeToSave={onSuccess} />
+                                        </Tippy>
+                                    </div>
+                                ),
+                            },
+                        ]}
+                        totalRecords={initialRecords.length}
+                        recordsPerPage={pageSize}
+                        page={page}
+                        onPageChange={(p) => setPage(p)}
+                        recordsPerPageOptions={PAGE_SIZES}
+                        onRecordsPerPageChange={setPageSize}
+                        sortStatus={sortStatus}
+                        onSortStatusChange={setSortStatus}
+                        minHeight={200}
+                        paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
+                        recordsPerPageLabel={t('recorsPerPage')}
+                    />
+                </div>
+            </div>
+        </div>
     );
 });

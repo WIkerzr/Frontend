@@ -56,6 +56,8 @@
     "adr": "ADR",
     "hazi": "Hazi",
     "gobiernoVasco": "Gobierno Vasco/Federación",
+    "paginacion":"Mostrando {{from}} de {{to}} con {{totalRecords}} entradas",
+    "recorsPerPage":"Registros por páginas",
 
     "errorGuardar": "❌ Error al guardar: ",
     "errorActualizarUsuario": "Error al actualizar usuario:",

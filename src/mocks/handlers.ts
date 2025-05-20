@@ -145,7 +145,7 @@ export const handlers = [
 
         const { name, lastName, secondSurname, role, email, ambit } = body;
 
-        if ([name, lastName, role, email, ambit].some((f) => !f?.trim())) {
+        if ([name, lastName, secondSurname, role, email].some((f) => !f?.trim())) {
             return HttpResponse.json(
                 {
                     success: false,
