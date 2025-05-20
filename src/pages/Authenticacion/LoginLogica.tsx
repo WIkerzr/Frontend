@@ -30,9 +30,11 @@ const useLogin = () => {
 
             const { token, user } = result.data;
 
-            localStorage.setItem('user', JSON.stringify(user)); //Almacenamiento en localStorage
+            localStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem('user', JSON.stringify(user));
             setUser(user);
-            dispatch(setAuthUser({ user, token })); //Almacenamiento del usuario en Redux
+            dispatch(setAuthUser({ user, token }));
+
             navigate('/');
         } catch (err) {
             if (err instanceof Error) {
