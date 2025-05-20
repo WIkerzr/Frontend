@@ -48,7 +48,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             />
                         </div>
                     </div>
-                    <Input nombreInput="ambit" type="text" value={userData.ambit} onChange={onChange} name="ambit" />
+                    {userData.role === 'adr' ? <Input nombreInput="ambit" type="text" value={userData.ambit} onChange={onChange} name="ambit" /> : <></>}
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (
