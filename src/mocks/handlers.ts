@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
-import { users } from './usersList';
+import { users } from './BBDD/usersList';
+import { indicadoresRealizacion, indicadoresResultado } from './BBDD/indicadores';
 
 export const handlers = [
     http.post('/api/login', async ({ request }) => {
@@ -210,7 +211,6 @@ export const handlers = [
             );
         }
 
-        // Elimina el usuario del array
         const deletedUser = users.splice(index, 1)[0];
 
         return HttpResponse.json(
@@ -220,6 +220,125 @@ export const handlers = [
                 data: deletedUser, // opcional, útil para confirmar al cliente
             },
             { status: 200 }
+        );
+    }),
+
+    http.get('/api/indicadores', () => {
+        return HttpResponse.json(
+            {
+                success: true,
+                indicadoresRealizacion: indicadoresRealizacion,
+                indicadoresResultado: indicadoresResultado,
+            },
+            { status: 200 }
+        );
+    }),
+
+    http.put('/api/modIndicador', async ({ request }) => {
+        const updatedindicador = (await request.json()) as {
+            tipo: 'realizacion' | 'resultado';
+            id: number;
+            nuevaDescripcion: string;
+        };
+
+        const { tipo, id, nuevaDescripcion } = updatedindicador;
+
+        let lista;
+        if (tipo === 'realizacion') {
+            lista = indicadoresRealizacion;
+        } else if (tipo === 'resultado') {
+            lista = indicadoresResultado;
+        } else {
+            return HttpResponse.json({ success: false, message: 'Tipo no válido' }, { status: 400 });
+        }
+
+        const indicadorIndex = lista.findIndex((ind) => ind.id === id);
+        if (indicadorIndex === -1) {
+            return HttpResponse.json({ success: false, message: 'Indicador no encontrado' }, { status: 404 });
+        }
+
+        lista[indicadorIndex].descripcion = nuevaDescripcion;
+
+        return HttpResponse.json(
+            {
+                success: true,
+                message: 'Descripción modificada correctamente',
+                indicadoresRealizacion,
+                indicadoresResultado,
+            },
+            { status: 200 }
+        );
+    }),
+
+    http.delete('/api/eliminarIndicador', async ({ request }) => {
+        const { tipo, id } = (await request.json()) as {
+            tipo: 'realizacion' | 'resultado';
+            id: number;
+        };
+
+        let lista;
+        if (tipo === 'realizacion') {
+            lista = indicadoresRealizacion;
+        } else if (tipo === 'resultado') {
+            lista = indicadoresResultado;
+        } else {
+            return HttpResponse.json({ success: false, message: 'Tipo no válido' }, { status: 400 });
+        }
+
+        const indicadorIndex = lista.findIndex((ind) => ind.id === id);
+        if (indicadorIndex === -1) {
+            return HttpResponse.json({ success: false, message: 'Indicador no encontrado' }, { status: 404 });
+        }
+
+        lista.splice(indicadorIndex, 1);
+
+        return HttpResponse.json(
+            {
+                success: true,
+                message: 'Indicador eliminado correctamente',
+                indicadoresRealizacion,
+                indicadoresResultado,
+            },
+            { status: 200 }
+        );
+    }),
+
+    http.post('/api/nuevoIndicador', async ({ request }) => {
+        const body = (await request.json()) as {
+            descripcion: string;
+            ano: number;
+            tipo: 'realizacion' | 'resultado';
+        };
+
+        const { descripcion, ano, tipo } = body;
+
+        if (!descripcion || !ano || !tipo) {
+            return HttpResponse.json({ success: false, message: 'Faltan campos obligatorios' }, { status: 400 });
+        }
+
+        // const descripcionCapitalizada =
+        //   descripcion.charAt(0).toUpperCase() + descripcion.slice(1);
+
+        const lista = tipo === 'realizacion' ? indicadoresRealizacion : indicadoresResultado;
+        const nuevoId = lista.length > 0 ? Math.max(...lista.map((i) => i.id)) + 1 : 1;
+
+        const nuevoIndicador = {
+            id: nuevoId,
+            descripcion: descripcion,
+            ano,
+        };
+
+        lista.push(nuevoIndicador);
+
+        return HttpResponse.json(
+            {
+                success: true,
+                message: 'Indicador añadido correctamente',
+                indicador: nuevoIndicador,
+                indicadoresRealizacion,
+                indicadoresResultado,
+            },
+            { status: 201 }
         );
     }),
 

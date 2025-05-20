@@ -13,11 +13,15 @@
     "indicadores": "Indicadores",
     "usuarios": "Usuarios",
 
+    "Descripcion": "Descripción",
+    "Ano": "Año",
+    "Tipo": "Tipo",
     "CuadroMando": "Cuadro de mando",
     "Acciones": "Acciones",
     "AccionesAccesorias": "Acciones accesorias",
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
+    "newIndicador": "Nuevo Indicador",
 
     "editar": "Editar",
     "borrar": "Borrar",
@@ -49,13 +53,17 @@
     "hazi": "Hazi",
     "gobiernoVasco": "Gobierno Vasco/Federación",
 
+    "errorGuardar": "❌ Error al guardar: ",
     "errorActualizarUsuario": "Error al actualizar usuario:",
     "errorEnviarServidor": "Error al enviar al servidor",
     "errorObtenerUsuarios": "Error al obtener usuarios",
     "noSePudoEliminarUsuario": "No se pudo eliminar el usuario",
     "errorEliminarUsuario": "Error inesperado al eliminar el usuario",
+
+    "correctoIndicadorGuardado": "✅ Indicador guardado correctamente",
     "cambiarEstado": "Cambiar Estado",
     "usuarioEliminadoCorrectamente": "Usuario eliminado correctamente",
+    "eliminacionExitosa": "Eliminado correctamente",
 
     "sales": "Ventas",
     "analytics": "Analítica",
