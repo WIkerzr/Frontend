@@ -22,7 +22,11 @@
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
     "newIndicador": "Nuevo Indicador",
+    "miPerfil": "Mi perfil",
+    "introduceEmail": "Introduce tu email",
+    "recordarContraseña": "Recordar contraseña",
 
+    "sinSeleccionar": "Sin seleccionar",
     "editar": "Editar",
     "borrar": "Borrar",
     "Contraseña": "Contraseña",
@@ -64,6 +68,16 @@
     "cambiarEstado": "Cambiar Estado",
     "usuarioEliminadoCorrectamente": "Usuario eliminado correctamente",
     "eliminacionExitosa": "Eliminado correctamente",
+
+    "sucessUserDataUpdate": "Datos de usuario actualizados correctamente",
+    "sucessUserPasswordUpdate": "Contraseña actualizada correctamente",
+    "sucessUserCreate": "Usuario creado exitosamente",
+    "sucessUserDelete": "Usuario eliminado correctamente",
+
+    "errorMissingFields": "Faltan campos obligatorios",
+    "errorUserDisabled": "Usuario deshabilitado",
+    "errorEmailPass": "Email o contraseña no válida",
+    "errorUserNoFound": "Usuario no encontrado",
 
     "sales": "Ventas",
     "analytics": "Analítica",

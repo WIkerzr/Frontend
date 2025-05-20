@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import Input from '../../components/Utils/inputs';
+import { Input } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { TableUsersHazi } from '../../types/users';
 

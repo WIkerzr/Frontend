@@ -1,20 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { IRootState } from '../../store';
-import { toggleRTL, toggleTheme, toggleSidebar } from '../../store/themeConfigSlice';
+import { toggleTheme, toggleSidebar } from '../../store/themeConfigSlice';
 import { useTranslation } from 'react-i18next';
 import Dropdown from '../Dropdown';
 import IconMenu from '../Icon/IconMenu';
-import IconSearch from '../Icon/IconSearch';
-import IconXCircle from '../Icon/IconXCircle';
 import IconSun from '../Icon/IconSun';
 import IconMoon from '../Icon/IconMoon';
-import IconLaptop from '../Icon/IconLaptop';
 import IconUser from '../Icon/IconUser';
-import IconLogout from '../Icon/IconLogout';
 import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
+import { LanguageSelector } from '../Utils/inputs';
 
 //IMPORTANT Temporal
 const ADRS = [{ adr: 'Añana' }, { adr: 'Busturialdea' }, { adr: 'Cantábrica' }, { adr: 'Debabarrena' }, { adr: 'Debagoiena' }, { adr: 'Donostialdea' }];
@@ -55,7 +52,7 @@ const Header = () => {
     return (
         <header className={`z-40 ${themeConfig.semidark && themeConfig.menu === 'horizontal' ? 'dark' : ''}`}>
             <div className="shadow-sm">
-                <div className="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-black flex gap-4">
+                <div className="relative bg-white w-full items-center px-5 py-2.5 dark:bg-black flex gap-4">
                     <div className="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
                         <Link to="/" className="main-logo flex items-center shrink-0">
                             <img className="w-20 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/logo.svg" alt="logo" />
@@ -74,7 +71,7 @@ const Header = () => {
                     {role != 'adr' ? (
                         <div>
                             <select id="adr" className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <option value="notSelect">Sin seleccionar</option>
+                                <option value="notSelect">{t('sinSeleccionar')}</option>
                                 {ADRS.map((item: any) => (
                                     <option key={item.adr} value={item.adr}>
                                         {item.adr}
@@ -161,10 +158,7 @@ const Header = () => {
                             )}
                         </div>
                         <div>
-                            <select id="idioma" className="form-select text-white-dark min-w-max mr-5" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <option value="ES">ES</option>
-                                <option value="EU">EU</option>
-                            </select>
+                            <LanguageSelector />
                         </div>
                         <div className="dropdown shrink-0 flex">
                             <Dropdown offset={[0, 8]} btnClassName="relative group block" button={<IconUser className="w-9 h-9 text-gray-500 group-hover:text-primary transition-colors" />}>
@@ -180,7 +174,7 @@ const Header = () => {
                                     <li>
                                         <Link to="/profile" className="dark:hover:text-white">
                                             <IconUser className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0" />
-                                            Mi perfil
+                                            {t('miPerfil')}
                                         </Link>
                                     </li>
                                     <LogoutItem />

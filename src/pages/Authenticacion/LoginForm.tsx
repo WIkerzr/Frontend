@@ -1,6 +1,7 @@
-import { t } from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { LanguageSelector } from '../../components/Utils/inputs';
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormProps {
     email: string;
@@ -12,14 +13,12 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPassword, onSubmit, error }) => {
+    const { t } = useTranslation();
     return (
         <div>
             <div className="absolute top-6 end-6">
                 <div>
-                    <select id="idioma" className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                        <option value="ES">ES</option>
-                        <option value="EUS">EUS</option>
-                    </select>
+                    <LanguageSelector />
                 </div>
             </div>
             <div className="mb-10">
@@ -34,20 +33,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Introduce tu email"
+                            placeholder={t('introduceEmail')}
                             className="form-input ps-10 placeholder:text-white-dark"
                         />
                     </div>
                 </div>
                 <div>
-                    <label htmlFor="Password">Contraseña</label>
+                    <label htmlFor="Password">{t('introduceEmail')}</label>
                     <div className="relative text-white-dark">
                         <input
                             id="Password"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Introduce tu contraseña"
+                            placeholder={t('IntroduceContrasena')}
                             className="form-input ps-10 placeholder:text-white-dark"
                         />
                     </div>
@@ -56,11 +55,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                 <div>
                     <label className="flex cursor-pointer items-center">
                         <input type="checkbox" className="form-checkbox bg-white dark:bg-black" />
-                        <span className="text-white-dark">Recordar contraseña</span>
+                        <span className="text-white-dark">{t('recordarContraseña')}</span>
                     </label>
                 </div>
                 <button type="submit" className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]">
-                    Entrar
+                    {t('Entrar')}
                 </button>
             </form>
             <div className="text-center dark:text-white">
@@ -72,7 +71,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
             <div className="flex justify-between w-full mt-8">
                 <img className="max-h-[40px] w-auto" src="/assets/images/logo.svg" alt="logo" />
                 <img className="max-h-[40px] w-auto" src="/assets/images/Mendinet-logo.png" alt="logo" />
-                <img className="max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.png" alt="logo" />
+                <img className="max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
             </div>
         </div>
     );

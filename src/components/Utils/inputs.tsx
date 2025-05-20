@@ -9,7 +9,7 @@ interface InputProps {
     className?: string;
 }
 
-const Input = ({ nombreInput, type, className, onChange, value, name }: InputProps) => {
+export const Input = ({ nombreInput, type, className, onChange, value, name }: InputProps) => {
     const { t } = useTranslation();
 
     return (
@@ -20,4 +20,18 @@ const Input = ({ nombreInput, type, className, onChange, value, name }: InputPro
     );
 };
 
-export default Input;
+export const LanguageSelector = () => {
+    const { i18n } = useTranslation();
+
+    const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedLang = e.target.value.toLowerCase();
+        i18n.changeLanguage(selectedLang);
+    };
+
+    return (
+        <select id="idioma" className="form-select text-white-dark min-w-max mr-5" style={{ minWidth: 'calc(100% + 10px)' }} value={i18n.language.toUpperCase()} onChange={handleLanguageChange}>
+            <option value="ES">ES</option>
+            <option value="EU">EU</option>
+        </select>
+    );
+};

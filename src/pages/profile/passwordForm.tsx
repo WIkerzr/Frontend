@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import Input from '../../components/Utils/inputs';
+import { Input } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 
 interface PasswordFormProps {
@@ -20,7 +20,7 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ onSubmit, passwordData, onC
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
-                <h2 className="text-lg font-semibold mb-4">{t('CambioContraseña')}</h2>
+                <h2 className="text-lg font-semibold mb-4">{t('CambioContrasena')}</h2>
                 <div className="space-y-4">
                     <Input nombreInput="contraNueva" type="password" value={passwordData.contraNueva} onChange={onChange} name="contraNueva" />
                     <Input nombreInput="repetirContra" type="password" value={passwordData.repetirContra} onChange={onChange} name="repetirContra" />

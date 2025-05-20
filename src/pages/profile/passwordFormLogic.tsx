@@ -31,7 +31,7 @@ const PasswordFormLogic = () => {
         setIsSubmitting(true);
 
         if (passwordData.contraNueva !== passwordData.repetirContra) {
-            setErrorMessage(t('ContraseñaNoCoincide'));
+            setErrorMessage(t('ContrasenaNoCoincide'));
             setSuccessMessage(null);
             setIsSubmitting(false);
             return;
