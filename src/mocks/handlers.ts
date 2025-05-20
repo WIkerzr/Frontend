@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { users } from './BBDD/usersList';
 import { indicadoresRealizacion, indicadoresResultado } from './BBDD/indicadores';
+import { PublicUser } from '../types/users';
 
 export const handlers = [
     http.post('/api/login', async ({ request }) => {
@@ -140,19 +141,11 @@ export const handlers = [
     }),
 
     http.post('/api/newUser', async ({ request }) => {
-        const body = (await request.json()) as {
-            name: string;
-            lastName: string;
-            secondSurname: string;
-            role: 'hazi' | 'adr' | 'gobiernoVasco';
-            email: string;
-            ambit: string;
-        };
+        const body = (await request.json()) as PublicUser;
 
         const { name, lastName, secondSurname, role, email, ambit } = body;
 
-        // Validación mínima
-        if (!name || !lastName || !role || !email || !ambit) {
+        if ([name, lastName, role, email, ambit].some((f) => !f?.trim())) {
             return HttpResponse.json(
                 {
                     success: false,

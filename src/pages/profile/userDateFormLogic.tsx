@@ -4,51 +4,23 @@ import { useState } from 'react';
 import UserDataForm from './userDateForm';
 import { TableUsersHazi } from '../../types/users';
 
-const UserDateFormLogic: React.FC<{
-    refIdEmail?: string;
-    roleDisabled?: boolean;
-    recargeToSave?: () => void;
-}> = ({ refIdEmail, roleDisabled = true, recargeToSave }) => {
-    type role = 'hazi' | 'adr' | 'gobiernoVasco';
-
+const UserDateFormLogic: React.FC = () => {
     const getInitialUserData = (): TableUsersHazi => {
-        if (refIdEmail) {
-            const usersRaw = localStorage.getItem('users');
+        const stored = localStorage.getItem('user');
+        if (stored) {
             try {
-                const users: TableUsersHazi[] = JSON.parse(usersRaw!);
-
-                const matched = users.find((user) => user.email === refIdEmail);
-                if (matched) {
-                    return {
-                        name: matched.name || '',
-                        lastName: matched.lastName || '',
-                        secondSurname: matched.secondSurname || '',
-                        role: matched.role || 'gobiernoVasco',
-                        email: matched.email || '',
-                        ambit: matched.ambit || '-',
-                        status: matched.status || false,
-                    };
-                }
+                const parsed = JSON.parse(stored);
+                return {
+                    name: parsed.name || '',
+                    lastName: parsed.lastName || '',
+                    secondSurname: parsed.secondSurname || '',
+                    role: parsed.role || 'gobiernoVasco',
+                    email: parsed.email || '',
+                    ambit: parsed.ambit || '-',
+                    status: false,
+                };
             } catch (e) {
                 console.error('Error parsing localStorage user:', e);
-            }
-        } else {
-            const stored = localStorage.getItem('user');
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    return {
-                        name: parsed.name || '',
-                        lastName: parsed.lastName || '',
-                        secondSurname: parsed.secondSurname || '',
-                        role: parsed.role || 'gobiernoVasco',
-                        email: parsed.email || '',
-                        ambit: parsed.ambit || '-',
-                        status: false,
-                    };
-                } catch (e) {
-                    console.error('Error parsing localStorage user:', e);
-                }
             }
         }
         return {
@@ -99,7 +71,7 @@ const UserDateFormLogic: React.FC<{
                     name: UserData.name,
                     lastName: UserData.lastName,
                     secondSurname: UserData.secondSurname,
-                    role: refIdEmail ? UserData.role : initialData.role,
+                    role: initialData.role,
                     email: UserData.email,
                     ambit: UserData.ambit,
                     idEmail,
@@ -110,25 +82,20 @@ const UserDateFormLogic: React.FC<{
                 throw new Error(t('errorEnviarServidor'));
             }
 
-            if (!refIdEmail) {
-                //Guardar cambios actualizados en localStorage si esta en perfil o no
-                localStorage.setItem(
-                    'user',
-                    JSON.stringify({
-                        name: UserData.name,
-                        lastName: UserData.lastName,
-                        secondSurname: UserData.secondSurname,
-                        role: refIdEmail ? UserData.role : initialData.role,
-                        email: UserData.email,
-                        ambit: UserData.ambit,
-                    })
-                );
-            }
+            localStorage.setItem(
+                'user',
+                JSON.stringify({
+                    name: UserData.name,
+                    lastName: UserData.lastName,
+                    secondSurname: UserData.secondSurname,
+                    role: initialData.role,
+                    email: UserData.email,
+                    ambit: UserData.ambit,
+                })
+            );
 
             setSuccessMessage(t('CambiosGuardados'));
-            if (refIdEmail) {
-                return recargeToSave && recargeToSave();
-            }
+
             setTimeout(() => {
                 setFadeOut(true);
                 setTimeout(() => {
@@ -143,17 +110,7 @@ const UserDateFormLogic: React.FC<{
         }
     };
 
-    return (
-        <UserDataForm
-            onSubmit={handleSubmitUser}
-            userData={UserData}
-            onChange={handleUserChange}
-            errorMessage={errorMessage}
-            successMessage={successMessage}
-            fadeOut={fadeOut}
-            roleDisabled={roleDisabled}
-        />
-    );
+    return <UserDataForm onSubmit={handleSubmitUser} userData={UserData} onChange={handleUserChange} errorMessage={errorMessage} successMessage={successMessage} fadeOut={fadeOut} />;
 };
 
 export default UserDateFormLogic;

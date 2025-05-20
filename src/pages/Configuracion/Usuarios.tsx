@@ -4,13 +4,13 @@ import IconTrash from '../../components/Icon/IconTrash';
 import IconPencil from '../../components/Icon/IconPencil';
 import { useTranslation } from 'react-i18next';
 import React, { forwardRef, useEffect, useState } from 'react';
-import { TableUsersHazi, User } from '../../types/users';
+import { PublicUser, TableUsersHazi, User } from '../../types/users';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import UserDateFormLogic from '../profile/userDateFormLogic';
-import { updateUser } from '../../components/Utils/llamada';
+import { updateUserInLocalStorage, UsersDateModalLogic } from './componentes';
 
 interface EditUserProps {
-    refIdEmail: string;
+    user: PublicUser;
     recargeToSave: () => void;
 }
 
@@ -18,7 +18,7 @@ interface NewUserProps {
     recargeToSave: () => void;
 }
 
-const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, recargeToSave }, ref) => {
+const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, recargeToSave }, ref) => {
     const [showModal, setShowModal] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     useEffect(() => {
@@ -51,7 +51,7 @@ const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, rec
                         className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <UserDateFormLogic refIdEmail={refIdEmail} roleDisabled={false} recargeToSave={recargeToSave} />
+                        <UsersDateModalLogic accion="editar" userData={user} recargeToSave={recargeToSave} />
                     </div>
                 </div>
             )}
@@ -73,12 +73,27 @@ const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ keyN
         const newStatus = !localStatus;
         setLocalStatus(newStatus);
 
+        const datosUsuario = {
+            name: value.name,
+            lastName: value.lastName,
+            secondSurname: value.secondSurname,
+            role: value.role,
+            email: value.email,
+            ambit: value.ambit,
+            status: newStatus,
+        };
         try {
-            await updateUser({
-                ...value,
-                status: newStatus,
-                idEmail: value.email,
+            await fetch('/api/user', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...datosUsuario,
+                    idEmail: value.email,
+                }),
             });
+            updateUserInLocalStorage(datosUsuario, 'editar');
             onSuccess?.();
         } catch (err) {
             console.error('Error actualizando el estado:', err);
@@ -99,7 +114,7 @@ const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ keyN
     );
 });
 
-const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, recargeToSave }, ref) => {
+const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, recargeToSave }, ref) => {
     const { t } = useTranslation();
 
     const handleDelete = async () => {
@@ -113,7 +128,7 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, r
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ idEmail: refIdEmail }),
+                body: JSON.stringify({ idEmail: user.email }),
             });
 
             if (!response.ok) {
@@ -125,6 +140,7 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ refIdEmail, r
             if (data.success && recargeToSave) {
                 recargeToSave();
             }
+            updateUserInLocalStorage(user, 'eliminar');
 
             alert(t('usuarioEliminadoCorrectamente'));
         } catch (error: any) {
@@ -174,7 +190,7 @@ const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToSave }, 
                         className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* <UserDateFormLogic refIdEmail={'newEmail'} roleDisabled={false} recargeToSave={recargeToSave}/> */}
+                        <UsersDateModalLogic accion="nuevo" recargeToSave={recargeToSave} />
                     </div>
                 </div>
             )}
@@ -209,6 +225,18 @@ const Index = () => {
         };
 
         fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
+            try {
+                const parsedUsers = JSON.parse(storedUsers);
+                setUsers(parsedUsers);
+            } catch (error) {
+                console.error(error);
+            }
+        }
     }, [refreshKey]);
 
     if (loading) return <Loading />;
@@ -247,10 +275,10 @@ const Index = () => {
                                     <td className="text-center">
                                         <div className="flex justify-end space-x-3">
                                             <Tippy content={t('editar')}>
-                                                <EditUser refIdEmail={row.email} recargeToSave={handleRefresh} />
+                                                <EditUser user={row} recargeToSave={handleRefresh} />
                                             </Tippy>
                                             <Tippy content={t('borrar')}>
-                                                <DeleteUser refIdEmail={row.email} recargeToSave={handleRefresh} />
+                                                <DeleteUser user={row} recargeToSave={handleRefresh} />
                                             </Tippy>
                                         </div>
                                     </td>

@@ -29,10 +29,7 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicador, tipoIndicador }) => {
     }, [datosIndicador]);
 
     const actualizarIndices = (nuevo: Indicador) => {
-        console.log(datosIndicadorTabla);
         setDatosIndicadorTabla((prev) => [...prev, nuevo]);
-        console.log(nuevo);
-        console.log(datosIndicadorTabla);
     };
 
     const startEdit = (index: number, descripcion: string) => {
