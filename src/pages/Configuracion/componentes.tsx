@@ -511,7 +511,7 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
     const [page, setPage] = useState(1);
-    const PAGE_SIZES = [10, 20, 30, 50, 100];
+    const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
     const [initialRecords, setInitialRecords] = useState(sortBy(users, 'id'));
     const [recordsData, setRecordsData] = useState(initialRecords);

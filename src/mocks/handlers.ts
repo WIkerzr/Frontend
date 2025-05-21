@@ -122,24 +122,6 @@ export const handlers = [
         );
     }),
 
-    http.get('/api/users', () => {
-        const usersWithoutPassword = users.map(({ password, ...rest }) => rest);
-
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(
-                    HttpResponse.json(
-                        {
-                            success: true,
-                            users: usersWithoutPassword,
-                        },
-                        { status: 200 }
-                    )
-                );
-            }, 3000);
-        });
-    }),
-
     http.post('/api/newUser', async ({ request }) => {
         const body = (await request.json()) as PublicUser;
 

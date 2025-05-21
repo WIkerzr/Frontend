@@ -1,8 +1,21 @@
-import LoginForm from './LoginForm';
-import LoginLogica from './LoginLogica';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { IRootState } from '../store';
+import LoginLogica from '../pages/Authenticacion/LoginLogica';
+import LoginForm from '../pages/Authenticacion/LoginForm';
 
-const LoginBoxed = () => {
+const LoginBoxed: React.FC = () => {
+    const user = useSelector((state: IRootState) => state.auth.user);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            navigate('/', { replace: true });
+        }
+    }, [user, navigate]);
     const { email, setEmail, password, setPassword, submitForm, error } = LoginLogica();
+
     return (
         <div>
             <div className="absolute inset-0">

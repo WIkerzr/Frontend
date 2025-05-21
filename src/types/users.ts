@@ -13,7 +13,16 @@ export interface User {
 export interface UserID extends Omit<User, 'password'> {
     id: number;
 }
-
+export type ApiUser = {
+    Id: number;
+    Name: string;
+    LastName: string;
+    SecondSurname: string;
+    Role: UserRole;
+    Email: string;
+    Ambit: string;
+    Status: boolean;
+};
 export type PublicUser = Omit<User, 'password'>;
 export type TableUsersHazi = Omit<User, 'password'>;
 export interface UpdateUserPayload extends Omit<TableUsersHazi, 'password'> {
