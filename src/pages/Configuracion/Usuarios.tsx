@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NewUser, UsersTable } from './componentes';
-import { ApiUser, TableUsersHazi, UserID } from '../../types/users';
+import { UserID } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 
@@ -21,22 +21,11 @@ const Index = () => {
                 const res = await fetch('https://localhost:44300/api/users');
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
-                const dataArray: ApiUser[] = Object.values(data);
+                const dataArray: UserID[] = Object.values(data);
 
-                const usersTipadoFront: UserID[] = dataArray.map((dataArray) => ({
-                    id: dataArray.Id,
-                    name: dataArray.Name,
-                    lastName: dataArray.LastName,
-                    secondSurname: dataArray.SecondSurname,
-                    role: dataArray.Role,
-                    email: dataArray.Email,
-                    ambit: dataArray.Ambit,
-                    status: dataArray.Status,
-                }));
+                setUsers(Object.values(dataArray));
 
-                setUsers(Object.values(usersTipadoFront));
-
-                localStorage.setItem('users', JSON.stringify(usersTipadoFront));
+                localStorage.setItem('users', JSON.stringify(dataArray));
             } catch (err: any) {
                 setError(err.message);
             } finally {
