@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { Input } from '../../components/Utils/inputs';
+import { Input, RegionSelect } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
-import { TableUsersHazi } from '../../types/users';
+import { User, UserID } from '../../types/users';
+import { useState } from 'react';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
-    userData: TableUsersHazi;
+    userData: UserID | User;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     errorMessage: string | null;
     successMessage: string | null;
@@ -15,7 +16,7 @@ interface UserDataFormProps {
 
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true }) => {
     const { t } = useTranslation();
-
+    const [selectedRegion, setSelectedRegion] = useState<number | string>('notSelect');
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
@@ -27,9 +28,9 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                     <div>
                         <label className="block text-sm font-medium mb-1">{t('role')}</label>
                         <select className="form-select w-full" name="role" value={userData.role} onChange={onChange} disabled={roleDisabled}>
-                            <option value="adr">{t('adr')}</option>
-                            <option value="hazi">{t('hazi')}</option>
-                            <option value="gobiernoVasco">{t('gobiernoVasco')}</option>
+                            <option value="ADR">{t('adr')}</option>
+                            <option value="HAZI">{t('hazi')}</option>
+                            <option value="GV">{t('gobiernoVasco')}</option>
                         </select>
                     </div>
                     <div className="md:col-span-2">
@@ -48,7 +49,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             />
                         </div>
                     </div>
-                    {userData.role === 'adr' ? <Input nombreInput="ambit" type="text" value={userData.ambit} onChange={onChange} name="ambit" /> : <></>}
+                    {userData.role === 'ADR' ? <RegionSelect value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)} /> : <></>}
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (

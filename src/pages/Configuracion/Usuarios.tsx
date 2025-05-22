@@ -22,7 +22,6 @@ const Index = () => {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
                 const dataArray: UserID[] = Object.values(data);
-
                 setUsers(Object.values(dataArray));
 
                 localStorage.setItem('users', JSON.stringify(dataArray));

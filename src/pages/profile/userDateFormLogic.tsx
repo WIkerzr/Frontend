@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
 import UserDataForm from './userDateForm';
-import { TableUsersHazi } from '../../types/users';
+import { UserID } from '../../types/users';
 
 const UserDateFormLogic: React.FC = () => {
-    const getInitialUserData = (): TableUsersHazi => {
+    const getInitialUserData = (): UserID => {
         const stored = localStorage.getItem('user');
         if (stored) {
             try {
@@ -18,6 +18,7 @@ const UserDateFormLogic: React.FC = () => {
                     email: parsed.email || '',
                     ambit: parsed.ambit || '-',
                     status: false,
+                    id: parsed.id || 9999,
                 };
             } catch (e) {
                 console.error('Error parsing localStorage user:', e);
@@ -27,16 +28,16 @@ const UserDateFormLogic: React.FC = () => {
             name: '',
             lastName: '',
             secondSurname: '',
-            role: 'gobiernoVasco',
+            role: 'GV',
             email: '',
             ambit: '-',
             status: false,
+            id: 9999,
         };
     };
 
     const initialData = getInitialUserData();
     const [UserData, setUserData] = useState(initialData);
-    const [idEmail] = useState(initialData.email);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [fadeOut, setFadeOut] = useState<boolean>(false);
@@ -62,7 +63,7 @@ const UserDateFormLogic: React.FC = () => {
         setSuccessMessage(null);
 
         try {
-            const response = await fetch('/api/user', {
+            const response = await fetch('https://localhost:44300/api/user', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ const UserDateFormLogic: React.FC = () => {
                     role: initialData.role,
                     email: UserData.email,
                     ambit: UserData.ambit,
-                    idEmail,
+                    id: UserData.id,
                 }),
             });
 

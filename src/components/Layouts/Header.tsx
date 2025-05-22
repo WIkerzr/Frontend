@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { IRootState } from '../../store';
 import { toggleTheme, toggleSidebar } from '../../store/themeConfigSlice';
 import { useTranslation } from 'react-i18next';
@@ -11,39 +11,38 @@ import IconMoon from '../Icon/IconMoon';
 import IconUser from '../Icon/IconUser';
 import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
-import { LanguageSelector } from '../Utils/inputs';
-
-//IMPORTANT Temporal
-const ADRS = [{ adr: 'Añana' }, { adr: 'Busturialdea' }, { adr: 'Cantábrica' }, { adr: 'Debabarrena' }, { adr: 'Debagoiena' }, { adr: 'Donostialdea' }];
-//Hasta aqui
+import { LanguageSelector, RegionSelect } from '../Utils/inputs';
+import { UserRole } from '../../types/users';
 
 const Header = () => {
-    const { setUser } = useUser();
+    const [selectedRegion, setSelectedRegion] = useState<number | string>('notSelect');
     const { user } = useUser();
-    const role = user?.role;
+    const role: UserRole = user!.role;
     const nombreUsuario = user?.name;
 
-    const location = useLocation();
-    useEffect(() => {
-        const selector = document.querySelector('ul.horizontal-menu a[href="' + window.location.pathname + '"]');
-        if (selector) {
-            selector.classList.add('active');
-            const all: any = document.querySelectorAll('ul.horizontal-menu .nav-link.active');
-            for (let i = 0; i < all.length; i++) {
-                all[0]?.classList.remove('active');
-            }
-            const ul: any = selector.closest('ul.sub-menu');
-            if (ul) {
-                let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link');
-                if (ele) {
-                    ele = ele[0];
-                    setTimeout(() => {
-                        ele?.classList.add('active');
-                    });
-                }
-            }
-        }
-    }, [location]);
+    // const location = useLocation();
+
+    // useEffect(() => {
+    //     const selector = document.querySelector('ul.horizontal-menu a[href="' + window.location.pathname + '"]');
+    //     if (selector) {
+    //         selector.classList.add('active');
+    //         const all: any = document.querySelectorAll('ul.horizontal-menu .nav-link.active');
+    //         for (let i = 0; i < all.length; i++) {
+    //             all[0]?.classList.remove('active');
+    //         }
+    //         const ul: any = selector.closest('ul.sub-menu');
+    //         if (ul) {
+    //             let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link');
+    //             if (ele) {
+    //                 ele = ele[0];
+    //                 setTimeout(() => {
+    //                     ele?.classList.add('active');
+    //                 });
+    //             }
+    //         }
+    //     }
+    // }, [location]);
+
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
 
@@ -68,16 +67,9 @@ const Header = () => {
                         </button>
                     </div>
 
-                    {role != 'adr' ? (
+                    {role != 'ADR' ? (
                         <div>
-                            <select id="adr" className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <option value="notSelect">{t('sinSeleccionar')}</option>
-                                {ADRS.map((item: any) => (
-                                    <option key={item.adr} value={item.adr}>
-                                        {item.adr}
-                                    </option>
-                                ))}
-                            </select>
+                            <RegionSelect value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)} />
                         </div>
                     ) : (
                         <div>
@@ -96,7 +88,7 @@ const Header = () => {
                             <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
                         </div>
                         {/* Borrar selector rol temporal */}
-                        <div>
+                        {/* <div>
                             <select
                                 value={role}
                                 onChange={(e) => {
@@ -104,16 +96,16 @@ const Header = () => {
                                     let datos;
                                     switch (value) {
                                         case 'adr':
-                                            datos = { email: 'test@adr.com', name: 'Jon', role: 'adr' };
+                                            datos = { email: 'test@adr.com', name: 'Jon', role: 'ADR' as UserRole };
                                             break;
                                         case 'hazi':
-                                            datos = { email: 'test@hazi.com', name: 'Jon', role: 'hazi' };
+                                            datos = { email: 'test@hazi.com', name: 'Jon', role: 'HAZI' as UserRole };
                                             break;
                                         case 'gobiernoVasco':
-                                            datos = { email: 'test@gv.com', name: 'Jon', role: 'gobiernoVasco' };
+                                            datos = { email: 'test@gv.com', name: 'Jon', role: 'GV' as UserRole };
                                             break;
                                         default:
-                                            datos = { email: '', name: '', role: '' };
+                                            datos = { email: '', name: '', role: '' as UserRole };
                                     }
 
                                     localStorage.setItem('user', JSON.stringify(datos));
@@ -126,7 +118,7 @@ const Header = () => {
                                 <option value="hazi">HAZI</option>
                                 <option value="gobiernoVasco">GOBIERNO</option>
                             </select>
-                        </div>
+                        </div> */}
                         <div>
                             {themeConfig.theme === 'light' ? (
                                 <button

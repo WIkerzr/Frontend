@@ -10,4 +10,9 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    server: {
+        headers: {
+            'access-control-allow-origin': '*',
+        },
+    },
 });

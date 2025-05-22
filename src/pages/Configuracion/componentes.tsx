@@ -10,19 +10,20 @@ import { Indicador } from '../../types/Indicadores';
 import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 
-import { PublicUser, TableUsersHazi } from '../../types/users';
+import { User } from '../../types/users';
 import UserDataForm from '../profile/userDateForm';
 import IconTrash from '../../components/Icon/IconTrash';
 import IconPencil from '../../components/Icon/IconPencil';
 
-const newUser: PublicUser = {
+const newUser: User = {
     name: '',
     lastName: '',
     secondSurname: '',
-    role: 'gobiernoVasco',
+    role: 'GV',
     email: '',
     ambit: '',
     status: true,
+    password: '',
 };
 
 interface BaseProps {
@@ -31,22 +32,22 @@ interface BaseProps {
 
 interface EditarProps extends BaseProps {
     accion: 'editar';
-    userData: PublicUser;
+    userData: UserID;
 }
 
 interface NuevoProps extends BaseProps {
     accion: 'nuevo';
-    userData?: undefined;
+    userData?: User;
 }
 
 type UserDataProps = EditarProps | NuevoProps;
 
-export const updateUserInLocalStorage = (updatedUser: PublicUser, accion: 'editar' | 'nuevo' | 'eliminar') => {
+export const updateUserInLocalStorage = (updatedUser: UserID | User, accion: 'editar' | 'nuevo' | 'eliminar') => {
     try {
         const usersRaw = localStorage.getItem('users');
-        const users: PublicUser[] = usersRaw ? JSON.parse(usersRaw) : [];
+        const users: UserID[] = usersRaw ? JSON.parse(usersRaw) : [];
 
-        let updatedUsers: PublicUser[];
+        let updatedUsers: UserID[] = [...users];
 
         switch (accion) {
             case 'editar': {
@@ -63,7 +64,9 @@ export const updateUserInLocalStorage = (updatedUser: PublicUser, accion: 'edita
                 if (exists) {
                     throw new Error(`El usuario con email ${updatedUser.email} ya existe`);
                 }
-                updatedUsers = [...users, updatedUser];
+                if ('id' in updatedUser) {
+                    updatedUsers = [...users, updatedUser];
+                }
                 break;
             }
 
@@ -79,7 +82,6 @@ export const updateUserInLocalStorage = (updatedUser: PublicUser, accion: 'edita
             default:
                 throw new Error(`Acción no reconocida: ${accion}`);
         }
-
         localStorage.setItem('users', JSON.stringify(updatedUsers));
     } catch (e) {
         console.error('Error en updateUserInLocalStorage:', e);
@@ -87,10 +89,10 @@ export const updateUserInLocalStorage = (updatedUser: PublicUser, accion: 'edita
 };
 
 export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion, recargeToSave }) => {
-    const getInitialUserData = (): PublicUser => {
+    const getInitialUserData = (): UserID => {
         const usersRaw = localStorage.getItem('users');
         try {
-            const users: PublicUser[] = JSON.parse(usersRaw!);
+            const users: UserID[] = JSON.parse(usersRaw!);
 
             const matched = users.find((user) => user.email === userData!.email);
             if (matched) {
@@ -102,6 +104,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     email: matched.email || '',
                     ambit: matched.ambit || '-',
                     status: matched.status || false,
+                    id: matched.id || 9999,
                 };
             }
         } catch (e) {
@@ -112,16 +115,16 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             name: '',
             lastName: '',
             secondSurname: '',
-            role: 'gobiernoVasco',
+            role: 'GV',
             email: '',
             ambit: '-',
+            id: 9999,
             status: false,
         };
     };
 
     const initialData = accion === 'editar' ? getInitialUserData() : newUser;
     const [UserData, setUserData] = useState(initialData);
-    const [idEmail] = useState(initialData.email);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [fadeOut, setFadeOut] = useState<boolean>(false);
@@ -149,27 +152,29 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
 
         try {
             if (accion === 'editar') {
-                response = await fetch('/api/user', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: UserData.name,
-                        lastName: UserData.lastName,
-                        secondSurname: UserData.secondSurname,
-                        role: initialData.role,
-                        email: UserData.email,
-                        ambit: UserData.ambit,
-                        idEmail,
-                    }),
-                });
-                if (response.ok) {
-                    updateUserInLocalStorage(UserData, 'editar');
+                if ('id' in UserData) {
+                    response = await fetch('https://localhost:44300/api/user', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            name: UserData.name,
+                            lastName: UserData.lastName,
+                            secondSurname: UserData.secondSurname,
+                            role: initialData.role,
+                            email: UserData.email,
+                            ambit: UserData.ambit,
+                            id: UserData.id,
+                        }),
+                    });
+                    if (response.ok) {
+                        updateUserInLocalStorage(UserData, 'editar');
+                    }
                 }
             } else if (accion === 'nuevo') {
-                response = await fetch('/api/newUser', {
-                    method: 'POST',
+                response = await fetch('https://localhost:44300/api/newUser', {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -316,7 +321,7 @@ export const ModalNuevoIndicador: React.FC<{ texto: string; datosIndicador: stri
 };
 
 interface EditUserProps {
-    user: PublicUser;
+    user: UserID;
     recargeToSave: () => void;
 }
 
@@ -325,7 +330,7 @@ interface NewUserProps {
 }
 
 interface ChangeStatusProps {
-    value: TableUsersHazi;
+    value: UserID;
     onSuccess?: () => void;
 }
 
@@ -386,16 +391,17 @@ export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(
             email: value.email,
             ambit: value.ambit,
             status: newStatus,
+            id: value.id,
         };
         try {
-            await fetch('/api/user', {
+            await fetch('https://localhost:44300/api/user', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     ...datosUsuario,
-                    idEmail: value.email,
+                    id: value.id,
                 }),
             });
             updateUserInLocalStorage(datosUsuario, 'editar');
@@ -422,12 +428,12 @@ export const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, 
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch('/api/deleteUser', {
+            const response = await fetch('https://localhost:44300/api/deleteUser', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ idEmail: user.email }),
+                body: JSON.stringify({ id: user.id }),
             });
 
             if (!response.ok) {
@@ -532,6 +538,7 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
     useEffect(() => {
         setInitialRecords(() => {
             return users.filter((item) => {
+                // console.log(t.(`${'item.role'}));
                 return item.status || item.name || item.lastName || item.secondSurname || item.email || item.role || item.ambit;
             });
         });

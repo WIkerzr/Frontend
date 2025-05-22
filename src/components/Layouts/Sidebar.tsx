@@ -17,12 +17,12 @@ import IconMenuServicios from '../Icon/Menu/Adr/IconMenuServicios';
 import IconMenuConfiguracion from '../Icon/Menu/IconMenuConfiguracion';
 import IconCaretDown from '../Icon/IconCaretDown';
 import { useUser } from '../../contexts/UserContext';
+import { UserRole } from '../../types/users';
 
 const Sidebar = () => {
-    //IMPORTANT Temporal borrar
     const { user } = useUser();
-    const role = user?.role;
 
+    const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
     //const [errorSubMenu, setErrorSubMenu] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -35,6 +35,11 @@ const Sidebar = () => {
             return oldValue === value ? '' : value;
         });
     };
+
+    useEffect(() => {
+        setRole(user!.role.toUpperCase() as UserRole);
+    }, []);
+
     useEffect(() => {
         const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
         if (selector) {
@@ -82,7 +87,7 @@ const Sidebar = () => {
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
                             {/* Configuracion */}
-                            {role === 'hazi' && (
+                            {role === 'HAZI' && (
                                 <li className="menu nav-item">
                                     <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
                                         <div className="flex items-center">
@@ -113,7 +118,7 @@ const Sidebar = () => {
                             {/* //ADR */}
                             <li className="nav-item">
                                 <ul>
-                                    {role !== 'gobiernoVasco' && (
+                                    {role !== 'GV' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/cuadroMando" className="group">
                                                 <div className="flex items-center">
@@ -123,7 +128,7 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                     )}
-                                    {role !== 'gobiernoVasco' && (
+                                    {role !== 'GV' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/acciones" className="group">
                                                 <div className="flex items-center">
@@ -133,7 +138,7 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                     )}
-                                    {role !== 'gobiernoVasco' && (
+                                    {role !== 'GV' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/accionesAccesorias" className="group">
                                                 <div className="flex items-center">
@@ -143,7 +148,7 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                     )}
-                                    {role !== 'gobiernoVasco' && (
+                                    {role !== 'GV' && (
                                         <li className="nav-item">
                                             <NavLink to="/adr/servicios" className="group">
                                                 <div className="flex items-center">

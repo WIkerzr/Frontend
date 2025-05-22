@@ -1,17 +1,12 @@
 import { createContext, useContext, useState } from 'react';
-
-export interface InterfaceUser {
-    name: string;
-    email: string;
-    role: string;
-}
+import { UserID } from '../types/users';
 
 interface UserContextType {
-    user: InterfaceUser | null;
-    setUser: (user: InterfaceUser | null) => void;
+    user: UserID | null;
+    setUser: (user: UserID | null) => void;
 }
 
-const defaultUser = (): InterfaceUser | null => {
+const defaultUser = (): UserID | null => {
     try {
         const stored = localStorage.getItem('user');
         return stored ? JSON.parse(stored) : null;
@@ -27,9 +22,9 @@ const UserContext = createContext<UserContextType>({
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUserState] = useState<InterfaceUser | null>(defaultUser());
+    const [user, setUserState] = useState<UserID | null>(defaultUser());
 
-    const setUser = (newUser: InterfaceUser | null) => {
+    const setUser = (newUser: UserID | null) => {
         setUserState(newUser);
         if (newUser) {
             localStorage.setItem('user', JSON.stringify(newUser));

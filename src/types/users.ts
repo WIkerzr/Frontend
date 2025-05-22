@@ -1,4 +1,4 @@
-export type UserRole = 'hazi' | 'adr' | 'gobiernoVasco';
+export type UserRole = 'ADR' | 'HAZI' | 'GV';
 
 export interface User {
     name: string;
@@ -14,8 +14,4 @@ export interface UserID extends Omit<User, 'password'> {
     id: number;
 }
 
-export type PublicUser = Omit<User, 'password'>;
-export type TableUsersHazi = Omit<User, 'password'>;
-export interface UpdateUserPayload extends Omit<TableUsersHazi, 'password'> {
-    idEmail: string;
-}
+// export type TableUsersHazi = Omit<User, 'password'>;

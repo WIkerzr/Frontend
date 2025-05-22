@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAuthUser } from '../../store/authSlice';
 import { useUser } from '../../contexts/UserContext';
+import { authlogin } from './auth';
 
 const useLogin = () => {
     const { setUser } = useUser();
@@ -16,7 +17,21 @@ const useLogin = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('/api/login', {
+            // const loginData = {
+            //     userName: email,
+            //     password: password,
+            //     useRefreshTokens: true,
+            // };
+
+            // authlogin(loginData)
+            //     .then((response) => {
+            //         console.log('Login exitoso:', response);
+            //     })
+            //     .catch((error) => {
+            //         console.error('Error al hacer login:', error);
+            //     });
+
+            const response = await fetch('https://localhost:44300/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -28,10 +43,13 @@ const useLogin = () => {
                 throw new Error(result.message || 'Error desconocido');
             }
 
-            const { token, user } = result.data;
+            const token = result.token;
+            const user = result.user;
 
             localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('token', token);
             sessionStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem('token', token);
             setUser(user);
             dispatch(setAuthUser({ user, token }));
 

@@ -2,7 +2,6 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { UserProvider } from './contexts/UserContext';
 import { MantineProvider } from '@mantine/core';
-
 // Perfect Scrollbar
 import 'react-perfect-scrollbar/dist/css/styles.css';
 
@@ -19,15 +18,18 @@ import router from './router/index';
 // Redux
 import { Provider } from 'react-redux';
 import store from './store/index';
+import { RegionProvider } from './contexts/RegionContext';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
         <Suspense>
             <Provider store={store}>
                 <UserProvider>
-                    <MantineProvider>
-                        <RouterProvider router={router} />
-                    </MantineProvider>
+                    <RegionProvider>
+                        <MantineProvider>
+                            <RouterProvider router={router} />
+                        </MantineProvider>
+                    </RegionProvider>
                 </UserProvider>
             </Provider>
         </Suspense>
