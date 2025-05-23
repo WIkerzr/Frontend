@@ -38,27 +38,36 @@ export const LanguageSelector = () => {
     );
 };
 
-type RegionSelectProps = {
-    value: number | string | undefined;
-    onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-};
-
-export const RegionSelect: React.FC<RegionSelectProps> = ({ value, onChange }) => {
+export const RegionSelect: React.FC = () => {
     const { i18n, t } = useTranslation();
-    const { regiones, loading, error } = useRegionContext();
+    const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
 
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        if (value === 'notSelect') {
+            setRegionSeleccionada(null);
+        } else {
+            setRegionSeleccionada(Number(value));
+        }
+    };
+
     if (loading)
         return (
-            <select disabled>
+            <select disabled className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
                 <option>{t('cargando')}</option>
             </select>
         );
     if (error) return <div>{t('errorCargandoRegiones')}</div>;
 
     return (
-        <select className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }} value={value} onChange={onChange}>
+        <select
+            className="form-select text-white-dark min-w-max"
+            style={{ minWidth: 'calc(100% + 10px)' }}
+            value={regionSeleccionada === null ? 'notSelect' : regionSeleccionada}
+            onChange={handleChange}
+        >
             <option value="notSelect">{t('sinSeleccionar')}</option>
             {regiones.map((region) => (
                 <option key={region.RegionId} value={region.RegionId}>

@@ -18,10 +18,11 @@ import IconMenuConfiguracion from '../Icon/Menu/IconMenuConfiguracion';
 import IconCaretDown from '../Icon/IconCaretDown';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Sidebar = () => {
     const { user } = useUser();
-
+    const { regiones, regionSeleccionada } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
     //const [errorSubMenu, setErrorSubMenu] = useState(false);
@@ -29,7 +30,7 @@ const Sidebar = () => {
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
     const dispatch = useDispatch();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const toggleMenu = (value: string) => {
         setCurrentMenu((oldValue) => {
             return oldValue === value ? '' : value;
@@ -113,69 +114,78 @@ const Sidebar = () => {
                             )}
                             <h2 className="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
                                 <IconMinus className="w-4 h-5 flex-none hidden" />
-                                <span>{t('adr')}</span>
+                                <span>{regionSeleccionada ? regiones.find((r) => r.RegionId === regionSeleccionada)?.[i18n!.language === 'eu' ? 'NameEu' : 'NameEs'] ?? t('adr') : t('adr')}</span>
                             </h2>
-                            {/* //ADR */}
-                            <li className="nav-item">
-                                <ul>
-                                    {role !== 'GV' && (
+                            <div
+                                style={{
+                                    opacity: regionSeleccionada ? 1 : 0.5,
+                                    pointerEvents: regionSeleccionada ? 'auto' : 'none',
+                                    filter: regionSeleccionada ? 'none' : 'grayscale(0.5)',
+                                    userSelect: regionSeleccionada ? 'auto' : 'none',
+                                }}
+                            >
+                                {/* //ADR */}
+                                <li className="nav-item">
+                                    <ul>
+                                        {role !== 'GV' && (
+                                            <li className="nav-item">
+                                                <NavLink to="/adr/cuadroMando" className="group">
+                                                    <div className="flex items-center">
+                                                        <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
+                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('CuadroMando')}</span>
+                                                    </div>
+                                                </NavLink>
+                                            </li>
+                                        )}
+                                        {role !== 'GV' && (
+                                            <li className="nav-item">
+                                                <NavLink to="/adr/acciones" className="group">
+                                                    <div className="flex items-center">
+                                                        <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
+                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Acciones')}</span>
+                                                    </div>
+                                                </NavLink>
+                                            </li>
+                                        )}
+                                        {role !== 'GV' && (
+                                            <li className="nav-item">
+                                                <NavLink to="/adr/accionesAccesorias" className="group">
+                                                    <div className="flex items-center">
+                                                        <IconMenuAccionesAccesorias className="group-hover:!text-primary shrink-0" />
+                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('AccionesAccesorias')}</span>
+                                                    </div>
+                                                </NavLink>
+                                            </li>
+                                        )}
+                                        {role !== 'GV' && (
+                                            <li className="nav-item">
+                                                <NavLink to="/adr/servicios" className="group">
+                                                    <div className="flex items-center">
+                                                        <IconMenuServicios className="group-hover:!text-primary shrink-0" />
+                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Servicios')}</span>
+                                                    </div>
+                                                </NavLink>
+                                            </li>
+                                        )}
                                         <li className="nav-item">
-                                            <NavLink to="/adr/cuadroMando" className="group">
+                                            <NavLink to="/adr/planesGestion" className="group">
                                                 <div className="flex items-center">
-                                                    <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
-                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('CuadroMando')}</span>
+                                                    <IconMenuPlanes className="group-hover:!text-primary shrink-0" />
+                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('PlanesGestion')}</span>
                                                 </div>
                                             </NavLink>
                                         </li>
-                                    )}
-                                    {role !== 'GV' && (
                                         <li className="nav-item">
-                                            <NavLink to="/adr/acciones" className="group">
+                                            <NavLink to="/adr/memoriasAnuales" className="group">
                                                 <div className="flex items-center">
-                                                    <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
-                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Acciones')}</span>
+                                                    <IconMenuMemoria className="group-hover:!text-primary shrink-0" />
+                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('memoriasAnuales')}</span>
                                                 </div>
                                             </NavLink>
                                         </li>
-                                    )}
-                                    {role !== 'GV' && (
-                                        <li className="nav-item">
-                                            <NavLink to="/adr/accionesAccesorias" className="group">
-                                                <div className="flex items-center">
-                                                    <IconMenuAccionesAccesorias className="group-hover:!text-primary shrink-0" />
-                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('AccionesAccesorias')}</span>
-                                                </div>
-                                            </NavLink>
-                                        </li>
-                                    )}
-                                    {role !== 'GV' && (
-                                        <li className="nav-item">
-                                            <NavLink to="/adr/servicios" className="group">
-                                                <div className="flex items-center">
-                                                    <IconMenuServicios className="group-hover:!text-primary shrink-0" />
-                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Servicios')}</span>
-                                                </div>
-                                            </NavLink>
-                                        </li>
-                                    )}
-                                    <li className="nav-item">
-                                        <NavLink to="/adr/planesGestion" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuPlanes className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('PlanesGestion')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                    <li className="nav-item">
-                                        <NavLink to="/adr/memoriasAnuales" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuMemoria className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('memoriasAnuales')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                </ul>
-                            </li>
+                                    </ul>
+                                </li>
+                            </div>
                         </ul>
                     </PerfectScrollbar>
                 </div>

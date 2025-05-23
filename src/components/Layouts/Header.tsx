@@ -13,9 +13,9 @@ import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
 import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Header = () => {
-    const [selectedRegion, setSelectedRegion] = useState<number | string>('notSelect');
     const { user } = useUser();
     const role: UserRole = user!.role;
     const nombreUsuario = user?.name;
@@ -69,7 +69,7 @@ const Header = () => {
 
                     {role != 'ADR' ? (
                         <div>
-                            <RegionSelect value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)} />
+                            <RegionSelect />
                         </div>
                     ) : (
                         <div>
