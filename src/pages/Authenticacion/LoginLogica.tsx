@@ -4,8 +4,11 @@ import { useDispatch } from 'react-redux';
 import { setAuthUser } from '../../store/authSlice';
 import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const useLogin = () => {
+    const { setRegionSeleccionada } = useRegionContext();
+
     const { login } = useAuth();
     const { setUser } = useUser();
     const dispatch = useDispatch();
@@ -13,7 +16,7 @@ const useLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
+    const { regiones } = useRegionContext();
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -46,6 +49,9 @@ const useLogin = () => {
 
             const token = result.token;
             const user = result.user;
+            const region = regiones.find((r) => r.RegionId === user.ambit);
+            setRegionSeleccionada(user.ambit);
+            console.log(user);
 
             login({ user });
 

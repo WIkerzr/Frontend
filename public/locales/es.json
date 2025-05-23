@@ -81,6 +81,8 @@
     "errorEmailPass": "Email o contraseña no válida",
     "errorUserNoFound": "Usuario no encontrado",
 
+    "noRegionSeleccionada": "Sin región seleccionada",
+
     "sales": "Ventas",
     "analytics": "Analítica",
     "apps": "Aplicaciones",

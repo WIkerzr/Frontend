@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { IRootState } from '../../store';
@@ -16,38 +16,20 @@ import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
 
 const Header = () => {
+    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
     const { user } = useUser();
     const role: UserRole = user!.role;
     const nombreUsuario = user?.name;
+    const { t } = useTranslation();
 
-    // const location = useLocation();
-
-    // useEffect(() => {
-    //     const selector = document.querySelector('ul.horizontal-menu a[href="' + window.location.pathname + '"]');
-    //     if (selector) {
-    //         selector.classList.add('active');
-    //         const all: any = document.querySelectorAll('ul.horizontal-menu .nav-link.active');
-    //         for (let i = 0; i < all.length; i++) {
-    //             all[0]?.classList.remove('active');
-    //         }
-    //         const ul: any = selector.closest('ul.sub-menu');
-    //         if (ul) {
-    //             let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link');
-    //             if (ele) {
-    //                 ele = ele[0];
-    //                 setTimeout(() => {
-    //                     ele?.classList.add('active');
-    //                 });
-    //             }
-    //         }
-    //     }
-    // }, [location]);
+    useEffect(() => {
+        setRegionSeleccionada(user!.ambit ? Number(user!.ambit) : null);
+    }, []);
 
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
 
-    const { t } = useTranslation();
-
+    const region = regiones.find((r) => r.RegionId === regionSeleccionada);
     return (
         <header className={`z-40 ${themeConfig.semidark && themeConfig.menu === 'horizontal' ? 'dark' : ''}`}>
             <div className="shadow-sm">
@@ -67,16 +49,14 @@ const Header = () => {
                         </button>
                     </div>
 
-                    {role != 'ADR' ? (
-                        <div>
-                            <RegionSelect />
-                        </div>
-                    ) : (
+                    {role.toUpperCase() != 'ADR' ? (
                         <div>
                             <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                {role}
+                                <RegionSelect />
                             </div>
                         </div>
+                    ) : (
+                        <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
                     )}
 
                     <div>

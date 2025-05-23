@@ -6,7 +6,7 @@ export interface User {
     secondSurname: string;
     role: UserRole;
     email: string;
-    ambit: string;
+    ambit: string | number;
     password: string;
     status: boolean;
 }
