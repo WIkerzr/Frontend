@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAuthUser } from '../../store/authSlice';
 import { useUser } from '../../contexts/UserContext';
-import { authlogin } from './auth';
+import { useAuth } from '../../contexts/AuthContext';
 
 const useLogin = () => {
+    const { login } = useAuth();
     const { setUser } = useUser();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -46,10 +47,8 @@ const useLogin = () => {
             const token = result.token;
             const user = result.user;
 
-            localStorage.setItem('user', JSON.stringify(user));
-            localStorage.setItem('token', token);
-            sessionStorage.setItem('user', JSON.stringify(user));
-            sessionStorage.setItem('token', token);
+            login({ user });
+
             setUser(user);
             dispatch(setAuthUser({ user, token }));
 

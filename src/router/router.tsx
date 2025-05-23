@@ -1,10 +1,8 @@
-import React from 'react';
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
 
 import BlankLayout from '../components/Layouts/BlankLayout';
 import DefaultLayout from '../components/Layouts/DefaultLayout';
 import { routes } from './routes';
-import ProtectedRoute from '../components/ProtectedRoute';
 
 const protectedPaths = [
     '/',
@@ -25,20 +23,6 @@ const finalRoutes = routes.map((route) => ({
 }));
 
 const routerRoutes: RouteObject[] = finalRoutes.map((route) => {
-    if (protectedPaths.includes(route.path)) {
-        return {
-            path: route.path,
-            element: <ProtectedRoute />, // Envolvemos con protección
-            children: [
-                {
-                    path: '',
-                    element: route.element,
-                },
-            ],
-        };
-    }
-
-    // Rutas públicas sin protección (ej: login)
     return {
         path: route.path,
         element: route.element,

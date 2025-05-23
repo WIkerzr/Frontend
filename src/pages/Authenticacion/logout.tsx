@@ -1,17 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import IconLogout from '../../components/Icon/IconLogout';
+import { useAuth } from '../../contexts/AuthContext'; // Asegúrate de que la ruta es correcta
 
 const LogoutItem = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        // Eliminar datos de sesión
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Redirigir al login
+        logout();
         navigate('/Authenticacion/Login');
     };
 

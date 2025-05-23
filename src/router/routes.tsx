@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import { OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
 const CuadroMando = lazy(() => import('../pages/ADR/CuadroMando'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
@@ -59,7 +60,11 @@ const routes = [
     },
     {
         path: '/Authenticacion/Login',
-        element: <Login />,
+        element: (
+            <OnlyIfNotLoggedIn>
+                <Login />
+            </OnlyIfNotLoggedIn>
+        ),
         layout: 'blank',
     },
     {
