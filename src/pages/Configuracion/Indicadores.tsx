@@ -20,9 +20,12 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicador, tipoIndicador }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [fadeOut, setFadeOut] = useState<boolean>(false);
+    const [modalNuevo, setModalNuevo] = useState(false);
+    const [modalEditar, setModalEditar] = useState(false);
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editValue, setEditValue] = useState('');
+    const [ultimoIndicador, setUltimoIndicador] = useState<Indicador | null>(null);
 
     useEffect(() => {
         setDatosIndicadorTabla(datosIndicador);
@@ -30,54 +33,6 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicador, tipoIndicador }) => {
 
     const actualizarIndices = (nuevo: Indicador) => {
         setDatosIndicadorTabla((prev) => [...prev, nuevo]);
-    };
-
-    const startEdit = (index: number, descripcion: string) => {
-        setEditingIndex(index);
-        setEditValue(descripcion);
-    };
-
-    const cancelEdit = () => {
-        setEditingIndex(null);
-        setEditValue('');
-    };
-
-    const saveEdit = async (id: number) => {
-        setErrorMessage(null);
-        setSuccessMessage(null);
-        try {
-            const response = await fetch('/api/modIndicador', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    tipo: tipoIndicador,
-                    id: id,
-                    nuevaDescripcion: editValue,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(t('errorEnviarServidor'));
-            }
-
-            const data = await response.json();
-            setDatosIndicadorTabla(data[tipoIndicador === 'realizacion' ? 'indicadoresRealizacion' : 'indicadoresResultado']);
-
-            setSuccessMessage(t('CambiosGuardados'));
-
-            setTimeout(() => {
-                setFadeOut(true);
-                setTimeout(() => {
-                    setSuccessMessage(null);
-                    setFadeOut(false);
-                }, 1000);
-            }, 5000);
-        } catch (err: any) {
-            setErrorMessage(err.message || 'Error inesperado');
-        }
-        setEditingIndex(null);
     };
 
     const eliminarIndicador = async (id: number) => {
@@ -119,15 +74,26 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicador, tipoIndicador }) => {
         }
         setEditingIndex(null);
     };
+    const handleNuevoIndicador = (indicador: Indicador) => {
+        setUltimoIndicador(indicador);
+        actualizarIndices(indicador);
+    };
 
     return (
         <div className="panel h-full w-1/2">
-            <ModalNuevoIndicador
-                texto={`${t('nuevoIndicador') + tituloIndicador}`}
-                datosIndicador={datosIndicadorTabla.length > 0 ? datosIndicadorTabla[datosIndicadorTabla.length - 1].descripcion.slice(0, 4) : ''}
-                tipoIndicador={tipoIndicador}
-                onGuardar={actualizarIndices}
-            />
+            <div className="flex justify-center mb-5">
+                <button onClick={() => setModalNuevo(true)} className="btn btn-primary">
+                    Abrir modal nuevo indicador
+                </button>
+                <ModalNuevoIndicador
+                    isOpen={modalNuevo}
+                    onClose={() => setModalNuevo(false)}
+                    accion="Nuevo"
+                    datosIndicador={datosIndicadorTabla[datosIndicadorTabla.length - 1]}
+                    tipoIndicador="realizacion"
+                    onGuardar={handleNuevoIndicador}
+                />
+            </div>
             {errorMessage && <span className="text-red-500 text-sm mt-2">{errorMessage}</span>}
             {successMessage && (
                 <div className={`mt-4 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
@@ -148,52 +114,32 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicador, tipoIndicador }) => {
                             .slice()
                             .reverse()
                             .map((data) => {
-                                const isEditing = editingIndex === data.id;
                                 return (
                                     <tr key={data.id}>
                                         <td>
-                                            {isEditing ? (
-                                                <input
-                                                    type="text"
-                                                    className="border border-gray-300 rounded px-2 py-1 w-full"
-                                                    value={editValue}
-                                                    onChange={(e) => setEditValue(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') saveEdit(data.id);
-                                                        if (e.key === 'Escape') cancelEdit();
-                                                    }}
-                                                    autoFocus
-                                                />
-                                            ) : (
-                                                <div className="break-words">{data.descripcion}</div>
-                                            )}
+                                            <div className="break-words">{data.descripcion}</div>
                                         </td>
                                         <td className="text-center">
                                             {data.ano === anoActual ? (
                                                 <div className="flex justify-end space-x-3">
-                                                    {isEditing ? (
-                                                        <>
-                                                            <button onClick={() => saveEdit(data.id)} className="btn btn-primary" title={t('guardar')}>
-                                                                ✓
-                                                            </button>
-                                                            <button onClick={cancelEdit} className="btn btn-secondary" title={t('cancelar')}>
-                                                                ✗
-                                                            </button>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Tippy content={t('editar')}>
-                                                                <button type="button" onClick={() => startEdit(data.id, data.descripcion)}>
-                                                                    <IconPencil />
-                                                                </button>
-                                                            </Tippy>
-                                                            <Tippy content={t('borrar')}>
-                                                                <button type="button" onClick={() => eliminarIndicador(data.id)}>
-                                                                    <IconTrash />
-                                                                </button>
-                                                            </Tippy>
-                                                        </>
-                                                    )}
+                                                    <Tippy content={t('editar')}>
+                                                        <button type="button" onClick={() => setModalEditar(true)}>
+                                                            <IconPencil />
+                                                        </button>
+                                                    </Tippy>
+                                                    <ModalNuevoIndicador
+                                                        isOpen={modalEditar}
+                                                        onClose={() => setModalEditar(false)}
+                                                        accion="Editar"
+                                                        datosIndicador={data}
+                                                        tipoIndicador="realizacion"
+                                                        onGuardar={handleNuevoIndicador}
+                                                    />
+                                                    <Tippy content={t('borrar')}>
+                                                        <button type="button" onClick={() => eliminarIndicador(data.id)}>
+                                                            <IconTrash />
+                                                        </button>
+                                                    </Tippy>
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-400"></span>

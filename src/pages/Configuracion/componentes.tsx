@@ -220,24 +220,32 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
     );
 };
 
-export const ModalNuevoIndicador: React.FC<{ texto: string; datosIndicador: string | undefined; tipoIndicador: 'realizacion' | 'resultado'; onGuardar: (nuevoIndicador: Indicador) => void }> = ({
-    texto,
-    datosIndicador,
-    tipoIndicador,
-    onGuardar,
-}) => {
+type ModalNuevoIndicadorProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    accion: 'Editar' | 'Nuevo';
+    datosIndicador: Indicador;
+    tipoIndicador: 'realizacion' | 'resultado';
+    onGuardar: (nuevoIndicador: Indicador) => void;
+};
+
+export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen, onClose, accion, datosIndicador, tipoIndicador, onGuardar }) => {
     const { t } = useTranslation();
 
-    const [isOpen, setIsOpen] = useState(false);
     const [descripcionEditable, setDescripcionEditable] = useState('');
     const [ano, setAno] = useState(2025);
     const [tipo, setTipo] = useState<'realizacion' | 'resultado'>(tipoIndicador);
-
     const [mensaje, setMensaje] = useState('');
+    const [unidad, setUnidad] = useState('');
+    const [ejes, setEjes] = useState('');
+    const [definicion, setDefinicion] = useState('');
+    const [variables, setVariables] = useState('');
+    const [metodologia, setMetodologia] = useState('');
 
     const getSiguienteCodigo = () => {
-        const prefijo = datosIndicador!.slice(0, 2);
-        const numero = parseInt(datosIndicador!.slice(2, 4), 10);
+        if (!datosIndicador) return '';
+        const prefijo = datosIndicador.descripcion.slice(0, 2);
+        const numero = parseInt(datosIndicador.descripcion.slice(2, 4), 10);
         const siguienteNumero = numero + 1;
         const siguienteCodigo = `${prefijo}${String(siguienteNumero).padStart(2, '0')}.`;
         return siguienteCodigo;
@@ -251,7 +259,16 @@ export const ModalNuevoIndicador: React.FC<{ texto: string; datosIndicador: stri
         const response = await fetch('/api/nuevoIndicador', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ descripcion: descripcionFinal, ano, tipo }),
+            body: JSON.stringify({
+                descripcion: descripcionFinal,
+                ano,
+                tipo,
+                unidad,
+                ejes,
+                definicion,
+                variables,
+                metodologia,
+            }),
         });
 
         const data = await response.json();
@@ -261,62 +278,90 @@ export const ModalNuevoIndicador: React.FC<{ texto: string; datosIndicador: stri
             setDescripcionEditable('');
             setAno(2025);
             setTipo(tipoIndicador);
+            setUnidad('');
+            setEjes('');
+            setDefinicion('');
+            setVariables('');
+            setMetodologia('');
             onGuardar(data.indicador);
             setTimeout(() => {
                 setMensaje('');
-                setIsOpen(false);
+                onClose();
             }, 1000);
         } else {
             setMensaje(t('errorGuardar') + data.message);
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <div className="flex justify-center mb-5">
-            <button onClick={() => setIsOpen(true)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 btn btn-primary w-1/2">
-                {texto}
-            </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
+                <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
+                    ×
+                </button>
 
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
-                        <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={() => setIsOpen(false)}>
-                            ×
-                        </button>
+                <h2 className="text-xl font-bold mb-4">{t('newIndicador')}</h2>
 
-                        <h2 className="text-xl font-bold mb-4">{t('newIndicador')}</h2>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block font-medium">{t('Descripcion')}</label>
+                <div className="space-y-4">
+                    <div>
+                        <div className="flex gap-4">
+                            <div className="w-1/2">
+                                <label className="block font-medium">{t('Nombre Indicador')}</label>
                                 <div className="flex">
-                                    <span className="p-2 bg-gray-100 border border-r-0 rounded-l text-gray-700 whitespace-nowrap">{siguienteIndicador}</span>
-                                    <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
+                                    <span className="p-2 bg-gray-100 border border-r-0 rounded-l text-gray-700 whitespace-nowrap">
+                                        {accion == 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 border rounded-r"
+                                        value={accion == 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable}
+                                        onChange={(e) => setDescripcionEditable(e.target.value)}
+                                    />
                                 </div>
                             </div>
-
-                            <div>
-                                <label className="block font-medium">{t('Ano')}</label>
-                                <input type="number" className="w-full p-2 border rounded" value={ano} onChange={(e) => setAno(Number(e.target.value))} />
-                            </div>
-
-                            <div>
-                                <label className="block font-medium">{t('Tipo')}</label>
-                                <select className="w-full p-2 border rounded" value={tipo} onChange={(e) => setTipo(e.target.value as 'realizacion' | 'resultado')}>
-                                    <option value="realizacion">{t('Realizacion')}</option>
-                                    <option value="resultado">{t('Resultado')}</option>
+                            <div className="w-1/2">
+                                <label className="block font-medium">{t('Unidad de medida')}</label>
+                                <select className="w-full p-2 border rounded">
+                                    <option>NUMERO</option>
+                                    <option>OTro</option>
                                 </select>
                             </div>
-
-                            <button onClick={handleGuardar} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
-                                {t('guardar')}
-                            </button>
-
-                            {mensaje && <p className="text-sm text-center mt-2">{mensaje}</p>}
                         </div>
                     </div>
+                    <div>
+                        <label className="block font-medium">{t('Ejes relacionados')}</label>
+                        <div className="flex">
+                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block font-medium">{t('Definicion')}</label>
+                        <div className="flex">
+                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block font-medium">{t('Variables de desagregacion')}</label>
+                        <div className="flex">
+                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block font-medium">{t('Metologia de calculo')}</label>
+                        <div className="flex">
+                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
+                        </div>
+                    </div>
+
+                    <button onClick={handleGuardar} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                        {t('guardar')}
+                    </button>
+
+                    {mensaje && <p className="text-sm text-center mt-2">{mensaje}</p>}
                 </div>
-            )}
+            </div>
         </div>
     );
 };
