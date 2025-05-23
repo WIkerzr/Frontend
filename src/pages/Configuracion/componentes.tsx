@@ -297,7 +297,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative">
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative" onClick={(e) => e.stopPropagation()}>
                 <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
                     ×
                 </button>

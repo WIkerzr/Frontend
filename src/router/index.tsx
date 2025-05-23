@@ -6,7 +6,7 @@ import { ProtectedRoute } from '../components/ProtectedRoute'; // Asegúrate de 
 import { worker } from '../mocks/browser';
 
 if (process.env.NODE_ENV === 'development') {
-    worker.stop();
+    worker.start();
 }
 
 const protectedPaths = [
