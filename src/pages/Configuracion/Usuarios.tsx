@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { NewUser, UsersTable } from './componentes';
-import { UserID } from '../../types/users';
+import { User, UserID, UserRegionId } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -10,29 +11,47 @@ const Index = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
+    const { regiones } = useRegionContext();
 
     const handleRefresh = () => {
         setRefreshKey((prev) => prev + 1);
     };
     useEffect(() => {
-        setLoading(true);
-        const fetchUsers = async () => {
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
             try {
-                const res = await fetch('https://localhost:44300/api/users');
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
-                const dataArray: UserID[] = Object.values(data);
-                setUsers(Object.values(dataArray));
-
-                localStorage.setItem('users', JSON.stringify(dataArray));
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
+                const parsedUsers = JSON.parse(storedUsers);
+                setUsers(parsedUsers);
+                setLoading(false);
+            } catch (error) {
+                console.error(error);
                 setLoading(false);
             }
-        };
-
-        fetchUsers();
+        } else {
+            setLoading(true);
+            const fetchUsers = async () => {
+                try {
+                    const res = await fetch('https://localhost:44300/api/users');
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
+                    const usuariosConRegion = data.map((user: UserRegionId) => {
+                        const region = regiones.find((r) => r.RegionId === user.RegionId);
+                        return {
+                            ...user,
+                            RegionName: region ? region.NameEs : '-',
+                        };
+                    });
+                    const dataArray: UserID[] = Array.isArray(usuariosConRegion) ? usuariosConRegion : Object.values(usuariosConRegion);
+                    setUsers(dataArray);
+                    localStorage.setItem('users', JSON.stringify(dataArray));
+                } catch (err: any) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchUsers();
+        }
     }, []);
 
     useEffect(() => {

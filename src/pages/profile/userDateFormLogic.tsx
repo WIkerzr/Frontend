@@ -17,7 +17,7 @@ const UserDateFormLogic: React.FC = () => {
                     role: parsed.role || 'gobiernoVasco',
                     email: parsed.email || '',
                     ambit: parsed.ambit || '-',
-                    status: false,
+                    status: true,
                     id: parsed.id || 9999,
                 };
             } catch (e) {
@@ -31,7 +31,7 @@ const UserDateFormLogic: React.FC = () => {
             role: 'GV',
             email: '',
             ambit: '-',
-            status: false,
+            status: true,
             id: 9999,
         };
     };
@@ -76,6 +76,7 @@ const UserDateFormLogic: React.FC = () => {
                     email: UserData.email,
                     ambit: UserData.ambit,
                     id: UserData.id,
+                    status: UserData.status,
                 }),
             });
 
@@ -92,6 +93,7 @@ const UserDateFormLogic: React.FC = () => {
                     role: initialData.role,
                     email: UserData.email,
                     ambit: UserData.ambit,
+                    status: UserData.status,
                 })
             );
 

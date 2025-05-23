@@ -14,4 +14,8 @@ export interface UserID extends Omit<User, 'password'> {
     id: number;
 }
 
+export interface UserRegionId extends Omit<UserID, 'ambit'> {
+    RegionId: number;
+    RegionName: string;
+}
 // export type TableUsersHazi = Omit<User, 'password'>;

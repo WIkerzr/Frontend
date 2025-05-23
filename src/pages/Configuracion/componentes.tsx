@@ -166,6 +166,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                             email: UserData.email,
                             ambit: UserData.ambit,
                             id: UserData.id,
+                            status: UserData.status,
                         }),
                     });
                     if (response.ok) {
@@ -538,7 +539,6 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
     useEffect(() => {
         setInitialRecords(() => {
             return users.filter((item) => {
-                // console.log(t.(`${'item.role'}));
                 return item.status || item.name || item.lastName || item.secondSurname || item.email || item.role || item.ambit;
             });
         });
@@ -568,7 +568,7 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
                             { accessor: 'secondSurname', title: t('secondSurname'), sortable: true },
                             { accessor: 'email', sortable: true },
                             { accessor: 'role', title: t('role'), sortable: true },
-                            { accessor: 'ambit', title: t('ambit'), sortable: true },
+                            { accessor: 'RegionName', title: t('ambit'), sortable: true },
                             {
                                 accessor: 'vacio2',
                                 title: '',
