@@ -12,6 +12,7 @@ export interface User {
 }
 export interface UserID extends Omit<User, 'password'> {
     id: number;
+    RegionName?: string;
 }
 
 export interface UserRegionId extends Omit<UserID, 'ambit'> {

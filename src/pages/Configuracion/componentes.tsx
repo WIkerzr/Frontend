@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '../../store';
 import { setPageTitle } from '../../store/themeConfigSlice';
 import { sortBy } from 'lodash';
-import { UserID } from '../../types/users';
+import { UserID, UserRegionId } from '../../types/users';
 import Tippy from '@tippyjs/react';
 import { forwardRef, useEffect, useState } from 'react';
 import { Indicador } from '../../types/Indicadores';
@@ -528,7 +528,7 @@ export const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToS
 
     return (
         <>
-            <button type="button" className="btn btn-primary w-1/2" onClick={handleOpen}>
+            <button type="button" className="btn btn-primary w-1/4" onClick={handleOpen}>
                 {t('agregarUsuario')}
             </button>
 
@@ -583,9 +583,18 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
 
     useEffect(() => {
         setInitialRecords(() => {
-            return users.filter((item) => {
-                return item.status || item.name || item.lastName || item.secondSurname || item.email || item.role || item.ambit;
-            });
+            if (!search.trim()) return sortBy(users, 'id');
+            const s = search.toLowerCase();
+            return users.filter(
+                (item) =>
+                    (item.status && String(item.status).toLowerCase().includes(s)) ||
+                    (item.name && item.name.toLowerCase().includes(s)) ||
+                    (item.lastName && item.lastName.toLowerCase().includes(s)) ||
+                    (item.secondSurname && item.secondSurname.toLowerCase().includes(s)) ||
+                    (item.email && item.email.toLowerCase().includes(s)) ||
+                    (item.role && item.role.toLowerCase().includes(s)) ||
+                    (item.RegionName && item.RegionName.toLowerCase().includes(s))
+            );
         });
     }, [search, users]);
 
@@ -596,6 +605,10 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
     }, [sortStatus]);
     return (
         <div>
+            <div className="flex items-center space-x-4 mb-5">
+                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar usuario...')} value={search} onChange={(e) => setSearch(e.target.value)} />
+                <NewUser recargeToSave={onSuccess} />
+            </div>
             <div className="panel mt-6">
                 <div className="datatables">
                     <DataTable

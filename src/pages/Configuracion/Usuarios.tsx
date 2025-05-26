@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NewUser, UsersTable } from './componentes';
-import { User, UserID, UserRegionId } from '../../types/users';
+import { UserID, UserRegionId } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -73,9 +73,6 @@ const Index = () => {
     return (
         <div className="flex w-full gap-5">
             <div className="panel h-full w-full">
-                <div className="flex justify-center mb-5">
-                    <NewUser recargeToSave={handleRefresh} />
-                </div>
                 <UsersTable users={users} onSuccess={handleRefresh} />
             </div>
         </div>
