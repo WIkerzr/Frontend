@@ -658,3 +658,10 @@
 pre.hljs {
     @apply p-6 rounded-md overflow-x-auto !bg-[#191e3a];
 }
+
+.card-div {
+    @apply bg-white rounded-xl border border-[#ECECEC] p-6 flex flex-row justify-between items-center shadow-sm;
+}
+.card-li {
+    @apply bg-white rounded-xl border border-[#ECECEC] p-2 flex flex-row justify-between items-center shadow-sm;
+}

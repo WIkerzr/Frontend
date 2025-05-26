@@ -59,7 +59,7 @@ export const ListadoAcciones = ({ nombre, listadoMap, ACCIONES_MAX }: ListadoAcc
                 </div>
             )}
             {accionesMostradas.map((accion) => (
-                <div key={accion.id} className="bg-white rounded-xl border border-[#ECECEC] p-6 flex flex-row justify-between items-start shadow-sm ">
+                <div key={accion.id} className="card-div">
                     <div className="flex-1 text-base text-[#222] mb-0 pr-2">{accion.texto}</div>
                     <div className="flex flex-col justify-start items-end gap-2 border-l border-[#ECECEC] pl-4">
                         <button onClick={() => handleEdit(accion.id)} aria-label={`Editar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">

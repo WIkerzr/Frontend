@@ -18,7 +18,8 @@ export const listAcciones = [
 
 const Index: React.FC = () => {
     return (
-        <div className="p-4 bg-[#FAFAFB] min-h-screen">
+        <div className="p-4 bg-[#FAFAFB]">
+            <label>{'Maximo 5 Acciones por eje prioritario (15)'}</label>
             <ListadoAcciones nombre="Acciones" listadoMap={listAcciones} ACCIONES_MAX={15} />
         </div>
     );
