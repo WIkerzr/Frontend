@@ -12,6 +12,7 @@ if (process.env.NODE_ENV === 'development') {
 const protectedPaths = [
     '/',
     '/adr/CuadroMando',
+    '/adr/Ejes',
     '/adr/acciones',
     '/adr/accionesAccesorias',
     '/adr/memoriasAnuales',

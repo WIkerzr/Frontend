@@ -7,6 +7,7 @@ import { routes } from './routes';
 const protectedPaths = [
     '/',
     '/adr/CuadroMando',
+    '/adr/Ejes',
     '/adr/acciones',
     '/adr/accionesAccesorias',
     '/adr/memoriasAnuales',

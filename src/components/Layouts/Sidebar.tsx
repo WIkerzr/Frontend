@@ -139,6 +139,16 @@ const Sidebar = () => {
                                         )}
                                         {role !== 'GV' && (
                                             <li className="nav-item">
+                                                <NavLink to="/adr/ejes" className="group">
+                                                    <div className="flex items-center">
+                                                        <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
+                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Ejes')}</span>
+                                                    </div>
+                                                </NavLink>
+                                            </li>
+                                        )}
+                                        {role !== 'GV' && (
+                                            <li className="nav-item">
                                                 <NavLink to="/adr/acciones" className="group">
                                                     <div className="flex items-center">
                                                         <IconMenuAcciones className="group-hover:!text-primary shrink-0" />

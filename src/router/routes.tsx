@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
 const CuadroMando = lazy(() => import('../pages/ADR/CuadroMando'));
+const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
@@ -22,6 +23,11 @@ const routes = [
         path: '/adr/CuadroMando',
         element: <CuadroMando />,
         layout: 'CuadroMando',
+    },
+    {
+        path: '/adr/Ejes',
+        element: <Ejes />,
+        layout: 'Ejes',
     },
     {
         path: '/adr/acciones',
