@@ -13,6 +13,8 @@
     "indicadores": "Indicadores",
     "usuarios": "Usuarios",
 
+    "NombreAccion": "Nombre de la accion",
+    "LineaActuaccion": "Línea de Actuación",
     "Descripcion": "Descripción",
     "Ano": "Año",
     "Tipo": "Tipo",
@@ -23,6 +25,8 @@
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
     "newIndicador": "Nuevo Indicador",
+    "newAccion": "Nueva Acción",
+    "editAccion": "Editar Acción",
     "miPerfil": "Mi perfil",
     "introduceEmail": "Introduce tu email",
     "recordarContraseña": "Recordar contraseña",

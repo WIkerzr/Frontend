@@ -1,27 +1,28 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
+import { NewModal } from '../../components/Utils/utils';
 
-type Accion = { id: number; texto: string };
-interface ListadoAccionesProps {
+type AccionAccesoria = { id: number; texto: string };
+interface ListadoAccionesAccesoriasProps {
     nombre: string;
-    listadoMap: Accion[];
+    listadoMap: AccionAccesoria[];
     ACCIONES_MAX: number;
 }
-export const ListadoAcciones = ({ nombre, listadoMap, ACCIONES_MAX }: ListadoAccionesProps) => {
+export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccionesAccesoriasProps) => {
     const idCounter = useRef(1000);
-    const [acciones, setAcciones] = useState<Accion[]>(listadoMap);
+    const [acciones, setAcciones] = useState<AccionAccesoria[]>(listadoMap);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [inputError, setInputError] = useState(false);
     const { t } = useTranslation();
 
     const handleNuevaAccion = () => {
-        if (!nuevaAccion.trim() || acciones.length >= ACCIONES_MAX) {
+        if (!nuevaAccion.trim() || acciones.length >= 5) {
             setInputError(!nuevaAccion.trim());
             return;
         }
-        setAcciones((prev) => [{ id: idCounter.current++, texto: nuevaAccion.trim() }, ...prev.slice(0, ACCIONES_MAX - 1)]);
+        setAcciones((prev) => [{ id: idCounter.current++, texto: nuevaAccion.trim() }, ...prev.slice(0, 5 - 1)]);
         setNuevaAccion('');
         setInputError(false);
     };
@@ -29,8 +30,8 @@ export const ListadoAcciones = ({ nombre, listadoMap, ACCIONES_MAX }: ListadoAcc
     const handleEdit = (id: number) => alert('Editar acción ' + id);
     const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
 
-    const mostrarInput = acciones.length < ACCIONES_MAX;
-    const accionesMostradas = mostrarInput ? acciones.slice(0, ACCIONES_MAX - 1) : acciones.slice(0, ACCIONES_MAX);
+    const mostrarInput = acciones.length < 5;
+    const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
     return (
         <div className="grid grid-cols-3 gap-x-6 gap-y-6">
             {mostrarInput && (
@@ -52,7 +53,7 @@ export const ListadoAcciones = ({ nombre, listadoMap, ACCIONES_MAX }: ListadoAcc
                     <button
                         className="bg-[#4463F7] text-white px-4 py-2 rounded hover:bg-[#254edb] self-end text-sm transition disabled:bg-gray-300"
                         onClick={handleNuevaAccion}
-                        disabled={acciones.length >= ACCIONES_MAX}
+                        disabled={acciones.length >= 5}
                     >
                         + {nombre}
                     </button>
@@ -71,6 +72,198 @@ export const ListadoAcciones = ({ nombre, listadoMap, ACCIONES_MAX }: ListadoAcc
                     </div>
                 </div>
             ))}
+        </div>
+    );
+};
+
+interface Accion {
+    eje: string;
+    id: number;
+    texto: string;
+    lineaActuaccion: string;
+}
+
+interface ModalAccionProps {
+    listadosAcciones?: Accion[];
+    accionAMostrar?: Accion;
+}
+
+export const ModalAccion = ({ listadosAcciones, accionAMostrar }: ModalAccionProps) => {
+    const { t } = useTranslation();
+    let ejes = Array.from(new Set(listadosAcciones!.map((a) => a.eje)));
+
+    const accionesPorEje: Record<string, Accion[]> = {};
+    ejes.forEach((eje) => {
+        accionesPorEje[eje] = listadosAcciones!.filter((a) => a.eje === eje);
+    });
+
+    const [selectedEje, setSelectedEje] = useState(() => {
+        const firstAvailable = ejes.find((eje) => accionesPorEje[eje].length < 5);
+        return firstAvailable || ejes[0];
+    });
+    let title = t('newAccion');
+    const [nuevaAccion, setNuevaAccion] = useState('');
+    const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
+    const [inputError, setInputError] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+
+    const getEjeLimitado = (eje: string) => accionesPorEje[eje]?.length >= 5;
+
+    const handleNuevaAccion = () => {
+        if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim() || getEjeLimitado(selectedEje)) {
+            setInputError(true);
+            return;
+        }
+
+        if (accionAMostrar) {
+            //LLamada al servidor con la edicion de la accion
+            console.log('Editar accion');
+            console.log('Accion');
+            console.log(nuevaAccion);
+            console.log('LineaActuaccion');
+            console.log(nuevaLineaActuaccion);
+            console.log('Eje');
+            console.log(selectedEje);
+
+            console.log('Pasa a');
+
+            console.log('Accion');
+            console.log(accionAMostrar.texto);
+            console.log('LineaActuaccion');
+            console.log(accionAMostrar.lineaActuaccion);
+            console.log('Eje');
+            console.log(accionAMostrar.eje);
+        } else {
+            //LLamada al servidor con la nueva accion
+        }
+
+        setNuevaAccion('');
+        setNuevaLineaActuaccion('');
+        setInputError(false);
+        setShowModal(false);
+    };
+
+    useEffect(() => {
+        if (accionAMostrar) {
+            setSelectedEje(accionAMostrar.eje);
+            setNuevaAccion(accionAMostrar.texto);
+            setNuevaLineaActuaccion(accionAMostrar.lineaActuaccion);
+            ejes = [accionAMostrar.eje];
+            title = t('editAccion');
+        }
+    }, [showModal]);
+    return (
+        <>
+            {accionAMostrar ? (
+                <button onClick={() => setShowModal(true)} aria-label={`Editar acción`} className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition">
+                    <IconPencil />
+                </button>
+            ) : (
+                <div className="flex justify-center">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
+                        Añadir Acción
+                    </button>
+                </div>
+            )}
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={title}>
+                <div className="space-y-5">
+                    <div>
+                        <label className="block font-medium mb-1">{t('Ejes')}</label>
+                        {accionAMostrar ? (
+                            <>
+                                <span>{accionAMostrar.eje}</span>
+                            </>
+                        ) : (
+                            <>
+                                <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={selectedEje} onChange={(e) => setSelectedEje(e.target.value)}>
+                                    {ejes.map((eje) => (
+                                        <option key={eje} value={eje} disabled={getEjeLimitado(eje)}>
+                                            {eje} {getEjeLimitado(eje) ? '(Límite alcanzado)' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                {getEjeLimitado(selectedEje) && <div className="text-xs text-red-500 mt-1">{t('Límite de acciones alcanzado para este eje')}</div>}
+                            </>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block font-medium mb-1">{t('NombreAccion')}</label>
+                        <input
+                            type="text"
+                            className={`w-full p-2 border rounded ${inputError && !nuevaAccion.trim() ? 'border-red-400' : ''}`}
+                            value={nuevaAccion}
+                            onChange={(e) => {
+                                setNuevaAccion(e.target.value);
+                                setInputError(false);
+                            }}
+                            placeholder={t('Introduce nombre acción')}
+                            disabled={getEjeLimitado(selectedEje)}
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
+                        <input
+                            type="text"
+                            className={`w-full p-2 border rounded ${inputError && !nuevaLineaActuaccion.trim() ? 'border-red-400' : ''}`}
+                            value={nuevaLineaActuaccion}
+                            onChange={(e) => {
+                                setNuevaLineaActuaccion(e.target.value);
+                                setInputError(false);
+                            }}
+                            placeholder={t('Introduce línea de actuación')}
+                            disabled={getEjeLimitado(selectedEje)}
+                            autoComplete="off"
+                        />
+                    </div>
+                    {inputError && <div className="text-xs text-red-500 text-center">{t('Por favor rellena ambos campos antes de guardar.')}</div>}
+                    <button
+                        onClick={handleNuevaAccion}
+                        className={`bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition ${getEjeLimitado(selectedEje) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {t('guardar')}
+                    </button>
+                </div>
+            </NewModal>
+        </>
+    );
+};
+
+interface ListadoAccionesProps {
+    nombre: string;
+    listadoMap: Accion[];
+}
+export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) => {
+    const [acciones, setAcciones] = useState<Accion[]>(listadoMap);
+    const { t } = useTranslation();
+
+    const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
+
+    const mostrarInput = acciones.length < 5;
+    const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
+
+    return (
+        <div className="rounded-lg space-y-5 text-center p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
+            <span className="text-lg font-semibold text-gray-700 tracking-wide block mb-2">{nombre}</span>
+
+            <div className="space-y-4">
+                {accionesMostradas.map((accion) => (
+                    <div key={accion.id} className="bg-white border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
+                        <span className="text-lg">{accion.texto}</span>
+                        <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
+                        <span className="text-base">{accion.lineaActuaccion}</span>
+                        <div className="flex gap-2 justify-end mt-2">
+                            <ModalAccion listadosAcciones={[]} accionAMostrar={accion} />
+                            <button
+                                onClick={() => handleDelete(accion.id)}
+                                aria-label={`Eliminar acción ${accion.id}`}
+                                className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
+                            >
+                                <IconTrash />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

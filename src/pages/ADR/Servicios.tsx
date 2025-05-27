@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListadoAcciones } from './Componentes';
+import { ListadoAccionesAccesorias } from './Componentes';
 
 export const listAcciones = [
     { id: 1, texto: 'Capacitación en buenas prácticas agrícolas' },
@@ -16,7 +16,7 @@ export const listAcciones = [
 const Index: React.FC = () => {
     return (
         <div className="p-4 bg-[#FAFAFB] min-h-screen">
-            <ListadoAcciones nombre="Servicios" listadoMap={listAcciones} ACCIONES_MAX={15} />
+            <ListadoAccionesAccesorias nombre="Servicios" listadoMap={listAcciones} ACCIONES_MAX={15} />
         </div>
     );
 };
