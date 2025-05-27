@@ -14,6 +14,7 @@ const protectedPaths = [
     '/adr/CuadroMando',
     '/adr/Ejes',
     '/adr/acciones',
+    '/adr/acciones/editando',
     '/adr/accionesAccesorias',
     '/adr/memoriasAnuales',
     '/adr/planesGestion',

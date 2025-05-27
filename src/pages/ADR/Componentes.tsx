@@ -3,6 +3,8 @@ import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../components/Utils/utils';
+import { NavLink } from 'react-router-dom';
+import AnimateHeight from 'react-animate-height';
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -84,11 +86,10 @@ interface Accion {
 }
 
 interface ModalAccionProps {
-    listadosAcciones?: Accion[];
-    accionAMostrar?: Accion;
+    listadosAcciones: Accion[];
 }
 
-export const ModalAccion = ({ listadosAcciones, accionAMostrar }: ModalAccionProps) => {
+export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
     const { t } = useTranslation();
     let ejes = Array.from(new Set(listadosAcciones!.map((a) => a.eje)));
 
@@ -115,27 +116,7 @@ export const ModalAccion = ({ listadosAcciones, accionAMostrar }: ModalAccionPro
             return;
         }
 
-        if (accionAMostrar) {
-            //LLamada al servidor con la edicion de la accion
-            console.log('Editar accion');
-            console.log('Accion');
-            console.log(nuevaAccion);
-            console.log('LineaActuaccion');
-            console.log(nuevaLineaActuaccion);
-            console.log('Eje');
-            console.log(selectedEje);
-
-            console.log('Pasa a');
-
-            console.log('Accion');
-            console.log(accionAMostrar.texto);
-            console.log('LineaActuaccion');
-            console.log(accionAMostrar.lineaActuaccion);
-            console.log('Eje');
-            console.log(accionAMostrar.eje);
-        } else {
-            //LLamada al servidor con la nueva accion
-        }
+        //LLamada al servidor con la nueva accion
 
         setNuevaAccion('');
         setNuevaLineaActuaccion('');
@@ -143,48 +124,25 @@ export const ModalAccion = ({ listadosAcciones, accionAMostrar }: ModalAccionPro
         setShowModal(false);
     };
 
-    useEffect(() => {
-        if (accionAMostrar) {
-            setSelectedEje(accionAMostrar.eje);
-            setNuevaAccion(accionAMostrar.texto);
-            setNuevaLineaActuaccion(accionAMostrar.lineaActuaccion);
-            ejes = [accionAMostrar.eje];
-            title = t('editAccion');
-        }
-    }, [showModal]);
     return (
         <>
-            {accionAMostrar ? (
-                <button onClick={() => setShowModal(true)} aria-label={`Editar acción`} className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition">
-                    <IconPencil />
+            <div className="flex justify-center">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
+                    Añadir Acción
                 </button>
-            ) : (
-                <div className="flex justify-center">
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
-                        Añadir Acción
-                    </button>
-                </div>
-            )}
+            </div>
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={title}>
                 <div className="space-y-5">
                     <div>
                         <label className="block font-medium mb-1">{t('Ejes')}</label>
-                        {accionAMostrar ? (
-                            <>
-                                <span>{accionAMostrar.eje}</span>
-                            </>
-                        ) : (
-                            <>
-                                <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={selectedEje} onChange={(e) => setSelectedEje(e.target.value)}>
-                                    {ejes.map((eje) => (
-                                        <option key={eje} value={eje} disabled={getEjeLimitado(eje)}>
-                                            {eje} {getEjeLimitado(eje) ? '(Límite alcanzado)' : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                                {getEjeLimitado(selectedEje) && <div className="text-xs text-red-500 mt-1">{t('Límite de acciones alcanzado para este eje')}</div>}
-                            </>
-                        )}
+                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={selectedEje} onChange={(e) => setSelectedEje(e.target.value)}>
+                            {ejes.map((eje) => (
+                                <option key={eje} value={eje} disabled={getEjeLimitado(eje)}>
+                                    {eje} {getEjeLimitado(eje) ? '(Límite alcanzado)' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        {getEjeLimitado(selectedEje) && <div className="text-xs text-red-500 mt-1">{t('Límite de acciones alcanzado para este eje')}</div>}
                     </div>
                     <div>
                         <label className="block font-medium mb-1">{t('NombreAccion')}</label>
@@ -252,7 +210,11 @@ export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) =>
                         <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
                         <span className="text-base">{accion.lineaActuaccion}</span>
                         <div className="flex gap-2 justify-end mt-2">
-                            <ModalAccion listadosAcciones={[]} accionAMostrar={accion} />
+                            <NavLink to="/adr/acciones/editando" className="group">
+                                <button aria-label={`Editar acción`} className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition">
+                                    <IconPencil />
+                                </button>
+                            </NavLink>
                             <button
                                 onClick={() => handleDelete(accion.id)}
                                 aria-label={`Eliminar acción ${accion.id}`}
@@ -267,3 +229,23 @@ export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) =>
         </div>
     );
 };
+
+export const Acordeon: React.FC<{ texto: string; num: number; active: string; togglePara: (n: string) => void }> = ({ texto, num, active, togglePara }) => (
+    <div className="space-y-2 font-semibold w-1/3 p-1">
+        <div className="border border-[#d3d3d3] rounded dark:border-[#1b2e4b]">
+            <button
+                type="button"
+                className="w-full p-1 flex items-center text-white-dark dark:bg-[#1b2e4b] min-h-[2.5rem] text-left"
+                onClick={() => togglePara(`${num}`)}
+                style={{ lineHeight: '1.5' }}
+            >
+                <span className="truncate overflow-hidden whitespace-nowrap block w-full">{texto}</span>
+            </button>
+            <AnimateHeight duration={300} height={active === `${num}` ? 'auto' : 0}>
+                <div className="space-y-2 p-4 text-white-dark text-[13px] border-t border-[#d3d3d3] dark:border-[#1b2e4b]">
+                    <p>{texto}</p>
+                </div>
+            </AnimateHeight>
+        </div>
+    </div>
+);

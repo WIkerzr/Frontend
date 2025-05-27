@@ -3,6 +3,7 @@ import { OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
 const CuadroMando = lazy(() => import('../pages/ADR/CuadroMando'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones'));
+const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
 const PlanesGestion = lazy(() => import('../pages/ADR/PlanesGestion'));
@@ -33,6 +34,11 @@ const routes = [
         path: '/adr/acciones',
         element: <Acciones />,
         layout: 'Acciones',
+    },
+    {
+        path: '/adr/acciones/editando',
+        element: <EditarAccion />,
+        layout: 'EditarAccion',
     },
     {
         path: '/adr/accionesAccesorias',

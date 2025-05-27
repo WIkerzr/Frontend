@@ -1,9 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
-import { useTranslation } from 'react-i18next';
-import { NewModal } from '../../components/Utils/utils';
 
-const datosAcciones = [
+export const datosAcciones = [
     {
         id: 1,
         texto: '1.- Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
