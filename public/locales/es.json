@@ -12,6 +12,8 @@
     "configuracion": "Configuración",
     "indicadores": "Indicadores",
     "usuarios": "Usuarios",
+    "seleccionar3Ejes": "Se deben seleccionar exactamente tres ejes",
+    "seleccionarCheckbox3Ejes": "Una vez guardado, no se podrán modificar los checkboxes.",
 
     "NombreAccion": "Nombre de la accion",
     "LineaActuaccion": "Línea de Actuación",
@@ -24,7 +26,7 @@
     "AccionesAccesorias": "Acciones accesorias",
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
-    "newIndicador": "Nuevo Indicador",
+    "newIndicador": "Nuevo Indicador {{tipo}}",
     "newAccion": "Nueva Acción",
     "editAccion": "Editar Acción",
     "miPerfil": "Mi perfil",
@@ -42,6 +44,8 @@
     "agregarUsuario": "Agregar nuevo usuario",
 
     "nuevoIndicador": "Nuevo indicador de ",
+    "agregarIndicadorResultadoRelacionado": "Agregar Indicador Resultado relacionado",
+    "sinIndicadorResultadoRelacionado": "Sin Indicador Resultado relacionado",
     "Indicadores": "Indicadores",
     "Realizacion": "Realización",
     "Resultado": "Resultado",

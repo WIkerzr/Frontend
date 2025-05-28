@@ -81,19 +81,21 @@ const Tabla: React.FC<IndicadorProps> = ({ datosIndicador, tipoIndicador }) => {
 
     return (
         <div className="panel h-full w-1/2">
-            <div className="flex justify-center mb-5">
-                <button onClick={() => setModalNuevo(true)} className="btn btn-primary">
-                    Abrir modal nuevo indicador
-                </button>
-                <ModalNuevoIndicador
-                    isOpen={modalNuevo}
-                    onClose={() => setModalNuevo(false)}
-                    accion="Nuevo"
-                    datosIndicador={datosIndicadorTabla[datosIndicadorTabla.length - 1]}
-                    tipoIndicador="realizacion"
-                    onGuardar={handleNuevoIndicador}
-                />
-            </div>
+            {tipoIndicador === 'realizacion' && (
+                <div className="flex justify-center mb-5">
+                    <button onClick={() => setModalNuevo(true)} className="btn btn-primary">
+                        Abrir modal nuevo indicador
+                    </button>
+                    <ModalNuevoIndicador
+                        isOpen={modalNuevo}
+                        onClose={() => setModalNuevo(false)}
+                        accion="Nuevo"
+                        datosIndicador={datosIndicadorTabla[datosIndicadorTabla.length - 1]}
+                        tipoIndicador="realizacion"
+                        onGuardar={handleNuevoIndicador}
+                    />
+                </div>
+            )}
             {errorMessage && <span className="text-red-500 text-sm mt-2">{errorMessage}</span>}
             {successMessage && (
                 <div className={`mt-4 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>

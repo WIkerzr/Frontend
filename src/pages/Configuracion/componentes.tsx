@@ -292,79 +292,204 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             setMensaje(t('errorGuardar') + data.message);
         }
     };
-
+    const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(false);
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg relative" onClick={(e) => e.stopPropagation()}>
-                <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
-                    ×
-                </button>
-
-                <h2 className="text-xl font-bold mb-4">{t('newIndicador')}</h2>
-
-                <div className="space-y-4">
-                    <div>
-                        <div className="flex gap-4">
-                            <div className="w-1/2">
-                                <label className="block font-medium">{t('Nombre Indicador')}</label>
-                                <div className="flex">
-                                    <span className="p-2 bg-gray-100 border border-r-0 rounded-l text-gray-700 whitespace-nowrap">
-                                        {accion == 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
-                                    </span>
-                                    <input
-                                        type="text"
-                                        className="w-full p-2 border rounded-r"
-                                        value={accion == 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable}
-                                        onChange={(e) => setDescripcionEditable(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="w-1/2">
-                                <label className="block font-medium">{t('Unidad de medida')}</label>
-                                <select className="w-full p-2 border rounded">
-                                    <option>NUMERO</option>
-                                    <option>OTro</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block font-medium">{t('Ejes relacionados')}</label>
-                        <div className="flex">
-                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block font-medium">{t('Definicion')}</label>
-                        <div className="flex">
-                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block font-medium">{t('Variables de desagregacion')}</label>
-                        <div className="flex">
-                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block font-medium">{t('Metologia de calculo')}</label>
-                        <div className="flex">
-                            <input type="text" className="w-full p-2 border rounded-r" value={descripcionEditable} onChange={(e) => setDescripcionEditable(e.target.value)} />
-                        </div>
-                    </div>
-
-                    <button onClick={handleGuardar} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
-                        {t('guardar')}
+            <div
+                className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex
+          ${mostrarResultadoRelacionado ? 'w-full max-w-4xl' : 'w-full max-w-md'}
+        `}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Panel principal */}
+                <div className={`flex-1 transition-all duration-300 ${mostrarResultadoRelacionado ? 'pr-8' : ''}`}>
+                    <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
+                        ×
                     </button>
 
-                    {mensaje && <p className="text-sm text-center mt-2">{mensaje}</p>}
+                    <h2 className="text-xl font-bold mb-4">{t('newIndicador', { tipo: t('Realizacion') })}</h2>
+
+                    <div className="space-y-4">
+                        <RellenoIndicador
+                            numNextIndi={accion === 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
+                            valorCampo1={accion === 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable}
+                        />
+
+                        {mostrarResultadoRelacionado ? (
+                            <button onClick={() => setMostrarResultadoRelacionado(false)} className="btn btn-danger mx-auto block">
+                                {t('sinIndicadorResultadoRelacionado')}
+                            </button>
+                        ) : (
+                            <button onClick={() => setMostrarResultadoRelacionado(true)} className="btn btn-primary mx-auto block">
+                                {t('agregarIndicadorResultadoRelacionado')}
+                            </button>
+                        )}
+                        <button onClick={handleGuardar} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                            {t('guardar')}
+                        </button>
+
+                        {mensaje && <p className="text-sm text-center mt-2">{mensaje}</p>}
+                    </div>
                 </div>
+
+                {/* Panel derecho */}
+                {mostrarResultadoRelacionado && (
+                    <>
+                        <div className="w-px bg-gray-300 mx-4 self-stretch" />
+                        <div className="flex-1 min-w-[300px]">
+                            <h2 className="text-xl font-bold mb-4">
+                                {t('Indicadores')} {t('Resultado')}
+                            </h2>
+                            <div>
+                                <SelectorOCreador />
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
 };
+//numNextIndi= {accion === 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
+//valorCampo1=accion === 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable
+type RellenoIndicadorProps = {
+    numNextIndi: string;
+    valorCampo1: string;
+};
+const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ numNextIndi, valorCampo1 }) => {
+    const { t } = useTranslation();
+
+    return (
+        <>
+            <div>
+                <div className="flex gap-4">
+                    <div className="w-1/2">
+                        <label className="block font-medium">{t('Nombre Indicador')}</label>
+                        <div className="flex">
+                            <span className="p-2 bg-gray-100 border border-r-0 rounded-l text-gray-700 whitespace-nowrap">{numNextIndi}</span>
+                            <input
+                                type="text"
+                                className="w-full p-2 border rounded-r"
+                                value={valorCampo1}
+                                //onChange={(e) => setDescripcionEditable(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="w-1/2">
+                        <label className="block font-medium">{t('Unidad de medida')}</label>
+                        <select className="w-full p-2 border rounded">
+                            <option>NUMERO</option>
+                            <option>OTro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label className="block font-medium">{t('Ejes relacionados')}</label>
+                <div className="flex">
+                    <input
+                        type="text"
+                        className="w-full p-2 border rounded-r"
+                        //value={descripcionEditable}
+                        //onChange={(e) => setDescripcionEditable(e.target.value)}
+                    />
+                </div>
+            </div>
+            <div>
+                <label className="block font-medium">{t('Definicion')}</label>
+                <div className="flex">
+                    <input
+                        type="text"
+                        className="w-full p-2 border rounded-r"
+                        // value={descripcionEditable}
+                        // onChange={(e) => setDescripcionEditable(e.target.value)}
+                    />
+                </div>
+            </div>
+            <div>
+                <label className="block font-medium">{t('Variables de desagregacion')}</label>
+                <div className="flex">
+                    <input
+                        type="text"
+                        className="w-full p-2 border rounded-r"
+                        // value={descripcionEditable}
+                        // onChange={(e) => setDescripcionEditable(e.target.value)}
+                    />
+                </div>
+            </div>
+            <div>
+                <label className="block font-medium">{t('Metologia de calculo')}</label>
+                <div className="flex">
+                    <input
+                        type="text"
+                        className="w-full p-2 border rounded-r"
+                        // value={descripcionEditable}
+                        // onChange={(e) => setDescripcionEditable(e.target.value)}
+                    />
+                </div>
+            </div>
+        </>
+    );
+};
+
+const opcionesIniciales = ['Opción A', 'Opción B', 'Opción C'];
+
+function SelectorOCreador() {
+    const [opciones, setOpciones] = useState(opcionesIniciales);
+    const [seleccion, setSeleccion] = useState('');
+    const [modoCrear, setModoCrear] = useState(false);
+    const [nuevaOpcion, setNuevaOpcion] = useState('');
+
+    const agregarNuevaOpcion = () => {
+        if (nuevaOpcion.trim()) {
+            setOpciones([...opciones, nuevaOpcion]);
+            setSeleccion(nuevaOpcion);
+            setNuevaOpcion('');
+            setModoCrear(false);
+        }
+    };
+
+    return (
+        <div className="max-w-md mx-auto p-4 rounded space-y-4">
+            {!modoCrear ? (
+                <>
+                    <label className="block font-bold mb-2">Selecciona una opción:</label>
+                    <div className="flex gap-2">
+                        <select className="flex-1 border p-2 rounded" value={seleccion} onChange={(e) => setSeleccion(e.target.value)}>
+                            <option value="" disabled>
+                                Elige una opción
+                            </option>
+                            {opciones.map((op) => (
+                                <option key={op} value={op}>
+                                    {op}
+                                </option>
+                            ))}
+                        </select>
+                        <button className="bg-blue-500 text-white px-3 py-2 rounded" onClick={() => setModoCrear(true)} type="button">
+                            Crear nueva
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <div className="flex gap-2">
+                    <div className="space-y-4">
+                        <RellenoIndicador numNextIndi={'1'} valorCampo1={''} />
+                        <button className="bg-gray-400 text-white px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
+                            Cancelar
+                        </button>
+                        <button className="btn-primary px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
+                            Crear indicador relacionado
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {seleccion && <div className="mt-2 text-green-700 font-semibold">Seleccionado: {seleccion}</div>}
+        </div>
+    );
+}
 
 interface EditUserProps {
     user: UserID;
