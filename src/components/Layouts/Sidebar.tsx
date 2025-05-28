@@ -65,6 +65,7 @@ const Sidebar = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
+    const region = regiones.find((r) => r.RegionId === regionSeleccionada);
     return (
         <div className={semidark ? 'dark' : ''}>
             <nav
@@ -114,7 +115,8 @@ const Sidebar = () => {
                             )}
                             <h2 className="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
                                 <IconMinus className="w-4 h-5 flex-none hidden" />
-                                <span>{regionSeleccionada ? regiones.find((r) => r.RegionId === regionSeleccionada)?.[i18n!.language === 'eu' ? 'NameEu' : 'NameEs'] ?? t('adr') : t('adr')}</span>
+                                {/* <span>{regionSeleccionada ? regiones.find((r) => r.RegionId === regionSeleccionada)?.[i18n!.language === 'eu' ? 'NameEu' : 'NameEs'] ?? t('adr') : t('adr')}</span> */}
+                                <span>{region?.NameEs}</span>
                             </h2>
                             <div
                                 style={{

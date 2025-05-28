@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Region } from './gets/getRegiones';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { useEffect } from 'react';
 
 interface InputProps {
     nombreInput: string;
@@ -37,12 +38,23 @@ export const LanguageSelector = () => {
         </select>
     );
 };
-
-export const RegionSelect: React.FC = () => {
+export const RegionSelect: React.FC<{ regionActiva: Region | undefined }> = ({ regionActiva }) => {
     const { i18n, t } = useTranslation();
     const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
+    useEffect(() => {
+        const savedRegion = sessionStorage.getItem('regionSeleccionada');
+        if (savedRegion !== null && !isNaN(Number(savedRegion))) {
+            setRegionSeleccionada(Number(savedRegion));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (regionSeleccionada !== null) {
+            sessionStorage.setItem('regionSeleccionada', regionSeleccionada.toString());
+        }
+    }, [regionSeleccionada]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -65,12 +77,12 @@ export const RegionSelect: React.FC = () => {
         <select
             className="form-select text-white-dark min-w-max"
             style={{ minWidth: 'calc(100% + 10px)' }}
-            value={regionSeleccionada === null ? 'notSelect' : regionSeleccionada}
+            value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}
             onChange={handleChange}
         >
             <option value="notSelect">{t('sinSeleccionar')}</option>
             {regiones.map((region) => (
-                <option key={region.RegionId} value={region.RegionId}>
+                <option key={region.RegionId} value={region.RegionId.toString()}>
                     {getRegionName(region)}
                 </option>
             ))}
