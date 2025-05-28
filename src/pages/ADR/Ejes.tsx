@@ -1,4 +1,6 @@
 import { Checkbox } from '@mantine/core';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 const ejesBBDD = [
     { id: 1, nombre: 'Abastecimiento de agua y Saneamiento' },
     { id: 2, nombre: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles' },
@@ -42,32 +44,60 @@ const ejesBBDD = [
     { id: 40, nombre: 'Conservación y puesta en valor del patrimonio natural' },
     { id: 41, nombre: 'Protección mantenimiento y restauración del suelo agrario y del hábitat rural' },
 ];
-const ListadosEjes = () => {
-    return (
-        <ul>
-            {ejesBBDD.map((accion) => (
-                <li className="p-1">
-                    <div className="card-li">
-                        <Checkbox className="mr-4" />
-                        <div className="flex w-full items-center">
-                            <span className="w-1/2 pr-3">{accion.nombre}</span>
-                            <select className="form-select w-1/2">
-                                <option value="0">Selecciona una opción</option>
-                                <option value="1">Estratégico</option>
-                                <option value="2">De interes</option>
-                            </select>
-                        </div>
-                    </div>
-                </li>
-            ))}
-        </ul>
-    );
-};
+
 const Index = () => {
+    const { t } = useTranslation();
+
+    const [selected, setSelected] = useState<number[]>([]);
+    const [locked, setLocked] = useState(false);
+
+    const handleCheck = (id: number) => {
+        if (locked) return;
+        if (selected.includes(id)) {
+            setSelected((prev) => prev.filter((i) => i !== id));
+        } else if (selected.length < 3) {
+            setSelected((prev) => [...prev, id]);
+        }
+    };
+
+    const handleSave = () => {
+        if (selected.length === 3) setLocked(true);
+    };
+
     return (
         <div>
-            <span>Se establecerán un máximo de tres ejes</span>
-            <ListadosEjes />
+            <span>{t('seleccionar3Ejes')}</span>
+            <div className="w-full mx-auto mt-8 px-2">
+                <div className="flex justify-between items-center mb-6">
+                    <div></div>
+                    <div className="flex items-center space-x-4">
+                        <span className="text-sm text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
+                        <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked || selected.length !== 3}>
+                            Guardar
+                        </button>
+                    </div>
+                </div>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-2 w-full">
+                    {ejesBBDD
+                        .slice()
+                        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                        .map((accion) => (
+                            <li key={accion.id} className={`flex items-center p-2 rounded transition ${selected.includes(accion.id) ? 'bg-green-100' : ''}`}>
+                                <input
+                                    type="checkbox"
+                                    className="form-checkbox h-5 w-5 text-green-600 accent-green-600"
+                                    checked={selected.includes(accion.id)}
+                                    onChange={() => handleCheck(accion.id)}
+                                    disabled={locked || (!selected.includes(accion.id) && selected.length === 3)}
+                                    id={`checkbox-${accion.id}`}
+                                />
+                                <label htmlFor={`checkbox-${accion.id}`} className={`ml-3 cursor-pointer w-full ${selected.includes(accion.id) ? 'text-green-700 font-semibold' : ''}`}>
+                                    {accion.nombre}
+                                </label>
+                            </li>
+                        ))}
+                </ul>
+            </div>
         </div>
     );
 };

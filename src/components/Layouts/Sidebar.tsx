@@ -25,7 +25,6 @@ const Sidebar = () => {
     const { regiones, regionSeleccionada } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
-    //const [errorSubMenu, setErrorSubMenu] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
@@ -62,7 +61,6 @@ const Sidebar = () => {
         if (window.innerWidth < 1024 && themeConfig.sidebar) {
             dispatch(toggleSidebar());
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
     const region = regiones.find((r) => r.RegionId === regionSeleccionada);
@@ -88,7 +86,6 @@ const Sidebar = () => {
 
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            {/* Configuracion */}
                             {role === 'HAZI' && (
                                 <li className="menu nav-item">
                                     <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
@@ -115,7 +112,6 @@ const Sidebar = () => {
                             )}
                             <h2 className="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
                                 <IconMinus className="w-4 h-5 flex-none hidden" />
-                                {/* <span>{regionSeleccionada ? regiones.find((r) => r.RegionId === regionSeleccionada)?.[i18n!.language === 'eu' ? 'NameEu' : 'NameEs'] ?? t('adr') : t('adr')}</span> */}
                                 <span>{region?.NameEs}</span>
                             </h2>
                             <div
