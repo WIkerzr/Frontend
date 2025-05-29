@@ -15,6 +15,14 @@
     "seleccionar3Ejes": "Se deben seleccionar exactamente tres ejes",
     "seleccionarCheckbox3Ejes": "Una vez guardado, no se podrán modificar los checkboxes.",
 
+    "Accion": "Acción",
+
+    "alertIndicadores":"Se tiene que rellenar como minimo el campo Nombre, y todos los totales para poder guardar",
+
+    "Hombre":"Hbr.",
+    "Mujer":"Muj.",
+    "Total":"Tot.",
+    "nombre": "Nombre",
     "NombreAccion": "Nombre de la accion",
     "LineaActuaccion": "Línea de Actuación",
     "Descripcion": "Descripción",
@@ -22,6 +30,8 @@
     "Tipo": "Tipo",
     "CuadroMando": "Cuadro de mando",
     "Ejes": "Ejes",
+    "Eje": "Eje",
+    "PlanGestion":"Plan de gestion",
     "Acciones": "Acciones",
     "AccionesAccesorias": "Acciones accesorias",
     "ServiciosPrestados": "Servicios prestados",
@@ -43,6 +53,8 @@
 
     "agregarUsuario": "Agregar nuevo usuario",
 
+    "unitMed": "Unidad de medida",
+    "completarUltimaFila": "Debes completar la última fila antes de agregar una nueva.",
     "nuevoIndicador": "Nuevo indicador de ",
     "agregarIndicadorResultadoRelacionado": "Agregar Indicador Resultado relacionado",
     "sinIndicadorResultadoRelacionado": "Sin Indicador Resultado relacionado",
@@ -92,6 +104,42 @@
 
     "noRegionSeleccionada": "Sin región seleccionada",
 
+
+
+
+    "ejecutora":"Entidad ejecutora",
+    "implicadas":"Entidades implicadas",
+    "comarcal":"Tratamiento territorial comarcal",
+    "supracomarcal":"Tratamiento territorial supracomarcal",
+    "rangoAnios":"Rango de años (Plurianualidad)",
+    "oAccion":"Objetivos de la acción",
+    "ods":"Objetivos de Desarrollo Sostenible (ODS) a los que contribuye",
+    "dAccion":"Descripción de la acción",
+    "presupuesto":"Presupuesto",
+    "iMujHom":"Principio de igualdad de mujeres y hombres",
+    "uEuskera":"Utilización del euskera",
+    "sostenibilidad":"Sostenibilidad",
+    "dInteligent":"Desarrollo de los territorios inteligentes “Smart Rural”",
+    "observaciones":"Observaciones",
+    "sActual":"Situación actual",
+    "dAccionAvances":"Descripción de los avances",
+    "presupuestoEjecutado":"Presupuesto ejecutado",
+    "tTotal":"Total",
+    "autofinanciación":"Autofinanciación",
+    "fPublicas":"Financiaciones públicas",
+    "origenFPublicas":"Origen de la financiación pública",
+    "fuentesFPrivadas":"Fuentes de financiación privada",
+    "ejecucionPreseupuestaria":"Ejecución presupuestaria",
+    "presuPrevisto":"Presupuesto previsto",
+    "presuEjecutado":"Presupuesto ejecutado",
+    "porcentEjecutado":"% de ejecución",
+    "detalleSeguimiento":"Detalles de seguimiento",
+    "valoracionFinal":"Valoración final y recomendaciones",
+
+
+
+
+    
     "sales": "Ventas",
     "analytics": "Analítica",
     "apps": "Aplicaciones",

@@ -1,9 +1,8 @@
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { IRootState } from '../../store';
-import { setPageTitle } from '../../store/themeConfigSlice';
 import { sortBy } from 'lodash';
-import { UserID, UserRegionId } from '../../types/users';
+import { UserID } from '../../types/users';
 import Tippy from '@tippyjs/react';
 import { forwardRef, useEffect, useState } from 'react';
 import { Indicador } from '../../types/Indicadores';
@@ -14,6 +13,8 @@ import { User } from '../../types/users';
 import UserDataForm from '../profile/userDateForm';
 import IconTrash from '../../components/Icon/IconTrash';
 import IconPencil from '../../components/Icon/IconPencil';
+import 'mantine-datatable/styles.layer.css';
+import '@mantine/core/styles.css';
 
 const newUser: User = {
     name: '',
@@ -378,7 +379,7 @@ const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ numNextIndi, valorC
                         </div>
                     </div>
                     <div className="w-1/2">
-                        <label className="block font-medium">{t('Unidad de medida')}</label>
+                        <label className="block font-medium">{t('unitMed')}</label>
                         <select className="w-full p-2 border rounded">
                             <option>NUMERO</option>
                             <option>OTro</option>
@@ -681,10 +682,6 @@ interface tableProps {
 
 export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, onSuccess }, ref) => {
     const { t } = useTranslation();
-    const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(setPageTitle('Order Sorting Table'));
-    });
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
     const [page, setPage] = useState(1);

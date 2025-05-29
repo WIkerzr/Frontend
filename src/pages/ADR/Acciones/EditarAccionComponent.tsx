@@ -1,12 +1,9 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { setPageTitle } from '../../../store/themeConfigSlice';
-import Tippy from '@tippyjs/react';
 import { sortBy } from 'lodash';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
-import { IRootState } from '../../../store';
 import { editableColumnByPath } from './Columnas';
+import { EstadoLabel } from '../../../types/TipadoAccion';
 
 export interface HMT {
     hombres: string;
@@ -20,6 +17,7 @@ export interface Indicador {
     ejecutado: HMT;
     metaFinal: HMT;
     hipotesis?: string;
+    [key: string]: any;
 }
 
 interface tablaIndicadoresProps {
@@ -34,12 +32,6 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
         setIndicadores(indicador);
     }, []);
 
-    const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(setPageTitle('Order Sorting Table'));
-    });
-    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-
     const [page, setPage] = useState(1);
     const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
@@ -47,10 +39,16 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
     const [recordsData, setRecordsData] = useState(initialRecords);
 
     const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Indicador>>({ columnAccessor: 'id', direction: 'asc' });
     const [editableRowIndex, setEditableRowIndex] = useState(-1);
 
     const agregarFila = () => {
+        const ultima = indicadores[indicadores.length - 1];
+        if (ultima && (!ultima.nombre || !ultima.metaAnual?.total || !ultima.ejecutado?.total || !ultima.metaFinal?.total)) {
+            alert(t('completarUltimaFila'));
+            return;
+        }
+
         setIndicadores((prev) => [
             ...prev,
             {
@@ -63,18 +61,25 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
         ]);
         setEditableRowIndex(indicadores.length);
     };
+    const columnMetaAnual = [
+        editableColumnByPath<Indicador>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<Indicador>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<Indicador>('metaAnual.total', t('Total'), setIndicadores, editableRowIndex, true),
+    ];
+    const columnEjecutadoAnual = [
+        editableColumnByPath<Indicador>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<Indicador>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<Indicador>('ejecutado.total', t('Total'), setIndicadores, editableRowIndex, true),
+    ];
+
+    const columnMetaFinal = [
+        editableColumnByPath<Indicador>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<Indicador>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<Indicador>('metaFinal.total', t('Total'), setIndicadores, editableRowIndex, true),
+    ];
+    const columnNombre = [editableColumnByPath<Indicador>('nombre', t('nombre'), setIndicadores, editableRowIndex, true)];
 
     const columns = [
-        editableColumnByPath<Indicador>('nombre', t('nombre'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaAnual.hombres', t('mhombres'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaAnual.mujeres', t('mmujeres'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaAnual.total', t('mtotal'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('ejecutado.hombres', t('ehombres'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('ejecutado.mujeres', t('emujeres'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('ejecutado.total', t('etotal'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaFinal.hombres', t('fhombres'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaFinal.mujeres', t('fmujeres'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaFinal.total', t('ftotal'), setIndicadores, editableRowIndex, true),
         editableColumnByPath<Indicador>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
         {
             accessor: 'acciones',
@@ -86,17 +91,24 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
                         onClick={() => {
                             if (_row.nombre != '' && _row.metaAnual.total != '' && _row.metaFinal.total != '' && _row.ejecutado.total != '') {
                                 setEditableRowIndex(-1);
-                            } else alert(t('Se tiene que rellenar como minimo el campo Nombre, y todos los totales para poder guardar'));
+                            } else alert(t('alertIndicadores'));
                         }}
                     >
-                        Guardar
+                        {t('guardar')}
                     </button>
                 ) : (
                     <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                        Editar
+                        {t('editar')}
                     </button>
                 ),
         },
+    ];
+    const columnGroups = [
+        { id: 'nombre', title: '', columns: columnNombre },
+        { id: 'metaAnual', title: t('Meta Anual'), textAlignment: 'center', columns: columnMetaAnual },
+        { id: 'ejecutado', title: t('Ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+        { id: 'metaFinal', title: t('Meta Final'), textAlignment: 'center', columns: columnMetaFinal },
+        { id: 'final', title: '', columns: columns },
     ];
 
     useEffect(() => {
@@ -135,23 +147,27 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
         setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
         setPage(1);
     }, [sortStatus]);
+
     return (
         <div>
-            <div className="flex items-center space-x-4 mb-5">
+            <div className="p-1 flex items-center space-x-4 mb-5">
                 <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
-                <button className="mb-4 px-4 py-2 bg-primary text-white rounded" onClick={agregarFila}>
+                <button className="px-4 py-2 bg-primary text-white rounded" onClick={agregarFila}>
                     {t('Agregar fila')}
                 </button>
             </div>
-            <div className="panel mt-6">
-                <div className="datatables">
+            <div className="panel mt-6 ">
+                <div>
                     <DataTable
-                        highlightOnHover
-                        className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'}`}
+                        className={`datatable-pagination-horizontal `}
                         records={recordsData}
-                        columns={columns}
+                        groups={columnGroups}
                         totalRecords={initialRecords.length}
                         recordsPerPage={pageSize}
+                        withRowBorders={false}
+                        withColumnBorders={true}
+                        striped={true}
+                        highlightOnHover={true}
                         page={page}
                         onPageChange={(p) => setPage(p)}
                         recordsPerPageOptions={PAGE_SIZES}
@@ -167,3 +183,83 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
         </div>
     );
 });
+
+type StatusType = 'aprobado' | 'proceso' | 'cerrado' | 'borrador';
+
+const statusColors: Record<StatusType, string> = {
+    aprobado: 'bg-green-400',
+    proceso: 'bg-yellow-400',
+    cerrado: 'bg-red-400',
+    borrador: 'bg-blue-400',
+};
+
+interface TabCardProps {
+    icon: string;
+    label: string;
+    status?: StatusType;
+    className?: string;
+}
+
+export const TabCard: React.FC<TabCardProps> = ({ icon, label, status = 'borrador', className }) => {
+    const { t } = useTranslation();
+    return (
+        <div className={`flex items-center`}>
+            <div className="relative">
+                <img src={icon} alt={t(`${label}`)} className="w-6 h-6" />
+                <span className={`absolute -top-1 -right-0 w-3 h-3 rounded-full border-2 border-white ${statusColors[status]}`} />
+            </div>
+            <span className={`font-semibold ${className}`}>{t(`${label}`)}</span>
+        </div>
+    );
+};
+
+const estados: { label: EstadoLabel; color: string }[] = [
+    { label: 'Actuación en ejecución', color: 'bg-green-100 text-green-800' },
+    { label: 'Actuación en espera', color: 'bg-yellow-100 text-yellow-800' },
+    { label: 'Actuación finalizada', color: 'bg-blue-100 text-blue-800' },
+    { label: 'Actuación abandonada', color: 'bg-red-100 text-red-800' },
+];
+
+type CustomSelectProps = {
+    value: EstadoLabel;
+    onChange: (value: EstadoLabel) => void;
+};
+
+export function CustomSelect({ value, onChange }: CustomSelectProps) {
+    const selected = estados.find((e) => e.label === value) || estados[0];
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const handleSelect = (estado: { label: EstadoLabel; color: string }) => {
+        onChange(estado.label);
+        setOpen(false);
+    };
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative w-full max-w-sm -top-[2px]" ref={dropdownRef}>
+            <button type="button" onClick={() => setOpen(!open)} className={`w-full text-left p-2 rounded border ${selected.color}`}>
+                {selected.label}
+            </button>
+
+            {open && (
+                <div className="absolute mt-1 w-full border rounded shadow bg-white z-10">
+                    {estados.map((estado) => (
+                        <div key={estado.label} onClick={() => handleSelect(estado)} className={`p-2 cursor-pointer hover:bg-gray-100 ${estado.color}`}>
+                            {estado.label}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}

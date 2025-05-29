@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
 import AnimateHeight from 'react-animate-height';
+import { DatosAccion } from '../../types/TipadoAccion';
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -78,22 +79,15 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
     );
 };
 
-interface Accion {
-    eje: string;
-    id: number;
-    texto: string;
-    lineaActuaccion: string;
-}
-
 interface ModalAccionProps {
-    listadosAcciones: Accion[];
+    listadosAcciones: DatosAccion[];
 }
 
 export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
     const { t } = useTranslation();
     let ejes = Array.from(new Set(listadosAcciones!.map((a) => a.eje)));
 
-    const accionesPorEje: Record<string, Accion[]> = {};
+    const accionesPorEje: Record<string, DatosAccion[]> = {};
     ejes.forEach((eje) => {
         accionesPorEje[eje] = listadosAcciones!.filter((a) => a.eje === eje);
     });
@@ -188,10 +182,10 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
 
 interface ListadoAccionesProps {
     nombre: string;
-    listadoMap: Accion[];
+    listadoMap: DatosAccion[];
 }
 export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) => {
-    const [acciones, setAcciones] = useState<Accion[]>(listadoMap);
+    const [acciones, setAcciones] = useState<DatosAccion[]>(listadoMap);
     const { t } = useTranslation();
 
     const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
@@ -206,7 +200,7 @@ export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) =>
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => (
                     <div key={accion.id} className="bg-white border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
-                        <span className="text-lg">{accion.texto}</span>
+                        <span className="text-lg">{accion.accion}</span>
                         <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
                         <span className="text-base">{accion.lineaActuaccion}</span>
                         <div className="flex gap-2 justify-end mt-2">

@@ -8,17 +8,19 @@ import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
 import IconCaretsDown from '../Icon/IconCaretsDown';
 import IconMinus from '../Icon/IconMinus';
-
-import IconMenuAcciones from '../Icon/Menu/Adr/IconMenuAcciones';
-import IconMenuAccionesAccesorias from '../Icon/Menu/Adr/IconMenuAccionesAccesorias';
-import IconMenuMemoria from '../Icon/Menu/Adr/IconMenuMemoria';
-import IconMenuPlanes from '../Icon/Menu/Adr/IconMenuPlanes';
-import IconMenuServicios from '../Icon/Menu/Adr/IconMenuServicios';
-import IconMenuConfiguracion from '../Icon/Menu/IconMenuConfiguracion';
+import IconMenuConfiguracion from '../Icon/Menu/IconMenuConfiguracion.svg';
 import IconCaretDown from '../Icon/IconCaretDown';
+import IconServiciosPrestados from '../Icon/Menu/IconServiciosPrestados.svg';
+import IconAcciones from '../Icon/Menu/IconAcciones.svg';
+import IconAccionesAccesorias from '../Icon/Menu/IconAccionesAccesorias.svg';
+import IconCuadroMando from '../Icon/Menu/IconCuadroMando.svg';
+import IconEjes from '../Icon/Menu/IconEjes.svg';
+import IconPlan from '../Icon/Menu/IconPlan.svg';
+import IconMemoria from '../Icon/Menu/IconMemoria.svg';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 
 const Sidebar = () => {
     const { user } = useUser();
@@ -29,7 +31,7 @@ const Sidebar = () => {
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
     const dispatch = useDispatch();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const toggleMenu = (value: string) => {
         setCurrentMenu((oldValue) => {
             return oldValue === value ? '' : value;
@@ -90,7 +92,7 @@ const Sidebar = () => {
                                 <li className="menu nav-item">
                                     <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
                                         <div className="flex items-center">
-                                            <IconMenuConfiguracion className="group-hover:!text-primary shrink-0" />
+                                            <img src={IconMenuConfiguracion} alt={t('CuadroMando')} className="w-6 h-6" />
                                             <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('configuracion')}</span>
                                         </div>
 
@@ -129,7 +131,7 @@ const Sidebar = () => {
                                             <li className="nav-item">
                                                 <NavLink to="/adr/cuadroMando" className="group">
                                                     <div className="flex items-center">
-                                                        <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
+                                                        <img src={IconCuadroMando} alt={t('CuadroMando')} className="w-6 h-6" />
                                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('CuadroMando')}</span>
                                                     </div>
                                                 </NavLink>
@@ -139,7 +141,7 @@ const Sidebar = () => {
                                             <li className="nav-item">
                                                 <NavLink to="/adr/ejes" className="group">
                                                     <div className="flex items-center">
-                                                        <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
+                                                        <img src={IconEjes} alt={t('Ejes')} className="w-6 h-6" />
                                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Ejes')}</span>
                                                     </div>
                                                 </NavLink>
@@ -149,7 +151,7 @@ const Sidebar = () => {
                                             <li className="nav-item">
                                                 <NavLink to="/adr/acciones" className="group">
                                                     <div className="flex items-center">
-                                                        <IconMenuAcciones className="group-hover:!text-primary shrink-0" />
+                                                        <img src={IconAcciones} alt={t('Acciones')} className="w-6 h-6" />
                                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Acciones')}</span>
                                                     </div>
                                                 </NavLink>
@@ -159,7 +161,7 @@ const Sidebar = () => {
                                             <li className="nav-item">
                                                 <NavLink to="/adr/accionesAccesorias" className="group">
                                                     <div className="flex items-center">
-                                                        <IconMenuAccionesAccesorias className="group-hover:!text-primary shrink-0" />
+                                                        <img src={IconAccionesAccesorias} alt={t('AccionesAccesorias')} className="w-6 h-6" />
                                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('AccionesAccesorias')}</span>
                                                     </div>
                                                 </NavLink>
@@ -169,7 +171,7 @@ const Sidebar = () => {
                                             <li className="nav-item">
                                                 <NavLink to="/adr/servicios" className="group">
                                                     <div className="flex items-center">
-                                                        <IconMenuServicios className="group-hover:!text-primary shrink-0" />
+                                                        <img src={IconServiciosPrestados} alt={t('Servicios')} className="w-6 h-6" />
                                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Servicios')}</span>
                                                     </div>
                                                 </NavLink>
@@ -178,16 +180,24 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/adr/planesGestion" className="group">
                                                 <div className="flex items-center">
-                                                    <IconMenuPlanes className="group-hover:!text-primary shrink-0" />
-                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('PlanesGestion')}</span>
+                                                    <TabCard
+                                                        icon={IconPlan}
+                                                        label="PlanGestion"
+                                                        status="borrador"
+                                                        className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                                    />
                                                 </div>
                                             </NavLink>
                                         </li>
                                         <li className="nav-item">
                                             <NavLink to="/adr/memoriasAnuales" className="group">
                                                 <div className="flex items-center">
-                                                    <IconMenuMemoria className="group-hover:!text-primary shrink-0" />
-                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('memoriasAnuales')}</span>
+                                                    <TabCard
+                                                        icon={IconMemoria}
+                                                        label="memoriasAnuales"
+                                                        status="cerrado"
+                                                        className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                                    />
                                                 </div>
                                             </NavLink>
                                         </li>

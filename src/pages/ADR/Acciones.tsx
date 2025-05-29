@@ -1,40 +1,41 @@
 import React from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
+import { DatosAccion } from '../../types/TipadoAccion';
 
-export const datosAcciones = [
+export const datosAcciones: DatosAccion[] = [
     {
         id: 1,
-        texto: '1.- Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
+        accion: '1.- Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
         lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
         eje: 'Cohesión comarcal',
     },
     {
         id: 2,
-        texto: '2.- Apoyo a la comercialización del producto local en circuitos cortos',
+        accion: '2.- Apoyo a la comercialización del producto local en circuitos cortos',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
         eje: 'Desarrollo de la actividad económica',
     },
     {
         id: 3,
-        texto: '3.- Socialización sobre la importancia de mantener un sector agroalimentario vivo y el consumo de producto local.',
+        accion: '3.- Socialización sobre la importancia de mantener un sector agroalimentario vivo y el consumo de producto local.',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
         eje: 'Desarrollo de la actividad económica',
     },
     {
         id: 4,
-        texto: '4.- Trabajo en coordinación con Turismo de la Cuadrilla para el impulso de esta',
+        accion: '4.- Trabajo en coordinación con Turismo de la Cuadrilla para el impulso de esta',
         lineaActuaccion: 'Impulso de los recursos turísticos específicos propios de la comarca y a su puesta en valor',
         eje: 'Desarrollo de la actividad económica',
     },
     {
         id: 5,
-        texto: '5.- Fomento de la Transformación Agroalimentario de la Llanada Alavesa',
+        accion: '5.- Fomento de la Transformación Agroalimentario de la Llanada Alavesa',
         lineaActuaccion: 'Impulso a la transformación y la diferenciación de los productos',
         eje: 'Desarrollo de la actividad económica',
     },
     {
         id: 6,
-        texto: '6.- Organización de jornadas y talleres para la sostenibilidad en las explotaciones agroalimentarias (energética, medioambiental)',
+        accion: '6.- Organización de jornadas y talleres para la sostenibilidad en las explotaciones agroalimentarias (energética, medioambiental)',
         lineaActuaccion:
             'Fomento de iniciativas de producción agrarias sostenibles: impulso a sistemas en ecológico,producción integrada, regenerativa, utilización de variedades autóctonas.Mejora de la eficiencia energética: sustitución de luminarias públicas, campañas de ahorro energético.',
         eje: 'Desarrollo sostenible',

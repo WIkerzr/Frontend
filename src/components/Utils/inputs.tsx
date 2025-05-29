@@ -6,17 +6,18 @@ import { useEffect } from 'react';
 interface InputProps {
     nombreInput: string;
     type: 'text' | 'password' | 'email' | 'number' | 'tel' | 'date';
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     value: string;
     name: string;
     className?: string;
+    divClassName?: string;
 }
 
-export const Input = ({ nombreInput, type, className, onChange, value, name }: InputProps) => {
+export const Input = ({ nombreInput, type, className, onChange, value, name, divClassName }: InputProps) => {
     const { t } = useTranslation();
 
     return (
-        <div>
+        <div className={divClassName}>
             <label className={`block text-sm font-medium mb-1 ${className ? className : ''}`}>{t(nombreInput)}</label>
             <input type={type} className="form-input w-full" value={value} onChange={onChange} name={name} />
         </div>

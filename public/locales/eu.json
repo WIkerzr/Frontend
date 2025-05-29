@@ -13,6 +13,10 @@
     "indicadores": "Adierazleak",
     "usuarios": "Erabiltzaileak",
 
+     "Hombre":"Giz.",
+    "Mujer":"Em.",
+    "Total":"Guz.",
+
     "Descripcion": "Deskribapena",
     "Ano": "Urtea",
     "Tipo": "Mota",
