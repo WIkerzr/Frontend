@@ -204,7 +204,7 @@ export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) =>
                         <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
                         <span className="text-base">{accion.lineaActuaccion}</span>
                         <div className="flex gap-2 justify-end mt-2">
-                            <NavLink to="/adr/acciones/editando" className="group">
+                            <NavLink to="/adr/acciones/editando" state={{ accion }} className="group">
                                 <button aria-label={`Editar acción`} className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition">
                                     <IconPencil />
                                 </button>

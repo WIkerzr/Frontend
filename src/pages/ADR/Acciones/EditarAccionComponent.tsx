@@ -4,29 +4,15 @@ import { sortBy } from 'lodash';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { editableColumnByPath } from './Columnas';
 import { EstadoLabel } from '../../../types/TipadoAccion';
-
-export interface HMT {
-    hombres: string;
-    mujeres: string;
-    total: string;
-}
-export interface Indicador {
-    id: number;
-    nombre: string;
-    metaAnual: HMT;
-    ejecutado: HMT;
-    metaFinal: HMT;
-    hipotesis?: string;
-    [key: string]: any;
-}
+import { IndicadorAccion } from '../../../types/Indicadores';
 
 interface tablaIndicadoresProps {
-    indicador: Indicador[];
+    indicador: IndicadorAccion[];
 }
 
 export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador }, ref) => {
     const { t } = useTranslation();
-    const [indicadores, setIndicadores] = useState<Indicador[]>(indicador);
+    const [indicadores, setIndicadores] = useState<IndicadorAccion[]>(indicador);
 
     useEffect(() => {
         setIndicadores(indicador);
@@ -39,7 +25,7 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
     const [recordsData, setRecordsData] = useState(initialRecords);
 
     const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Indicador>>({ columnAccessor: 'id', direction: 'asc' });
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorAccion>>({ columnAccessor: 'id', direction: 'asc' });
     const [editableRowIndex, setEditableRowIndex] = useState(-1);
 
     const agregarFila = () => {
@@ -54,42 +40,63 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
             {
                 id: Date.now(),
                 nombre: '',
-                metaAnual: { hombres: '', mujeres: '', total: '' },
-                ejecutado: { hombres: '', mujeres: '', total: '' },
-                metaFinal: { hombres: '', mujeres: '', total: '' },
+                metaAnual: { hombres: 0, mujeres: 0, total: 0 },
+                ejecutado: { hombres: 0, mujeres: 0, total: 0 },
+                metaFinal: { hombres: 0, mujeres: 0, total: 0 },
             },
         ]);
         setEditableRowIndex(indicadores.length);
     };
     const columnMetaAnual = [
-        editableColumnByPath<Indicador>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaAnual.total', t('Total'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>(
+            'metaAnual.total',
+            t('Total'),
+            setIndicadores,
+            editableRowIndex,
+            true,
+            (Number(indicadores[editableRowIndex]?.metaAnual?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaAnual?.mujeres) || 0)
+        ),
     ];
     const columnEjecutadoAnual = [
-        editableColumnByPath<Indicador>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('ejecutado.total', t('Total'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>(
+            'ejecutado.total',
+            t('Total'),
+            setIndicadores,
+            editableRowIndex,
+            true,
+            (Number(indicadores[editableRowIndex]?.ejecutado?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.ejecutado?.mujeres) || 0)
+        ),
     ];
 
     const columnMetaFinal = [
-        editableColumnByPath<Indicador>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
-        editableColumnByPath<Indicador>('metaFinal.total', t('Total'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>(
+            'metaFinal.total',
+            t('Total'),
+            setIndicadores,
+            editableRowIndex,
+            true,
+            (Number(indicadores[editableRowIndex]?.metaFinal?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaFinal?.mujeres) || 0)
+        ),
     ];
-    const columnNombre = [editableColumnByPath<Indicador>('nombre', t('nombre'), setIndicadores, editableRowIndex, true)];
+    const columnNombre = [editableColumnByPath<IndicadorAccion>('nombre', t('nombre'), setIndicadores, editableRowIndex, true)];
 
     const columns = [
-        editableColumnByPath<Indicador>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
         {
             accessor: 'acciones',
             title: 'Acciones',
-            render: (_row: Indicador, index: number) =>
+            render: (_row: IndicadorAccion, index: number) =>
                 editableRowIndex === index ? (
                     <button
                         className="bg-green-500 text-white px-2 py-1 rounded"
                         onClick={() => {
-                            if (_row.nombre != '' && _row.metaAnual.total != '' && _row.metaFinal.total != '' && _row.ejecutado.total != '') {
+                            if (_row.nombre != '' && _row.metaAnual.total != 0 && _row.metaFinal.total != 0 && _row.ejecutado.total != 0) {
                                 setEditableRowIndex(-1);
                             } else alert(t('alertIndicadores'));
                         }}
@@ -128,15 +135,15 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
             return indicadores.filter(
                 (item) =>
                     (item.nombre && String(item.nombre).toLowerCase().includes(s)) ||
-                    (item.metaAnual.hombres && item.metaAnual.hombres.toLowerCase().includes(s)) ||
-                    (item.metaAnual.mujeres && item.metaAnual.mujeres.toLowerCase().includes(s)) ||
-                    (item.metaAnual.total && item.metaAnual.total.toLowerCase().includes(s)) ||
-                    (item.ejecutado.hombres && item.ejecutado.hombres.toLowerCase().includes(s)) ||
-                    (item.ejecutado.mujeres && item.ejecutado.mujeres.toLowerCase().includes(s)) ||
-                    (item.ejecutado.total && item.ejecutado.total.toLowerCase().includes(s)) ||
-                    (item.metaFinal.hombres && item.metaFinal.hombres.toLowerCase().includes(s)) ||
-                    (item.metaFinal.mujeres && item.metaFinal.mujeres.toLowerCase().includes(s)) ||
-                    (item.metaFinal.total && item.metaFinal.total.toLowerCase().includes(s)) ||
+                    (item.metaAnual?.hombres !== undefined && String(item.metaAnual.hombres).toLowerCase().includes(s)) ||
+                    (item.metaAnual?.mujeres !== undefined && String(item.metaAnual.mujeres).toLowerCase().includes(s)) ||
+                    (item.metaAnual?.total !== undefined && String(item.metaAnual.total).toLowerCase().includes(s)) ||
+                    (item.ejecutado?.hombres !== undefined && String(item.ejecutado.hombres).toLowerCase().includes(s)) ||
+                    (item.ejecutado?.mujeres !== undefined && String(item.ejecutado.mujeres).toLowerCase().includes(s)) ||
+                    (item.ejecutado?.total !== undefined && String(item.ejecutado.total).toLowerCase().includes(s)) ||
+                    (item.metaFinal?.hombres !== undefined && String(item.metaFinal.hombres).toLowerCase().includes(s)) ||
+                    (item.metaFinal?.mujeres !== undefined && String(item.metaFinal.mujeres).toLowerCase().includes(s)) ||
+                    (item.metaFinal?.total !== undefined && String(item.metaFinal.total).toLowerCase().includes(s)) ||
                     (item.hipotesis && item.hipotesis.toLowerCase().includes(s))
             );
         });
@@ -150,13 +157,13 @@ export const PestanaIndicadores = forwardRef<HTMLButtonElement, tablaIndicadores
 
     return (
         <div>
-            <div className="p-1 flex items-center space-x-4 mb-5">
-                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
-                <button className="px-4 py-2 bg-primary text-white rounded" onClick={agregarFila}>
-                    {t('Agregar fila')}
-                </button>
-            </div>
             <div className="panel mt-6 ">
+                <div className="p-1 flex items-center space-x-4 mb-5">
+                    <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
+                    <button className="px-4 py-2 bg-primary text-white rounded" onClick={agregarFila}>
+                        {t('Agregar fila')}
+                    </button>
+                </div>
                 <div>
                     <DataTable
                         className={`datatable-pagination-horizontal `}

@@ -1,26 +1,15 @@
 import { forwardRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DatosPlan } from '../../../types/TipadoAccion';
 
 const plurianualidad = true;
+interface planProps {
+    datosPlan: DatosPlan;
+}
 
-export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
+export const PestanaPlan = forwardRef<HTMLButtonElement, planProps>(({ datosPlan }, ref) => {
     const { t } = useTranslation();
-    const [formData, setFormData] = useState({
-        ejecutora: '',
-        implicadas: '',
-        comarcal: '',
-        supracomarcal: '',
-        rangoAnios: '',
-        oAccion: '',
-        ods: '',
-        dAccion: '',
-        presupuesto: '',
-        iMujHom: '',
-        uEuskera: '',
-        sostenibilidad: '',
-        dInteligent: '',
-        observaciones: '',
-    });
+    const [formData, setFormData] = useState(datosPlan);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

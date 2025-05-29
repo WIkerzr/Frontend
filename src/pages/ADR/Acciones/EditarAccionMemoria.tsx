@@ -1,11 +1,14 @@
 import { forwardRef, useState } from 'react';
 import { CustomSelect } from './EditarAccionComponent';
 import { useTranslation } from 'react-i18next';
-import { datosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
+import { DatosMemoria, datosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
 
 const plurianualidad = true;
+interface memoriaProps {
+    datosMemoria: DatosMemoria;
+}
 
-export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
+export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ datosMemoria }, ref) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState(datosMemoria);
 
