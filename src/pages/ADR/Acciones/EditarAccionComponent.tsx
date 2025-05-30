@@ -91,7 +91,6 @@ interface tablaIndicadoresProps {
     indicadoresResultados?: IndicadorAccion[];
     creaccion?: boolean;
     onResultadosRelacionadosChange?: (resultados: IndicadorAccion[]) => void;
-    onChangeIndicadores?: (indicadores: IndicadorAccion[]) => void;
 }
 
 //Import temporal
@@ -112,224 +111,221 @@ const listadoIndicadoresResultados: IndicadorAccion[] = indicadoresResultado.map
 
 //Temporal
 
-export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(
-    ({ indicador, indicadoresResultados, creaccion = false, onResultadosRelacionadosChange, onChangeIndicadores }, ref) => {
-        const { t } = useTranslation();
-        const { anio, estados } = useEstadosPorAnio();
-        const estadoPlan = estados[anio]?.plan ?? 'borrador';
-        const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
-        const editarPlan = estadoPlan === 'borrador';
-        const editarMemoria = estadoMemoria === 'borrador';
-        const [indicadores, setIndicadores] = useState<IndicadorAccion[]>(indicador);
+export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador, indicadoresResultados, creaccion = false, onResultadosRelacionadosChange }, ref) => {
+    const { t } = useTranslation();
+    const { anio, estados } = useEstadosPorAnio();
+    const estadoPlan = estados[anio]?.plan ?? 'borrador';
+    const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
+    const editarPlan = estadoPlan === 'borrador';
+    const editarMemoria = estadoMemoria === 'borrador';
+    const [indicadores, setIndicadores] = useState<IndicadorAccion[]>(indicador);
 
-        useEffect(() => {
+    useEffect(() => {
+        setIndicadores(indicador);
+    }, []);
+
+    useEffect(() => {
+        if (indicadores != indicador) {
             setIndicadores(indicador);
-        }, []);
+        }
+    }, [indicador]);
 
-        useEffect(() => {
-            console.log('indicador');
-            console.log(indicador);
-
-            if (onResultadosRelacionadosChange && indicadoresResultados?.length) {
-                const idsUsados = new Set(indicador.flatMap((r) => r.idsResultados ?? []));
-                const usados = indicadoresResultados.filter((res) => idsUsados.has(res.id));
+    useEffect(() => {
+        if (creaccion) {
+            const idsUsados = new Set(indicadores.flatMap((r) => r.idsResultados ?? []));
+            const usados = indicadoresResultados!.filter((res) => idsUsados.has(res.id));
+            if (onResultadosRelacionadosChange) {
                 onResultadosRelacionadosChange(usados);
             }
-        }, [indicador, indicadoresResultados, onResultadosRelacionadosChange]);
+        }
+    }, [indicadores]);
 
-        const [page, setPage] = useState(1);
-        const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
-        const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-        const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
-        const [recordsData, setRecordsData] = useState(initialRecords);
+    const [page, setPage] = useState(1);
+    const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
+    const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
+    const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
+    const [recordsData, setRecordsData] = useState(initialRecords);
 
-        const [search, setSearch] = useState('');
-        const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorAccion>>({ columnAccessor: 'id', direction: 'asc' });
-        const [editableRowIndex, setEditableRowIndex] = useState(-1);
+    const [search, setSearch] = useState('');
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorAccion>>({ columnAccessor: 'id', direction: 'asc' });
+    const [editableRowIndex, setEditableRowIndex] = useState(-1);
 
-        const columnMetaAnual = [
-            editableColumnByPath<IndicadorAccion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorAccion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorAccion>(
-                'metaAnual.total',
-                t('Total'),
-                setIndicadores,
-                editableRowIndex,
-                true,
-                (Number(indicadores[editableRowIndex]?.metaAnual?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaAnual?.mujeres) || 0)
-            ),
-        ];
+    const columnMetaAnual = [
+        editableColumnByPath<IndicadorAccion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorAccion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorAccion>(
+            'metaAnual.total',
+            t('Total'),
+            setIndicadores,
+            editableRowIndex,
+            true,
+            (Number(indicadores[editableRowIndex]?.metaAnual?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaAnual?.mujeres) || 0)
+        ),
+    ];
 
-        const columnEjecutadoAnual = [
-            editableColumnByPath<IndicadorAccion>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarMemoria),
-            editableColumnByPath<IndicadorAccion>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarMemoria),
-            editableColumnByPath<IndicadorAccion>(
-                'ejecutado.total',
-                t('Total'),
-                setIndicadores,
-                editableRowIndex,
-                true,
-                (Number(indicadores[editableRowIndex]?.ejecutado?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.ejecutado?.mujeres) || 0)
-            ),
-        ];
+    const columnEjecutadoAnual = [
+        editableColumnByPath<IndicadorAccion>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarMemoria),
+        editableColumnByPath<IndicadorAccion>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarMemoria),
+        editableColumnByPath<IndicadorAccion>(
+            'ejecutado.total',
+            t('Total'),
+            setIndicadores,
+            editableRowIndex,
+            true,
+            (Number(indicadores[editableRowIndex]?.ejecutado?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.ejecutado?.mujeres) || 0)
+        ),
+    ];
 
-        const columnMetaFinal = [
-            editableColumnByPath<IndicadorAccion>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorAccion>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorAccion>(
-                'metaFinal.total',
-                t('Total'),
-                setIndicadores,
-                editableRowIndex,
-                true,
-                (Number(indicadores[editableRowIndex]?.metaFinal?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaFinal?.mujeres) || 0)
-            ),
-        ];
-        const columnNombre = [editableColumnByPath<IndicadorAccion>('nombre', t('nombre'), setIndicadores, editableRowIndex, true)];
+    const columnMetaFinal = [
+        editableColumnByPath<IndicadorAccion>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorAccion>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorAccion>(
+            'metaFinal.total',
+            t('Total'),
+            setIndicadores,
+            editableRowIndex,
+            true,
+            (Number(indicadores[editableRowIndex]?.metaFinal?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaFinal?.mujeres) || 0)
+        ),
+    ];
+    const columnNombre = [editableColumnByPath<IndicadorAccion>('nombre', t('nombre'), setIndicadores, editableRowIndex, true)];
 
-        const columns = [
-            editableColumnByPath<IndicadorAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
+    const columns = [
+        editableColumnByPath<IndicadorAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
+        {
+            accessor: 'acciones',
+            title: 'Acciones',
+            render: (_row: IndicadorAccion, index: number) =>
+                editableRowIndex === index ? (
+                    <button
+                        className="bg-green-500 text-white px-2 py-1 rounded"
+                        onClick={() => {
+                            if (_row.nombre != '' && _row.metaAnual && _row.metaAnual.total != 0 && _row.metaFinal && _row.metaFinal.total != 0 && _row.ejecutado && _row.ejecutado.total != 0) {
+                                setEditableRowIndex(-1);
+                            } else alert(t('alertIndicadores'));
+                        }}
+                    >
+                        {t('guardar')}
+                    </button>
+                ) : (
+                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                        {t('editar')}
+                    </button>
+                ),
+        },
+    ];
+    const columnGroups = [
+        { id: 'nombre', title: '', columns: columnNombre },
+        { id: 'metaAnual', title: t('Meta Anual'), textAlignment: 'center', columns: columnMetaAnual },
+        { id: 'ejecutado', title: t('Ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+        { id: 'metaFinal', title: t('Meta Final'), textAlignment: 'center', columns: columnMetaFinal },
+        { id: 'final', title: '', columns: columns },
+    ];
+
+    useEffect(() => {
+        setPage(1);
+    }, [pageSize]);
+
+    useEffect(() => {
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize;
+        setRecordsData([...initialRecords.slice(from, to)]);
+    }, [page, pageSize, initialRecords]);
+
+    useEffect(() => {
+        setInitialRecords(() => {
+            if (!search.trim()) return sortBy(indicadores, 'id');
+            const s = search.toLowerCase();
+            return indicadores.filter(
+                (item) =>
+                    (item.nombre && String(item.nombre).toLowerCase().includes(s)) ||
+                    (item.metaAnual?.hombres !== undefined && String(item.metaAnual.hombres).toLowerCase().includes(s)) ||
+                    (item.metaAnual?.mujeres !== undefined && String(item.metaAnual.mujeres).toLowerCase().includes(s)) ||
+                    (item.metaAnual?.total !== undefined && String(item.metaAnual.total).toLowerCase().includes(s)) ||
+                    (item.ejecutado?.hombres !== undefined && String(item.ejecutado.hombres).toLowerCase().includes(s)) ||
+                    (item.ejecutado?.mujeres !== undefined && String(item.ejecutado.mujeres).toLowerCase().includes(s)) ||
+                    (item.ejecutado?.total !== undefined && String(item.ejecutado.total).toLowerCase().includes(s)) ||
+                    (item.metaFinal?.hombres !== undefined && String(item.metaFinal.hombres).toLowerCase().includes(s)) ||
+                    (item.metaFinal?.mujeres !== undefined && String(item.metaFinal.mujeres).toLowerCase().includes(s)) ||
+                    (item.metaFinal?.total !== undefined && String(item.metaFinal.total).toLowerCase().includes(s)) ||
+                    (item.hipotesis && item.hipotesis.toLowerCase().includes(s))
+            );
+        });
+    }, [search, indicadores]);
+
+    useEffect(() => {
+        const data = sortBy(initialRecords, sortStatus.columnAccessor);
+        setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
+        setPage(1);
+    }, [sortStatus]);
+
+    const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
+        const indicadorBase = realizaciones.find((r) => r.id === seleccion.idRealizacion);
+        const nuevosIndicadores = [
+            ...indicador,
             {
-                accessor: 'acciones',
-                title: 'Acciones',
-                render: (_row: IndicadorAccion, index: number) =>
-                    editableRowIndex === index ? (
-                        <button
-                            className="bg-green-500 text-white px-2 py-1 rounded"
-                            onClick={() => {
-                                if (_row.nombre != '' && _row.metaAnual && _row.metaAnual.total != 0 && _row.metaFinal && _row.metaFinal.total != 0 && _row.ejecutado && _row.ejecutado.total != 0) {
-                                    setEditableRowIndex(-1);
-                                } else alert(t('alertIndicadores'));
-                            }}
-                        >
-                            {t('guardar')}
-                        </button>
-                    ) : (
-                        <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                            {t('editar')}
-                        </button>
-                    ),
+                id: seleccion.idRealizacion,
+                nombre: `${indicadorBase?.nombre}`,
+                idsResultados: seleccion.idsResultadosEnRealizacion,
+                metaAnual: { hombres: 0, mujeres: 0, total: 0 },
+                ejecutado: { hombres: 0, mujeres: 0, total: 0 },
+                metaFinal: { hombres: 0, mujeres: 0, total: 0 },
             },
         ];
-        const columnGroups = [
-            { id: 'nombre', title: '', columns: columnNombre },
-            { id: 'metaAnual', title: t('Meta Anual'), textAlignment: 'center', columns: columnMetaAnual },
-            { id: 'ejecutado', title: t('Ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
-            { id: 'metaFinal', title: t('Meta Final'), textAlignment: 'center', columns: columnMetaFinal },
-            { id: 'final', title: '', columns: columns },
-        ];
+        setIndicadores(nuevosIndicadores);
+        //if (onChangeIndicadores) onChangeIndicadores(nuevosIndicadores);
+    };
 
-        useEffect(() => {
-            setPage(1);
-        }, [pageSize]);
+    const handleOpenModal = () => {
+        const ultima = indicadores[indicadores.length - 1];
+        if (ultima && (!ultima.nombre || !ultima.metaAnual?.total || !ultima.ejecutado?.total || !ultima.metaFinal?.total)) {
+            alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
+            return;
+        }
+        setOpen(true);
+    };
 
-        useEffect(() => {
-            const from = (page - 1) * pageSize;
-            const to = from + pageSize;
-            setRecordsData([...initialRecords.slice(from, to)]);
-        }, [page, pageSize, initialRecords]);
+    const [open, setOpen] = useState(false);
 
-        useEffect(() => {
-            setInitialRecords(() => {
-                if (!search.trim()) return sortBy(indicadores, 'id');
-                const s = search.toLowerCase();
-                return indicadores.filter(
-                    (item) =>
-                        (item.nombre && String(item.nombre).toLowerCase().includes(s)) ||
-                        (item.metaAnual?.hombres !== undefined && String(item.metaAnual.hombres).toLowerCase().includes(s)) ||
-                        (item.metaAnual?.mujeres !== undefined && String(item.metaAnual.mujeres).toLowerCase().includes(s)) ||
-                        (item.metaAnual?.total !== undefined && String(item.metaAnual.total).toLowerCase().includes(s)) ||
-                        (item.ejecutado?.hombres !== undefined && String(item.ejecutado.hombres).toLowerCase().includes(s)) ||
-                        (item.ejecutado?.mujeres !== undefined && String(item.ejecutado.mujeres).toLowerCase().includes(s)) ||
-                        (item.ejecutado?.total !== undefined && String(item.ejecutado.total).toLowerCase().includes(s)) ||
-                        (item.metaFinal?.hombres !== undefined && String(item.metaFinal.hombres).toLowerCase().includes(s)) ||
-                        (item.metaFinal?.mujeres !== undefined && String(item.metaFinal.mujeres).toLowerCase().includes(s)) ||
-                        (item.metaFinal?.total !== undefined && String(item.metaFinal.total).toLowerCase().includes(s)) ||
-                        (item.hipotesis && item.hipotesis.toLowerCase().includes(s))
-                );
-            });
-        }, [search, indicadores]);
-
-        useEffect(() => {
-            const data = sortBy(initialRecords, sortStatus.columnAccessor);
-            setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-            setPage(1);
-        }, [sortStatus]);
-
-        const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
-            const indicadorBase = realizaciones.find((r) => r.id === seleccion.idRealizacion);
-            const nuevosIndicadores = [
-                ...indicador,
-                {
-                    id: seleccion.idRealizacion,
-                    nombre: `${indicadorBase?.nombre}`,
-                    idsResultados: seleccion.idsResultadosEnRealizacion,
-                    metaAnual: { hombres: 0, mujeres: 0, total: 0 },
-                    ejecutado: { hombres: 0, mujeres: 0, total: 0 },
-                    metaFinal: { hombres: 0, mujeres: 0, total: 0 },
-                },
-            ];
-            setIndicadores(nuevosIndicadores);
-            //if (onChangeIndicadores) onChangeIndicadores(nuevosIndicadores);
-        };
-
-        const handleOpenModal = () => {
-            const ultima = indicadores[indicadores.length - 1];
-            if (ultima && (!ultima.nombre || !ultima.metaAnual?.total || !ultima.ejecutado?.total || !ultima.metaFinal?.total)) {
-                alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
-                return;
-            }
-            setOpen(true);
-        };
-
-        const [open, setOpen] = useState(false);
-
-        return (
-            <div>
-                <div className="panel mt-6 ">
-                    <div className="p-1 flex items-center space-x-4 mb-5">
-                        <input
-                            type="text"
-                            className="border border-gray-300 rounded p-2 w-full max-w-xs"
-                            placeholder={t('Buscar') + ' ...'}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        {creaccion && (
-                            <>
-                                <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
-                                    {t('newIndicador', { tipo: t('Realizacion') })}
-                                </button>
-                                {open && (
-                                    <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />
-                                )}
-                            </>
-                        )}
-                    </div>
-                    <div>
-                        <DataTable
-                            className={`datatable-pagination-horizontal `}
-                            records={recordsData}
-                            groups={columnGroups}
-                            totalRecords={initialRecords.length}
-                            recordsPerPage={pageSize}
-                            withRowBorders={false}
-                            withColumnBorders={true}
-                            striped={true}
-                            highlightOnHover={true}
-                            page={page}
-                            onPageChange={(p) => setPage(p)}
-                            recordsPerPageOptions={PAGE_SIZES}
-                            onRecordsPerPageChange={setPageSize}
-                            sortStatus={sortStatus}
-                            onSortStatusChange={setSortStatus}
-                            minHeight={200}
-                            paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
-                            recordsPerPageLabel={t('recorsPerPage')}
-                        />
-                    </div>
+    return (
+        <div>
+            <div className="panel mt-6 ">
+                <div className="p-1 flex items-center space-x-4 mb-5">
+                    <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
+                    {creaccion && (
+                        <>
+                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
+                                {t('newIndicador', { tipo: t('Realizacion') })}
+                            </button>
+                            {open && (
+                                <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />
+                            )}
+                        </>
+                    )}
+                </div>
+                <div>
+                    <DataTable
+                        className={`datatable-pagination-horizontal `}
+                        records={recordsData}
+                        groups={columnGroups}
+                        totalRecords={initialRecords.length}
+                        recordsPerPage={pageSize}
+                        withRowBorders={false}
+                        withColumnBorders={true}
+                        striped={true}
+                        highlightOnHover={true}
+                        page={page}
+                        onPageChange={(p) => setPage(p)}
+                        recordsPerPageOptions={PAGE_SIZES}
+                        onRecordsPerPageChange={setPageSize}
+                        sortStatus={sortStatus}
+                        onSortStatusChange={setSortStatus}
+                        minHeight={200}
+                        paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
+                        recordsPerPageLabel={t('recorsPerPage')}
+                    />
                 </div>
             </div>
-        );
-    }
-);
+        </div>
+    );
+});

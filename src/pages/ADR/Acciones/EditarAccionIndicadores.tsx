@@ -29,12 +29,10 @@ interface tablaIndicadoresProps {
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador }, ref) => {
     const realizaciones: IndicadorAccion[] = indicador;
+    const todosLosIdsResultados = Array.from(new Set(realizaciones.flatMap((r) => r.idsResultados ?? [])));
+    const resultadosFiltrados = resultados.filter((res) => todosLosIdsResultados.includes(res.id));
 
-    const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorAccion[]>(realizaciones);
-    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorAccion[]>([]);
-    const handleChangeIndicadoresRealizacion = (nuevosIndicadores: IndicadorAccion[]) => {
-        setIndicadoresRealizacion(nuevosIndicadores);
-    };
+    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorAccion[]>(resultadosFiltrados);
 
     const handleResultadosRelacionadosChange = (nuevosResultados: IndicadorAccion[]) => {
         setResultadosSeleccionados(nuevosResultados);
@@ -42,13 +40,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndic
 
     return (
         <>
-            <TablaIndicadorAccion
-                indicador={indicadoresRealizacion}
-                indicadoresResultados={resultados}
-                creaccion={true}
-                onResultadosRelacionadosChange={handleResultadosRelacionadosChange}
-                onChangeIndicadores={handleChangeIndicadoresRealizacion}
-            />
+            <TablaIndicadorAccion indicador={indicador} indicadoresResultados={resultados} creaccion={true} onResultadosRelacionadosChange={handleResultadosRelacionadosChange} />
             <TablaIndicadorAccion indicador={resultadosSeleccionados} />
         </>
     );
