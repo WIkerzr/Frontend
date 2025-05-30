@@ -70,7 +70,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
             </div>
             <div className="flex justify-between w-full mt-8">
                 <img className="max-h-[40px] w-auto" src="/assets/images/logo.svg" alt="logo" />
-                <img className="max-h-[40px] w-auto" src="/assets/images/Mendinet-logo.png" alt="logo" />
+                <img className="max-h-[40px] w-auto" src="/assets/images/meneko.png" alt="logo" />
                 <img className="max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
             </div>
         </div>
