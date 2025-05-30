@@ -11,9 +11,10 @@ export interface HMT {
 export interface IndicadorAccion {
     id: number;
     nombre: string;
-    metaAnual: HMT;
-    ejecutado: HMT;
-    metaFinal: HMT;
+    idsResultados?: number[];
+    metaAnual?: HMT;
+    ejecutado?: HMT;
+    metaFinal?: HMT;
     hipotesis?: string;
     [key: string]: any;
 }

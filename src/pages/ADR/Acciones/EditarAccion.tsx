@@ -3,21 +3,22 @@ import { Acordeon } from '../Componentes';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import { Fragment } from 'react';
-import { PestanaIndicadores, TabCard } from './EditarAccionComponent';
+import { TabCard } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { DatosAccion, datosInicializadosAccion } from '../../../types/TipadoAccion';
-import { datosAcciones } from '../Acciones';
-import { IndicadorAccion } from '../../../types/Indicadores';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { PestanaIndicadores } from './EditarAccionIndicadores';
 
 const Index: React.FC = () => {
     const { t } = useTranslation();
     const [active, setActive] = useState<string>('0');
-    const [planActivo, setPlanActivo] = useState<boolean>(true);
+    const { anio, estados } = useEstadosPorAnio();
+    const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const togglePara = (value: string) => {
         setActive((oldValue) => {
             return oldValue === value ? '' : value;
@@ -28,8 +29,6 @@ const Index: React.FC = () => {
     const [datosAccion, setDatosAccion] = useState<DatosAccion>(accion);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        console.log(datosAccion);
-
         const { name, value } = e.target;
         setDatosAccion((prev) => ({
             ...prev,
@@ -40,7 +39,7 @@ const Index: React.FC = () => {
     return (
         <div>
             <div className="flex w-full">
-                {planActivo === true ? (
+                {estadoPlan === 'borrador' ? (
                     <div className="w-[80%] panel">
                         <div className="flex gap-4 w-full">
                             <div className="w-1/3">
@@ -78,15 +77,13 @@ const Index: React.FC = () => {
                     <TabList className="mx-10 mt-3 flex flex-wrap justify-center border-b border-white-light dark:border-[#191e3a]">
                         <Tab as={Fragment}>
                             {({ selected }) => (
-                                <div className="text-center !outline-none">
-                                    <button
-                                        className={`${
-                                            selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
-                                        }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
-                                    >
-                                        Indicadores
-                                    </button>
-                                </div>
+                                <button
+                                    className={`${
+                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
+                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
+                                >
+                                    {t('Indicadores')}
+                                </button>
                             )}
                         </Tab>
                         <Tab as={Fragment}>

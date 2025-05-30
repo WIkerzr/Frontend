@@ -21,8 +21,12 @@ import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 const Sidebar = () => {
+    const { anio, estados, setAnio } = useEstadosPorAnio();
+    const estadoPlan = estados[anio]?.plan ?? 'borrador';
+    const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
     const { user } = useUser();
     const { regiones, regionSeleccionada } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
@@ -31,6 +35,8 @@ const Sidebar = () => {
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
     const dispatch = useDispatch();
+    const anioActual = new Date().getFullYear();
+    const anios = [anioActual - 1, anioActual];
     const { t } = useTranslation();
     const toggleMenu = (value: string) => {
         setCurrentMenu((oldValue) => {
@@ -115,6 +121,15 @@ const Sidebar = () => {
                             <h2 className="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
                                 <IconMinus className="w-4 h-5 flex-none hidden" />
                                 <span>{region?.NameEs}</span>
+                                {region !== undefined && (
+                                    <select value={anio} onChange={(e) => setAnio(Number(e.target.value))}>
+                                        {anios.map((a) => (
+                                            <option key={a} value={a}>
+                                                {a}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
                             </h2>
                             <div
                                 style={{
@@ -124,7 +139,6 @@ const Sidebar = () => {
                                     userSelect: regionSeleccionada ? 'auto' : 'none',
                                 }}
                             >
-                                {/* //ADR */}
                                 <li className="nav-item">
                                     <ul>
                                         {role !== 'GV' && (
@@ -183,7 +197,7 @@ const Sidebar = () => {
                                                     <TabCard
                                                         icon={IconPlan}
                                                         label="PlanGestion"
-                                                        status="borrador"
+                                                        status={estadoPlan}
                                                         className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
                                                     />
                                                 </div>
@@ -195,7 +209,7 @@ const Sidebar = () => {
                                                     <TabCard
                                                         icon={IconMemoria}
                                                         label="memoriasAnuales"
-                                                        status="cerrado"
+                                                        status={estadoMemoria}
                                                         className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
                                                     />
                                                 </div>

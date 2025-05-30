@@ -37,6 +37,7 @@
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
     "newIndicador": "Nuevo Indicador {{tipo}}",
+    "indicadoresResultadoRelacionados": "Indicadores de resultado relacionados",
     "newAccion": "Nueva Acción",
     "editAccion": "Editar Acción",
     "miPerfil": "Mi perfil",
@@ -54,7 +55,7 @@
     "agregarUsuario": "Agregar nuevo usuario",
 
     "unitMed": "Unidad de medida",
-    "completarUltimaFila": "Debes completar la última fila antes de agregar una nueva.",
+    "completarUltimaFila": "Debes completar la última fila de {{tipo}} antes de agregar una nueva",
     "nuevoIndicador": "Nuevo indicador de ",
     "agregarIndicadorResultadoRelacionado": "Agregar Indicador Resultado relacionado",
     "sinIndicadorResultadoRelacionado": "Sin Indicador Resultado relacionado",
@@ -106,6 +107,7 @@
     "noRegionSeleccionada": "Sin región seleccionada",
 
 
+    "seleccionaIndicador":"Selecciona un indicador...",
 
 
     "ejecutora":"Entidad ejecutora",

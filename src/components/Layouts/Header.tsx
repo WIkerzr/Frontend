@@ -59,9 +59,6 @@ const Header = () => {
                         <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
                     )}
 
-                    <div>
-                        <span className="text-white-dark min-w-max ml-5">2025</span>
-                    </div>
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <div className="flex justify-end w-full overflow-hidden">
                             <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/meneko.png" alt="logo" />

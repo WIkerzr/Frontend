@@ -7,7 +7,7 @@ export function editableColumnByPath<T extends object>(
     title: string,
     setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
     editableRowIndex: number | null,
-    required = false,
+    editable = true,
     sumTotal?: number
 ) {
     const [indicadorSeleccionado, setIndicadorSeleccionado] = useState<string | undefined>(undefined);
@@ -25,12 +25,12 @@ export function editableColumnByPath<T extends object>(
                 return <input className="border p-1 rounded bg-gray-100 text-gray-700" value={sumTotal} style={{ maxWidth: 60 }} readOnly disabled />;
             }
 
-            if (editableRowIndex === index) {
+            if (editableRowIndex === index && editable) {
                 return title !== 'Nombre' ? (
                     <input
                         className="border p-1 rounded"
                         value={get(row, accessor) ?? ''}
-                        required={required}
+                        required={true}
                         style={{ maxWidth: accessor !== 'nombre' && accessor !== 'hipotesis' ? 60 : 300 }}
                         onChange={(e) => {
                             setIndicadores((prevRows) => {
@@ -69,7 +69,6 @@ export function editableColumnByPath<T extends object>(
                 );
             }
 
-            // No editable (solo vista)
             return (
                 <span
                     style={{

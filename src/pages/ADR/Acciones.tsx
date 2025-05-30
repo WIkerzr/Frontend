@@ -74,6 +74,7 @@ export const datosAcciones: DatosAccion[] = [
                     total: 40,
                 },
                 hipotesis: 'Se espera un ligero aumento.',
+                idsResultados: [4],
             },
             {
                 id: 2,
@@ -93,6 +94,7 @@ export const datosAcciones: DatosAccion[] = [
                     mujeres: 0,
                     total: 300,
                 },
+                idsResultados: [5],
             },
         ],
     },
