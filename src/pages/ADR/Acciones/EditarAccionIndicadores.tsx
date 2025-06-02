@@ -1,52 +1,50 @@
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { forwardRef, useEffect, useState } from 'react';
-import { editableColumnByPath } from './Columnas';
-import { sortBy } from 'lodash';
+import { forwardRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IndicadorAccion } from '../../../types/Indicadores';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
 import { NewModal } from '../../../components/Utils/utils';
 import { TablaIndicadorAccion } from './EditarAccionComponent';
-import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
+import { indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import React from 'react';
 
-//Temporal
-
-const resultados: IndicadorAccion[] = indicadoresResultado.map(({ id, descripcion, ano, ...rest }) => ({
-    id,
-    nombre: descripcion,
-    ano,
-    ...rest,
-}));
-
 interface tablaIndicadoresProps {
-    indicador: IndicadorAccion[];
-    indicadoresResultados?: IndicadorAccion[];
+    indicador: {
+        indicadoreRealizacion: IndicadorRealizacion[];
+        indicadoreResultado: IndicadorResultado[];
+    };
     creaccion?: boolean;
-    onResultadosRelacionadosChange?: (resultados: IndicadorAccion[]) => void;
-    onChangeIndicadores?: (indicadores: IndicadorAccion[]) => void;
+    onResultadosRelacionadosChange?: (resultados: IndicadorRealizacion[]) => void;
+    onChangeIndicadores?: (indicadores: IndicadorRealizacion[]) => void;
 }
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador }, ref) => {
-    const realizaciones: IndicadorAccion[] = indicador;
-    const todosLosIdsResultados = Array.from(new Set(realizaciones.flatMap((r) => r.idsResultados ?? [])));
-    const resultadosFiltrados = resultados.filter((res) => todosLosIdsResultados.includes(res.id));
+    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorRealizacion[]>(indicador.indicadoreResultado);
 
-    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorAccion[]>(resultadosFiltrados);
-
-    const handleResultadosRelacionadosChange = (nuevosResultados: IndicadorAccion[]) => {
-        setResultadosSeleccionados(nuevosResultados);
+    const handleResultadosRelacionadosChange = (nuevosResultados: number[]) => {
+        setResultadosSeleccionados((anteriores) => {
+            let suma = anteriores;
+            let nue = nuevosResultados.map((id) => indicadoresResultado.find((res) => res.id === id));
+            for (let index = 0; index < nue.length; index++) {
+                const element = nue[index];
+                suma.push(element!);
+            }
+            return [...suma];
+        });
     };
 
     return (
         <>
-            <TablaIndicadorAccion indicador={indicador} indicadoresResultados={resultados} creaccion={true} onResultadosRelacionadosChange={handleResultadosRelacionadosChange} />
+            <TablaIndicadorAccion
+                indicador={indicador.indicadoreRealizacion}
+                indicadoresResultados={resultadosSeleccionados}
+                creaccion={true}
+                onResultadosRelacionadosChange={handleResultadosRelacionadosChange}
+            />
             <TablaIndicadorAccion indicador={resultadosSeleccionados} />
         </>
     );
 });
 
-type Indicador = { id: number; nombre: string; idsResultados?: number[] };
+type Indicador = { id: number; descripcion: string; idsResultados?: number[] };
 
 interface ModalNuevoIndicadorAccionProps {
     open: boolean;
@@ -94,7 +92,7 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                     </option>
                     {realizaciones.map((r) => (
                         <option value={r.id} key={r.id}>
-                            {r.nombre}
+                            {r.descripcion}
                         </option>
                     ))}
                 </select>
@@ -108,7 +106,7 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                             <li key={res.id} className="mb-2">
                                 <label className="flex items-center">
                                     <input type="checkbox" checked={seleccionados.includes(res.id)} onChange={() => handleToggleResultado(res.id)} className="mr-2" />
-                                    {res.nombre}
+                                    {res.descripcion}
                                 </label>
                             </li>
                         ))}

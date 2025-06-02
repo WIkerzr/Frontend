@@ -54,49 +54,92 @@ export const datosAcciones: DatosAccion[] = [
             dSeguimiento: '23',
             valFinal: '24',
         },
-        indicadorAccion: [
-            {
-                id: 1,
-                nombre: 'RE04. Número de infraestructuras y/o servicios mejorados',
-                metaAnual: {
-                    hombres: 10,
-                    mujeres: 10,
-                    total: 20,
+        indicadorAccion: {
+            indicadoreRealizacion: [
+                {
+                    id: 4,
+                    descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+                    metaAnual: {
+                        hombres: 10,
+                        mujeres: 10,
+                        total: 20,
+                    },
+                    ejecutado: {
+                        hombres: 7,
+                        mujeres: 5,
+                        total: 12,
+                    },
+                    metaFinal: {
+                        hombres: 20,
+                        mujeres: 20,
+                        total: 40,
+                    },
+                    hipotesis: 'Se espera un ligero aumento.',
+                    idsResultados: [4],
                 },
-                ejecutado: {
-                    hombres: 7,
-                    mujeres: 5,
-                    total: 12,
+                {
+                    id: 5,
+                    descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+                    metaAnual: {
+                        hombres: 0,
+                        mujeres: 0,
+                        total: 100,
+                    },
+                    ejecutado: {
+                        hombres: 0,
+                        mujeres: 0,
+                        total: 92,
+                    },
+                    metaFinal: {
+                        hombres: 0,
+                        mujeres: 0,
+                        total: 300,
+                    },
+                    idsResultados: [5],
                 },
-                metaFinal: {
-                    hombres: 20,
-                    mujeres: 20,
-                    total: 40,
+            ],
+            indicadoreResultado: [
+                {
+                    id: 4,
+                    descripcion: 'RS04. Número de personas beneficiadas de las infraestructuras y/o servicios mejorados',
+                    metaAnual: {
+                        hombres: 10,
+                        mujeres: 10,
+                        total: 20,
+                    },
+                    ejecutado: {
+                        hombres: 7,
+                        mujeres: 5,
+                        total: 12,
+                    },
+                    metaFinal: {
+                        hombres: 20,
+                        mujeres: 20,
+                        total: 40,
+                    },
+                    hipotesis: '',
                 },
-                hipotesis: 'Se espera un ligero aumento.',
-                idsResultados: [4],
-            },
-            {
-                id: 2,
-                nombre: 'RE05. Número de personas emprendedoras apoyadas',
-                metaAnual: {
-                    hombres: 0,
-                    mujeres: 0,
-                    total: 100,
+                {
+                    id: 5,
+                    descripcion: 'RS05. Número de empresas creadas por personas emprendedoras',
+                    metaAnual: {
+                        hombres: 0,
+                        mujeres: 0,
+                        total: 100,
+                    },
+                    ejecutado: {
+                        hombres: 0,
+                        mujeres: 0,
+                        total: 92,
+                    },
+                    metaFinal: {
+                        hombres: 0,
+                        mujeres: 0,
+                        total: 300,
+                    },
                 },
-                ejecutado: {
-                    hombres: 0,
-                    mujeres: 0,
-                    total: 92,
-                },
-                metaFinal: {
-                    hombres: 0,
-                    mujeres: 0,
-                    total: 300,
-                },
-                idsResultados: [5],
-            },
-        ],
+            ],
+        },
     },
     {
         id: 2,

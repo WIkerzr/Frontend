@@ -2,12 +2,10 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { IRootState } from '../../store';
-import { toggleTheme, toggleSidebar } from '../../store/themeConfigSlice';
+import { toggleSidebar } from '../../store/themeConfigSlice';
 import { useTranslation } from 'react-i18next';
 import Dropdown from '../Dropdown';
 import IconMenu from '../Icon/IconMenu';
-import IconSun from '../Icon/IconSun';
-import IconMoon from '../Icon/IconMoon';
 import IconUser from '../Icon/IconUser';
 import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
@@ -96,7 +94,7 @@ const Header = () => {
                                 <option value="gobiernoVasco">GOBIERNO</option>
                             </select>
                         </div> */}
-                        <div>
+                        {/* <div>
                             {themeConfig.theme === 'light' ? (
                                 <button
                                     className={`${
@@ -125,7 +123,7 @@ const Header = () => {
                                     <IconMoon />
                                 </button>
                             )}
-                        </div>
+                        </div> */}
                         <div>
                             <LanguageSelector />
                         </div>

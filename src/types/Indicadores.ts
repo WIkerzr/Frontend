@@ -8,10 +8,19 @@ export interface HMT {
     mujeres: number;
     total: number;
 }
-export interface IndicadorAccion {
+export interface IndicadorRealizacion {
     id: number;
-    nombre: string;
+    descripcion: string;
     idsResultados?: number[];
+    metaAnual?: HMT;
+    ejecutado?: HMT;
+    metaFinal?: HMT;
+    hipotesis?: string;
+    [key: string]: any;
+}
+export interface IndicadorResultado {
+    id: number;
+    descripcion: string;
     metaAnual?: HMT;
     ejecutado?: HMT;
     metaFinal?: HMT;

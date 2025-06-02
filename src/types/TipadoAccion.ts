@@ -1,4 +1,4 @@
-import { IndicadorAccion } from './Indicadores';
+import { IndicadorRealizacion, IndicadorResultado } from './Indicadores';
 
 export type EstadoLabel = 'Actuación en ejecución' | 'Actuación en espera' | 'Actuación finalizada' | 'Actuación abandonada';
 
@@ -61,7 +61,10 @@ export interface DatosAccion {
     lineaActuaccion: string;
     datosPlan?: DatosPlan;
     datosMemoria?: DatosMemoria;
-    indicadorAccion?: IndicadorAccion[];
+    indicadorAccion?: {
+        indicadoreRealizacion: IndicadorRealizacion[];
+        indicadoreResultado: IndicadorResultado[];
+    };
 }
 
 export const datosInicializadosAccion: DatosAccion = {

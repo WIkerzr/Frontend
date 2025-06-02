@@ -2,14 +2,13 @@ import { get, set } from 'lodash';
 import { indicadoresRealizacion } from '../../../mocks/BBDD/indicadores';
 import { useState, useEffect } from 'react';
 
-export function editableColumnByPath<T extends object>(
-    accessor: string,
-    title: string,
-    setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
-    editableRowIndex: number | null,
-    editable = true,
-    sumTotal?: number
-) {
+const totalKeys = {
+    'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
+    'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },
+    'ejecutado.total': { root: 'ejecutado', hombres: 'ejecutado.hombres', mujeres: 'ejecutado.mujeres', total: 'ejecutado.total' },
+};
+
+export function editableColumnByPath<T extends object>(accessor: string, title: string, setIndicadores: React.Dispatch<React.SetStateAction<T[]>>, editableRowIndex: number | null, editable = true) {
     const [indicadorSeleccionado, setIndicadorSeleccionado] = useState<string | undefined>(undefined);
 
     useEffect(() => {
@@ -21,28 +20,52 @@ export function editableColumnByPath<T extends object>(
         title,
         sortable: true,
         render: (row: T, index: number) => {
-            if (title === 'Tot.' && sumTotal && sumTotal > 0) {
-                return <input className="border p-1 rounded bg-gray-100 text-gray-700" value={sumTotal} style={{ maxWidth: 60 }} readOnly disabled />;
+            if (((title === 'Tot.' || title === 'Total') && accessor === 'metaAnual.total') || accessor === 'metaFinal.total' || accessor === 'ejecutado.total') {
+                const keys = totalKeys[accessor as keyof typeof totalKeys];
+                const hombres = Number(get(row, keys.hombres)) || 0;
+                const mujeres = Number(get(row, keys.mujeres)) || 0;
+                const total = Number(get(row, keys.total)) || 0;
+                const ambosCero = hombres === 0 && mujeres === 0;
+
+                if (editableRowIndex === index && editable) {
+                    return (
+                        <input
+                            className={ambosCero ? 'border p-1 rounded' : 'border p-1 rounded bg-gray-100 text-gray-700'}
+                            value={ambosCero ? total : hombres + mujeres}
+                            style={{ maxWidth: 60 }}
+                            readOnly={!ambosCero}
+                            onChange={(e) => {
+                                if (ambosCero) {
+                                    setIndicadores((prevRows) => {
+                                        const copy = [...prevRows];
+                                        const updatedRow = { ...copy[index] };
+                                        set(updatedRow as object, accessor, Number(e.target.value));
+                                        copy[index] = updatedRow;
+                                        return copy;
+                                    });
+                                }
+                            }}
+                        />
+                    );
+                }
+
+                return (
+                    <span
+                        style={{
+                            maxWidth: 60,
+                            display: 'inline-block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {ambosCero ? total : hombres + mujeres}
+                    </span>
+                );
             }
 
-            if (editableRowIndex === index && editable) {
-                return title !== 'Nombre' ? (
-                    <input
-                        className="border p-1 rounded"
-                        value={get(row, accessor) ?? ''}
-                        required={true}
-                        style={{ maxWidth: accessor !== 'nombre' && accessor !== 'hipotesis' ? 60 : 300 }}
-                        onChange={(e) => {
-                            setIndicadores((prevRows) => {
-                                const copy = [...prevRows];
-                                const updatedRow = { ...copy[index] };
-                                set(updatedRow as object, accessor, e.target.value);
-                                copy[index] = updatedRow;
-                                return copy;
-                            });
-                        }}
-                    />
-                ) : (
+            if (editableRowIndex === index && editable && title === 'Nombre') {
+                return (
                     <div>
                         <select
                             id="indicadores"
@@ -69,19 +92,41 @@ export function editableColumnByPath<T extends object>(
                 );
             }
 
-            return (
-                <span
-                    style={{
-                        maxWidth: accessor !== 'nombre' && accessor !== 'hipotesis' ? 60 : 300,
-                        display: 'inline-block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                    }}
-                >
-                    {get(row, accessor)}
-                </span>
-            );
+            if (editableRowIndex === index && editable) {
+                return (
+                    <input
+                        className="border p-1 rounded"
+                        value={get(row, accessor) ?? ''}
+                        required={true}
+                        style={{ maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300 }}
+                        onChange={(e) => {
+                            setIndicadores((prevRows) => {
+                                const copy = [...prevRows];
+                                const updatedRow = { ...copy[index] };
+                                set(updatedRow as object, accessor, e.target.value);
+                                copy[index] = updatedRow;
+                                return copy;
+                            });
+                        }}
+                    />
+                );
+            } else {
+                const value = get(row, accessor);
+                const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
+                return (
+                    <span
+                        style={{
+                            maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300,
+                            display: 'inline-block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {visual}
+                    </span>
+                );
+            }
         },
     };
 }
