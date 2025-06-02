@@ -6,7 +6,8 @@ const Acciones = lazy(() => import('../pages/ADR/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
-const PlanesGestion = lazy(() => import('../pages/ADR/PlanesGestion'));
+const PlanesGestion = lazy(() => import('../pages/ADR/Plan/PlanesGestion'));
+const PlanesGestionEnvio = lazy(() => import('../pages/ADR/Plan/PlanesGestionEnvio'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
 const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
 const Profile = lazy(() => import('../pages/profile/profile'));
@@ -54,6 +55,11 @@ const routes = [
         path: '/adr/planesGestion',
         element: <PlanesGestion />,
         layout: 'PlanesGestion',
+    },
+    {
+        path: '/adr/planesGestionEnvio',
+        element: <PlanesGestionEnvio />,
+        layout: 'PlanesGestionEnvio',
     },
     {
         path: '/adr/servicios',

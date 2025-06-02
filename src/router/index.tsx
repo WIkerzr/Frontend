@@ -18,6 +18,7 @@ const protectedPaths = [
     '/adr/accionesAccesorias',
     '/adr/memoriasAnuales',
     '/adr/planesGestion',
+    '/adr/planesGestionEnvio',
     '/adr/servicios',
     '/configuracion/indicadores',
     '/configuracion/usuarios',

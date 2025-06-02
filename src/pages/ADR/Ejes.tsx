@@ -1,7 +1,6 @@
-import { Checkbox } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-const ejesBBDD = [
+export const ejesBBDD = [
     { id: 1, nombre: 'Abastecimiento de agua y Saneamiento' },
     { id: 2, nombre: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles' },
     { id: 3, nombre: 'Telecomunicaciones' },
