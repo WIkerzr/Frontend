@@ -150,6 +150,13 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorAccion>>({ columnAccessor: 'id', direction: 'asc' });
     const [editableRowIndex, setEditableRowIndex] = useState(-1);
 
+    const handleEliminarFila = (rowIndex: number) => {
+        if (window.confirm(t('confirmarEliminarIndicador'))) {
+            const nuevosIndicadores = indicadores.filter((_row, idx) => idx !== rowIndex);
+            setIndicadores(nuevosIndicadores);
+        }
+    };
+
     const columnMetaAnual = [
         editableColumnByPath<IndicadorAccion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
         editableColumnByPath<IndicadorAccion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
@@ -188,7 +195,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
             (Number(indicadores[editableRowIndex]?.metaFinal?.hombres) || 0) + (Number(indicadores[editableRowIndex]?.metaFinal?.mujeres) || 0)
         ),
     ];
-    const columnNombre = [editableColumnByPath<IndicadorAccion>('nombre', t('nombre'), setIndicadores, editableRowIndex, true)];
+    const columnNombre = [editableColumnByPath<IndicadorAccion>('nombre', t('nombre'), setIndicadores, editableRowIndex, false)];
 
     const columns = [
         editableColumnByPath<IndicadorAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
@@ -208,9 +215,14 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
                         {t('guardar')}
                     </button>
                 ) : (
-                    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                        {t('editar')}
-                    </button>
+                    <div className="flex gap-2 w-full">
+                        <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                            {t('editar')}
+                        </button>
+                        <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
+                            {t('eliminar')}
+                        </button>
+                    </div>
                 ),
         },
     ];

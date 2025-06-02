@@ -9,7 +9,7 @@ import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
-import { DatosAccion, datosInicializadosAccion } from '../../../types/TipadoAccion';
+import { DatosAccion } from '../../../types/TipadoAccion';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { PestanaIndicadores } from './EditarAccionIndicadores';

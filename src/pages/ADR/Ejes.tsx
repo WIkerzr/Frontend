@@ -48,7 +48,7 @@ const ejesBBDD = [
 const Index = () => {
     const { t } = useTranslation();
 
-    const [selected, setSelected] = useState<number[]>([]);
+    const [selected, setSelected] = useState<number[]>([37, 36, 3]);
     const [locked, setLocked] = useState(false);
 
     const handleCheck = (id: number) => {

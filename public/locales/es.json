@@ -17,7 +17,9 @@
 
     "Accion": "Acción",
 
+    "eliminar":"Eliminar.",
     "alertIndicadores":"Se tiene que rellenar como minimo el campo Nombre, y todos los totales para poder guardar",
+    "confirmarEliminarIndicador": "¿Seguro que quieres eliminar este indicador?",
 
     "Hombre":"Hbr.",
     "Mujer":"Muj.",
