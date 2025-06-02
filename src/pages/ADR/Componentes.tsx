@@ -96,7 +96,6 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
         const firstAvailable = ejes.find((eje) => accionesPorEje[eje].length < 5);
         return firstAvailable || ejes[0];
     });
-    let title = t('newAccion');
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [inputError, setInputError] = useState(false);
@@ -125,7 +124,7 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
                     Añadir Acción
                 </button>
             </div>
-            <NewModal open={showModal} onClose={() => setShowModal(false)} title={title}>
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('newAccion')}>
                 <div className="space-y-5">
                     <div>
                         <label className="block font-medium mb-1">{t('Ejes')}</label>
@@ -170,7 +169,7 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
                     {inputError && <div className="text-xs text-red-500 text-center">{t('Por favor rellena ambos campos antes de guardar.')}</div>}
                     <button
                         onClick={handleNuevaAccion}
-                        className={`bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition ${getEjeLimitado(selectedEje) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition ${getEjeLimitado(selectedEje) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         {t('guardar')}
                     </button>

@@ -52,7 +52,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
     return (
         <div className="p-5 flex flex-col gap-4 w-full">
             <div className="flex gap-4 panel">
-                <div className="flex-1">
+                {/* <div className="flex-1">
                     <label htmlFor="ejecutora">*{t('ejecutora')}</label>
                     <textarea id="ejecutora" name="ejecutora" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.ejecutora} onChange={handleChange} />
                 </div>
@@ -75,7 +75,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                         </label>
                         <input type="text" id="rangoAnios" name="rangoAnios" className="w-full border rounded p-2 h-[38px]" value={formData.rangoAnios} onChange={handleChange} />
                     </div>
-                )}
+                )}*/}
                 <div className="flex-1">
                     <label htmlFor="sActual">*{t('sActual')}</label>
                     <CustomSelect value={formData.sActual} onChange={handleSituacionActual} />
