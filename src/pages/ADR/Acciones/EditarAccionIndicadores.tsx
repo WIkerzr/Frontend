@@ -118,7 +118,7 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                 <button onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">
                     Cancelar
                 </button>
-                <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                <button onClick={handleSave} className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded">
                     Guardar
                 </button>
             </div>

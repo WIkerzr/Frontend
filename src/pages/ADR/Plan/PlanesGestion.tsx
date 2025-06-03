@@ -3,26 +3,17 @@ import { ejesBBDD } from '../Ejes';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import { IndicadoresOperativosPlanTable } from './PlanesComponentes';
+import { TabCard } from '../Acciones/EditarAccionComponent';
+import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 
-let introduccion: string = `2.- Liderar la realización y el despliegue del nuevo PROGRAMA COMARCAL DE DESARROLLO RURAL (PCDR).`;
-let proceso: string = `El despliegue de las herramientas para la nueva LDR (Ley de Desarrollo Rural) va a llevar un trabajo
-constante durante todo el año:
- Participación en el diseño de una metodología común para todas las comarcas de Euskadi
- Planificación y elaboración del nuevo PCDR Llanada Alavesa donde la ADR será líder y
-responsable del proceso de elaboración con la participación “botom-up”. Para ello se realizará un
-diseño de la metodología y se marcan 3 fases:
-o Primer trimestre 2024. Hazi Fundazioa contratará una empresa para la elaboración del
-diseño y planificación de un PCDR. Las ADRs participarán en este proceso
-o Segundo trimestre 2024. Capacitación al personal de las ADRs para la elaboración del PCDR
-o Segundo semestre 2024. Realización PCDR de la Llanada con un proceso participativo
- Reuniones de participación y presentación de los PDTs (Programas de Desarrollo Territorial)
-que serán dos: PDT de diversificación de la actividad económica y PDT de calidad de vida. Las
-ADRs participarán como organismos y colaboradores de apoyo
- Seguir trabajando con GV y DFA en el desarrollo de los nuevos convenios y financiación que se
-adecúen a las necesidades de la LDR.
- Se continuará con los grupos de trabajo de legumbres, sala de sacrifico de aves, harina y cocina
-colectiva y con el grupo de cohesión comarcal para el diseño y organización de las ediciones de
-2023 del X Lautada Eguna y VII Semana del Desarrollo Rural.`;
+let introduccion: string = `La Ley 7/2022, de 30 de junio, de Desarrollo Rural, determina la elaboración de nuevos instrumentos de planificación que favorezcan la alineación de los proyectos e iniciativas del medio rural con las políticas institucionales a impulsar.
+En el caso de los PCDR (Programas Comarcales de Desarrollo Rural), la previsión es que se elaboren a lo largo del ejercicio 2024 como herramientas donde se recojan, para cada comarca y bajo una metodología de trabajo común, los objetivos sectoriales y las líneas de actuación a implementar derivados de los PDT (Programas de Desarrollo Territorial) que incidan de forma prioritaria en cada comarca.
+En este contexto, los Planes de Gestión correspondientes al año 2024 se diseñan en base a lo dispuesto en el PDR comarcal 2015-2020, con la finalidad de alcanzar los objetivos que lleven a la comarca hacia la VISION marcada en dicho PDR hasta que los nuevos instrumentos de planificación de referencia estén plenamente desarrollados.
+En este documento se recogen las actuaciones que configuran el Plan de Gestión 2024 de la ADR LAUTADA para el desarrollo del PDR Comarcal de LLANADA ALAVESA`;
+let proceso: string = `El despliegue de las herramientas para la nueva LDR (Ley de Desarrollo Rural) va a llevar un trabajo constante durante todo el año:
+ Participación en el diseño de una metodología común para todas las comarcas de Euskadi  Planificación y elaboración del nuevo PCDR Llanada Alavesa donde la ADR será líder y responsable del proceso de elaboración con la participación “botom-up”. Para ello se realizará un diseño de la metodología y se marcan 3 fases:
+o Primer trimestre 2024. Hazi Fundazioa contratará una empresa para la elaboración del diseño y planificación de un PCDR. Las ADRs participarán en este proceso o Segundo trimestre 2024. Capacitación al personal de las ADRs para la elaboración del PCDR o Segundo semestre 2024. Realización PCDR de la Llanada con un proceso participativo  Reuniones de participación y presentación de los PDTs (Programas de Desarrollo Territorial) que serán dos: PDT de diversificación de la actividad económica y PDT de calidad de vida. Las ADRs participarán como organismos y colaboradores de apoyo  Seguir trabajando con GV y DFA en el desarrollo de los nuevos convenios y financiación que se adecúen a las necesidades de la LDR.
+ Se continuará con los grupos de trabajo de legumbres, sala de sacrifico de aves, harina y cocina colectiva y con el grupo de cohesión comarcal para el diseño y organización de las ediciones de 2023 del X Lautada Eguna y VII Semana del Desarrollo Rural.`;
 const ejesPrioritarios = `${ejesBBDD[37].nombre}
 ${ejesBBDD[36].nombre}
 ${ejesBBDD[3].nombre}`;
@@ -31,30 +22,39 @@ let tareasInternasGestionADR: string = `Las tareas internas de gestión que aseg
 Elaboración del PG anual y seguimiento de las actuaciones propuestas.
 Elaboración de la memoria recapitulativa anual analizando el grado de ejecución de las actuaciones previstas.
 Labores propias de la gestión administrativa interna de la asociación: convocatoria de juntas directivas, elaboración de actas y memorias, gestión del presupuesto, etc.
-Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa etc.).
-`;
+Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa etc.).`;
 
 const Index = () => {
     const { t } = useTranslation();
 
     return (
-        <div className="p-5 flex flex-col gap-4 w-full">
-            <div className=" flex flex-row  gap-4">
-                <div className="panel flex w-[90%] flex-col">
-                    <label htmlFor="introduccion">*{t('introduccion')}</label>
-                    <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={introduccion} />
-                </div>
-                <div className=" flex w-[10%] items-center justify-center ">
-                    <div className="flex flex-col gap-4 panel">
-                        <button className="px-4 py-3 bg-primary text-white rounded">{t('guardar')}</button>
-                        <button className="px-1 py-3 bg-primary text-white rounded flex gap-1">
+        <div className="panel">
+            <div className="w-full mx-auto mt-1 px-2">
+                <h2 className="text-xl font-bold flex items-center">
+                    {t('planTitulo')} (
+                    <TabCard icon={IconPlan} label="estadoBorrador" status="borrador" className=" text-black dark:text-[#506690] dark:group-hover:text-white-dark" />) 2025
+                </h2>
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col space-x-4">
+                        <span>{t('explicacionPlanParte1')}</span>
+                        <span>{t('explicacionPlanParte2')}</span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded text-center font-medium">{t('guardar')}</button>
+                        <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded flex items-center justify-center gap-1 font-medium">
                             <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
                             {t('WORD')}
                         </button>
                         <NavLink to="/adr/planesGestionEnvio" className="group">
-                            <button className="px-4 py-3 bg-green-500 text-white rounded">{t('enviar')}</button>
+                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-green-500 text-white rounded text-center font-medium">{t('enviar')}</button>
                         </NavLink>
                     </div>
+                </div>
+            </div>
+            <div className=" flex flex-row  gap-4">
+                <div className="panel flex w-[90%] flex-col">
+                    <label htmlFor="introduccion">*{t('introduccion')}</label>
+                    <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={introduccion} />
                 </div>
             </div>
             <div className="panel">

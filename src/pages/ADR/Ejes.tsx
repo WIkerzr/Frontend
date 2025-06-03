@@ -64,13 +64,16 @@ const Index = () => {
     };
 
     return (
-        <div>
-            <span>{t('seleccionar3Ejes')}</span>
-            <div className="w-full mx-auto mt-8 px-2">
-                <div className="flex justify-between items-center mb-6">
-                    <div></div>
+        <div className="panel">
+            <h2 className="text-xl font-bold">{t('ejesTitulo')}</h2>
+            <div className="w-full mx-auto mt-1 px-2">
+                <div className="flex justify-between items-center mb-6 panel">
+                    <div className="flex flex-col space-x-4">
+                        <span>{t('explicacionEje')}</span>
+                        <span>{t('seleccionar3Ejes')}</span>
+                    </div>
                     <div className="flex items-center space-x-4">
-                        <span className="text-sm text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
+                        <span className="text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
                         <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked || selected.length !== 3}>
                             Guardar
                         </button>

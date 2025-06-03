@@ -1,6 +1,7 @@
 import React from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
 import { DatosAccion } from '../../types/TipadoAccion';
+import { useTranslation } from 'react-i18next';
 
 export const datosAcciones: DatosAccion[] = [
     {
@@ -175,24 +176,34 @@ export const datosAcciones: DatosAccion[] = [
 ];
 
 const Index: React.FC = () => {
+    const { t } = useTranslation();
+
     const ejesUnicos = Array.from(new Set(datosAcciones.map((a) => a.eje)));
     const arraysPorEje = ejesUnicos.map((eje) => datosAcciones.filter((a) => a.eje === eje));
 
     return (
-        <>
-            <ModalAccion listadosAcciones={datosAcciones} />
-            <div className="flex items-start w-full h-100%">
-                <div className="flex flex-col flex-1 items-center justify-center  p-1">
-                    <ListadoAcciones nombre={ejesUnicos[0]} listadoMap={arraysPorEje[0]} />
+        <div className="panel">
+            <h2 className="text-xl font-bold">{t('listadoAcciones')}</h2>
+            <div className="w-full mx-auto mt-1 px-2">
+                <div className="flex justify-between items-center mb-6 panel">
+                    <div className="flex space-x-4">
+                        <span>{t('explicacionAccion')}</span>
+                    </div>
+                    <ModalAccion listadosAcciones={datosAcciones} />
                 </div>
-                <div className="flex flex-col flex-1 items-center justify-center  p-1">
-                    <ListadoAcciones nombre={ejesUnicos[1]} listadoMap={arraysPorEje[1]} />
-                </div>
-                <div className="flex flex-col flex-1 items-center justify-center  p-1">
-                    <ListadoAcciones nombre={ejesUnicos[2]} listadoMap={arraysPorEje[2]} />
+                <div className="flex items-start w-full h-100%">
+                    <div className="flex flex-col flex-1 items-center justify-center  p-1">
+                        <ListadoAcciones nombre={ejesUnicos[0]} listadoMap={arraysPorEje[0]} />
+                    </div>
+                    <div className="flex flex-col flex-1 items-center justify-center  p-1">
+                        <ListadoAcciones nombre={ejesUnicos[1]} listadoMap={arraysPorEje[1]} />
+                    </div>
+                    <div className="flex flex-col flex-1 items-center justify-center  p-1">
+                        <ListadoAcciones nombre={ejesUnicos[2]} listadoMap={arraysPorEje[2]} />
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
 
         // <div className="p-4 bg-[#FAFAFB]">
         //     <label>{'Maximo 5 Acciones por eje prioritario (15)'}</label>

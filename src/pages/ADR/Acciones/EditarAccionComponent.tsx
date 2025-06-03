@@ -9,7 +9,7 @@ import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicad
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 
-const statusColors: Record<Estado, string> = {
+export const StatusColors: Record<Estado, string> = {
     proceso: 'bg-yellow-400',
     cerrado: 'bg-red-400',
     borrador: 'bg-blue-400',
@@ -28,7 +28,7 @@ export const TabCard: React.FC<TabCardProps> = ({ icon, label, status = 'borrado
         <div className={`flex items-center`}>
             <div className="relative">
                 <img src={icon} alt={t(`${label}`)} className="w-6 h-6" />
-                <span className={`absolute -top-1 -right-0 w-3 h-3 rounded-full border-2 border-white ${statusColors[status]}`} />
+                <span className={`absolute -top-1 -right-0 w-3 h-3 rounded-full border-2 border-white ${StatusColors[status]}`} />
             </div>
             <span className={`font-semibold ${className}`}>{t(`${label}`)}</span>
         </div>
@@ -207,10 +207,10 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
                     </button>
                 ) : (
                     <div className="flex gap-2 w-full">
-                        <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                        <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
                             {t('editar')}
                         </button>
-                        <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
+                        <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
                             {t('eliminar')}
                         </button>
                     </div>
@@ -293,12 +293,12 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     return (
         <div>
             <div className="panel mt-6 ">
-                <div className="p-1 flex items-center space-x-4 mb-5">
+                <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
                     <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
                     {creaccion && (
                         <>
                             <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
-                                {t('newIndicador', { tipo: t('Realizacion') })}
+                                {t('newFileIndicador', { tipo: t('Realizacion') })}
                             </button>
                             {open && (
                                 <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />
