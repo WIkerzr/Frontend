@@ -1,9 +1,9 @@
 {
     "IniciaSesion": "Inicio de sesión",
     "IntroduceEmail": "Introduce tu e-mail",
-    "Contrasena": "Contraseña",
+    "contrasena": "Contraseña",
     "IntroduceContrasena": "Introduce tu contraseña",
-    "RecordarContrasena": "Recordar mi sesión",
+    "RecordarSesion": "Recordar mi sesión",
     "Entrar": "Entrar",
     "OlvidadoContra": "¿Has olvidado tu contraseña? Haz click",
     "cerrarSesion": "Cerrar sesión",
@@ -52,13 +52,14 @@
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
     "newIndicador": "Nuevo Indicador {{tipo}}",
-    "newFileIndicador": "Agregar nueva fila Indicador {{tipo}}",
+    "newFileIndicador": "Añadir indicador {{tipo}}",
     "indicadoresResultadoRelacionados": "Indicadores de resultado relacionados",
+    "nuevoIndicadorRealizacion": "Nuevo indicador de realización",
     "newAccion": "Nueva Acción",
     "editAccion": "Editar Acción",
     "miPerfil": "Mi perfil",
     "introduceEmail": "Introduce tu email",
-    "recordarContraseña": "Recordar contraseña",
+    "recordarContrasena": "Recordar contraseña",
 
     "introduccion": "Introducción",
     "proceso": "Proceso",
@@ -70,10 +71,9 @@
     "sinSeleccionar": "Sin seleccionar",
     "editar": "Editar",
     "borrar": "Borrar",
-    "Contraseña": "Contraseña",
-    "ContraseñaNoCoincide": "Las contraseñas no coinciden.",
+    "contrasenaNoCoincide": "Las contraseñas no coinciden.",
     "CambiosGuardados": "Cambios guardados correctamente.",
-    "CambioContraseña": "Cambio de contraseña",
+    "CambioContrasena": "Cambio de contraseña",
 
     "agregarUsuario": "Agregar nuevo usuario",
 
@@ -82,12 +82,15 @@
     "nuevoIndicador": "Nuevo indicador de ",
     "agregarIndicadorResultadoRelacionado": "Agregar Indicador Resultado relacionado",
     "sinIndicadorResultadoRelacionado": "Sin Indicador Resultado relacionado",
+    "indicadorTipo": "Indicador {{tipo}}",
     "Indicadores": "Indicadores",
     "Realizacion": "Realización",
     "Resultado": "Resultado",
     "ambit": "Ámbito",
     "guardar": "Guardar",
     "cerrar": "Cerrar",
+    "anadir": "Añadir",
+    "cancelar": "Cancelar",
     "seguridad": "Seguridad",
     "contraNueva": "Contraseña nueva",
     "repetirContra": "Repetir contraseña",
@@ -132,6 +135,7 @@
     "noRegionSeleccionada": "Sin región seleccionada",
 
 
+    "seleccionaElIndicador":"Selecciona el indicador {{tipo}}",
     "seleccionaIndicador":"Selecciona un indicador...",
 
 

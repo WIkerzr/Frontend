@@ -1,19 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
-import IconMemoria from '../../components/Icon/Menu/IconMemoria.svg';
-
-const Index = () => {
-    return (
-        <div>
-            <ListadoArchivos></ListadoArchivos>
-        </div>
-    );
-};
-
-export default Index;
-
 import { useState } from 'react';
-import { StatusColors, TabCard } from './Acciones/EditarAccionComponent';
+import { ZonaTitulo } from '../Configuracion/componentes';
+import { StatusColors } from './Componentes';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 interface Archivo {
     nombre: string;
     url: string;
@@ -27,24 +17,27 @@ const archivos: Archivo[] = [
     // { nombre: "Anexo5.pdf", url: "/docs/Anexo5.pdf" },
 ];
 
-function ListadoArchivos() {
+const Index = () => {
+    const { anio, estados } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     return (
         <div className="panel">
-            <div className="panel">
-                <h2 className="text-xl font-bold flex items-center">
-                    {t('memoriaTitulo')} (
-                    <TabCard icon={IconMemoria} label="estadoCerrado" status="cerrado" className=" text-black dark:text-[#506690] dark:group-hover:text-white-dark" />) 2025
-                </h2>
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-col space-x-4">
+            <ZonaTitulo
+                titulo={
+                    <h2 className="text-xl font-bold flex items-center space-x-2">
+                        <span>{t('memoriaTitulo')} 2025</span>
+                        <span className={`badge text-xs ml-2 py-0.5 px-2 relative -mt-2 ${StatusColors[estados[anio]?.memoria]}`}>{t('estadoCerrado')}</span>
+                    </h2>
+                }
+                zonaExplicativa={
+                    <>
                         <span>{t('explicacionMemoriaParte1')}</span>
                         <span>{t('explicacionMemoriaParte2')}</span>
-                    </div>
-                </div>
-            </div>
+                    </>
+                }
+            />
             <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
                 <ul className="space-y-3 ">
@@ -70,4 +63,6 @@ function ListadoArchivos() {
             </div>
         </div>
     );
-}
+};
+
+export default Index;

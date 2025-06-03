@@ -5,6 +5,9 @@ import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import { IndicadoresOperativosPlanTable } from './PlanesComponentes';
 import { TabCard } from '../Acciones/EditarAccionComponent';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
+import { ZonaTitulo } from '../../Configuracion/componentes';
+import { StatusColors } from '../Componentes';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 let introduccion: string = `La Ley 7/2022, de 30 de junio, de Desarrollo Rural, determina la elaboración de nuevos instrumentos de planificación que favorezcan la alineación de los proyectos e iniciativas del medio rural con las políticas institucionales a impulsar.
 En el caso de los PCDR (Programas Comarcales de Desarrollo Rural), la previsión es que se elaboren a lo largo del ejercicio 2024 como herramientas donde se recojan, para cada comarca y bajo una metodología de trabajo común, los objetivos sectoriales y las líneas de actuación a implementar derivados de los PDT (Programas de Desarrollo Territorial) que incidan de forma prioritaria en cada comarca.
@@ -25,33 +28,40 @@ Labores propias de la gestión administrativa interna de la asociación: convoca
 Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa etc.).`;
 
 const Index = () => {
+    const { anio, estados } = useEstadosPorAnio();
     const { t } = useTranslation();
 
     return (
-        <div className="panel">
-            <div className="w-full mx-auto mt-1 px-2">
-                <h2 className="text-xl font-bold flex items-center">
-                    {t('planTitulo')} (
-                    <TabCard icon={IconPlan} label="estadoBorrador" status="borrador" className=" text-black dark:text-[#506690] dark:group-hover:text-white-dark" />) 2025
-                </h2>
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-col space-x-4">
+        <div className="panel ">
+            <ZonaTitulo
+                titulo={
+                    <h2 className="text-xl font-bold flex items-center space-x-2">
+                        <span>{t('planTitulo')} 2025</span>
+                        <span className={`badge text-xs ml-2 py-0.5 px-2 relative -mt-2 ${StatusColors[estados[anio]?.plan]}`}>{t('estadoCerrado')}</span>
+                    </h2>
+                }
+                zonaBtn={
+                    <>
+                        <div className="flex items-center space-x-4">
+                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded text-center font-medium">{t('guardar')}</button>
+                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded flex items-center justify-center gap-1 font-medium">
+                                <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
+                                {t('WORD')}
+                            </button>
+                            <NavLink to="/adr/planesGestionEnvio" className="group">
+                                <button className="px-4 py-3 min-w-[120px] h-[48px] bg-green-500 text-white rounded text-center font-medium">{t('enviar')}</button>
+                            </NavLink>
+                        </div>
+                    </>
+                }
+                zonaExplicativa={
+                    <>
                         <span>{t('explicacionPlanParte1')}</span>
                         <span>{t('explicacionPlanParte2')}</span>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded text-center font-medium">{t('guardar')}</button>
-                        <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded flex items-center justify-center gap-1 font-medium">
-                            <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
-                            {t('WORD')}
-                        </button>
-                        <NavLink to="/adr/planesGestionEnvio" className="group">
-                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-green-500 text-white rounded text-center font-medium">{t('enviar')}</button>
-                        </NavLink>
-                    </div>
-                </div>
-            </div>
-            <div className=" flex flex-row  gap-4">
+                    </>
+                }
+            />
+            <div className=" flex flex-row gap-4">
                 <div className="panel flex w-[90%] flex-col">
                     <label htmlFor="introduccion">*{t('introduccion')}</label>
                     <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={introduccion} />

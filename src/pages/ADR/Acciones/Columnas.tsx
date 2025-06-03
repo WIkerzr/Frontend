@@ -30,7 +30,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                 if (editableRowIndex === index && editable) {
                     return (
                         <input
-                            className={ambosCero ? 'border p-1 rounded' : 'border p-1 rounded bg-gray-100 text-gray-700'}
+                            className={ambosCero ? 'border p-1 rounded text-center' : 'border p-1 rounded bg-gray-100 text-gray-700 text-center'}
                             value={ambosCero ? total : hombres + mujeres}
                             style={{ maxWidth: 60 }}
                             readOnly={!ambosCero}
@@ -50,52 +50,55 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                 }
 
                 return (
-                    <span
-                        style={{
-                            maxWidth: 60,
-                            display: 'inline-block',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {ambosCero ? total : hombres + mujeres}
-                    </span>
-                );
-            }
-
-            if (editableRowIndex === index && editable && title === 'Nombre') {
-                return (
-                    <div>
-                        <select
-                            id="indicadores"
-                            className="p-2 border rounded focus:outline-none focus:ring focus:ring-blue-200 max-w-[350px]"
-                            value={indicadorSeleccionado !== undefined ? indicadorSeleccionado : get(row, accessor) ?? ''}
-                            onChange={(e) => {
-                                setIndicadorSeleccionado(e.target.value);
-                                setIndicadores((prevRows) => {
-                                    const copy = [...prevRows];
-                                    const updatedRow = { ...copy[index] };
-                                    set(updatedRow as object, accessor, e.target.value);
-                                    copy[index] = updatedRow;
-                                    return copy;
-                                });
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <span
+                            style={{
+                                maxWidth: 60,
+                                display: 'inline-block',
+                                margin: '0 auto',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
                             }}
                         >
-                            {indicadoresRealizacion.map((inVal) => (
-                                <option key={inVal.id} value={inVal.descripcion}>
-                                    {inVal.descripcion}
-                                </option>
-                            ))}
-                        </select>
+                            {ambosCero ? total : hombres + mujeres}
+                        </span>
                     </div>
                 );
             }
 
+            // if (editableRowIndex === index && editable && title === 'Nombre') {
+            //     return (
+            //         <div>
+            //             <select
+            //                 id="indicadores"
+            //                 className="p-2 border rounded focus:outline-none focus:ring focus:ring-blue-200 max-w-[350px] text-center"
+            //                 value={indicadorSeleccionado !== undefined ? indicadorSeleccionado : get(row, accessor) ?? ''}
+            //                 onChange={(e) => {
+            //                     setIndicadorSeleccionado(e.target.value);
+            //                     setIndicadores((prevRows) => {
+            //                         const copy = [...prevRows];
+            //                         const updatedRow = { ...copy[index] };
+            //                         set(updatedRow as object, accessor, e.target.value);
+            //                         copy[index] = updatedRow;
+            //                         return copy;
+            //                     });
+            //                 }}
+            //             >
+            //                 {indicadoresRealizacion.map((inVal) => (
+            //                     <option key={inVal.id} value={inVal.descripcion}>
+            //                         {inVal.descripcion}
+            //                     </option>
+            //                 ))}
+            //             </select>
+            //         </div>
+            //     );
+            // }
+
             if (editableRowIndex === index && editable) {
                 return (
                     <input
-                        className="border p-1 rounded"
+                        className={`border p-1 rounded ${accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}`}
                         value={get(row, accessor) ?? ''}
                         required={true}
                         style={{ maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300 }}
@@ -114,17 +117,21 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                 const value = get(row, accessor);
                 const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
                 return (
-                    <span
-                        style={{
-                            maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300,
-                            display: 'inline-block',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {visual}
-                    </span>
+                    <div style={accessor === 'descripcion' || accessor === 'hipotesis' ? {} : { display: 'flex', justifyContent: 'left' }}>
+                        <span
+                            className={accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}
+                            style={{
+                                maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300,
+                                display: 'inline-block',
+                                margin: '0 auto',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {visual}
+                        </span>
+                    </div>
                 );
             }
         },

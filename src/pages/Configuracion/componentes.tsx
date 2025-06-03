@@ -4,7 +4,7 @@ import { IRootState } from '../../store';
 import { sortBy } from 'lodash';
 import { UserID } from '../../types/users';
 import Tippy from '@tippyjs/react';
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, ReactNode, useEffect, useState } from 'react';
 import { Indicador } from '../../types/Indicadores';
 import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
@@ -781,3 +781,29 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
         </div>
     );
 });
+interface PanelEjesProps {
+    titulo: ReactNode;
+    zonaBtn?: ReactNode;
+    zonaExplicativa?: ReactNode;
+    zonaExtra?: ReactNode;
+}
+
+export const ZonaTitulo: React.FC<PanelEjesProps> = ({ titulo, zonaBtn, zonaExplicativa, zonaExtra }) => {
+    const { t } = useTranslation();
+    return (
+        <>
+            <div className="flex flex-col justify-between mb-6 ">
+                <div className="flex items-center justify-between mb-6 h-[48px]">
+                    {titulo}
+                    <div className="flex items-center space-x-4">{zonaBtn}</div>
+                </div>
+                {zonaExplicativa && (
+                    <div className=" rounded inline-flex items-center mb-6">
+                        <div className="flex flex-col  text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">{zonaExplicativa}</div>
+                    </div>
+                )}
+                {zonaExtra && <>{zonaExtra}</>}
+            </div>
+        </>
+    );
+};

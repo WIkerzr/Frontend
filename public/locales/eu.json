@@ -3,7 +3,7 @@
     "IntroduceEmail": "Sartu zure e-posta",
     "Contrasena": "Pasahitza",
     "IntroduceContrasena": "Sartu zure pasahitza",
-    "RecordarContrasena": "Gogoratu nire saioa",
+    "RecordarSesion": "Gogoratu nire saioa",
     "Entrar": "Sartu",
     "OlvidadoContra": "Pasahitza ahaztu duzu? Egin klik",
     "cerrarSesion": "Saioa itxi",
@@ -29,7 +29,7 @@
     "newIndicador": "Adierazle berria",
     "miPerfil": "Nire profila",
     "introduceEmail": "Sartu zure helbide elektronikoa",
-    "recordarContraseña": "Gogoratu pasahitza",
+    "recordarContrasena": "Gogoratu pasahitza",
 
     "sinSeleccionar": "Hautatu gabe",
     "editar": "Editatu",

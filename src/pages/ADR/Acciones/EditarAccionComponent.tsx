@@ -8,12 +8,7 @@ import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
-
-export const StatusColors: Record<Estado, string> = {
-    proceso: 'bg-yellow-400',
-    cerrado: 'bg-red-400',
-    borrador: 'bg-blue-400',
-};
+import { StatusColors } from '../Componentes';
 
 interface TabCardProps {
     icon: string;
@@ -133,8 +128,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
         }
     }, [indicadores]);
     const [page, setPage] = useState(1);
-    const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
-    const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
     const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
     const [recordsData, setRecordsData] = useState(initialRecords);
 
@@ -226,16 +219,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     ];
 
     useEffect(() => {
-        setPage(1);
-    }, [pageSize]);
-
-    useEffect(() => {
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize;
-        setRecordsData([...initialRecords.slice(from, to)]);
-    }, [page, pageSize, initialRecords]);
-
-    useEffect(() => {
         setInitialRecords(() => {
             if (!search.trim()) return sortBy(indicadores, 'id');
             const s = search.toLowerCase();
@@ -292,42 +275,34 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
 
     return (
         <div>
-            <div className="panel mt-6 ">
-                <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
-                    <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
-                    {creaccion && (
-                        <>
-                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
-                                {t('newFileIndicador', { tipo: t('Realizacion') })}
-                            </button>
-                            {open && (
-                                <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />
-                            )}
-                        </>
-                    )}
-                </div>
-                <div>
-                    <DataTable
-                        className={`datatable-pagination-horizontal `}
-                        records={recordsData}
-                        groups={columnGroups}
-                        totalRecords={initialRecords.length}
-                        recordsPerPage={pageSize}
-                        withRowBorders={false}
-                        withColumnBorders={true}
-                        striped={true}
-                        highlightOnHover={true}
-                        page={page}
-                        onPageChange={(p) => setPage(p)}
-                        recordsPerPageOptions={PAGE_SIZES}
-                        onRecordsPerPageChange={setPageSize}
-                        sortStatus={sortStatus}
-                        onSortStatusChange={setSortStatus}
-                        minHeight={200}
-                        paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
-                        recordsPerPageLabel={t('recorsPerPage')}
-                    />
-                </div>
+            <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
+                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
+                {creaccion && (
+                    <>
+                        <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
+                            {t('newFileIndicador', { tipo: t('Realizacion') })}
+                        </button>
+                        {open && <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />}
+                    </>
+                )}
+            </div>
+            <div>
+                <DataTable
+                    className={`datatable-pagination-horizontal `}
+                    records={recordsData}
+                    groups={columnGroups}
+                    withRowBorders={false}
+                    withColumnBorders={true}
+                    striped={true}
+                    highlightOnHover={true}
+                    // onPageChange={(p) => setPage(p)}
+                    // onRecordsPerPageChange={setPageSize}
+                    sortStatus={sortStatus}
+                    onSortStatusChange={setSortStatus}
+                    minHeight={200}
+                    // paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
+                    // recordsPerPageLabel={t('recorsPerPage')}
+                />
             </div>
         </div>
     );

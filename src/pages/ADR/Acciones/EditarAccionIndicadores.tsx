@@ -17,6 +17,7 @@ interface tablaIndicadoresProps {
 }
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador }, ref) => {
+    const { t } = useTranslation();
     const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorRealizacion[]>(indicador.indicadoreResultado);
 
     const handleResultadosRelacionadosChange = (nuevosResultados: number[]) => {
@@ -33,13 +34,19 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndic
 
     return (
         <>
-            <TablaIndicadorAccion
-                indicador={indicador.indicadoreRealizacion}
-                indicadoresResultados={resultadosSeleccionados}
-                creaccion={true}
-                onResultadosRelacionadosChange={handleResultadosRelacionadosChange}
-            />
-            <TablaIndicadorAccion indicador={resultadosSeleccionados} />
+            <div className="panel mt-6 ">
+                <span className="text-xl">{t('indicadorTipo', { tipo: t('Realizacion') })}</span>
+                <TablaIndicadorAccion
+                    indicador={indicador.indicadoreRealizacion}
+                    indicadoresResultados={resultadosSeleccionados}
+                    creaccion={true}
+                    onResultadosRelacionadosChange={handleResultadosRelacionadosChange}
+                />
+            </div>
+            <div className="panel mt-6 ">
+                <span className="text-xl">{t('indicadorTipo', { tipo: t('Resultado') })}</span>
+                <TablaIndicadorAccion indicador={resultadosSeleccionados} />
+            </div>
         </>
     );
 });
@@ -83,12 +90,12 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
     };
 
     return (
-        <NewModal open={open} onClose={onClose} title="Nuevo Indicador de Acción">
+        <NewModal open={open} onClose={onClose} title={t('nuevoIndicadorRealizacion')}>
             <div>
                 <label className="block mb-2 font-semibold">Indicador de realización:</label>
                 <select className="w-full mb-4 border rounded px-2 py-1" value={indicadorRealizacionId ?? ''} onChange={(e) => handleChangeRealizacion(Number(e.target.value))}>
                     <option value="" disabled>
-                        {t('seleccionaIndicador')}
+                        {t('seleccionaElIndicador', { tipo: t('Realizacion') })}
                     </option>
                     {realizaciones.map((r) => (
                         <option value={r.id} key={r.id}>
@@ -116,10 +123,10 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
 
             <div className="flex justify-end gap-2 mt-4">
                 <button onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">
-                    Cancelar
+                    {t('cancelar')}
                 </button>
                 <button onClick={handleSave} className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded">
-                    Guardar
+                    {t('anadir')}
                 </button>
             </div>
         </NewModal>

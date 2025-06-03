@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,12 @@ import { NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
 import AnimateHeight from 'react-animate-height';
 import { DatosAccion } from '../../types/TipadoAccion';
+
+export const StatusColors: Record<Estado, string> = {
+    proceso: 'bg-gray',
+    cerrado: 'bg-success',
+    borrador: 'bg-warning',
+};
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -180,10 +186,10 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
 };
 
 interface ListadoAccionesProps {
-    nombre: string;
+    eje: string;
     listadoMap: DatosAccion[];
 }
-export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) => {
+export const ListadoAcciones = ({ eje, listadoMap }: ListadoAccionesProps) => {
     const [acciones, setAcciones] = useState<DatosAccion[]>(listadoMap);
     const { t } = useTranslation();
 
@@ -193,13 +199,13 @@ export const ListadoAcciones = ({ nombre, listadoMap }: ListadoAccionesProps) =>
     const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
 
     return (
-        <div className="rounded-lg space-y-5 text-center p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
-            <span className="text-lg font-semibold text-gray-700 tracking-wide block mb-2">{nombre}</span>
+        <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
+            <span className="text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
 
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => (
-                    <div key={accion.id} className="bg-white border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
-                        <span className="text-lg">{accion.accion}</span>
+                    <div key={accion.id} className="bg-white border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col ">
+                        <span className="text-base">{accion.accion}</span>
                         <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
                         <span className="text-base">{accion.lineaActuaccion}</span>
                         <div className="flex gap-2 justify-end mt-2">

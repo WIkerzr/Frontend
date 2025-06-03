@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ZonaTitulo } from '../Configuracion/componentes';
 export const ejesBBDD = [
     { id: 1, nombre: 'Abastecimiento de agua y Saneamiento' },
     { id: 2, nombre: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles' },
@@ -65,20 +66,24 @@ const Index = () => {
 
     return (
         <div className="panel">
-            <h2 className="text-xl font-bold">{t('ejesTitulo')}</h2>
             <div className="w-full mx-auto mt-1 px-2">
-                <div className="flex justify-between items-center mb-6 panel">
-                    <div className="flex flex-col space-x-4">
-                        <span>{t('explicacionEje')}</span>
-                        <span>{t('seleccionar3Ejes')}</span>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <span className="text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
-                        <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked || selected.length !== 3}>
-                            Guardar
-                        </button>
-                    </div>
-                </div>
+                <ZonaTitulo
+                    titulo={<h2 className="text-xl font-bold">{t('ejesTitulo')}</h2>}
+                    zonaBtn={
+                        <>
+                            <span className="text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked || selected.length !== 3}>
+                                Guardar
+                            </button>
+                        </>
+                    }
+                    zonaExplicativa={
+                        <>
+                            <span>{t('explicacionEje')}</span>
+                            <span>{t('seleccionar3Ejes')}</span>
+                        </>
+                    }
+                />
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-2 w-full">
                     {ejesBBDD
                         .slice()

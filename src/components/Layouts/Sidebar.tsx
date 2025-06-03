@@ -118,13 +118,8 @@ const Sidebar = () => {
                                     </AnimateHeight>
                                 </li>
                             )}
-                            <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
-                                {/* <IconMinus className="w-4 h-5 flex-none hidden" /> */}
-                                <select
-                                    value={anio}
-                                    className="w-full py-3 px-7 uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] "
-                                    onChange={(e) => setAnio(Number(e.target.value))}
-                                >
+                            <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1 justify-center">
+                                <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={(e) => setAnio(Number(e.target.value))}>
                                     {anios.map((a) => (
                                         <option key={a} value={a}>
                                             {a}
