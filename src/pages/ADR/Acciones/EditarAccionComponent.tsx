@@ -4,11 +4,10 @@ import { EstadoLabel } from '../../../types/TipadoAccion';
 import { ModalNuevoIndicadorAccion } from './EditarAccionIndicadores';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { Estado, StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
-import { StatusColors } from '../Componentes';
 
 interface TabCardProps {
     icon: string;
@@ -23,7 +22,7 @@ export const TabCard: React.FC<TabCardProps> = ({ icon, label, status = 'borrado
         <div className={`flex items-center`}>
             <div className="relative">
                 <img src={icon} alt={t(`${label}`)} className="w-6 h-6" />
-                <span className={`absolute -top-1 -right-0 w-3 h-3 rounded-full border-2 border-white ${StatusColors[status]}`} />
+                <span className={`absolute -top-1 -right-0 w-3 h-3 rounded-full border-2 border-whit ${StatusColorsFonds[status]}`} />
             </div>
             <span className={`font-semibold ${className}`}>{t(`${label}`)}</span>
         </div>
@@ -264,7 +263,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
 
     const handleOpenModal = () => {
         const ultima = indicadores[indicadores.length - 1];
-        if (ultima && (!ultima.descripcion || !ultima.metaAnual?.total || !ultima.ejecutado?.total || !ultima.metaFinal?.total)) {
+        if (ultima && (!ultima.descripcion || !ultima.metaAnual?.total || !ultima.metaFinal?.total)) {
             alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
             return;
         }
@@ -280,7 +279,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
                 {creaccion && (
                     <>
                         <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
-                            {t('newFileIndicador', { tipo: t('Realizacion') })}
+                            {t('newFileIndicador', { tipo: t('RealizacionMin') })}
                         </button>
                         {open && <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />}
                     </>

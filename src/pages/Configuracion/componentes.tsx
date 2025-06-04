@@ -795,11 +795,11 @@ export const ZonaTitulo: React.FC<PanelEjesProps> = ({ titulo, zonaBtn, zonaExpl
             <div className="flex flex-col justify-between mb-6 ">
                 <div className="flex items-center justify-between mb-6 h-[48px]">
                     {titulo}
-                    <div className="flex items-center space-x-4">{zonaBtn}</div>
+                    <div className="flex items-end space-x-4">{zonaBtn}</div>
                 </div>
                 {zonaExplicativa && (
-                    <div className=" rounded inline-flex items-center mb-6">
-                        <div className="flex flex-col  text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">{zonaExplicativa}</div>
+                    <div className="w-full rounded inline-flex items-center mb-6">
+                        <div className="w-full flex flex-col  text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">{zonaExplicativa}</div>
                     </div>
                 )}
                 {zonaExtra && <>{zonaExtra}</>}

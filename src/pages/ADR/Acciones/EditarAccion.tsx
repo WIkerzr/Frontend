@@ -18,7 +18,7 @@ const Index: React.FC = () => {
     const { t } = useTranslation();
     const [active, setActive] = useState<string>('0');
     const { anio, estados } = useEstadosPorAnio();
-    const estadoPlan = estados[anio]?.plan ?? 'borrador';
+
     const togglePara = (value: string) => {
         setActive((oldValue) => {
             return oldValue === value ? '' : value;
@@ -41,11 +41,11 @@ const Index: React.FC = () => {
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
-                        <span>{t('listadoAcciones')} 2025</span>
+                        <span>{t('accionTituloEditado')} 2025</span>
                     </h2>
                 }
                 zonaBtn={
-                    <div className="w-[18%] flex gap-4 items-center justify-end">
+                    <div className="ml-auto flex gap-4 items-center justify-end">
                         <button className="px-4 py-2 bg-primary text-white rounded">{t('guardar')}</button>
                         <NavLink to="/adr/acciones" className="group">
                             <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
@@ -55,39 +55,22 @@ const Index: React.FC = () => {
                 zonaExtra={
                     <div className="w-full">
                         <div className="flex gap-4 w-full">
-                            {/* Accion: la mitad izquierda */}
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
                                 <input type="text" className="form-input w-full" value={datosAccion.accion} onChange={handleChange} name="accion" />
                             </div>
-                            {/* Eje y LineaActuaccion: la mitad derecha, uno arriba de otro, más pequeños */}
                             <div className="w-1/2 flex flex-col gap-2 justify-center">
                                 <span className="block  font-semibold mb-1">
-                                    {t('Eje')}: <span className="font-normal">{datosAccion.eje}</span>
+                                    <span className="font-normal text-lg">{datosAccion.eje}</span>
                                 </span>
                                 <span className="block  font-semibold">
-                                    {t('LineaActuaccion')}: <span className="font-normal">{datosAccion.lineaActuaccion}</span>
+                                    <span className="font-normal text-col text-info">{datosAccion.lineaActuaccion}</span>
                                 </span>
                             </div>
                         </div>
                     </div>
                 }
             />
-            {/* <div className="flex justify-between items-center mb-6 panel">
-                <div className="flex space-x-4 w-full">
-                    <div className="flex w-full justify-between">
-                        {estadoPlan === 'borrador' ? (
-                            <></>
-                        ) : (
-                            <div className=" flex bg-gray-100 mx-auto my-4 rounded shadow transition-all duration-300 p-1">
-                                <Acordeon texto={datosAccion.accion} num={1} active={active} togglePara={togglePara} />
-                                <Acordeon texto={datosAccion.eje} num={1} active={active} togglePara={togglePara} />
-                                <Acordeon texto={datosAccion.lineaActuaccion} num={1} active={active} togglePara={togglePara} />
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div> */}
 
             <div className="mb-5 flex flex-col sm:flex-row">
                 <TabGroup className="w-full">
@@ -115,7 +98,7 @@ const Index: React.FC = () => {
                                         selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
                                     }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
                                 >
-                                    <TabCard icon={IconPlan} label="Plan" status="borrador" />
+                                    <TabCard icon={IconPlan} label="tabPlan" status={estados[anio]?.plan} />
                                 </button>
                             )}
                         </Tab>
@@ -126,7 +109,7 @@ const Index: React.FC = () => {
                                         selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
                                     }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
                                 >
-                                    <TabCard icon={IconMemoria} label="Memoria" status="cerrado" />
+                                    <TabCard icon={IconMemoria} label="tabMemoria" status={estados[anio]?.memoria} />
                                 </button>
                             )}
                         </Tab>

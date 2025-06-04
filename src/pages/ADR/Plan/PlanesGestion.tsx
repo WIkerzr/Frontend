@@ -5,8 +5,7 @@ import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { IndicadoresOperativosPlanTable } from './PlanesComponentes';
 import { ZonaTitulo } from '../../Configuracion/componentes';
-import { StatusColors } from '../Componentes';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 let introduccion: string = `La Ley 7/2022, de 30 de junio, de Desarrollo Rural, determina la elaboración de nuevos instrumentos de planificación que favorezcan la alineación de los proyectos e iniciativas del medio rural con las políticas institucionales a impulsar.
 En el caso de los PCDR (Programas Comarcales de Desarrollo Rural), la previsión es que se elaboren a lo largo del ejercicio 2024 como herramientas donde se recojan, para cada comarca y bajo una metodología de trabajo común, los objetivos sectoriales y las líneas de actuación a implementar derivados de los PDT (Programas de Desarrollo Territorial) que incidan de forma prioritaria en cada comarca.
@@ -36,25 +35,23 @@ const Index = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>{t('planTitulo')} 2025</span>
-                        <span className={`badge text-xs ml-2 py-0.5 px-2 relative -mt-2 ${StatusColors[estados[anio]?.plan]}`}>{t('estadoCerrado')}</span>
+                        <span className={`${StatusColors[estados[anio]?.plan]}`}>{t(estados[anio]?.plan)}</span>
                     </h2>
                 }
                 zonaBtn={
-                    <>
-                        <div className="flex items-center space-x-4">
-                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded text-center font-medium">{t('guardar')}</button>
-                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-gray-400 text-white rounded flex items-center justify-center gap-1 font-medium">
-                                <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
-                                {t('WORD')}
+                    <div className="flex items-center gap-4 justify-end">
+                        <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]">{t('guardar')}</button>
+                        <button className="px-4 py-2 bg-gray-400 text-white rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]">
+                            <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
+                            {t('descargarBorrador')}
+                        </button>
+                        <NavLink to="/adr/planesGestionEnvio" className="min-w-[120px]">
+                            <button className="px-4 py-2 bg-green-500 text-white rounded flex items-center justify-center gap-1 font-medium h-10 w-full">
+                                <img src={IconEnviar} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
+                                {t('enviar')}
                             </button>
-                            <NavLink to="/adr/planesGestionEnvio" className="group">
-                                <button className="px-4 py-3 min-w-[120px] h-[48px] bg-green-500  text-white rounded flex items-center justify-center gap-1 font-medium">
-                                    <img src={IconEnviar} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
-                                    {t('enviar')}
-                                </button>
-                            </NavLink>
-                        </div>
-                    </>
+                        </NavLink>
+                    </div>
                 }
                 zonaExplicativa={
                     <>
@@ -66,7 +63,7 @@ const Index = () => {
 
             <div className=" flex flex-col gap-4">
                 <div className=" flex flex-row gap-4">
-                    <div className="panel flex w-[90%] flex-col">
+                    <div className="panel flex w-[100%] flex-col">
                         <label htmlFor="introduccion">*{t('introduccion')}</label>
                         <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={introduccion} />
                     </div>

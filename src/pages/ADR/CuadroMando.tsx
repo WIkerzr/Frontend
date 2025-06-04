@@ -5,7 +5,7 @@ const Index = () => {
     const { t } = useTranslation();
 
     return (
-        <div className="panel h-[830px]">
+        <div className=" h-[830px]">
             <ZonaTitulo
                 titulo={
                     <div className="text-xl font-bold flex items-center space-x-2 ">

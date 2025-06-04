@@ -1,4 +1,4 @@
-type Estado = 'borrador' | 'proceso' | 'cerrado';
+import { Estado } from '../contexts/EstadosPorAnioContext';
 
 type EstadoPorAnio = {
     plan: Estado;

@@ -2,17 +2,16 @@ import { useTranslation } from 'react-i18next';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import { useState } from 'react';
 import { ZonaTitulo } from '../Configuracion/componentes';
-import { StatusColors } from './Componentes';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { StatusColors, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 interface Archivo {
     nombre: string;
     url: string;
 }
 
 const archivos: Archivo[] = [
-    { nombre: 'Anexo2.pdf', url: '/docs/Anexo2.pdf' },
-    { nombre: 'Anexo3.pdf', url: '/docs/Anexo3.pdf' },
     { nombre: 'Memoria.pdf', url: '/docs/Memoria.pdf' },
+    { nombre: 'Anexo1.pdf', url: '/docs/Anexo1.pdf' },
+    { nombre: 'Anexo2.pdf', url: '/docs/Anexo2.pdf' },
     // { nombre: "Anexo4.pdf", url: "/docs/Anexo4.pdf" },
     // { nombre: "Anexo5.pdf", url: "/docs/Anexo5.pdf" },
 ];
@@ -28,13 +27,13 @@ const Index = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>{t('memoriaTitulo')} 2025</span>
-                        <span className={`badge text-xs ml-2 py-0.5 px-2 relative -mt-2 ${StatusColors[estados[anio]?.memoria]}`}>{t('estadoCerrado')}</span>
+                        <span className={`${StatusColors[estados[anio]?.memoria]}`}>{t(estados[anio]?.memoria)}</span>
                     </h2>
                 }
                 zonaExplicativa={
                     <>
-                        <span>{t('explicacionMemoriaParte1')}</span>
-                        <span>{t('explicacionMemoriaParte2')}</span>
+                        {estados[anio]?.memoria === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
+                        <span className="block">{t(`explicacionMemoriaParte2${estados[anio]?.memoria}`)}</span>
                     </>
                 }
             />

@@ -1,6 +1,19 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type Estado = 'borrador' | 'proceso' | 'cerrado';
+export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';
+
+export const StatusColorsFonds: Record<Estado, string> = {
+    proceso: 'bg-info',
+    cerrado: 'bg-danger',
+    borrador: 'bg-warning',
+    aceptado: 'bg-success',
+};
+export const StatusColors: Record<Estado, string> = {
+    proceso: 'badge badge-outline-info',
+    cerrado: 'badge badge-outline-danger',
+    borrador: 'badge badge-outline-warning',
+    aceptado: 'badge badge-outline-success',
+};
 
 type EstadoPorAnio = {
     plan: Estado;

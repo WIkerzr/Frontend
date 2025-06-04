@@ -35,7 +35,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndic
     return (
         <>
             <div className="panel mt-6 ">
-                <span className="text-xl">{t('indicadorTipo', { tipo: t('Realizacion') })}</span>
+                <span className="text-xl">{t('indicadorTipo', { tipo: t('RealizacionMin') })}</span>
                 <TablaIndicadorAccion
                     indicador={indicador.indicadoreRealizacion}
                     indicadoresResultados={resultadosSeleccionados}
@@ -44,7 +44,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndic
                 />
             </div>
             <div className="panel mt-6 ">
-                <span className="text-xl">{t('indicadorTipo', { tipo: t('Resultado') })}</span>
+                <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
                 <TablaIndicadorAccion indicador={resultadosSeleccionados} />
             </div>
         </>
@@ -92,7 +92,7 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
     return (
         <NewModal open={open} onClose={onClose} title={t('nuevoIndicadorRealizacion')}>
             <div>
-                <label className="block mb-2 font-semibold"> {t('indicadoresResultadoRelacionados')}:</label>
+                <label className="block mb-2 font-semibold">{t('seleccionaElIndicador', { tipo: t('Realizacion') })}:</label>
                 <select className="w-full mb-4 border rounded px-2 py-1" value={indicadorRealizacionId ?? ''} onChange={(e) => handleChangeRealizacion(Number(e.target.value))}>
                     <option value="" disabled>
                         {t('seleccionaIndicador')}
