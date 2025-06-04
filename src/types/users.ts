@@ -9,6 +9,7 @@ export interface User {
     ambit: string | number;
     password: string;
     status: boolean;
+    [key: string]: unknown;
 }
 export interface UserID extends Omit<User, 'password'> {
     id: number;

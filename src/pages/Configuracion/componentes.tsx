@@ -16,7 +16,7 @@ import IconPencil from '../../components/Icon/IconPencil';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
 
-const newUser: User = {
+const newUser: UserID = {
     name: '',
     lastName: '',
     secondSurname: '',
@@ -24,7 +24,7 @@ const newUser: User = {
     email: '',
     ambit: '',
     status: true,
-    password: '',
+    id: 0,
 };
 
 interface BaseProps {
@@ -43,7 +43,7 @@ interface NuevoProps extends BaseProps {
 
 type UserDataProps = EditarProps | NuevoProps;
 
-export const updateUserInLocalStorage = (updatedUser: UserID | User, accion: 'editar' | 'nuevo' | 'eliminar') => {
+export const updateUserInLocalStorage = (updatedUser: UserID, accion: 'editar' | 'nuevo' | 'eliminar') => {
     try {
         const usersRaw = localStorage.getItem('users');
         const users: UserID[] = usersRaw ? JSON.parse(usersRaw) : [];
@@ -65,9 +65,7 @@ export const updateUserInLocalStorage = (updatedUser: UserID | User, accion: 'ed
                 if (exists) {
                     throw new Error(`El usuario con email ${updatedUser.email} ya existe`);
                 }
-                if ('id' in updatedUser) {
-                    updatedUsers = [...users, updatedUser];
-                }
+                updatedUsers = [...users, updatedUser];
                 break;
             }
 
@@ -187,11 +185,13 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         role: UserData.role,
                         email: UserData.email,
                         ambit: UserData.ambit,
+                        id: UserData.id,
                         status: true,
                     }),
                 });
+                const data = await response.json();
                 if (response.ok) {
-                    updateUserInLocalStorage(UserData, 'nuevo');
+                    updateUserInLocalStorage(data.data, 'nuevo');
                 }
             }
 
@@ -691,7 +691,7 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
     const [recordsData, setRecordsData] = useState(initialRecords);
 
     const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<UserID>>({ columnAccessor: 'id', direction: 'asc' });
 
     useEffect(() => {
         setPage(1);
@@ -710,12 +710,12 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
             return users.filter(
                 (item) =>
                     (item.status && String(item.status).toLowerCase().includes(s)) ||
-                    (item.name && item.name.toLowerCase().includes(s)) ||
-                    (item.lastName && item.lastName.toLowerCase().includes(s)) ||
-                    (item.secondSurname && item.secondSurname.toLowerCase().includes(s)) ||
-                    (item.email && item.email.toLowerCase().includes(s)) ||
-                    (item.role && item.role.toLowerCase().includes(s)) ||
-                    (item.RegionName && item.RegionName.toLowerCase().includes(s))
+                    (item.name as string).toLowerCase().includes(s) ||
+                    (item.lastName as string).toLowerCase().includes(s) ||
+                    (item.secondSurname as string).toLowerCase().includes(s) ||
+                    (item.email as string).toLowerCase().includes(s) ||
+                    (item.role as string).toLowerCase().includes(s) ||
+                    (item.RegionName && (item.RegionName as string).toLowerCase().includes(s))
             );
         });
     }, [search, users]);
@@ -733,7 +733,7 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
             </div>
             <div className="panel mt-6">
                 <div className="datatables">
-                    <DataTable
+                    <DataTable<UserID>
                         highlightOnHover
                         className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'}`}
                         records={recordsData}
