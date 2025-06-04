@@ -5,12 +5,12 @@ const Index = () => {
     const { t } = useTranslation();
 
     return (
-        <div className="panel">
+        <div className="panel h-[830px]">
             <ZonaTitulo
                 titulo={
-                    <h2 className="text-xl font-bold flex items-center space-x-2">
+                    <div className="text-xl font-bold flex items-center space-x-2 ">
                         <span>{t('CuadroMando')}</span>
-                    </h2>
+                    </div>
                 }
             />
         </div>

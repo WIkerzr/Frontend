@@ -4,8 +4,12 @@ import ImageUploading, { ImageListType } from 'react-images-uploading';
 import { Link } from 'react-router-dom';
 import IconBell from '../../../components/Icon/IconBell';
 import IconCode from '../../../components/Icon/IconCode';
+import { ZonaTitulo } from '../../Configuracion/componentes';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { StatusColors } from '../Componentes';
 
 const Index = () => {
+    const { anio, estados } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [codeArr, setCodeArr] = useState<string[]>([]);
 
@@ -29,7 +33,21 @@ const Index = () => {
         setImages2(imageList as never[]);
     };
     return (
-        <div>
+        <div className="panel h-[830px]">
+            <ZonaTitulo
+                titulo={
+                    <h2 className="text-xl font-bold flex items-center space-x-2">
+                        <span>{t('planTitulo')} 2025</span>
+                        <span className={`badge text-xs ml-2 py-0.5 px-2 relative -mt-2 ${StatusColors[estados[anio]?.plan]}`}>{t('estadoCerrado')}</span>
+                    </h2>
+                }
+                zonaExplicativa={
+                    <>
+                        <span>Una vez enviado el Plan, no podrá ser editado a menos que Hazi lo permita.</span>
+                        <span>Asegurate antes que toda la información se ha introducido correctamente en los PDF antes de enviarlo.</span>
+                    </>
+                }
+            />
             <div className="pt-5 space-y-8">
                 <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
                     <div className="panel" id="single_file">

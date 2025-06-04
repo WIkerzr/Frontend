@@ -2,9 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { ejesBBDD } from '../Ejes';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
+import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { IndicadoresOperativosPlanTable } from './PlanesComponentes';
-import { TabCard } from '../Acciones/EditarAccionComponent';
-import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { StatusColors } from '../Componentes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
@@ -44,12 +43,15 @@ const Index = () => {
                     <>
                         <div className="flex items-center space-x-4">
                             <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded text-center font-medium">{t('guardar')}</button>
-                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-primary text-white rounded flex items-center justify-center gap-1 font-medium">
+                            <button className="px-4 py-3 min-w-[120px] h-[48px] bg-gray-400 text-white rounded flex items-center justify-center gap-1 font-medium">
                                 <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
                                 {t('WORD')}
                             </button>
                             <NavLink to="/adr/planesGestionEnvio" className="group">
-                                <button className="px-4 py-3 min-w-[120px] h-[48px] bg-green-500 text-white rounded text-center font-medium">{t('enviar')}</button>
+                                <button className="px-4 py-3 min-w-[120px] h-[48px] bg-green-500  text-white rounded flex items-center justify-center gap-1 font-medium">
+                                    <img src={IconEnviar} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
+                                    {t('enviar')}
+                                </button>
                             </NavLink>
                         </div>
                     </>
@@ -61,27 +63,30 @@ const Index = () => {
                     </>
                 }
             />
-            <div className=" flex flex-row gap-4">
-                <div className="panel flex w-[90%] flex-col">
-                    <label htmlFor="introduccion">*{t('introduccion')}</label>
-                    <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={introduccion} />
+
+            <div className=" flex flex-col gap-4">
+                <div className=" flex flex-row gap-4">
+                    <div className="panel flex w-[90%] flex-col">
+                        <label htmlFor="introduccion">*{t('introduccion')}</label>
+                        <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={introduccion} />
+                    </div>
                 </div>
-            </div>
-            <div className="panel">
-                <label htmlFor="proceso">*{t('proceso')}</label>
-                <textarea required name="proceso" className="w-full border rounded p-2 h-[114px] resize-y" value={proceso} />
-            </div>
-            <div className="panel">
-                <label htmlFor="ejesPrioritarios">*{t('ejesPrioritarios')}</label>
-                <textarea required name="ejesPrioritarios" className="w-full border rounded p-2 resize-none overflow-hidden text-base" value={ejesPrioritarios} />
-            </div>
-            <div className="panel">
-                <div>
-                    <label htmlFor="tareasInternasGestionADR">*{t('tareasInternasGestionADR')}</label>
-                    <textarea required name="tareasInternasGestionADR" className="w-full border rounded p-2 h-[114px] resize-y" value={tareasInternasGestionADR} />
+                <div className="panel">
+                    <label htmlFor="proceso">*{t('proceso')}</label>
+                    <textarea required name="proceso" className="w-full border rounded p-2 h-[114px] resize-y" value={proceso} />
                 </div>
-                <div>
-                    <IndicadoresOperativosPlanTable />
+                <div className="panel ">
+                    <label htmlFor="ejesPrioritarios">*{t('ejesPrioritarios')}</label>
+                    <textarea required name="ejesPrioritarios" className="w-full border rounded p-2 h-[90px] resize-none overflow-hidden text-base" value={ejesPrioritarios} />
+                </div>
+                <div className="panel">
+                    <div>
+                        <label htmlFor="tareasInternasGestionADR">*{t('tareasInternasGestionADR')}</label>
+                        <textarea required name="tareasInternasGestionADR" className="w-full border rounded p-2 h-[114px] resize-y" value={tareasInternasGestionADR} />
+                    </div>
+                    <div>
+                        <IndicadoresOperativosPlanTable />
+                    </div>
                 </div>
             </div>
         </div>

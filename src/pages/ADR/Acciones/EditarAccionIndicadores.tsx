@@ -92,10 +92,10 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
     return (
         <NewModal open={open} onClose={onClose} title={t('nuevoIndicadorRealizacion')}>
             <div>
-                <label className="block mb-2 font-semibold">Indicador de realización:</label>
+                <label className="block mb-2 font-semibold"> {t('indicadoresResultadoRelacionados')}:</label>
                 <select className="w-full mb-4 border rounded px-2 py-1" value={indicadorRealizacionId ?? ''} onChange={(e) => handleChangeRealizacion(Number(e.target.value))}>
                     <option value="" disabled>
-                        {t('seleccionaElIndicador', { tipo: t('Realizacion') })}
+                        {t('seleccionaIndicador')}
                     </option>
                     {realizaciones.map((r) => (
                         <option value={r.id} key={r.id}>
