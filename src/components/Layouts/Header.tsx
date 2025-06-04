@@ -21,7 +21,9 @@ const Header = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        setRegionSeleccionada(user!.ambit ? Number(user!.ambit) : null);
+        if (role.toUpperCase() === 'ADR') {
+            setRegionSeleccionada(user!.ambit ? Number(user!.ambit) : null);
+        }
     }, []);
 
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -50,7 +52,7 @@ const Header = () => {
                     {role.toUpperCase() != 'ADR' ? (
                         <div>
                             <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <RegionSelect regionActiva={region} />
+                                <RegionSelect />
                             </div>
                         </div>
                     ) : (

@@ -39,7 +39,7 @@ export const LanguageSelector = () => {
         </select>
     );
 };
-export const RegionSelect: React.FC<{ regionActiva: Region | undefined }> = ({ regionActiva }) => {
+export const RegionSelect: React.FC = ({}) => {
     const { i18n, t } = useTranslation();
     const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 

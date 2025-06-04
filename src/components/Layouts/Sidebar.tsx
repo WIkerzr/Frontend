@@ -137,7 +137,7 @@ const Sidebar = () => {
                             >
                                 <li className="nav-item">
                                     <ul>
-                                        {role !== 'GV' && (
+                                        {role !== 'GOBIERNOVASCO' && (
                                             <li className="nav-item">
                                                 <NavLink to="/adr/cuadroMando" className="group">
                                                     <div className="flex items-center">
@@ -147,7 +147,7 @@ const Sidebar = () => {
                                                 </NavLink>
                                             </li>
                                         )}
-                                        {role !== 'GV' && (
+                                        {role !== 'GOBIERNOVASCO' && (
                                             <li className="nav-item">
                                                 <NavLink to="/adr/ejes" className="group">
                                                     <div className="flex items-center">
@@ -157,7 +157,7 @@ const Sidebar = () => {
                                                 </NavLink>
                                             </li>
                                         )}
-                                        {role !== 'GV' && (
+                                        {role !== 'GOBIERNOVASCO' && (
                                             <li className="nav-item">
                                                 <NavLink to="/adr/acciones" className="group">
                                                     <div className="flex items-center">
@@ -167,7 +167,7 @@ const Sidebar = () => {
                                                 </NavLink>
                                             </li>
                                         )}
-                                        {role !== 'GV' && (
+                                        {role !== 'GOBIERNOVASCO' && (
                                             <li className="nav-item">
                                                 <NavLink to="/adr/accionesAccesorias" className="group">
                                                     <div className="flex items-center">
@@ -177,7 +177,7 @@ const Sidebar = () => {
                                                 </NavLink>
                                             </li>
                                         )}
-                                        {role !== 'GV' && (
+                                        {role !== 'GOBIERNOVASCO' && (
                                             <li className="nav-item">
                                                 <NavLink to="/adr/servicios" className="group">
                                                     <div className="flex items-center">

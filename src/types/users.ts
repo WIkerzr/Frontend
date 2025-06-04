@@ -1,4 +1,4 @@
-export type UserRole = 'ADR' | 'HAZI' | 'GV';
+export type UserRole = 'ADR' | 'HAZI' | 'GOBIERNOVASCO';
 
 export interface User {
     name: string;
