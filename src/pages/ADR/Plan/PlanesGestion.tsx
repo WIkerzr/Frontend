@@ -72,10 +72,10 @@ const Index = () => {
                     <label htmlFor="proceso">*{t('proceso')}</label>
                     <textarea required name="proceso" className="w-full border rounded p-2 h-[114px] resize-y" value={proceso} />
                 </div>
-                <div className="panel ">
+                {/* <div className="panel ">
                     <label htmlFor="ejesPrioritarios">*{t('ejesPrioritarios')}</label>
                     <textarea required name="ejesPrioritarios" className="w-full border rounded p-2 h-[90px] resize-none overflow-hidden text-base" value={ejesPrioritarios} />
-                </div>
+                </div> */}
                 <div className="panel">
                     <div>
                         <label htmlFor="tareasInternasGestionADR">*{t('tareasInternasGestionADR')}</label>

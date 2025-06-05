@@ -53,7 +53,7 @@ const Index = () => {
                             </div>
                             <a href={archivo.url} download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition">
                                 <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
-                                    Descargar
+                                    {t('descargar')}
                                 </button>
                             </a>
                         </li>

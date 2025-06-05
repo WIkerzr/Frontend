@@ -22,6 +22,11 @@
     "alertTotalesPlanActivo":"los totales de Meta anual y Meta Final para poder guardar",
     "alertTotalesMemoriaActivo":"el total Ejecutado poder guardar",
 
+    "metaAnual": "Meta Anual",
+    "ejecutado": "Ejecutado",
+    "metaFinal": "Meta Final",
+    "porcentaje": "Porcentaje",
+
     "confirmarEliminarIndicador": "¿Seguro que quieres eliminar este indicador?",
     "borrador":"Borrador",
     "proceso":"Proceso",
@@ -62,6 +67,8 @@
     "newIndicador": "Nuevo Indicador {{tipo}}",
     "newFileIndicador": "Añadir indicador {{tipo}}",
     "indicadoresResultadoRelacionados": "Indicadores de resultado relacionados",
+    "indicadoresDeRealizacion": "Indicadores de realización",
+    "indicadoresDeResultado": "Indicadores de resultado",
     "nuevoIndicadorRealizacion": "Nuevo indicador realización",
     "newAccion": "Nueva Acción",
     "editAccion": "Editar Acción",
@@ -69,6 +76,8 @@
     "introduceEmail": "Introduce tu email",
     "recordarContrasena": "Recordar contraseña",
     "hipotesis": "Hipótesis",
+    "plurianual": "Plurianualidad",
+
 
     "introduccion": "Introducción",
     "ejesPrioritarios": "Ejes prioritarios",
@@ -111,6 +120,7 @@
     "rellenarAmbosCampos": "Por favor rellena ambos campos antes de guardar.",
     "limiteEje": "Límite de acciones alcanzado para este eje",
     "descargarBorrador": "Descargar borrador",
+    "descargar": "Descargar",
     "loading": "Cargando...",
     "datosUsuarios": "Datos usuario",
     "name": "Nombre",

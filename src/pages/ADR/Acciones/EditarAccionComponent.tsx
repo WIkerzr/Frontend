@@ -211,9 +211,9 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     ];
     const columnGroups = [
         { id: 'descripcion', title: '', columns: columnNombre },
-        { id: 'metaAnual', title: t('Meta Anual'), textAlignment: 'center', columns: columnMetaAnual },
-        { id: 'ejecutado', title: t('Ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
-        { id: 'metaFinal', title: t('Meta Final'), textAlignment: 'center', columns: columnMetaFinal },
+        { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
+        { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+        { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
         { id: 'final', title: '', columns: columns },
     ];
 

@@ -1,6 +1,8 @@
 import { get, set } from 'lodash';
 import { indicadoresRealizacion } from '../../../mocks/BBDD/indicadores';
 import { useState, useEffect } from 'react';
+import { DataTableColumnTextAlign } from 'mantine-datatable';
+import { useTranslation } from 'react-i18next';
 
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
@@ -134,6 +136,89 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                     </div>
                 );
             }
+        },
+    };
+}
+export function visualColumnByPath<T extends object>(accessor: string, title: string) {
+    const { t } = useTranslation();
+    const [hombresTotal, setHombresTotal] = useState(0);
+    const [mujeresTotal, setMujeresTotal] = useState(0);
+    const [totalTotal, setTotalTotal] = useState(0);
+
+    return {
+        accessor,
+        title,
+        textAlign: 'center' as DataTableColumnTextAlign,
+        sortable: true,
+        render: (row: T, index: number) => {
+            if (((title === 'Tot.' || title === 'Total') && accessor === 'metaAnual.total') || accessor === 'metaFinal.total' || accessor === 'ejecutado.total') {
+                const keys = totalKeys[accessor as keyof typeof totalKeys];
+                const hombres = Number(get(row, keys.hombres)) || 0;
+                const mujeres = Number(get(row, keys.mujeres)) || 0;
+                const total = Number(get(row, keys.total)) || 0;
+                const ambosCero = hombres === 0 && mujeres === 0;
+                if (hombres != 0) {
+                    setHombresTotal(hombresTotal + hombres);
+                }
+                if (mujeres != 0) {
+                    setMujeresTotal(mujeresTotal + mujeres);
+                }
+                if (total != 0) {
+                    setTotalTotal(totalTotal + total);
+                }
+                return (
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <span
+                            style={{
+                                maxWidth: 60,
+                                display: 'inline-block',
+                                margin: '0 auto',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {ambosCero ? total : hombres + mujeres}
+                        </span>
+                    </div>
+                );
+            }
+
+            if (title === 'Tot.' && accessor === 'porcentajeHombres') {
+                console.log('hombresTotal');
+                console.log(hombresTotal);
+                console.log('mujeresTotal');
+                console.log(mujeresTotal);
+                console.log('totalTotal');
+                console.log(totalTotal);
+
+                const keys = totalKeys[accessor as keyof typeof totalKeys];
+                return (
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div className={`h-2.5 rounded-full rounded-bl-full text-center text-white text-xs bg-purple-600`} style={{ width: `${100}%` }}></div>
+                    </div>
+                );
+            }
+
+            const value = get(row, accessor);
+            const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
+            return (
+                <div style={accessor === 'descripcion' || accessor === 'hipotesis' ? {} : { display: 'flex', justifyContent: 'left' }}>
+                    <span
+                        className={accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}
+                        style={{
+                            maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300,
+                            display: 'inline-block',
+                            margin: '0 auto',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {visual}
+                    </span>
+                </div>
+            );
         },
     };
 }
