@@ -16,7 +16,7 @@ import { useRegionContext } from '../../contexts/RegionContext';
 const Header = () => {
     const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
     const { user } = useUser();
-    const role: UserRole = user!.role;
+    const role: UserRole = user!.role as UserRole;
     const nombreUsuario = user?.name;
     const { t } = useTranslation();
 
@@ -135,7 +135,7 @@ const Header = () => {
                                     <li>
                                         <div className="flex items-center px-4 py-4">
                                             <div className="ltr:pl-4 rtl:pr-4 truncate">
-                                                <h4 className="text-base">{nombreUsuario}</h4>
+                                                <h4 className="text-base">{nombreUsuario as string}</h4>
                                                 <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{role!}</h4>
                                             </div>
                                         </div>

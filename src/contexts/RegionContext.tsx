@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getRegiones } from '../components/Utils/gets/getRegiones';
-
-export type Region = {
-    RegionId: number;
-    NameEs: string;
-    NameEu: string;
-};
+import { getRegiones, Region } from '../components/Utils/gets/getRegiones';
+import { useAuth } from './AuthContext';
 
 type RegionContextType = {
     regiones: Region[];
@@ -26,6 +21,8 @@ const RegionContext = createContext<RegionContextType>({
 export const useRegionContext = () => useContext(RegionContext);
 
 export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user } = useAuth();
+    const token = sessionStorage.getItem('token');
     const [regiones, setRegiones] = useState<Region[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<any>(null);
@@ -44,21 +41,24 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [regionSeleccionada]);
 
     useEffect(() => {
-        const regionesStr = sessionStorage.getItem('regiones');
-        if (regionesStr && regionesStr !== '[]' && regiones.length === 0) {
-            const regionesArr = JSON.parse(regionesStr);
-            setRegiones(regionesArr);
-            setLoading(false);
-        } else {
-            getRegiones()
-                .then((data) => {
-                    setRegiones(data);
-                    sessionStorage.setItem('regiones', JSON.stringify(data));
-                })
-                .catch(setError)
-                .finally(() => setLoading(false));
+        if (!token) return;
+        if (user && user.user) {
+            const regionesStr = sessionStorage.getItem('regiones');
+            if (regionesStr && regionesStr !== '[]' && regiones.length === 0) {
+                const regionesArr = JSON.parse(regionesStr);
+                setRegiones(regionesArr);
+                setLoading(false);
+            } else {
+                getRegiones()
+                    .then((data) => {
+                        setRegiones(data);
+                        sessionStorage.setItem('regiones', JSON.stringify(data));
+                    })
+                    .catch(setError)
+                    .finally(() => setLoading(false));
+            }
         }
-    }, []);
+    }, [user]);
 
     const setRegionSeleccionada = (id: number | null) => {
         setRegionSeleccionadaState(id);

@@ -5,6 +5,7 @@ import { setAuthUser } from '../../store/authSlice';
 import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { User, UserID, UserRole } from '../../types/users';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionContext();
@@ -35,28 +36,70 @@ const useLogin = () => {
             //         console.error('Error al hacer login:', error);
             //     });
 
-            const response = await fetch('https://localhost:44300/api/login', {
+            const response = await fetch('https://localhost:44300/token', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    grant_type: 'password',
+                    username: email,
+                    password: password,
+                    client_id: 'webApp',
+                }).toString(),
             });
 
-            const result = await response.json();
+            ///////////////////////////////////
+            interface BackendResponse {
+                ambit: string;
+                apellido1: string;
+                apellido2: string;
+                emailConfirmed: string;
+                nombre: string;
+                userName: string;
+                rol: string;
+                message: string;
+                access_token: string;
+                userId: string;
+            }
+
+            ////////////////////////////////
+            const result: BackendResponse = await response.json();
 
             if (!response.ok) {
                 throw new Error(result.message || 'Error desconocido');
             }
 
-            const token = result.token;
-            const user = result.user;
+            const isUserRole = (value: any): value is UserRole => {
+                const allowedRoles: string[] = ['HAZI', 'GOBIERNOVASCO', 'ADR'];
+                return typeof value === 'string' && allowedRoles.includes(value.toUpperCase());
+            };
+
+            const user: UserID = {
+                name: result.nombre,
+                lastName: result.apellido1,
+                secondSurname: result.apellido2,
+                email: result.userName,
+                role: isUserRole(result.rol) ? result.rol : 'GOBIERNOVASCO',
+                ambit: result.ambit != '' ? result.ambit : parseInt(result.ambit, 10),
+                password: '',
+                status: result.emailConfirmed === 'True',
+                id: parseInt(result.userId, 10),
+            };
+
+            const token = result.access_token;
             const region = regiones.find((r) => r.RegionId === user.ambit);
-            setRegionSeleccionada(user.ambit);
-            console.log(user);
+            setRegionSeleccionada(Number(user.ambit));
 
             login({ user });
 
             setUser(user);
-            dispatch(setAuthUser({ user, token }));
+            const authUser = {
+                name: result.nombre,
+                email: result.userName,
+            };
+            dispatch(setAuthUser({ user: authUser, token }));
+
+            localStorage.setItem('token', token);
+            sessionStorage.setItem('token', token);
 
             navigate('/');
         } catch (err) {

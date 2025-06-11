@@ -18,6 +18,8 @@ const Index = () => {
     };
     useEffect(() => {
         const storedUsers = localStorage.getItem('users');
+        const token = localStorage.getItem('token');
+
         if (storedUsers) {
             try {
                 const parsedUsers = JSON.parse(storedUsers);
@@ -31,7 +33,12 @@ const Index = () => {
             setLoading(true);
             const fetchUsers = async () => {
                 try {
-                    const res = await fetch('https://localhost:44300/api/users');
+                    const res = await fetch('https://localhost:44300/api/users', {
+                        headers: {
+                            Authorization: `Bearer ` + token,
+                            'Content-Type': 'application/json',
+                        },
+                    });
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
                     const usuariosConRegion = data.map((user: UserRegionId) => {

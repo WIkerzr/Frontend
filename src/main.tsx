@@ -28,17 +28,17 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Suspense>
             <Provider store={store}>
                 <UserProvider>
-                    <RegionProvider>
-                        <AuthProvider>
-                            <MantineProvider>
+                    <AuthProvider>
+                        <MantineProvider>
+                            <RegionProvider>
                                 <TableMantineProvider>
                                     <EstadosPorAnioProvider>
                                         <RouterProvider router={router} />
                                     </EstadosPorAnioProvider>
                                 </TableMantineProvider>
-                            </MantineProvider>
-                        </AuthProvider>
-                    </RegionProvider>
+                            </RegionProvider>
+                        </MantineProvider>
+                    </AuthProvider>
                 </UserProvider>
             </Provider>
         </Suspense>

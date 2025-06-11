@@ -27,7 +27,7 @@ export const indicadoresRealizacion = [
         id: 5,
         descripcion: 'RE05. Número de personas emprendedoras apoyadas',
         ano: 2024,
-        idsResultados: [5],
+        idsResultados: [5, 12],
     },
     {
         id: 6,
@@ -45,7 +45,7 @@ export const indicadoresRealizacion = [
         id: 8,
         descripcion: 'RE08. Número de actividades de comercialización de productos locales organizadas (ferias, mercados, etc.)',
         ano: 2024,
-        idsResultados: [8, 9, 13],
+        idsResultados: [8, 9],
     },
     {
         id: 9,
@@ -77,12 +77,6 @@ export const indicadoresRealizacion = [
         ano: 2024,
         idsResultados: [15],
     },
-    {
-        id: 14,
-        descripcion: 'RE14. Número de jornadas de información y sensibilización organizadas',
-        ano: 2025,
-        idsResultados: [16],
-    },
 ];
 
 export const indicadoresResultado = [
@@ -101,5 +95,4 @@ export const indicadoresResultado = [
     { id: 13, descripcion: 'RS11.2. Número de entidades participantes en ferias, mercados, etc.', ano: 2024 },
     { id: 14, descripcion: 'RS12. Número de empleos creados', ano: 2024 },
     { id: 15, descripcion: 'RS13. Número de entidades implicadas en las actividades de impulso de la identidad cultural comarcal', ano: 2024 },
-    { id: 16, descripcion: 'RS14. Número de personas asistentes a jornadas de información y sensibilización', ano: 2025 },
 ];
