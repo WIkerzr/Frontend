@@ -409,8 +409,6 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         </div>
     );
 };
-//numNextIndi= {accion === 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
-//valorCampo1=accion === 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable
 interface RellenoIndicadorProps {
     indicadorRealizacion: IndicadorRealizacion;
     onChange: (data: IndicadorRealizacion) => void;
@@ -492,6 +490,8 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
     const [opciones, setOpciones] = useState(indicadoresResultados);
     const [seleccion, setSeleccion] = useState('');
     const [modoCrear, setModoCrear] = useState(false);
+    const [modoEditar, setModoEditar] = useState(false);
+    const [filaEditar, setFilaEditar] = useState(0);
 
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado>(indicadorResultadoinicial);
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorResultado>(indicadorResultadoinicial);
@@ -511,6 +511,14 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
         setDescripcionEditable(indicadorResultadoinicial);
     };
 
+    const modificarIndicadorResultadoExistente = (data: IndicadorResultado) => {
+        indicadorRealizacion.Resultados![filaEditar] = data;
+        setModoCrear(false);
+        setModoEditar(false);
+        cambiosIndicadorResultado(indicadorRealizacion.Resultados);
+        setDescripcionEditable(indicadorResultadoinicial);
+    };
+
     const incorporarIndicadorResultado = (selectedOp: IndicadorResultado) => {
         indicadorRealizacion.Resultados = [...indicadorRealizacion.Resultados!, selectedOp];
         cambiosIndicadorResultado(indicadorRealizacion.Resultados);
@@ -525,7 +533,7 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
 
     return (
         <div className="max-w-md mx-auto p-4 rounded space-y-4">
-            {!modoCrear ? (
+            {!modoCrear && !modoEditar ? (
                 <>
                     <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
                     <div className="flex gap-2">
@@ -560,9 +568,52 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
                             {t('crearNueva')}
                         </button>
                     </div>
-                    {indicadorRealizacion.Resultados && (
-                        <TablaIndicadores datosIndicador={indicadorRealizacion.Resultados!} tipoIndicador="resultado" modal={true} onDelete={eliminarIndicadorResultado} />
-                    )}
+                    <div className={`h-full 'w-full'}`}>
+                        <div className="table-responsive mb-5">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>{t('Realizacion')}</th>
+                                        <th className="text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {indicadorRealizacion.Resultados!.slice().map((data, index) => {
+                                        return (
+                                            <tr key={data.Id}>
+                                                <td>
+                                                    <div className="break-words">
+                                                        {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
+                                                    </div>
+                                                </td>
+                                                <td className="text-center">
+                                                    <div className="flex justify-end space-x-3">
+                                                        <Tippy content={t('editar')}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setDescripcionEditable(data);
+                                                                    setModoEditar(true);
+                                                                    setFilaEditar(index);
+                                                                }}
+                                                            >
+                                                                <IconPencil />
+                                                            </button>
+                                                        </Tippy>
+                                                        <Tippy content={t('borrar')}>
+                                                            <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
+                                                                <IconTrash />
+                                                            </button>
+                                                        </Tippy>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </>
             ) : (
                 <div className="flex gap-2 ">
@@ -572,9 +623,15 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
                             <button className="bg-gray-400 text-white px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
                                 {t('Cancelar')}
                             </button>
-                            <button className="btn-primary px-3 py-2 rounded" onClick={() => nuevoIndicadorResultado()} type="button">
-                                {t('crearindicadorRelacionado')}
-                            </button>
+                            {modoCrear ? (
+                                <button className="btn-primary px-3 py-2 rounded" onClick={() => nuevoIndicadorResultado()} type="button">
+                                    {t('crearindicadorRelacionado')}
+                                </button>
+                            ) : (
+                                <button className="btn-primary px-3 py-2 rounded" onClick={() => modificarIndicadorResultadoExistente(descripcionEditable)} type="button">
+                                    {t('editarindicadorRelacionado')}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

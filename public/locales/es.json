@@ -28,6 +28,7 @@
     "porcentaje": "Porcentaje",
 
     "crearindicadorRelacionado": "Crear indicador relacionado",
+    "editarindicadorRelacionado": "Editar indicador relacionado",
     "crearNueva": "Crear nueva",
     "seleccionaopcion": "Selecciona una opción",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
