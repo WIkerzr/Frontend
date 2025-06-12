@@ -307,8 +307,16 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         validadorRespuestasBBDD(response);
     };
 
-    const cambiosIndicadorRealizacion = (data: any) => {
-        setDescripcionEditable(data);
+    const cambiosIndicadorRealizacionSinResultados = (data: IndicadorRealizacion) => {
+        setDescripcionEditable((prev) => ({
+            ...prev,
+            NameEs: data.NameEs,
+            NameEu: data.NameEu,
+            RelatedAxes: data.RelatedAxes,
+            Description: data.Description,
+            DisaggregationVariables: data.DisaggregationVariables,
+            CalculationMethodology: data.CalculationMethodology,
+        }));
     };
 
     const BotonResultadosRelacionados: React.FC = () => {
@@ -321,7 +329,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                     <button
                         onClick={() => {
                             if (descripcionEditable.Resultados && descripcionEditable.Resultados.length > 0) {
-                                const confirmacion = window.confirm(t('Hay indicadores de Resultados. ¿Está seguro de continuar?'));
+                                const confirmacion = window.confirm(t('modalEliminarIndicadoresResultados'));
                                 if (!confirmacion) return;
                                 setDescripcionEditable((prev) => ({
                                     ...prev,
@@ -361,7 +369,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                     <h2 className="text-xl font-bold mb-4">{t('newIndicador', { tipo: t('Realizacion') })}</h2>
 
                     <div className="space-y-4">
-                        <RellenoIndicador indicadorRealizacion={descripcionEditable} onChange={cambiosIndicadorRealizacion} />
+                        <RellenoIndicador indicadorRealizacion={descripcionEditable} onChange={cambiosIndicadorRealizacionSinResultados} />
 
                         <BotonResultadosRelacionados />
 
