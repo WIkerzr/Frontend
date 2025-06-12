@@ -82,7 +82,7 @@ const useLogin = () => {
                 ambit: result.ambit != '' ? result.ambit : parseInt(result.ambit, 10),
                 password: '',
                 status: result.emailConfirmed === 'True',
-                id: parseInt(result.userId, 10),
+                id: result.userId,
             };
 
             const token = result.access_token;

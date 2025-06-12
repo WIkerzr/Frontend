@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
 import PasswordForm from './passwordForm';
+import { User, UserID } from '../../types/users';
 
 const PasswordFormLogic = () => {
     const [passwordData, setPasswordData] = useState({
@@ -38,20 +39,24 @@ const PasswordFormLogic = () => {
         }
 
         try {
-            const stored = localStorage.getItem('user');
-            if (!stored) throw new Error(t('usuarioNoAutenticado'));
+            let user;
+            const token = sessionStorage.getItem('token');
+            const savedUser = sessionStorage.getItem('user');
+            if (savedUser) {
+                user = JSON.parse(savedUser);
+            }
+            if (!savedUser) throw new Error(t('usuarioNoAutenticado'));
 
-            const parsed = JSON.parse(stored);
-            const email = parsed.email;
-
-            const response = await fetch('/api/user/password', {
+            const response = await fetch('https://localhost:44300/api/user/changePassword', {
                 method: 'PUT',
                 headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email,
-                    newPassword: passwordData.contraNueva,
+                    UserId: user.user.id,
+                    NewPassword: passwordData.contraNueva,
                 }),
             });
 

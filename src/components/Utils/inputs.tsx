@@ -39,7 +39,12 @@ export const LanguageSelector = () => {
         </select>
     );
 };
-export const RegionSelect: React.FC = ({}) => {
+
+interface RegionSelectProps {
+    disabled?: boolean;
+}
+
+export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled }) => {
     const { i18n, t } = useTranslation();
     const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
@@ -66,16 +71,9 @@ export const RegionSelect: React.FC = ({}) => {
         }
     };
 
-    if (loading)
-        return (
-            <select disabled className="form-select text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                <option>{t('cargando')}</option>
-            </select>
-        );
-    if (error) return <div>{t('errorCargandoRegiones')}</div>;
-
     return (
         <select
+            disabled={disabled}
             className="form-select text-white-dark min-w-max"
             style={{ minWidth: 'calc(100% + 10px)' }}
             value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}

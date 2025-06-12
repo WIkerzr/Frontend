@@ -25,7 +25,7 @@ const newUser: UserID = {
     email: '',
     ambit: '',
     status: true,
-    id: 0,
+    id: '0',
 };
 
 interface BaseProps {
@@ -101,10 +101,10 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     lastName: matched.lastName || '',
                     secondSurname: matched.secondSurname || '',
                     role: matched.role || 'gobiernoVasco',
-                    email: matched.email || '',
+                    RegionId: matched.email || '',
                     ambit: matched.ambit || '-',
                     status: matched.status || false,
-                    id: matched.id || 9999,
+                    id: matched.id || '9999',
                 };
             }
         } catch (e) {
@@ -117,8 +117,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             secondSurname: '',
             role: 'GOBIERNOVASCO',
             email: '',
-            ambit: '-',
-            id: 9999,
+            RegionId: '-',
+            id: '9999',
             status: false,
         };
     };
@@ -144,6 +144,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
     };
 
     const handleSubmitUser = async (e: React.FormEvent) => {
+        const token = sessionStorage.getItem('token');
         e.preventDefault();
         setIsSubmitting(true);
         setErrorMessage(null);
@@ -156,6 +157,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     response = await fetch('https://localhost:44300/api/user', {
                         method: 'PUT',
                         headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: 'application/json',
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
@@ -177,6 +180,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 response = await fetch('https://localhost:44300/api/newUser', {
                     method: 'PUT',
                     headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: 'application/json',
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -710,6 +715,7 @@ export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(
     const [localStatus, setLocalStatus] = useState<boolean>(!!value.status);
 
     const handleToggle = async () => {
+        const token = sessionStorage.getItem('token');
         const newStatus = !localStatus;
         setLocalStatus(newStatus);
 
@@ -727,6 +733,8 @@ export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(
             await fetch('https://localhost:44300/api/user', {
                 method: 'PUT',
                 headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -754,6 +762,7 @@ export const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, 
 
     const handleDelete = async () => {
         const confirmDelete = window.confirm(t('¿Estás seguro de que deseas eliminar este usuario?'));
+        const token = sessionStorage.getItem('token');
 
         if (!confirmDelete) return;
 
@@ -761,6 +770,8 @@ export const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, 
             const response = await fetch('https://localhost:44300/api/deleteUser', {
                 method: 'DELETE',
                 headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ id: user.id }),

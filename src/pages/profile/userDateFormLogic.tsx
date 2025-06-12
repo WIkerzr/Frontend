@@ -32,7 +32,7 @@ const UserDateFormLogic: React.FC = () => {
             email: '',
             ambit: '-',
             status: true,
-            id: 9999,
+            id: '9999',
         };
     };
 
@@ -61,11 +61,14 @@ const UserDateFormLogic: React.FC = () => {
         setIsSubmitting(true);
         setErrorMessage(null);
         setSuccessMessage(null);
+        const token = sessionStorage.getItem('token');
 
         try {
             const response = await fetch('https://localhost:44300/api/user', {
                 method: 'PUT',
                 headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -74,7 +77,7 @@ const UserDateFormLogic: React.FC = () => {
                     secondSurname: UserData.secondSurname,
                     role: initialData.role,
                     email: UserData.email,
-                    ambit: UserData.ambit,
+                    RegionId: UserData.ambit,
                     id: UserData.id,
                     status: UserData.status,
                 }),

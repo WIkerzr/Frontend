@@ -11,11 +11,14 @@ export async function authlogin(loginData: LoginData): Promise<any> {
     params.append('grant_type', 'password');
     params.append('username', loginData.userName);
     params.append('password', loginData.password);
+    const token = sessionStorage.getItem('token');
 
     const response = await fetch(serviceBase + 'token', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
         },
         body: params.toString(),
     });

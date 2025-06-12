@@ -16,23 +16,11 @@ interface UserDataFormProps {
 
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true }) => {
     const { t } = useTranslation();
-    const [selectedRegion, setSelectedRegion] = useState<number | string>('notSelect');
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
                 <h2 className="text-lg font-semibold mb-4">{t('datosUsuarios')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input nombreInput={t('name')} type="text" value={userData.name} onChange={onChange} name="name" />
-                    <Input nombreInput={t('lastName')} type="text" value={userData.lastName} onChange={onChange} name="lastName" />
-                    <Input nombreInput={t('secondSurname')} type="text" value={userData.secondSurname} onChange={onChange} name="secondSurname" />
-                    <div>
-                        <label className="block text-sm font-medium mb-1">{t('role')}</label>
-                        <select className="form-select w-full" name="role" value={userData.role} onChange={onChange} disabled={roleDisabled}>
-                            <option value="ADR">{t('adr')}</option>
-                            <option value="HAZI">{t('hazi')}</option>
-                            <option value="GV">{t('gobiernoVasco')}</option>
-                        </select>
-                    </div>
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-1">{t('email')}</label>
                         <div className="flex">
@@ -43,13 +31,24 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 type="text"
                                 placeholder="{t('email')}@E-mail.com"
                                 className="form-input ltr:rounded-l-none rtl:rounded-r-none"
-                                value={userData.email}
+                                value={userData.email as string}
                                 name="email"
                                 onChange={onChange}
                             />
                         </div>
                     </div>
-                    {userData.role === 'ADR' ? <RegionSelect value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)} /> : <></>}
+                    <Input nombreInput={t('name')} type="text" value={userData.name as string} onChange={onChange} name="name" />
+                    <Input nombreInput={t('lastName')} type="text" value={userData.lastName as string} onChange={onChange} name="lastName" />
+                    <Input nombreInput={t('secondSurname')} type="text" value={userData.secondSurname as string} onChange={onChange} name="secondSurname" />
+                    <div>
+                        <label className="block text-sm font-medium mb-1">{t('role')}</label>
+                        <select className="form-select w-full" name="role" value={userData.role as string} onChange={onChange} disabled={roleDisabled}>
+                            <option value="ADR">{t('adr')}</option>
+                            <option value="HAZI">{t('hazi')}</option>
+                            <option value="GV">{t('gobiernoVasco')}</option>
+                        </select>
+                    </div>
+                    {userData.role === 'ADR' || userData.role === 'adr' ? <RegionSelect disabled /> : <></>}.
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (

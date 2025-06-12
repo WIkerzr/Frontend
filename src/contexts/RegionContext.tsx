@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getRegiones, Region } from '../components/Utils/gets/getRegiones';
 import { useAuth } from './AuthContext';
+import { useUser } from './UserContext';
 
 type RegionContextType = {
     regiones: Region[];
@@ -21,9 +22,17 @@ const RegionContext = createContext<RegionContextType>({
 export const useRegionContext = () => useContext(RegionContext);
 
 export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { user } = useAuth();
+    const { user } = useUser();
     const token = sessionStorage.getItem('token');
-    const [regiones, setRegiones] = useState<Region[]>([]);
+    const [regiones, setRegiones] = useState<Region[]>(() => {
+        const saved = sessionStorage.getItem('regiones');
+        try {
+            return saved ? (JSON.parse(saved) as Region[]) : [];
+        } catch {
+            return [];
+        }
+    });
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<any>(null);
 
@@ -36,19 +45,15 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (regionSeleccionada !== null && !isNaN(regionSeleccionada)) {
             sessionStorage.setItem('regionSeleccionada', String(regionSeleccionada));
         } else {
-            // sessionStorage.removeItem('regionSeleccionada');
+            console.log(user);
         }
     }, [regionSeleccionada]);
 
     useEffect(() => {
         if (!token) return;
-        if (user && user.user) {
+        if (user) {
             const regionesStr = sessionStorage.getItem('regiones');
-            if (regionesStr && regionesStr !== '[]' && regiones.length === 0) {
-                const regionesArr = JSON.parse(regionesStr);
-                setRegiones(regionesArr);
-                setLoading(false);
-            } else {
+            if (!regionesStr) {
                 getRegiones()
                     .then((data) => {
                         setRegiones(data);
@@ -56,7 +61,16 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     })
                     .catch(setError)
                     .finally(() => setLoading(false));
+                return;
             }
+
+            // const regions = JSON.parse(regionesStr);
+            // if (regions.length > 0) {
+            //     const regionesArr = JSON.parse(regionesStr);
+            //     setRegiones(regionesArr);
+            //     setRegionSeleccionadaState(user);
+            //     setLoading(false);
+            // }
         }
     }, [user]);
 
