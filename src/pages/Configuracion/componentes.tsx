@@ -5,7 +5,7 @@ import { sortBy } from 'lodash';
 import { UserID } from '../../types/users';
 import Tippy from '@tippyjs/react';
 import { forwardRef, ReactNode, useEffect, useState } from 'react';
-import { Indicador } from '../../types/Indicadores';
+import { Indicador, indicadorInicial, IndicadorRealizacion, IndicadorResultado, indicadorResultadoinicial } from '../../types/Indicadores';
 import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 
@@ -15,6 +15,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 import IconPencil from '../../components/Icon/IconPencil';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
+import { TablaIndicadores } from './Indicadores';
 
 const newUser: UserID = {
     name: '',
@@ -225,86 +226,133 @@ type ModalNuevoIndicadorProps = {
     isOpen: boolean;
     onClose: () => void;
     accion: 'Editar' | 'Nuevo';
-    datosIndicador: Indicador;
-    tipoIndicador: 'realizacion' | 'resultado';
-    onGuardar: (nuevoIndicador: Indicador) => void;
+    datosIndicador: IndicadorResultado;
+    onSave?: (indicadorActualizado: IndicadorRealizacion) => void;
+    tipoIndicador?: 'realizacion' | 'resultado';
 };
 
-export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen, onClose, accion, datosIndicador, tipoIndicador, onGuardar }) => {
-    const { t } = useTranslation();
-
-    const [descripcionEditable, setDescripcionEditable] = useState('');
-    const [ano, setAno] = useState(2025);
-    const [tipo, setTipo] = useState<'realizacion' | 'resultado'>(tipoIndicador);
+export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen, onClose, onSave, accion, datosIndicador, tipoIndicador }) => {
+    const { t, i18n } = useTranslation();
+    const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(datosIndicador);
     const [mensaje, setMensaje] = useState('');
-    const [unidad, setUnidad] = useState('');
-    const [ejes, setEjes] = useState('');
-    const [definicion, setDefinicion] = useState('');
-    const [variables, setVariables] = useState('');
-    const [metodologia, setMetodologia] = useState('');
+    const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
+    const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(accion === 'Nuevo' ? false : hayResultados);
 
-    const getSiguienteCodigo = () => {
-        if (!datosIndicador) return '';
-        const prefijo = datosIndicador.descripcion.slice(0, 2);
-        const numero = parseInt(datosIndicador.descripcion.slice(2, 4), 10);
-        const siguienteNumero = numero + 1;
-        const siguienteCodigo = `${prefijo}${String(siguienteNumero).padStart(2, '0')}.`;
-        return siguienteCodigo;
-    };
-
-    let siguienteIndicador = getSiguienteCodigo();
-
-    const handleGuardar = async () => {
-        const descripcionFinal = `${siguienteIndicador ?? ''} ${descripcionEditable}`.trim();
-
-        const response = await fetch('/api/nuevoIndicador', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                descripcion: descripcionFinal,
-                ano,
-                tipo,
-                unidad,
-                ejes,
-                definicion,
-                variables,
-                metodologia,
-            }),
-        });
-
+    const validadorRespuestasBBDD = async (response: any) => {
         const data = await response.json();
 
         if (response.ok) {
+            const indicador: IndicadorRealizacion = {
+                ...descripcionEditable,
+                Id: data.data.Id,
+                Resultados: data.data.Resultados,
+            };
             setMensaje(t('correctoIndicadorGuardado'));
-            setDescripcionEditable('');
-            setAno(2025);
-            setTipo(tipoIndicador);
-            setUnidad('');
-            setEjes('');
-            setDefinicion('');
-            setVariables('');
-            setMetodologia('');
-            onGuardar(data.indicador);
             setTimeout(() => {
+                if (onSave) {
+                    onSave(indicador);
+                }
+            }, 200);
+            setTimeout(() => {
+                setDescripcionEditable(indicadorInicial);
+                setMostrarResultadoRelacionado(false);
                 setMensaje('');
                 onClose();
             }, 1000);
         } else {
-            setMensaje(t('errorGuardar') + data.message);
+            setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + data.message : t('errorGuardar') + data.message));
         }
     };
-    const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(false);
+
+    const handleGuardarNuevoRealizacion = async () => {
+        const token = sessionStorage.getItem('token');
+        const response = await fetch('https://localhost:44300/api/nuevoIndicadores', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(descripcionEditable),
+        });
+        validadorRespuestasBBDD(response);
+    };
+
+    const handleEditarIndicadorRealizacion = async () => {
+        const token = sessionStorage.getItem('token');
+        const response = await fetch('https://localhost:44300/api/editarIndicadorRealizacion', {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(descripcionEditable),
+        });
+        validadorRespuestasBBDD(response);
+    };
+
+    const handleEditarIndicadorResultado = async () => {
+        const token = sessionStorage.getItem('token');
+        const response = await fetch('https://localhost:44300/api/editarIndicadorResultado', {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(descripcionEditable),
+        });
+
+        validadorRespuestasBBDD(response);
+    };
+
+    const cambiosIndicadorRealizacion = (data: any) => {
+        setDescripcionEditable(data);
+    };
+
+    const BotonResultadosRelacionados: React.FC = () => {
+        if (tipoIndicador === 'resultado') {
+            return <></>;
+        }
+        return (
+            <>
+                {mostrarResultadoRelacionado ? (
+                    <button
+                        onClick={() => {
+                            if (descripcionEditable.Resultados && descripcionEditable.Resultados.length > 0) {
+                                const confirmacion = window.confirm(t('Hay indicadores de Resultados. ¿Está seguro de continuar?'));
+                                if (!confirmacion) return;
+                                setDescripcionEditable((prev) => ({
+                                    ...prev,
+                                    Resultados: [],
+                                }));
+                            }
+                            setMostrarResultadoRelacionado(false);
+                        }}
+                        className="btn btn-danger mx-auto block"
+                    >
+                        {t('sinIndicadorResultadoRelacionado')}
+                    </button>
+                ) : (
+                    <button onClick={() => setMostrarResultadoRelacionado(true)} className="btn btn-primary mx-auto block">
+                        {t('agregarIndicadorResultadoRelacionado')}
+                    </button>
+                )}
+            </>
+        );
+    };
+
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
             <div
                 className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex
-          ${mostrarResultadoRelacionado ? 'w-full max-w-4xl' : 'w-full max-w-md'}
+            ${mostrarResultadoRelacionado ? 'w-full max-w-4xl' : 'w-full max-w-md'}
         `}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Panel principal */}
                 <div className={`flex-1 transition-all duration-300 ${mostrarResultadoRelacionado ? 'pr-8' : ''}`}>
                     <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
                         ×
@@ -313,21 +361,30 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                     <h2 className="text-xl font-bold mb-4">{t('newIndicador', { tipo: t('Realizacion') })}</h2>
 
                     <div className="space-y-4">
-                        <RellenoIndicador
-                            numNextIndi={accion === 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
-                            valorCampo1={accion === 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable}
-                        />
+                        <RellenoIndicador indicadorRealizacion={descripcionEditable} onChange={cambiosIndicadorRealizacion} />
 
-                        {mostrarResultadoRelacionado ? (
-                            <button onClick={() => setMostrarResultadoRelacionado(false)} className="btn btn-danger mx-auto block">
-                                {t('sinIndicadorResultadoRelacionado')}
-                            </button>
-                        ) : (
-                            <button onClick={() => setMostrarResultadoRelacionado(true)} className="btn btn-primary mx-auto block">
-                                {t('agregarIndicadorResultadoRelacionado')}
-                            </button>
-                        )}
-                        <button onClick={handleGuardar} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                        <BotonResultadosRelacionados />
+
+                        <button
+                            onClick={() => {
+                                let mensajeError = '';
+                                if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
+                                    mensajeError += `${t('errorMissingFields')}`;
+                                }
+                                if (accion === 'Nuevo') {
+                                    handleGuardarNuevoRealizacion();
+                                } else if (tipoIndicador === 'realizacion') {
+                                    handleEditarIndicadorRealizacion();
+                                } else if (tipoIndicador === 'resultado') {
+                                    handleEditarIndicadorResultado();
+                                }
+                                if (mensajeError && mensajeError?.length > 0) {
+                                    setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + mensajeError : t('errorGuardar') + mensajeError));
+                                    return;
+                                }
+                            }}
+                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
+                        >
                             {t('guardar')}
                         </button>
 
@@ -335,7 +392,6 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                     </div>
                 </div>
 
-                {/* Panel derecho */}
                 {mostrarResultadoRelacionado && (
                     <>
                         <div className="w-px bg-gray-300 mx-4 self-stretch" />
@@ -344,7 +400,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                                 {t('Indicadores')} {t('Resultado')}
                             </h2>
                             <div>
-                                <SelectorOCreador />
+                                <SelectorOCreador indicadorRealizacion={descripcionEditable} />
                             </div>
                         </div>
                     </>
@@ -355,100 +411,115 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 };
 //numNextIndi= {accion === 'Nuevo' ? siguienteIndicador : datosIndicador.descripcion.slice(0, 5)}
 //valorCampo1=accion === 'Editar' ? datosIndicador.descripcion.slice(5) : descripcionEditable
-type RellenoIndicadorProps = {
-    numNextIndi: string;
-    valorCampo1: string;
-};
-const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ numNextIndi, valorCampo1 }) => {
-    const { t } = useTranslation();
+interface RellenoIndicadorProps {
+    indicadorRealizacion: IndicadorRealizacion;
+    onChange: (data: IndicadorRealizacion) => void;
+}
+
+const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange }) => {
+    const { t, i18n } = useTranslation();
+    const [formData, setFormData] = useState<IndicadorRealizacion>(indicadorRealizacion);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        const updatedData = { ...formData, [name]: value };
+        setFormData(updatedData);
+        onChange(updatedData);
+    };
+
+    useEffect(() => {
+        setFormData(indicadorRealizacion);
+    }, []);
 
     return (
-        <>
-            <div>
-                <div className="flex gap-4">
-                    <div className="w-1/2">
-                        <label className="block font-medium">{t('Nombre Indicador')}</label>
-                        <div className="flex">
-                            <span className="p-2 bg-gray-100 border border-r-0 rounded-l text-gray-700 whitespace-nowrap">{numNextIndi}</span>
-                            <input
-                                type="text"
-                                className="w-full p-2 border rounded-r"
-                                value={valorCampo1}
-                                //onChange={(e) => setDescripcionEditable(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                    <div className="w-1/2">
-                        <label className="block font-medium">{t('unitMed')}</label>
-                        <select className="w-full p-2 border rounded">
-                            <option>NUMERO</option>
-                            <option>OTro</option>
-                        </select>
-                    </div>
+        <div className="space-y-4">
+            <div className="flex gap-4">
+                <div className="w-1/2">
+                    <label className="block font-medium">{t('Nombre Indicador')}</label>
+                    <input
+                        type="text"
+                        name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
+                        className="w-full p-2 border rounded"
+                        value={i18n.language === 'eu' ? formData.NameEu : formData.NameEs}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="w-1/2">
+                    <label className="block font-medium">{t('unitMed')}</label>
+                    <select
+                        name="unidad"
+                        className="w-full p-2 border rounded"
+                        //value={formData.unidad}
+                        onChange={handleChange}
+                    >
+                        <option value="NUMERO">NUMERO</option>
+                        <option value="OTRO">OTRO</option>
+                    </select>
                 </div>
             </div>
+
             <div>
                 <label className="block font-medium">{t('Ejes relacionados')}</label>
-                <div className="flex">
-                    <input
-                        type="text"
-                        className="w-full p-2 border rounded-r"
-                        //value={descripcionEditable}
-                        //onChange={(e) => setDescripcionEditable(e.target.value)}
-                    />
-                </div>
+                <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes} onChange={handleChange} />
             </div>
+
             <div>
                 <label className="block font-medium">{t('Definicion')}</label>
-                <div className="flex">
-                    <input
-                        type="text"
-                        className="w-full p-2 border rounded-r"
-                        // value={descripcionEditable}
-                        // onChange={(e) => setDescripcionEditable(e.target.value)}
-                    />
-                </div>
+                <input type="text" name="Description" className="w-full p-2 border rounded" value={formData.Description} onChange={handleChange} />
             </div>
+
             <div>
                 <label className="block font-medium">{t('Variables de desagregacion')}</label>
-                <div className="flex">
-                    <input
-                        type="text"
-                        className="w-full p-2 border rounded-r"
-                        // value={descripcionEditable}
-                        // onChange={(e) => setDescripcionEditable(e.target.value)}
-                    />
-                </div>
+                <input type="text" name="DisaggregationVariables" className="w-full p-2 border rounded" value={formData.DisaggregationVariables} onChange={handleChange} />
             </div>
+
             <div>
                 <label className="block font-medium">{t('Metologia de calculo')}</label>
-                <div className="flex">
-                    <input
-                        type="text"
-                        className="w-full p-2 border rounded-r"
-                        // value={descripcionEditable}
-                        // onChange={(e) => setDescripcionEditable(e.target.value)}
-                    />
-                </div>
+                <input type="text" name="CalculationMethodology" className="w-full p-2 border rounded" value={formData.CalculationMethodology} onChange={handleChange} />
             </div>
-        </>
+        </div>
     );
 };
 
 const opcionesIniciales = ['Opción A', 'Opción B', 'Opción C'];
+interface RellenoIndicadorResultadoProps {
+    indicadorRealizacion: IndicadorRealizacion;
+}
 
-function SelectorOCreador() {
-    const [opciones, setOpciones] = useState(opcionesIniciales);
+const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorRealizacion }) => {
+    const { t, i18n } = useTranslation();
+    const indicadoresResultados: IndicadorResultado[] = JSON.parse(localStorage.getItem('indicadoresResultado') || '[]');
+    const [opciones, setOpciones] = useState(indicadoresResultados);
     const [seleccion, setSeleccion] = useState('');
     const [modoCrear, setModoCrear] = useState(false);
-    const [nuevaOpcion, setNuevaOpcion] = useState('');
 
-    const agregarNuevaOpcion = () => {
-        if (nuevaOpcion.trim()) {
-            setOpciones([...opciones, nuevaOpcion]);
-            setSeleccion(nuevaOpcion);
-            setNuevaOpcion('');
-            setModoCrear(false);
+    const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado>(indicadorResultadoinicial);
+    const [descripcionEditable, setDescripcionEditable] = useState<IndicadorResultado>(indicadorResultadoinicial);
+
+    const cambiosIndicadorEditable = (data: any) => {
+        setDescripcionEditable(data);
+    };
+
+    const cambiosIndicadorResultado = (data: any) => {
+        setIndicadoresResultado(data);
+    };
+
+    const nuevoIndicadorResultado = () => {
+        indicadorRealizacion.Resultados = [...indicadorRealizacion.Resultados!, descripcionEditable];
+        setModoCrear(false);
+        cambiosIndicadorResultado(indicadorRealizacion.Resultados);
+        setDescripcionEditable(indicadorResultadoinicial);
+    };
+
+    const incorporarIndicadorResultado = (selectedOp: IndicadorResultado) => {
+        indicadorRealizacion.Resultados = [...indicadorRealizacion.Resultados!, selectedOp];
+        cambiosIndicadorResultado(indicadorRealizacion.Resultados);
+    };
+
+    const eliminarIndicadorResultado = (selectedOp: IndicadorResultado) => {
+        if (indicadorRealizacion.Resultados) {
+            indicadorRealizacion.Resultados = indicadorRealizacion.Resultados.filter((resultado) => resultado.Id !== selectedOp.Id);
+            cambiosIndicadorResultado(indicadorRealizacion.Resultados);
         }
     };
 
@@ -456,33 +527,55 @@ function SelectorOCreador() {
         <div className="max-w-md mx-auto p-4 rounded space-y-4">
             {!modoCrear ? (
                 <>
-                    <label className="block font-bold mb-2">Selecciona una opción:</label>
+                    <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
                     <div className="flex gap-2">
-                        <select className="flex-1 border p-2 rounded" value={seleccion} onChange={(e) => setSeleccion(e.target.value)}>
+                        <select
+                            className="max-w-md w-full flex-1 border p-2 rounded"
+                            value={seleccion}
+                            onChange={(e) => {
+                                const selectedValue = e.target.value;
+                                const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
+                                if (selectedOp) {
+                                    setIndicadoresResultado(selectedOp);
+                                    incorporarIndicadorResultado(selectedOp);
+                                }
+                                setSeleccion('');
+                            }}
+                        >
                             <option value="" disabled>
-                                Elige una opción
+                                {t('seleccionaopcion')}
                             </option>
-                            {opciones.map((op) => (
-                                <option key={op} value={op}>
-                                    {op}
-                                </option>
-                            ))}
+                            {opciones
+                                .filter((op) => {
+                                    return !indicadorRealizacion.Resultados!.some((resultado) => resultado.Id === op.Id);
+                                })
+                                .map((op) => (
+                                    <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
+                                        {i18n.language === 'eu' ? op.NameEu : op.NameEs}
+                                    </option>
+                                ))}
                         </select>
+
                         <button className="bg-blue-500 text-white px-3 py-2 rounded" onClick={() => setModoCrear(true)} type="button">
-                            Crear nueva
+                            {t('crearNueva')}
                         </button>
                     </div>
+                    {indicadorRealizacion.Resultados && (
+                        <TablaIndicadores datosIndicador={indicadorRealizacion.Resultados!} tipoIndicador="resultado" modal={true} onDelete={eliminarIndicadorResultado} />
+                    )}
                 </>
             ) : (
-                <div className="flex gap-2">
+                <div className="flex gap-2 ">
                     <div className="space-y-4">
-                        <RellenoIndicador numNextIndi={'1'} valorCampo1={''} />
-                        <button className="bg-gray-400 text-white px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
-                            Cancelar
-                        </button>
-                        <button className="btn-primary px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
-                            Crear indicador relacionado
-                        </button>
+                        <RellenoIndicador indicadorRealizacion={descripcionEditable} onChange={cambiosIndicadorEditable} />
+                        <div className="flex gap-4">
+                            <button className="bg-gray-400 text-white px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
+                                {t('Cancelar')}
+                            </button>
+                            <button className="btn-primary px-3 py-2 rounded" onClick={() => nuevoIndicadorResultado()} type="button">
+                                {t('crearindicadorRelacionado')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -490,7 +583,7 @@ function SelectorOCreador() {
             {seleccion && <div className="mt-2 text-green-700 font-semibold">Seleccionado: {seleccion}</div>}
         </div>
     );
-}
+};
 
 interface EditUserProps {
     user: UserID;

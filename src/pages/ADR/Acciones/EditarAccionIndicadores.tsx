@@ -1,6 +1,6 @@
 import { forwardRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
 import { NewModal } from '../../../components/Utils/utils';
 import { TablaIndicadorAccion } from './EditarAccionComponent';
 import { indicadoresResultado } from '../../../mocks/BBDD/indicadores';
@@ -8,17 +8,17 @@ import React from 'react';
 
 interface tablaIndicadoresProps {
     indicador: {
-        indicadoreRealizacion: IndicadorRealizacion[];
-        indicadoreResultado: IndicadorResultado[];
+        indicadoreRealizacion: IndicadorRealizacionAccion[];
+        indicadoreResultado: IndicadorResultadoAccion[];
     };
     creaccion?: boolean;
-    onResultadosRelacionadosChange?: (resultados: IndicadorRealizacion[]) => void;
-    onChangeIndicadores?: (indicadores: IndicadorRealizacion[]) => void;
+    onResultadosRelacionadosChange?: (resultados: IndicadorRealizacionAccion[]) => void;
+    onChangeIndicadores?: (indicadores: IndicadorRealizacionAccion[]) => void;
 }
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador }, ref) => {
     const { t } = useTranslation();
-    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorRealizacion[]>(indicador.indicadoreResultado);
+    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorRealizacionAccion[]>(indicador.indicadoreResultado);
 
     const handleResultadosRelacionadosChange = (nuevosResultados: number[]) => {
         setResultadosSeleccionados((anteriores) => {

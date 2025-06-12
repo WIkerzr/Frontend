@@ -1,4 +1,4 @@
-import { IndicadorRealizacion, IndicadorResultado } from './Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 
 export type EstadoLabel = 'Actuación en ejecución' | 'Actuación en espera' | 'Actuación finalizada' | 'Actuación abandonada';
 
@@ -62,8 +62,8 @@ export interface DatosAccion {
     datosPlan?: DatosPlan;
     datosMemoria?: DatosMemoria;
     indicadorAccion?: {
-        indicadoreRealizacion: IndicadorRealizacion[];
-        indicadoreResultado: IndicadorResultado[];
+        indicadoreRealizacion: IndicadorRealizacionAccion[];
+        indicadoreResultado: IndicadorResultadoAccion[];
     };
 }
 

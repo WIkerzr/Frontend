@@ -5,7 +5,7 @@ import { ModalNuevoIndicadorAccion } from './EditarAccionIndicadores';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
 import { Estado, StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 
@@ -81,16 +81,16 @@ export function CustomSelect({ value, onChange }: CustomSelectProps) {
 }
 
 interface tablaIndicadoresProps {
-    indicador: IndicadorRealizacion[];
-    indicadoresResultados?: IndicadorRealizacion[];
+    indicador: IndicadorRealizacionAccion[];
+    indicadoresResultados?: IndicadorRealizacionAccion[];
     creaccion?: boolean;
     onResultadosRelacionadosChange?: (resultados: number[]) => void;
 }
 
 //Import temporal
-const realizaciones: IndicadorRealizacion[] = indicadoresRealizacion;
+const realizaciones: IndicadorRealizacionAccion[] = indicadoresRealizacion;
 
-const listadoIndicadoresResultados: IndicadorResultado[] = indicadoresResultado;
+const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResultado;
 
 //Temporal
 
@@ -103,7 +103,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     const editarMemoria = estadoMemoria === 'borrador';
     // const editarPlan = estadoPlan === 'cerrado';
     // const editarMemoria = estadoMemoria === 'cerrado';
-    const [indicadores, setIndicadores] = useState<IndicadorRealizacion[]>(indicador);
+    const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>(indicador);
 
     useEffect(() => {
         setIndicadores(indicador);
@@ -131,7 +131,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     const [recordsData, setRecordsData] = useState(initialRecords);
 
     const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorRealizacion>>({ columnAccessor: 'id', direction: 'asc' });
+    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
     const [editableRowIndex, setEditableRowIndex] = useState(-1);
 
     const handleEliminarFila = (rowIndex: number) => {
@@ -142,30 +142,30 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     };
 
     const columnMetaAnual = [
-        editableColumnByPath<IndicadorRealizacion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
-        editableColumnByPath<IndicadorRealizacion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
-        editableColumnByPath<IndicadorRealizacion>('metaAnual.total', t('Total'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicadores, editableRowIndex, editarPlan),
     ];
 
     const columnEjecutadoAnual = [
-        editableColumnByPath<IndicadorRealizacion>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarMemoria),
-        editableColumnByPath<IndicadorRealizacion>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarMemoria),
-        editableColumnByPath<IndicadorRealizacion>('ejecutado.total', t('Total'), setIndicadores, editableRowIndex, editarMemoria),
+        editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarMemoria),
+        editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarMemoria),
+        editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicadores, editableRowIndex, editarMemoria),
     ];
 
     const columnMetaFinal = [
-        editableColumnByPath<IndicadorRealizacion>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
-        editableColumnByPath<IndicadorRealizacion>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
-        editableColumnByPath<IndicadorRealizacion>('metaFinal.total', t('Total'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
+        editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicadores, editableRowIndex, editarPlan),
     ];
-    const columnNombre = [editableColumnByPath<IndicadorRealizacion>('descripcion', t('nombre'), setIndicadores, editableRowIndex, false)];
+    const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicadores, editableRowIndex, false)];
 
     const columns = [
-        editableColumnByPath<IndicadorRealizacion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
+        editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
         {
             accessor: 'acciones',
             title: 'Acciones',
-            render: (_row: IndicadorRealizacion, index: number) =>
+            render: (_row: IndicadorRealizacionAccion, index: number) =>
                 editableRowIndex === index ? (
                     <button
                         className="bg-green-500 text-white px-2 py-1 rounded"

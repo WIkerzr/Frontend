@@ -27,7 +27,10 @@
     "metaFinal": "Meta Final",
     "porcentaje": "Porcentaje",
 
-    "confirmarEliminarIndicador": "¿Seguro que quieres eliminar este indicador?",
+    "crearindicadorRelacionado": "Crear indicador relacionado",
+    "crearNueva": "Crear nueva",
+    "seleccionaopcion": "Selecciona una opción",
+    "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
     "borrador":"Borrador",
     "proceso":"Proceso",
     "cerrado":"Cerrado",

@@ -6,8 +6,7 @@ import { NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
 import AnimateHeight from 'react-animate-height';
 import { DatosAccion } from '../../types/TipadoAccion';
-import { Estado } from '../../contexts/EstadosPorAnioContext';
-import { IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { sortBy } from 'lodash';
 import { DataTable, DataTableSortStatus, DataTableColumnTextAlign } from 'mantine-datatable';
 import { editableColumnByPath, visualColumnByPath } from './Acciones/Columnas';
@@ -259,7 +258,7 @@ export const Acordeon: React.FC<{ texto: string; num: number; active: string; to
 );
 
 interface tablaIndicadoresProps {
-    indicador: IndicadorRealizacion[] | IndicadorResultado[];
+    indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[];
     titulo: string;
 }
 
