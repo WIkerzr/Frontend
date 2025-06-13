@@ -42,9 +42,10 @@ export const LanguageSelector = () => {
 
 interface RegionSelectProps {
     disabled?: boolean;
+    header?: boolean;
 }
 
-export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled }) => {
+export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = false }) => {
     const { i18n, t } = useTranslation();
     const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
@@ -73,7 +74,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled }) => {
 
     return (
         <div>
-            <label className="block text-sm font-medium mb-1">{t('region')}</label>
+            {header ? <></> : <label className="block text-sm font-medium mb-1">{t('region')}</label>}
             <select
                 disabled={disabled}
                 className="form-select min-w-max w-full"

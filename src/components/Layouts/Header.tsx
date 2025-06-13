@@ -52,7 +52,7 @@ const Header = () => {
                     {role.toUpperCase() != 'ADR' ? (
                         <div>
                             <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <RegionSelect />
+                                <RegionSelect header={true} />
                             </div>
                         </div>
                     ) : (
