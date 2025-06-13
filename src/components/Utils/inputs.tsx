@@ -72,19 +72,22 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled }) => {
     };
 
     return (
-        <select
-            disabled={disabled}
-            className="form-select text-white-dark min-w-max"
-            style={{ minWidth: 'calc(100% + 10px)' }}
-            value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}
-            onChange={handleChange}
-        >
-            <option value="notSelect">{t('sinSeleccionar')}</option>
-            {regiones.map((region) => (
-                <option key={region.RegionId} value={region.RegionId.toString()}>
-                    {getRegionName(region)}
-                </option>
-            ))}
-        </select>
+        <div>
+            <label className="block text-sm font-medium mb-1">{t('region')}</label>
+            <select
+                disabled={disabled}
+                className="form-select min-w-max w-full"
+                style={{ minWidth: 'calc(100% + 10px)' }}
+                value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}
+                onChange={handleChange}
+            >
+                <option value="notSelect">{t('sinSeleccionar')}</option>
+                {regiones.map((region) => (
+                    <option key={region.RegionId} value={region.RegionId.toString()}>
+                        {getRegionName(region)}
+                    </option>
+                ))}
+            </select>
+        </div>
     );
 };

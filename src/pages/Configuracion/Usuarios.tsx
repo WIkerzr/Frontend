@@ -5,31 +5,44 @@ import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
 
+export const useUsers = (onChange?: (users: UserID[]) => void) => {
+    const [users, setUsers] = useState<UserID[]>(() => {
+        const saved = localStorage.getItem('users');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    const actualizarUsers = (nuevoUsers: UserID[]) => {
+        setUsers(nuevoUsers);
+        localStorage.setItem('users', JSON.stringify(nuevoUsers));
+    };
+
+    const refrescarUsuarios = () => {
+        const saved = localStorage.getItem('users');
+        const parsed = saved ? JSON.parse(saved) : [];
+        setUsers(parsed);
+        if (onChange) onChange(parsed);
+    };
+
+    const agregarUsuario = (nuevo: UserID) => actualizarUsers([...users, nuevo]);
+    const listadoUsuarios = (dataArray: UserID[]) => actualizarUsers(dataArray);
+    const eliminarUsuario = (id: string) => actualizarUsers(users.filter((u) => u.id !== id));
+    const actualizarUsuario = (usuarioActualizado: UserID) => actualizarUsers(users.map((u) => (u.id === usuarioActualizado.id ? usuarioActualizado : u)));
+
+    return { users, agregarUsuario, listadoUsuarios, eliminarUsuario, actualizarUsuario, refrescarUsuarios };
+};
+
 const Index = () => {
     const { t } = useTranslation();
-    const [users, setUsers] = useState<UserID[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { users, listadoUsuarios } = useUsers();
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [refreshKey, setRefreshKey] = useState(0);
     const { regiones } = useRegionContext();
 
-    const handleRefresh = () => {
-        setRefreshKey((prev) => prev + 1);
-    };
     useEffect(() => {
         const storedUsers = localStorage.getItem('users');
-        const token = localStorage.getItem('token');
 
-        if (storedUsers) {
-            try {
-                const parsedUsers = JSON.parse(storedUsers);
-                setUsers(parsedUsers);
-                setLoading(false);
-            } catch (error) {
-                console.error(error);
-                setLoading(false);
-            }
-        } else {
+        if (!storedUsers) {
+            const token = localStorage.getItem('token');
             setLoading(true);
             const fetchUsers = async () => {
                 try {
@@ -49,7 +62,7 @@ const Index = () => {
                         };
                     });
                     const dataArray: UserID[] = Array.isArray(usuariosConRegion) ? usuariosConRegion : Object.values(usuariosConRegion);
-                    setUsers(dataArray);
+                    listadoUsuarios(dataArray);
                     localStorage.setItem('users', JSON.stringify(dataArray));
                 } catch (err: any) {
                     setError(err.message);
@@ -61,18 +74,6 @@ const Index = () => {
         }
     }, []);
 
-    useEffect(() => {
-        const storedUsers = localStorage.getItem('users');
-        if (storedUsers) {
-            try {
-                const parsedUsers = JSON.parse(storedUsers);
-                setUsers(parsedUsers);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    }, [refreshKey]);
-
     if (loading) return <Loading />;
     if (error) return <ErrorMessage message={error} />;
     if (users && Object.keys(users).length === 0) return <div>No hay datos para mostrar</div>;
@@ -80,7 +81,7 @@ const Index = () => {
     return (
         <div className="flex w-full gap-5">
             <div className="panel h-full w-full">
-                <UsersTable users={users} onSuccess={handleRefresh} />
+                <UsersTable />
             </div>
         </div>
     );

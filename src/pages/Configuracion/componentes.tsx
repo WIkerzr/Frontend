@@ -16,6 +16,7 @@ import IconPencil from '../../components/Icon/IconPencil';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
 import { TablaIndicadores } from './Indicadores';
+import { useUsers } from './Usuarios';
 
 const newUser: UserID = {
     name: '',
@@ -31,18 +32,6 @@ const newUser: UserID = {
 interface BaseProps {
     recargeToSave?: () => void;
 }
-
-interface EditarProps extends BaseProps {
-    accion: 'editar';
-    userData: UserID;
-}
-
-interface NuevoProps extends BaseProps {
-    accion: 'nuevo';
-    userData?: User;
-}
-
-type UserDataProps = EditarProps | NuevoProps;
 
 export const updateUserInLocalStorage = (updatedUser: UserID, accion: 'editar' | 'nuevo' | 'eliminar') => {
     try {
@@ -88,7 +77,21 @@ export const updateUserInLocalStorage = (updatedUser: UserID, accion: 'editar' |
     }
 };
 
-export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion, recargeToSave }) => {
+interface EditarProps extends BaseProps {
+    accion: 'editar';
+    userData: UserID;
+    onClose: () => void;
+}
+
+interface NuevoProps extends BaseProps {
+    accion: 'nuevo';
+    userData?: User;
+    onClose: () => void;
+}
+
+type UserDataProps = EditarProps | NuevoProps;
+
+export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion, onClose }) => {
     const getInitialUserData = (): UserID => {
         const usersRaw = localStorage.getItem('users');
         try {
@@ -98,11 +101,11 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             if (matched) {
                 return {
                     name: matched.name || '',
+                    email: matched.email || '',
                     lastName: matched.lastName || '',
                     secondSurname: matched.secondSurname || '',
                     role: matched.role || 'gobiernoVasco',
-                    RegionId: matched.email || '',
-                    ambit: matched.ambit || '-',
+                    ambit: matched.RegionId || '-',
                     status: matched.status || false,
                     id: matched.id || '9999',
                 };
@@ -122,6 +125,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             status: false,
         };
     };
+    const { agregarUsuario, actualizarUsuario } = useUsers();
 
     const initialData = accion === 'editar' ? getInitialUserData() : newUser;
     const [UserData, setUserData] = useState(initialData);
@@ -173,7 +177,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         }),
                     });
                     if (response.ok) {
-                        updateUserInLocalStorage(UserData, 'editar');
+                        actualizarUsuario(UserData);
                     }
                 }
             } else if (accion === 'nuevo') {
@@ -197,7 +201,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    updateUserInLocalStorage(data.data, 'nuevo');
+                    agregarUsuario(data.data);
                 }
             }
 
@@ -211,9 +215,9 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     setTimeout(() => {
                         setSuccessMessage(null);
                         setFadeOut(false);
+                        onClose();
                     }, 1000);
-                }, 5000);
-                return recargeToSave && recargeToSave();
+                }, 1000);
             }
         } catch (err: any) {
             setErrorMessage(err.message || 'Error inesperado');
@@ -657,30 +661,17 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
 
 interface EditUserProps {
     user: UserID;
-    recargeToSave: () => void;
+    onChange: () => void;
 }
 
-interface NewUserProps {
-    recargeToSave: () => void;
-}
-
-interface ChangeStatusProps {
-    value: UserID;
-    onSuccess?: () => void;
-}
-
-export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, recargeToSave }, ref) => {
+export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChange }, ref) => {
     const [showModal, setShowModal] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
-    useEffect(() => {
-        setTimeout(() => {
-            handleClose();
-        }, 1500);
-    }, [recargeToSave]);
 
     const handleOpen = () => setShowModal(true);
     const handleClose = () => {
         setIsClosing(true);
+        onChange();
         setTimeout(() => {
             setShowModal(false);
             setIsClosing(false);
@@ -692,7 +683,6 @@ export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, re
             <button type="button" onClick={handleOpen} ref={ref}>
                 <IconPencil />
             </button>
-
             {showModal && (
                 <div
                     className={`fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
@@ -702,13 +692,59 @@ export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, re
                         className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <UsersDateModalLogic accion="editar" userData={user} recargeToSave={recargeToSave} />
+                        <UsersDateModalLogic accion="editar" userData={user} onClose={() => handleClose()} />
                     </div>
                 </div>
             )}
         </>
     );
 });
+
+export const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChange }, ref) => {
+    const { t } = useTranslation();
+    const { eliminarUsuario } = useUsers();
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm(t('¿Estás seguro de que deseas eliminar este usuario?'));
+        const token = sessionStorage.getItem('token');
+
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch('https://localhost:44300/api/deleteUser', {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: user.id }),
+            });
+
+            if (!response.ok) {
+                throw new Error(t('noSePudoEliminarUsuario'));
+            }
+
+            alert(t('usuarioEliminadoCorrectamente'));
+
+            if (response.ok) {
+                eliminarUsuario(user.id);
+                onChange();
+            }
+        } catch (error: any) {
+            alert(error.message || t('errorEliminarUsuario'));
+        }
+    };
+
+    return (
+        <button type="button" onClick={handleDelete} ref={ref} title={t('Eliminar usuario')}>
+            <IconTrash />
+        </button>
+    );
+});
+interface ChangeStatusProps {
+    value: UserID;
+    onSuccess?: () => void;
+}
 
 export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ value, onSuccess }, ref) => {
     const { t } = useTranslation();
@@ -757,51 +793,11 @@ export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(
     );
 });
 
-export const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, recargeToSave }, ref) => {
-    const { t } = useTranslation();
+interface ElimarUserProps {
+    onChange: () => void;
+}
 
-    const handleDelete = async () => {
-        const confirmDelete = window.confirm(t('¿Estás seguro de que deseas eliminar este usuario?'));
-        const token = sessionStorage.getItem('token');
-
-        if (!confirmDelete) return;
-
-        try {
-            const response = await fetch('https://localhost:44300/api/deleteUser', {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: user.id }),
-            });
-
-            if (!response.ok) {
-                throw new Error(t('noSePudoEliminarUsuario'));
-            }
-
-            const data = await response.json();
-
-            if (data.success && recargeToSave) {
-                recargeToSave();
-            }
-            updateUserInLocalStorage(user, 'eliminar');
-
-            alert(t('usuarioEliminadoCorrectamente'));
-        } catch (error: any) {
-            alert(error.message || t('errorEliminarUsuario'));
-        }
-    };
-
-    return (
-        <button type="button" onClick={handleDelete} ref={ref} title={t('Eliminar usuario')}>
-            <IconTrash />
-        </button>
-    );
-});
-
-export const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToSave }, ref) => {
+export const NewUser = forwardRef<HTMLButtonElement, ElimarUserProps>(({ onChange }) => {
     const { t } = useTranslation();
 
     const [showModal, setShowModal] = useState(false);
@@ -810,20 +806,22 @@ export const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToS
         setTimeout(() => {
             handleClose();
         }, 1500);
-    }, [recargeToSave]);
+    }, []);
 
     const handleOpen = () => setShowModal(true);
     const handleClose = () => {
         setIsClosing(true);
         setTimeout(() => {
             setShowModal(false);
+            onChange();
             setIsClosing(false);
         }, 300);
     };
 
     return (
         <>
-            <button type="button" className="btn btn-primary w-1/4" onClick={handleOpen}>
+            <div className="flex-grow"></div>
+            <button type="button" className="btn btn-primary w-1/4 " onClick={handleOpen}>
                 {t('agregarUsuario')}
             </button>
 
@@ -836,7 +834,7 @@ export const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToS
                         className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <UsersDateModalLogic accion="nuevo" recargeToSave={recargeToSave} />
+                        <UsersDateModalLogic accion="nuevo" onClose={() => handleClose()} />
                     </div>
                 </div>
             )}
@@ -844,39 +842,29 @@ export const NewUser = forwardRef<HTMLButtonElement, NewUserProps>(({ recargeToS
     );
 });
 
-interface tableProps {
-    users: UserID[];
-    onSuccess: () => void;
-}
+export const UsersTable = forwardRef<HTMLButtonElement>((ref) => {
+    const { users, refrescarUsuarios } = useUsers();
 
-export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, onSuccess }, ref) => {
     const { t } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-
     const [page, setPage] = useState(1);
     const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-    const [initialRecords, setInitialRecords] = useState(sortBy(users, 'id'));
-    const [recordsData, setRecordsData] = useState(initialRecords);
 
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus<UserID>>({ columnAccessor: 'id', direction: 'asc' });
 
-    useEffect(() => {
-        setPage(1);
-    }, [pageSize]);
+    const [datosMostrar, setDatosMostrar] = useState<UserID[]>([]);
+    const [recordsPaginados, setRecordsPaginados] = useState<UserID[]>([]);
 
     useEffect(() => {
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize;
-        setRecordsData([...initialRecords.slice(from, to)]);
-    }, [page, pageSize, initialRecords]);
+        console.log(users);
 
-    useEffect(() => {
-        setInitialRecords(() => {
-            if (!search.trim()) return sortBy(users, 'id');
+        let data = [...users];
+
+        if (search.trim()) {
             const s = search.toLowerCase();
-            return users.filter(
+            data = data.filter(
                 (item) =>
                     (item.status && String(item.status).toLowerCase().includes(s)) ||
                     (item.name as string).toLowerCase().includes(s) ||
@@ -886,26 +874,41 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
                     (item.role as string).toLowerCase().includes(s) ||
                     (item.RegionName && (item.RegionName as string).toLowerCase().includes(s))
             );
-        });
-    }, [search, users]);
+        }
+
+        data = sortBy(data, sortStatus.columnAccessor);
+        if (sortStatus.direction === 'desc') data = data.reverse();
+
+        setDatosMostrar(data);
+        setPage(1);
+    }, [users, search, sortStatus]);
 
     useEffect(() => {
-        const data = sortBy(initialRecords, sortStatus.columnAccessor);
-        setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-        setPage(1);
-    }, [sortStatus]);
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize;
+        setRecordsPaginados(datosMostrar.slice(from, to));
+    }, [datosMostrar, page, pageSize]);
+
     return (
         <div>
-            <div className="flex items-center space-x-4 mb-5">
+            <div className="flex items-center space-x-4 mb-5 w-[100%]">
                 <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar usuario...')} value={search} onChange={(e) => setSearch(e.target.value)} />
-                <NewUser recargeToSave={onSuccess} />
+                <NewUser onChange={() => refrescarUsuarios()} />
             </div>
             <div className="panel mt-6">
                 <div className="datatables">
                     <DataTable<UserID>
+                        records={recordsPaginados}
+                        totalRecords={datosMostrar.length}
+                        recordsPerPage={pageSize}
+                        page={page}
+                        onPageChange={(p) => setPage(p)}
+                        recordsPerPageOptions={PAGE_SIZES}
+                        onRecordsPerPageChange={setPageSize}
+                        sortStatus={sortStatus}
+                        onSortStatusChange={setSortStatus}
                         highlightOnHover
                         className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'}`}
-                        records={recordsData}
                         columns={[
                             {
                                 accessor: 'status',
@@ -924,23 +927,15 @@ export const UsersTable = forwardRef<HTMLButtonElement, tableProps>(({ users, on
                                 render: (row) => (
                                     <div className="flex justify-end space-x-3">
                                         <Tippy content={t('editar')}>
-                                            <EditUser user={row} recargeToSave={onSuccess} />
+                                            <EditUser user={row} onChange={() => refrescarUsuarios()} />
                                         </Tippy>
                                         <Tippy content={t('borrar')}>
-                                            <DeleteUser user={row} recargeToSave={onSuccess} />
+                                            <DeleteUser user={row} onChange={() => refrescarUsuarios()} />
                                         </Tippy>
                                     </div>
                                 ),
                             },
                         ]}
-                        totalRecords={initialRecords.length}
-                        recordsPerPage={pageSize}
-                        page={page}
-                        onPageChange={(p) => setPage(p)}
-                        recordsPerPageOptions={PAGE_SIZES}
-                        onRecordsPerPageChange={setPageSize}
-                        sortStatus={sortStatus}
-                        onSortStatusChange={setSortStatus}
                         minHeight={200}
                         paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
                         recordsPerPageLabel={t('recorsPerPage')}

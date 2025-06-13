@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Input, RegionSelect } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { User, UserID } from '../../types/users';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
@@ -15,7 +16,14 @@ interface UserDataFormProps {
 }
 
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const { regiones } = useRegionContext();
+    const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => r.RegionId === userData.ambit) || null);
+
+    useEffect(() => {
+        userData.ambit = regionSeleccionada?.RegionId;
+    }, [regionSeleccionada]);
+
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
@@ -48,7 +56,29 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             <option value="GV">{t('gobiernoVasco')}</option>
                         </select>
                     </div>
-                    {userData.role === 'ADR' || userData.role === 'adr' ? <RegionSelect disabled /> : <></>}.
+                    {userData.role === 'ADR' || userData.role === 'adr' ? (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('region')}</label>
+                            <select
+                                className="form-select min-w-max w-full"
+                                style={{ minWidth: 'calc(100% + 10px)' }}
+                                value={i18n.language === 'eu' ? regionSeleccionada?.NameEu : regionSeleccionada?.NameEs}
+                                onChange={(e) => {
+                                    setRegionSeleccionada(regiones.find((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs) === e.target.value)!);
+                                }}
+                            >
+                                <option value="notSelect">{t('sinSeleccionar')}</option>
+                                {regiones.map((region, index) => (
+                                    <option key={region.RegionId} value={i18n.language === 'eu' ? region.NameEu : region.NameEs}>
+                                        {i18n.language === 'eu' ? region.NameEu : region.NameEs}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
+                    .
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (
