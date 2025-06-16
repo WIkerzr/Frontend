@@ -57,7 +57,8 @@ export interface DatosMemoria {
 export interface DatosAccion {
     id: number;
     accion: string;
-    eje: string;
+    ejeEs?: string;
+    ejeEu?: string;
     lineaActuaccion: string;
     datosPlan?: DatosPlan;
     datosMemoria?: DatosMemoria;
@@ -70,7 +71,8 @@ export interface DatosAccion {
 export const datosInicializadosAccion: DatosAccion = {
     id: 0,
     accion: '',
-    eje: '',
+    ejeEs: '',
+    ejeEu: '',
     lineaActuaccion: '',
     datosPlan: {
         ejecutora: '',

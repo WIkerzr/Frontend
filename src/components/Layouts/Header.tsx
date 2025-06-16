@@ -56,7 +56,12 @@ const Header = () => {
                             </div>
                         </div>
                     ) : (
-                        <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
+                        // <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
+                        <div>
+                            <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                <RegionSelect header={true} disabled />
+                            </div>
+                        </div>
                     )}
 
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">

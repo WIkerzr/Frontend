@@ -22,6 +22,7 @@ import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { yearIniciado } from '../../types/tipadoPlan';
 
 const Sidebar = () => {
     const { anio, estados, setAnio } = useEstadosPorAnio();
@@ -71,7 +72,10 @@ const Sidebar = () => {
         }
     }, [location]);
 
-    const region = regiones.find((r) => r.RegionId === regionSeleccionada);
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setAnio(Number(e.target.value));
+    };
+
     return (
         <div className={semidark ? 'dark' : ''}>
             <nav
@@ -119,7 +123,7 @@ const Sidebar = () => {
                                 </li>
                             )}
                             <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1 justify-center">
-                                <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={(e) => setAnio(Number(e.target.value))}>
+                                <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={handleChange}>
                                     {anios.map((a) => (
                                         <option key={a} value={a}>
                                             {a}

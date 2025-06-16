@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
 import { DatosAccion } from '../../types/TipadoAccion';
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { useYear } from '../../contexts/DatosAnualContext';
+import { Ejes } from '../../types/tipadoPlan';
 
 export const datosAcciones: DatosAccion[] = [
     {
         id: 1,
         accion: 'Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
         lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
-        eje: 'Sectores prioritarios - Turismo, comercio y actividades relacionadas',
+        ejeEs: 'Sectores prioritarios - Turismo, comercio y actividades relacionadas',
         datosPlan: {
             ejecutora: '1',
             implicadas: '2',
@@ -148,32 +150,32 @@ export const datosAcciones: DatosAccion[] = [
         id: 2,
         accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
-        eje: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
         id: 3,
         accion: 'Socialización sobre la importancia de mantener un sector agroalimentario vivo y el consumo de producto local.',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
-        eje: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
         id: 4,
         accion: 'Trabajo en coordinación con Turismo de la Cuadrilla para el impulso de esta',
         lineaActuaccion: 'Impulso de los recursos turísticos específicos propios de la comarca y a su puesta en valor',
-        eje: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
         id: 5,
         accion: 'Fomento de la Transformación Agroalimentario de la Llanada Alavesa',
         lineaActuaccion: 'Impulso a la transformación y la diferenciación de los productos',
-        eje: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
         id: 6,
         accion: 'Organización de jornadas y talleres para la sostenibilidad en las explotaciones agroalimentarias (energética, medioambiental)',
         lineaActuaccion:
             'Fomento de iniciativas de producción agrarias sostenibles: impulso a sistemas en ecológico,producción integrada, regenerativa, utilización de variedades autóctonas.Mejora de la eficiencia energética: sustitución de luminarias públicas, campañas de ahorro energético.',
-        eje: 'Telecomunicaciones',
+        ejeEs: 'Telecomunicaciones',
     },
 ];
 
@@ -190,12 +192,12 @@ export const useAcciones = (onChange?: (users: DatosAccion[]) => void) => {
 };
 
 const Index: React.FC = () => {
-    const { acciones } = useAcciones();
-    const { t } = useTranslation();
+    const { yearData } = useYear();
+    const ejesPrioritarios = yearData.plan.ejesPrioritarios;
+    const { t, i18n } = useTranslation();
     const { anio } = useEstadosPorAnio();
 
-    const ejesUnicos = Array.from(new Set(acciones.map((a) => a.eje)));
-    const arraysPorEje = ejesUnicos.map((eje) => acciones.filter((a) => a.eje === eje));
+    const nombresEjesPrioritarios = ejesPrioritarios.slice(0, 3).map((eje) => (i18n.language === 'es' ? eje.nameEs : eje.nameEu));
 
     return (
         <div className="panel">
@@ -207,28 +209,19 @@ const Index: React.FC = () => {
                         </span>
                     </h2>
                 }
-                zonaBtn={<ModalAccion listadosAcciones={acciones} />}
+                zonaBtn={<ModalAccion />}
                 zonaExplicativa={<span>{t('explicacionAccion')}</span>}
             />
             <div className="w-full mx-auto mt-1 px-2">
                 <div className="flex items-start w-full h-100%">
-                    <div className="flex flex-col flex-1 items-center justify-center  p-1">
-                        <ListadoAcciones eje={ejesUnicos[0]} listadoMap={arraysPorEje[0]} />
-                    </div>
-                    <div className="flex flex-col flex-1 items-center justify-center  p-1">
-                        <ListadoAcciones eje={ejesUnicos[1]} listadoMap={arraysPorEje[1]} />
-                    </div>
-                    <div className="flex flex-col flex-1 items-center justify-center  p-1">
-                        <ListadoAcciones eje={ejesUnicos[2]} listadoMap={arraysPorEje[2]} />
-                    </div>
+                    {nombresEjesPrioritarios.map((eje, index) => (
+                        <div key={index} className="flex flex-col flex-1 items-center justify-center p-1">
+                            <ListadoAcciones eje={eje} number={index} />
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
-
-        // <div className="p-4 bg-[#FAFAFB]">
-        //     <label>{'Maximo 5 Acciones por eje prioritario (15)'}</label>
-        //     <ListadoAcciones nombre="Acciones" listadoMap={listAcciones} ACCIONES_MAX={15} />
-        // </div>
     );
 };
 export default Index;

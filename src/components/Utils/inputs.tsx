@@ -2,6 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { Region } from './gets/getRegiones';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect } from 'react';
+import { yearIniciado } from '../../types/tipadoPlan';
+import { useUser } from '../../contexts/UserContext';
+import { UserRole } from '../../types/users';
+import { useYear } from '../../contexts/DatosAnualContext';
 
 interface InputProps {
     nombreInput: string;
@@ -43,10 +47,14 @@ export const LanguageSelector = () => {
 interface RegionSelectProps {
     disabled?: boolean;
     header?: boolean;
+    noInput?: boolean;
 }
 
-export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = false }) => {
+export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = false, noInput = false }) => {
     const { i18n, t } = useTranslation();
+    const { user } = useUser();
+    const role: UserRole = user!.role as UserRole;
+    const { setYearData } = useYear();
     const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
@@ -61,6 +69,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
         if (regionSeleccionada !== null) {
             sessionStorage.setItem('regionSeleccionada', regionSeleccionada.toString());
         }
+        setYearData(yearIniciado);
     }, [regionSeleccionada]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -71,24 +80,29 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
             setRegionSeleccionada(Number(value));
         }
     };
+    const region = regiones.find((r) => r.RegionId === regionSeleccionada);
 
     return (
         <div>
             {header ? <></> : <label className="block text-sm font-medium mb-1">{t('region')}</label>}
-            <select
-                disabled={disabled}
-                className="form-select min-w-max w-full"
-                style={{ minWidth: 'calc(100% + 10px)' }}
-                value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}
-                onChange={handleChange}
-            >
-                <option value="notSelect">{t('sinSeleccionar')}</option>
-                {regiones.map((region) => (
-                    <option key={region.RegionId} value={region.RegionId.toString()}>
-                        {getRegionName(region)}
-                    </option>
-                ))}
-            </select>
+            {role.toUpperCase() != 'ADR' ? (
+                <select
+                    disabled={disabled}
+                    className="form-select min-w-max w-full"
+                    style={{ minWidth: 'calc(100% + 10px)' }}
+                    value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}
+                    onChange={handleChange}
+                >
+                    <option value="notSelect">{t('sinSeleccionar')}</option>
+                    {regiones.map((region) => (
+                        <option key={region.RegionId} value={region.RegionId.toString()}>
+                            {getRegionName(region)}
+                        </option>
+                    ))}
+                </select>
+            ) : (
+                <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
+            )}
         </div>
     );
 };

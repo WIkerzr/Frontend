@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
 import AnimateHeight from 'react-animate-height';
-import { DatosAccion } from '../../types/TipadoAccion';
+import { DatosAccion, datosInicializadosAccion } from '../../types/TipadoAccion';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { sortBy } from 'lodash';
 import { DataTable, DataTableSortStatus, DataTableColumnTextAlign } from 'mantine-datatable';
 import { editableColumnByPath, visualColumnByPath } from './Acciones/Columnas';
+import { Ejes } from '../../types/tipadoPlan';
+import { useYear } from '../../contexts/DatosAnualContext';
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -83,40 +85,47 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
     );
 };
 
-interface ModalAccionProps {
-    listadosAcciones: DatosAccion[];
-}
+interface ModalAccionProps {}
 
-export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
-    const { t } = useTranslation();
-    let ejes = Array.from(new Set(listadosAcciones!.map((a) => a.eje)));
+export const ModalAccion = () => {
+    const { t, i18n } = useTranslation();
+    const { yearData, NuevaAccion } = useYear();
+    const ejesPrioritarios = yearData.plan.ejesPrioritarios;
+    const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(ejesPrioritarios[0].acciones);
 
-    const accionesPorEje: Record<string, DatosAccion[]> = {};
-    ejes.forEach((eje) => {
-        accionesPorEje[eje] = listadosAcciones!.filter((a) => a.eje === eje);
-    });
-
-    const [selectedEje, setSelectedEje] = useState(() => {
-        const firstAvailable = ejes.find((eje) => accionesPorEje[eje].length < 5);
-        return firstAvailable || ejes[0];
-    });
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState('0');
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
+    const [plurianual, setNuevaPlurianual] = useState(false);
+
     const [inputError, setInputError] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-    const getEjeLimitado = (eje: string) => accionesPorEje[eje]?.length >= 5;
+    useEffect(() => {
+        const numero = ejesPrioritarios.findIndex((eje) => eje.id.toString() === idEjeSeleccionado);
+        if (numero !== -1) {
+            setAccionesEje(ejesPrioritarios[numero].acciones);
+        } else {
+            setAccionesEje([]);
+        }
+    }, [idEjeSeleccionado]);
+
+    const getEjeLimitado = () => accionesEje.length >= 5;
 
     const handleNuevaAccion = () => {
-        if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim() || getEjeLimitado(selectedEje)) {
+        if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
             setInputError(true);
             return;
         }
 
+        NuevaAccion(idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion);
+
         //LLamada al servidor con la nueva accion
 
+        setIdEjeSeleccionado('');
         setNuevaAccion('');
         setNuevaLineaActuaccion('');
+        setNuevaPlurianual(false);
         setInputError(false);
         setShowModal(false);
     };
@@ -132,14 +141,17 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
                 <div className="space-y-5">
                     <div>
                         <label className="block font-medium mb-1">{t('Ejes')}</label>
-                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={selectedEje} onChange={(e) => setSelectedEje(e.target.value)}>
-                            {ejes.map((eje) => (
-                                <option key={eje} value={eje} disabled={getEjeLimitado(eje)}>
-                                    {eje} {getEjeLimitado(eje) ? '(Límite alcanzado)' : ''}
+                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} defaultValue={'inicial'} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
+                            <option value="inicial" hidden>
+                                {t('seleccionaEjePrioritario')}
+                            </option>
+                            {ejesPrioritarios.map((eje) => (
+                                <option key={eje.id} value={eje.id} disabled={getEjeLimitado()}>
+                                    {i18n.language === 'es' ? eje.nameEs : eje.nameEu} {getEjeLimitado() ? '(Límite alcanzado)' : ''}
                                 </option>
                             ))}
                         </select>
-                        {getEjeLimitado(selectedEje) && <div className="text-xs text-red-500 mt-1">{t('limiteEje')}</div>}
+                        {getEjeLimitado() && <div className="text-xs text-red-500 mt-1">{t('limiteEje')}</div>}
                     </div>
                     <div>
                         <label className="block font-medium mb-1">{t('NombreAccion')}</label>
@@ -152,7 +164,7 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
                                 setInputError(false);
                             }}
                             placeholder={t('Introduce nombre acción')}
-                            disabled={getEjeLimitado(selectedEje)}
+                            disabled={getEjeLimitado() || idEjeSeleccionado === '0'}
                         />
                     </div>
                     <div>
@@ -166,15 +178,16 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
                                 setInputError(false);
                             }}
                             placeholder={t('Introduce línea de actuación')}
-                            disabled={getEjeLimitado(selectedEje)}
+                            disabled={getEjeLimitado() || idEjeSeleccionado === '0'}
                             autoComplete="off"
                         />
                     </div>
                     <div className="flex">
                         <input
+                            onChange={(e) => setNuevaPlurianual(e.target.checked)}
                             type="checkbox"
                             className="form-checkbox h-5 w-5 "
-                            //checked={selected.includes(accion.id)}
+                            checked={plurianual}
                             //onChange={() => handleCheck(accion.id)}
                             //id={`checkbox-${accion.id}`}
                         />
@@ -183,7 +196,7 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
                     {inputError && <div className="text-xs text-red-500 text-center">{t('rellenarAmbosCampos')}</div>}
                     <button
                         onClick={handleNuevaAccion}
-                        className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition ${getEjeLimitado(selectedEje) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition ${getEjeLimitado() ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         {t('guardar')}
                     </button>
@@ -195,13 +208,32 @@ export const ModalAccion = ({ listadosAcciones }: ModalAccionProps) => {
 
 interface ListadoAccionesProps {
     eje: string;
-    listadoMap: DatosAccion[];
+    number: number;
 }
-export const ListadoAcciones = ({ eje, listadoMap }: ListadoAccionesProps) => {
-    const [acciones, setAcciones] = useState<DatosAccion[]>(listadoMap);
+export const ListadoAcciones = ({ eje, number }: ListadoAccionesProps) => {
+    const { yearData, setYearData } = useYear();
+    const [acciones, setAcciones] = useState<DatosAccion[]>([]);
+
+    useEffect(() => {
+        setAcciones(yearData.plan.ejesPrioritarios[number].acciones);
+    }, [yearData]);
+
     const { t } = useTranslation();
 
-    const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
+    const handleDelete = (id: number) => {
+        const updatedYearData = {
+            ...yearData,
+            plan: {
+                ...yearData.plan,
+                ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) => ({
+                    ...eje,
+                    acciones: eje.acciones.filter((accion) => accion.id !== id),
+                })),
+            },
+        };
+        setYearData(updatedYearData);
+        setAcciones((prev) => prev.filter((a) => a.id !== id));
+    };
 
     const mostrarInput = acciones.length < 5;
     const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);

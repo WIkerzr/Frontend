@@ -15,7 +15,7 @@ import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 
 const Index: React.FC = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [active, setActive] = useState<string>('0');
     const { anio, estados } = useEstadosPorAnio();
 
@@ -61,7 +61,7 @@ const Index: React.FC = () => {
                             </div>
                             <div className="w-1/2 flex flex-col gap-2 justify-center">
                                 <span className="block  font-semibold mb-1">
-                                    <span className="font-normal text-lg">{datosAccion.eje}</span>
+                                    <span className="font-normal text-lg">{i18n.language === 'es' ? datosAccion.ejeEs : datosAccion.ejeEu}</span>
                                 </span>
                                 <span className="block  font-semibold">
                                     <span className="font-normal text-col text-info">{datosAccion.lineaActuaccion}</span>
