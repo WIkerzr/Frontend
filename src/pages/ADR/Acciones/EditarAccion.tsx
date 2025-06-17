@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment } from 'react';
@@ -8,8 +8,7 @@ import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
-import { DatosAccion } from '../../../types/TipadoAccion';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
@@ -17,16 +16,10 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const [active, setActive] = useState<string>('0');
     const { anio, estados } = useEstadosPorAnio();
 
-    const togglePara = (value: string) => {
-        setActive((oldValue) => {
-            return oldValue === value ? '' : value;
-        });
-    };
+    const { datosEditandoAccion } = useYear();
 
-    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
     if (!datosEditandoAccion) {
         return;
     }

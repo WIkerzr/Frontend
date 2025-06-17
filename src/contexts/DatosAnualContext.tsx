@@ -19,11 +19,18 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
         return stored ? JSON.parse(stored) : yearIniciado;
     });
 
-    const [datosEditandoAccion, setDatosEditandoAccion] = useState<DatosAccion>();
+    const [datosEditandoAccion, setDatosEditandoAccion] = useState<DatosAccion>(() => {
+        const stored = localStorage.getItem('datosAccionModificado');
+        return JSON.parse(stored!);
+    });
 
     useEffect(() => {
         localStorage.setItem('datosAno', JSON.stringify(yearData));
     }, [yearData]);
+
+    useEffect(() => {
+        localStorage.setItem('datosAccionModificado', JSON.stringify(datosEditandoAccion));
+    }, [datosEditandoAccion]);
 
     const setYearData = (data: YearData) => {
         setYearDataState(data);
