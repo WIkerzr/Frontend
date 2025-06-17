@@ -25,6 +25,7 @@
     "alertTotalesPlanActivo":"los totales de Meta anual y Meta Final para poder guardar",
     "alertTotalesMemoriaActivo":"el total Ejecutado poder guardar",
     "buscarUsuario":"Buscar usuario...",
+    "ReenviandoLogin":"Reenviando al login...",
 
     "metaAnual": "Meta Anual",
     "ejecutado": "Ejecutado",

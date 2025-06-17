@@ -916,7 +916,7 @@ export const UsersTable = forwardRef<HTMLButtonElement>((ref) => {
                             { accessor: 'name', title: t('name'), sortable: true },
                             { accessor: 'lastName', title: t('lastName'), sortable: true },
                             { accessor: 'secondSurname', title: t('secondSurname'), sortable: true },
-                            { accessor: 'email', sortable: true },
+                            { accessor: 'email', title: t('email'), sortable: true },
                             { accessor: 'role', title: t('role'), sortable: true },
                             { accessor: 'RegionName', title: t('ambit'), sortable: true },
                             {

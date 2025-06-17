@@ -22,7 +22,6 @@ import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
-import { yearIniciado } from '../../types/tipadoPlan';
 
 const Sidebar = () => {
     const { anio, estados, setAnio } = useEstadosPorAnio();
@@ -46,7 +45,8 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        setRole(user!.role.toUpperCase() as UserRole);
+        const rolUsuario = user!.role as String;
+        setRole(rolUsuario.toUpperCase() as UserRole);
     }, []);
 
     useEffect(() => {

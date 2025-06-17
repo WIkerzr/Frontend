@@ -1,25 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
-import { datosAcciones } from './Acciones';
 import { TablaCuadroMando } from './Componentes';
-
-const PanelAccionCuadroMando: React.FC = () => {
-    const { t } = useTranslation();
-
-    return (
-        <>
-            <h5 className="font-semibold text-lg dark:text-white-light mb-5">{datosAcciones[0].accion}</h5>
-            {/* <TablaCuadroMando indicador={datosAcciones[0].indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} /> */}
-            {/* <TablaCuadroMando indicador={datosAcciones[0].indicadorAccion?.indicadoreResultado ?? []} titulo={t('indicadoresDeResultado')} /> */}
-        </>
-    );
-};
+import { useYear } from '../../contexts/DatosAnualContext';
 
 const Index = () => {
     const { t } = useTranslation();
+    const { yearData } = useYear();
 
     return (
-        <div className="panel h-[830px]">
+        <div className="panel">
             <ZonaTitulo
                 titulo={
                     <div className="text-xl font-bold flex items-center space-x-2 ">
@@ -27,8 +16,22 @@ const Index = () => {
                     </div>
                 }
             />
-            <div className="panel">
-                <PanelAccionCuadroMando />
+
+            <div className="p-5 flex flex-col gap-4 w-full">
+                {yearData.plan.ejesPrioritarios.map(
+                    (ejes) =>
+                        ejes.acciones.length > 0 && (
+                            <div className="paneln0">
+                                {ejes.acciones.map((acciones) => (
+                                    <div className="panel">
+                                        <h5 className="font-semibold text-lg dark:text-white-light mb-5">{acciones.accion}</h5>
+                                        <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} />
+                                        <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreResultado ?? []} titulo={t('indicadoresDeResultado')} />
+                                    </div>
+                                ))}
+                            </div>
+                        )
+                )}
             </div>
         </div>
     );

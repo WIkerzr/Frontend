@@ -1,9 +1,6 @@
 import { get, set } from 'lodash';
-import { indicadoresRealizacion } from '../../../mocks/BBDD/indicadores';
 import { useState, useEffect } from 'react';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
-import { useTranslation } from 'react-i18next';
-
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
     'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },
@@ -182,11 +179,6 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
     };
 }
 export function visualColumnByPath<T extends object>(accessor: string, title: string) {
-    const { t } = useTranslation();
-    const [hombresTotal, setHombresTotal] = useState(0);
-    const [mujeresTotal, setMujeresTotal] = useState(0);
-    const [totalTotal, setTotalTotal] = useState(0);
-
     return {
         accessor,
         title,
@@ -199,15 +191,7 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
                 const mujeres = Number(get(row, keys.mujeres)) || 0;
                 const total = Number(get(row, keys.total)) || 0;
                 const ambosCero = hombres === 0 && mujeres === 0;
-                if (hombres != 0) {
-                    setHombresTotal(hombresTotal + hombres);
-                }
-                if (mujeres != 0) {
-                    setMujeresTotal(mujeresTotal + mujeres);
-                }
-                if (total != 0) {
-                    setTotalTotal(totalTotal + total);
-                }
+
                 return (
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <span
@@ -226,18 +210,64 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
                 );
             }
 
-            if (title === 'Tot.' && accessor === 'porcentajeHombres') {
-                console.log('hombresTotal');
-                console.log(hombresTotal);
-                console.log('mujeresTotal');
-                console.log(mujeresTotal);
-                console.log('totalTotal');
-                console.log(totalTotal);
+            if (accessor.startsWith('porcentaje')) {
+                const metaHombres = Number(get(row, 'metaAnual.hombres')) || 0;
+                const metaMujeres = Number(get(row, 'metaAnual.mujeres')) || 0;
+                const metaTotal = Number(get(row, 'metaAnual.total')) || 0;
+                const ejecutadoHombres = Number(get(row, 'ejecutado.hombres')) || 0;
+                const ejecutadoMujeres = Number(get(row, 'ejecutado.mujeres')) || 0;
+                const ejecutadoTotal = Number(get(row, 'ejecutado.total')) || 0;
 
-                const keys = totalKeys[accessor as keyof typeof totalKeys];
-                return (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div className={`h-2.5 rounded-full rounded-bl-full text-center text-white text-xs bg-purple-600`} style={{ width: `${100}%` }}></div>
+                const porcentajeHombre = ejecutadoHombres > 0 ? (ejecutadoHombres / metaHombres) * 100 : 0;
+                const porcentajeMujeres = ejecutadoMujeres > 0 ? (ejecutadoMujeres / metaMujeres) * 100 : 0;
+
+                let width = 0;
+                switch (title) {
+                    case 'Hbr.':
+                        width = porcentajeHombre;
+                        break;
+
+                    case 'Muj.':
+                        width = porcentajeMujeres;
+                        break;
+
+                    case 'Tot.':
+                        let porcentajeTotal = 0;
+                        if (porcentajeHombre != 0 || porcentajeMujeres != 0) {
+                            porcentajeTotal = (porcentajeHombre + porcentajeMujeres) / 2;
+                        } else {
+                            porcentajeTotal = ejecutadoTotal > 0 ? (ejecutadoTotal / metaTotal) * 100 : 0;
+                        }
+                        width = porcentajeTotal;
+                        break;
+                }
+
+                let colorFrom = '#A1EE89';
+                let colorTo = '#8ED279';
+                if (width >= 50 && width <= 85) {
+                    colorFrom = '#EADB87';
+                    colorTo = '#D5C778';
+                } else if (width < 50) {
+                    colorFrom = '#F76A6A';
+                    colorTo = '#DD5D5D';
+                }
+
+                return width === 0 && (title === 'Hbr.' || title === 'Muj.') ? (
+                    <div>
+                        <span className="block text-center">-</span>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-between">
+                        <div className="w-5/6 rounded-full h-5 p-1 bg-dark-light overflow-hidden shadow-3xl dark:shadow-none dark:bg-dark-light/10">
+                            <div
+                                className="bg-gradient-to-r w-full h-full rounded-full relative before:absolute before:inset-y-0 ltr:before:right-0.5 rtl:before:left-0.5 before:bg-white before:w-2 before:h-2 before:rounded-full before:m-auto"
+                                style={{
+                                    width: width,
+                                    background: `linear-gradient(to right, ${colorFrom}, ${colorTo})`,
+                                }}
+                            ></div>
+                        </div>
+                        <span className="w-1/6 ltr:ml-5 rtl:mr-5 dark:text-white-light text-xs text-right">{width}%</span>
                     </div>
                 );
             }

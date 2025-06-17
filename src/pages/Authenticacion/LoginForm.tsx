@@ -36,7 +36,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                 {!recordarSegundoPaso ? (
                     <form className="space-y-5 dark:text-white" onSubmit={onSubmit}>
                         <div>
-                            <label htmlFor="Email">E-mail</label>
+                            <label htmlFor="Email">{t('email')}</label>
                             <div className="relative text-white-dark">
                                 <img className="absolute left-3 top-1/2 -translate-y-1/2 max-h-[24px] w-auto" src="/assets/images/auth/email.svg" alt="logo" />
                                 <input
@@ -97,8 +97,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                     </form>
                 ) : (
                     <>
-                        <h2 className="text-lg font-bold text-center">{t('EmailRestaurarEnviado')} </h2>
+                        <h2 className="text-lg font-bold text-center">{t('EmailRestaurarEnviado')}</h2>
                         <h2 className="text-lg font-bold text-center">{t('EmailRestaurarRevisa')}</h2>
+                        <p className="text-center text-sm text-gray-500 mt-2">{t('ReenviandoLogin')}...</p>
+
+                        <div className="w-full bg-gray-300 rounded h-2 mt-4 overflow-hidden">
+                            <div className="h-2 bg-blue-500 animate-[progreso_5s_linear_forwards]" style={{ animationName: 'progreso' }}></div>
+                        </div>
+
+                        <style>
+                            {`
+        @keyframes progreso {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        `}
+                        </style>
                     </>
                 )}
                 {!recordar && (

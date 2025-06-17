@@ -22,6 +22,9 @@
     .panel {
         @apply relative rounded-md bg-white p-5 shadow dark:bg-black;
     }
+    .paneln0 {
+        @apply relative rounded-md bg-[#fafafa] p-5 shadow dark:bg-black;
+    }
     /* Navbar */
     .navbar-sticky header,
     .navbar-floating header {

@@ -75,9 +75,9 @@ export const datosPruebaIndicadoreRealizacion: IndicadorRealizacionAccion[] = [
             total: 20,
         },
         ejecutado: {
-            hombres: 0,
-            mujeres: 0,
-            total: 0,
+            hombres: 5,
+            mujeres: 10,
+            total: 15,
         },
         metaFinal: {
             hombres: 20,

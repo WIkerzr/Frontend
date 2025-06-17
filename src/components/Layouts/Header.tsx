@@ -141,7 +141,7 @@ const Header = () => {
                                         <div className="flex items-center px-4 py-4">
                                             <div className="ltr:pl-4 rtl:pr-4 truncate">
                                                 <h4 className="text-base">{nombreUsuario as string}</h4>
-                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{role!}</h4>
+                                                <h4 className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">{role!.toUpperCase()}</h4>
                                             </div>
                                         </div>
                                     </li>
