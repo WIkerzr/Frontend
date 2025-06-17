@@ -1,7 +1,7 @@
 {
     "IniciaSesion": "Saioa hasi",
     "IntroduceEmail": "Sartu zure e-posta",
-    "Contrasena": "Pasahitza",
+    "contrasena": "Pasahitza",
     "IntroduceContrasena": "Sartu zure pasahitza",
     "RecordarSesion": "Gogoratu nire saioa",
     "Entrar": "Sartu",
@@ -23,6 +23,11 @@
     "CuadroMando": "Kontrol panela",
     "Ejes": "Ardatzak",
     "Acciones": "Ekintzak",
+
+    "Restablecer": "Berrezarri pasahitza",
+    "EmailRestaurarEnviado": "Zure pasahitza berrezartzeko esteka bidali dugu.",
+    "EmailRestaurarRevisa": "Egiaztatu zure posta elektronikoa.",
+
     "AccionesAccesorias": "Ekintza osagarriak",
     "ServiciosPrestados": "Emandako zerbitzuak",
     "memoriasAnuales": "Urteko txostenak",

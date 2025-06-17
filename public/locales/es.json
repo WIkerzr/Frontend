@@ -16,11 +16,15 @@
     "seleccionarCheckbox3Ejes": "Una vez guardado, no se podrán modificar",
 
     "Accion": "Acción",
+    "Restablecer": "Restablecer contraseña",
+    "EmailRestaurarEnviado": "Hemos enviado un enlace para restaurar tu contraseña.",
+    "EmailRestaurarRevisa": "Revisa tu correo electrónico.",
 
     "eliminar":"Eliminar",
     "alertIndicadores":"Se tiene que rellenar como minimo el campo Nombre, y {{totales}}",
     "alertTotalesPlanActivo":"los totales de Meta anual y Meta Final para poder guardar",
     "alertTotalesMemoriaActivo":"el total Ejecutado poder guardar",
+    "buscarUsuario":"Buscar usuario...",
 
     "metaAnual": "Meta Anual",
     "ejecutado": "Ejecutado",

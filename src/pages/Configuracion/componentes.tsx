@@ -858,8 +858,6 @@ export const UsersTable = forwardRef<HTMLButtonElement>((ref) => {
     const [recordsPaginados, setRecordsPaginados] = useState<UserID[]>([]);
 
     useEffect(() => {
-        console.log(users);
-
         let data = [...users];
 
         if (search.trim()) {
@@ -892,7 +890,7 @@ export const UsersTable = forwardRef<HTMLButtonElement>((ref) => {
     return (
         <div>
             <div className="flex items-center space-x-4 mb-5 w-[100%]">
-                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar usuario...')} value={search} onChange={(e) => setSearch(e.target.value)} />
+                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('buscarUsuario')} value={search} onChange={(e) => setSearch(e.target.value)} />
                 <NewUser onChange={() => refrescarUsuarios()} />
             </div>
             <div className="panel mt-6">
