@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { YearData, yearIniciado } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
@@ -44,7 +45,7 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
 
     const NuevaAccion = (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string) => {
         const ejesSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
-        let datos = {
+        const datos = {
             ...datosInicializadosAccion,
             accion: nuevaAccion,
             ejeEs: ejesSeleccionado[0].nameEs,

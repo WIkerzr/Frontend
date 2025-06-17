@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment } from 'react';

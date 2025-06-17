@@ -1,4 +1,4 @@
-import { datosPruebaIndicadoreRealizacion, datosPruebaIndicadoreResultado, IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
+import { datosPruebaIndicadoreRealizacion, datosPruebaIndicadoreResultado } from './Indicadores';
 import { DatosAccion } from './TipadoAccion';
 export type Year = number;
 

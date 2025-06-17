@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
 import { DatosAccion } from '../../types/TipadoAccion';
 import { useTranslation } from 'react-i18next';
@@ -184,17 +184,17 @@ export const datosAcciones: DatosAccion[] = [
     },
 ];
 
-export const useAcciones = (onChange?: (users: DatosAccion[]) => void) => {
-    const [acciones, setAcciones] = useState<DatosAccion[]>(datosAcciones);
+// export const useAcciones = (onChange?: (users: DatosAccion[]) => void) => {
+//     const [acciones, setAcciones] = useState<DatosAccion[]>(datosAcciones);
 
-    const actualizarAcciones = (nuevaAccion: DatosAccion[]) => {
-        setAcciones(nuevaAccion);
-    };
+//     const actualizarAcciones = (nuevaAccion: DatosAccion[]) => {
+//         setAcciones(nuevaAccion);
+//     };
 
-    const actualizarUsuario = (accionActualizada: DatosAccion) => actualizarAcciones(acciones.map((u) => (u.id === accionActualizada.id ? accionActualizada : u)));
+//     const actualizarUsuario = (accionActualizada: DatosAccion) => actualizarAcciones(acciones.map((u) => (u.id === accionActualizada.id ? accionActualizada : u)));
 
-    return { acciones, actualizarUsuario };
-};
+//     return { acciones, actualizarUsuario };
+// };
 
 const Index: React.FC = () => {
     const { yearData } = useYear();
