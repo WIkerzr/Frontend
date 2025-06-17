@@ -191,6 +191,7 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
+                plurianual: true,
             },
             {
                 id: '2',
@@ -250,6 +251,7 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
+                plurianual: false,
             },
         ],
     },
@@ -317,6 +319,7 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
+                plurianual: false,
             },
         ],
     },

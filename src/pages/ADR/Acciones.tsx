@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
 import { DatosAccion } from '../../types/TipadoAccion';
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
-import { Ejes } from '../../types/tipadoPlan';
 
 export const datosAcciones: DatosAccion[] = [
     {
@@ -145,30 +144,35 @@ export const datosAcciones: DatosAccion[] = [
                 },
             ],
         },
+        plurianual: false,
     },
     {
         id: '2',
         accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        plurianual: false,
     },
     {
         id: '3',
         accion: 'Socialización sobre la importancia de mantener un sector agroalimentario vivo y el consumo de producto local.',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        plurianual: false,
     },
     {
         id: '4',
         accion: 'Trabajo en coordinación con Turismo de la Cuadrilla para el impulso de esta',
         lineaActuaccion: 'Impulso de los recursos turísticos específicos propios de la comarca y a su puesta en valor',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        plurianual: false,
     },
     {
         id: '5',
         accion: 'Fomento de la Transformación Agroalimentario de la Llanada Alavesa',
         lineaActuaccion: 'Impulso a la transformación y la diferenciación de los productos',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+        plurianual: false,
     },
     {
         id: '6',
@@ -176,6 +180,7 @@ export const datosAcciones: DatosAccion[] = [
         lineaActuaccion:
             'Fomento de iniciativas de producción agrarias sostenibles: impulso a sistemas en ecológico,producción integrada, regenerativa, utilización de variedades autóctonas.Mejora de la eficiencia energética: sustitución de luminarias públicas, campañas de ahorro energético.',
         ejeEs: 'Telecomunicaciones',
+        plurianual: false,
     },
 ];
 

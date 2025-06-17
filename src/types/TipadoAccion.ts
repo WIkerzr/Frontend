@@ -66,6 +66,7 @@ export interface DatosAccion {
         indicadoreRealizacion: IndicadorRealizacionAccion[];
         indicadoreResultado: IndicadorResultadoAccion[];
     };
+    plurianual: boolean;
 }
 
 export const datosInicializadosAccion: DatosAccion = {
@@ -124,6 +125,7 @@ export const datosInicializadosAccion: DatosAccion = {
         indicadoreRealizacion: [],
         indicadoreResultado: [],
     },
+    plurianual: false,
 };
 
 export const datosPlan: DatosPlan = {

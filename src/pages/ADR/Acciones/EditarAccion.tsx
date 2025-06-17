@@ -18,14 +18,17 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { anio, estados } = useEstadosPorAnio();
 
-    const { datosEditandoAccion } = useYear();
+    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
 
     if (!datosEditandoAccion) {
         return;
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+    const handleAccionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setDatosEditandoAccion({
+            ...datosEditandoAccion!,
+            accion: `${e.target.value}`,
+        });
     };
 
     return (
@@ -49,7 +52,7 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
-                                <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleChange} name="accion" />
+                                <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
                             </div>
                             <div className="w-1/2 flex flex-col gap-2 justify-center">
                                 <span className="block  font-semibold mb-1">
@@ -112,10 +115,10 @@ const Index: React.FC = () => {
                                 <PestanaIndicadores />
                             </TabPanel>
                             <TabPanel>
-                                <PestanaPlan datosPlan={datosEditandoAccion.datosPlan!} />
+                                <PestanaPlan />
                             </TabPanel>
                             <TabPanel>
-                                <PestanaMemoria datosMemoria={datosEditandoAccion.datosMemoria!} />
+                                <PestanaMemoria />
                             </TabPanel>
                         </TabPanels>
                     </div>

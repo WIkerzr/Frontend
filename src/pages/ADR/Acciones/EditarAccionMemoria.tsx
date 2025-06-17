@@ -1,101 +1,102 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef } from 'react';
 import { CustomSelect } from './EditarAccionComponent';
 import { useTranslation } from 'react-i18next';
-import { DatosMemoria, datosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
+import { DatosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
+import { useYear } from '../../../contexts/DatosAnualContext';
 
-const plurianualidad = true;
-interface memoriaProps {
-    datosMemoria: DatosMemoria;
-}
-
-export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ datosMemoria }, ref) => {
+export const PestanaMemoria = forwardRef<HTMLButtonElement>(({}, ref) => {
     const { t } = useTranslation();
-    const [formData, setFormData] = useState(datosMemoria);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
+    if (!datosEditandoAccion || !datosEditandoAccion.datosMemoria) {
+        return;
+    }
+
+    const handleChangeCampos = (campo: keyof DatosMemoria, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosMemoria: {
+                ...datosEditandoAccion.datosMemoria!,
+                [campo]: e.target.value || '',
+            },
+        });
+        console.log(datosEditandoAccion);
     };
 
     const handlePresupuestoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            presupuestoEjecutado: {
-                ...prev.presupuestoEjecutado,
-                [name]: value,
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosMemoria: {
+                ...datosEditandoAccion.datosMemoria!,
+                presupuestoEjecutado: {
+                    ...datosEditandoAccion.datosMemoria!.presupuestoEjecutado!,
+                    [name]: value || '',
+                },
             },
-        }));
+        });
     };
 
-    const handleEjecucionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleEjecucionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            ejecucionPresupuestaria: {
-                ...prev.ejecucionPresupuestaria,
-                [name]: value,
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosMemoria: {
+                ...datosEditandoAccion.datosMemoria!,
+                ejecucionPresupuestaria: {
+                    ...datosEditandoAccion.datosMemoria!.ejecucionPresupuestaria!,
+                    [name]: value || '',
+                },
             },
-        }));
+        });
     };
 
     const handleSituacionActual = (value: EstadoLabel) => {
-        setFormData((prev) => ({
-            ...prev,
-            sActual: value,
-        }));
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosMemoria: {
+                ...datosEditandoAccion.datosMemoria!,
+                sActual: value,
+            },
+        });
+        console.log(datosEditandoAccion);
     };
 
     return (
         <div className="p-5 flex flex-col gap-4 w-full">
             <div className="flex gap-4 panel">
-                {/* <div className="flex-1">
-                    <label htmlFor="ejecutora">*{t('ejecutora')}</label>
-                    <textarea id="ejecutora" name="ejecutora" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.ejecutora} onChange={handleChange} />
-                </div>
-                <div className="flex-1">
-                    <label htmlFor="implicadas">*{t('implicadas')}</label>
-                    <textarea id="implicadas" name="implicadas" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.implicadas} onChange={handleChange} />
-                </div>
-                <div className="flex-1">
-                    <label htmlFor="comarcal">*{t('comarcal')}</label>
-                    <textarea id="comarcal" name="comarcal" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.comarcal} onChange={handleChange} />
-                </div>
-                <div className="flex-1">
-                    <label htmlFor="supracomarcal">{t('supracomarcal')}</label>
-                    <textarea id="supracomarcal" name="supracomarcal" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.supracomarcal} onChange={handleChange} />
-                </div>
-                {plurianualidad && (
-                    <div className="flex-1">
-                        <label htmlFor="rangoAnios" className="block font-medium mb-1">
-                            {t('rangoAnios')}
-                        </label>
-                        <input type="text" id="rangoAnios" name="rangoAnios" className="w-full border rounded p-2 h-[38px]" value={formData.rangoAnios} onChange={handleChange} />
-                    </div>
-                )}*/}
                 <div className="flex-1">
                     <label htmlFor="sActual">*{t('sActual')}</label>
-                    <CustomSelect value={formData.sActual} onChange={handleSituacionActual} />
+                    <CustomSelect value={datosEditandoAccion.datosMemoria.sActual} onChange={handleSituacionActual} />
                 </div>
             </div>
 
             <div className="flex gap-4 panel">
                 <div className="flex-1">
                     <label htmlFor="oAccion">*{t('oAccion')}</label>
-                    <textarea id="oAccion" name="oAccion" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.oAccion} onChange={handleChange} />
+                    <textarea
+                        id="oAccion"
+                        name="oAccion"
+                        className="w-full border rounded p-2 h-[38px] resize-y"
+                        value={datosEditandoAccion.datosMemoria.oAccion}
+                        onChange={(e) => handleChangeCampos('oAccion', e)}
+                    />
                 </div>
                 <div className="flex-1">
                     <label htmlFor="ods">*{t('ods')}</label>
-                    <textarea id="ods" name="ods" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.ods} onChange={handleChange} />
+                    <textarea id="ods" name="ods" className="w-full border rounded p-2 h-[38px] resize-y" value={datosEditandoAccion.datosMemoria.ods} onChange={(e) => handleChangeCampos('ods', e)} />
                 </div>
             </div>
 
             <div className="panel">
                 <label htmlFor="dAccionAvances">*{t('dAccionAvances')}</label>
-                <textarea id="dAccionAvances" name="dAccionAvances" className="w-full border rounded p-2 h-[114px] resize-y" value={formData.dAccionAvances} onChange={handleChange} />
+                <textarea
+                    id="dAccionAvances"
+                    name="dAccionAvances"
+                    className="w-full border rounded p-2 h-[114px] resize-y"
+                    value={datosEditandoAccion.datosMemoria.dAccionAvances}
+                    onChange={(e) => handleChangeCampos('dAccionAvances', e)}
+                />
             </div>
 
             <div className="panel">
@@ -115,14 +116,20 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                     <tbody>
                         <tr>
                             <td className="px-4 py-2">
-                                <input type="number" className="w-full border rounded px-2 py-1 h-[38px]" name="total" value={formData.presupuestoEjecutado.total} onChange={handlePresupuestoChange} />
+                                <input
+                                    type="number"
+                                    className="w-full border rounded px-2 py-1 h-[38px]"
+                                    name="total"
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.total}
+                                    onChange={handlePresupuestoChange}
+                                />
                             </td>
                             <td className="px-4 py-2">
                                 <input
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="autofinanciacion"
-                                    value={formData.presupuestoEjecutado.autofinanciacion}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.autofinanciacion}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -131,7 +138,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="financiacionPublica"
-                                    value={formData.presupuestoEjecutado.financiacionPublica}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.financiacionPublica}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -139,7 +146,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                                 <textarea
                                     className="w-full border rounded px-2 py-1 h-[38px] align-middle"
                                     name="origenPublica"
-                                    value={formData.presupuestoEjecutado.origenPublica}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.origenPublica}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -148,7 +155,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="financiacionPrivada"
-                                    value={formData.presupuestoEjecutado.financiacionPrivada}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.financiacionPrivada}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -176,7 +183,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="previsto"
-                                    value={formData.ejecucionPresupuestaria.previsto}
+                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.previsto}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -185,7 +192,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="ejecutado"
-                                    value={formData.ejecucionPresupuestaria.ejecutado}
+                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.ejecutado}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -194,7 +201,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="porcentaje"
-                                    value={formData.ejecucionPresupuestaria.porcentaje}
+                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.porcentaje}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -207,21 +214,45 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                 <div className="flex gap-4">
                     <div className="flex-1">
                         <label htmlFor="iMujHom">{t('iMujHom')}</label>
-                        <textarea id="iMujHom" name="iMujHom" className="w-full border rounded p-2 h-[76px] resize-y" value={formData.iMujHom} onChange={handleChange} />
+                        <textarea
+                            id="iMujHom"
+                            name="iMujHom"
+                            className="w-full border rounded p-2 h-[76px] resize-y"
+                            value={datosEditandoAccion.datosMemoria.iMujHom}
+                            onChange={(e) => handleChangeCampos('iMujHom', e)}
+                        />
                     </div>
                     <div className="flex-1">
                         <label htmlFor="uEuskera">{t('uEuskera')}</label>
-                        <textarea id="uEuskera" name="uEuskera" className="w-full border rounded p-2 h-[76px] resize-y" value={formData.uEuskera} onChange={handleChange} />
+                        <textarea
+                            id="uEuskera"
+                            name="uEuskera"
+                            className="w-full border rounded p-2 h-[76px] resize-y"
+                            value={datosEditandoAccion.datosMemoria.uEuskera}
+                            onChange={(e) => handleChangeCampos('uEuskera', e)}
+                        />
                     </div>
                 </div>
                 <div className="flex gap-4 ">
                     <div className="flex-1">
                         <label htmlFor="sostenibilidad">{t('sostenibilidad')}</label>
-                        <textarea id="sostenibilidad" name="sostenibilidad" className="w-full border rounded p-2 h-[76px] resize-y" value={formData.sostenibilidad} onChange={handleChange} />
+                        <textarea
+                            id="sostenibilidad"
+                            name="sostenibilidad"
+                            className="w-full border rounded p-2 h-[76px] resize-y"
+                            value={datosEditandoAccion.datosMemoria.sostenibilidad}
+                            onChange={(e) => handleChangeCampos('sostenibilidad', e)}
+                        />
                     </div>
                     <div className="flex-1">
                         <label htmlFor="dInteligent">{t('dInteligent')}</label>
-                        <textarea id="dInteligent" name="dInteligent" className="w-full border rounded p-2 h-[76px] resize-y" value={formData.dInteligent} onChange={handleChange} />
+                        <textarea
+                            id="dInteligent"
+                            name="dInteligent"
+                            className="w-full border rounded p-2 h-[76px] resize-y"
+                            value={datosEditandoAccion.datosMemoria.dInteligent}
+                            onChange={(e) => handleChangeCampos('dInteligent', e)}
+                        />
                     </div>
                 </div>
             </div>
@@ -230,20 +261,38 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement, memoriaProps>(({ dat
                 <label htmlFor="observaciones" className="block font-medium mb-1">
                     {t('observaciones')}
                 </label>
-                <textarea id="observaciones" name="observaciones" className="w-full border rounded p-2 h-[38px]" value={formData.observaciones} onChange={handleChange} />
+                <textarea
+                    id="observaciones"
+                    name="observaciones"
+                    className="w-full border rounded p-2 h-[38px]"
+                    value={datosEditandoAccion.datosMemoria.observaciones}
+                    onChange={(e) => handleChangeCampos('observaciones', e)}
+                />
             </div>
 
             <div className="flex gap-4 panel">
                 <div className="flex-1">
                     <label htmlFor="dSeguimiento">{t('detalleSeguimiento')}</label>
-                    <textarea id="dSeguimiento" name="dSeguimiento" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.dSeguimiento} onChange={handleChange} />
+                    <textarea
+                        id="dSeguimiento"
+                        name="dSeguimiento"
+                        className="w-full border rounded p-2 h-[38px] resize-y"
+                        value={datosEditandoAccion.datosMemoria.dSeguimiento}
+                        onChange={(e) => handleChangeCampos('dSeguimiento', e)}
+                    />
                 </div>
             </div>
 
             <div className="flex gap-4 panel">
                 <div className="flex-1">
                     <label htmlFor="valFinal">{t('valoracionFinal')}</label>
-                    <textarea id="valFinal" name="valFinal" className="w-full border rounded p-2 h-[38px] resize-y" value={formData.valFinal} onChange={handleChange} />
+                    <textarea
+                        id="valFinal"
+                        name="valFinal"
+                        className="w-full border rounded p-2 h-[38px] resize-y"
+                        value={datosEditandoAccion.datosMemoria.valFinal}
+                        onChange={(e) => handleChangeCampos('valFinal', e)}
+                    />
                 </div>
             </div>
         </div>
