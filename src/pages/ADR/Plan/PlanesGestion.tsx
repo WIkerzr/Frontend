@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { ejesBBDD } from '../Ejes';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
@@ -15,9 +14,6 @@ let proceso: string = `El despliegue de las herramientas para la nueva LDR (Ley 
  Participación en el diseño de una metodología común para todas las comarcas de Euskadi  Planificación y elaboración del nuevo PCDR Llanada Alavesa donde la ADR será líder y responsable del proceso de elaboración con la participación “botom-up”. Para ello se realizará un diseño de la metodología y se marcan 3 fases:
 o Primer trimestre 2024. Hazi Fundazioa contratará una empresa para la elaboración del diseño y planificación de un PCDR. Las ADRs participarán en este proceso o Segundo trimestre 2024. Capacitación al personal de las ADRs para la elaboración del PCDR o Segundo semestre 2024. Realización PCDR de la Llanada con un proceso participativo  Reuniones de participación y presentación de los PDTs (Programas de Desarrollo Territorial) que serán dos: PDT de diversificación de la actividad económica y PDT de calidad de vida. Las ADRs participarán como organismos y colaboradores de apoyo  Seguir trabajando con GV y DFA en el desarrollo de los nuevos convenios y financiación que se adecúen a las necesidades de la LDR.
  Se continuará con los grupos de trabajo de legumbres, sala de sacrifico de aves, harina y cocina colectiva y con el grupo de cohesión comarcal para el diseño y organización de las ediciones de 2023 del X Lautada Eguna y VII Semana del Desarrollo Rural.`;
-const ejesPrioritarios = `${ejesBBDD[37].nombre}
-${ejesBBDD[36].nombre}
-${ejesBBDD[3].nombre}`;
 
 let tareasInternasGestionADR: string = `Las tareas internas de gestión que aseguran un adecuado funcionamiento de la ADR son las siguientes:
 Elaboración del PG anual y seguimiento de las actuaciones propuestas.

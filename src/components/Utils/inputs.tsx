@@ -32,14 +32,15 @@ export const LanguageSelector = () => {
     const { i18n } = useTranslation();
 
     const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedLang = e.target.value.toLowerCase();
+        const selectedLang = e.target.value;
         i18n.changeLanguage(selectedLang);
+        localStorage.setItem('idioma', selectedLang);
     };
 
     return (
-        <select id="idioma" className="form-select text-white-dark min-w-max mr-5" style={{ minWidth: 'calc(100% + 10px)' }} value={i18n.language.toUpperCase()} onChange={handleLanguageChange}>
-            <option value="ES">ES</option>
-            <option value="EU">EU</option>
+        <select id="idioma" className="form-select text-white-dark min-w-max mr-5" style={{ minWidth: 'calc(100% + 10px)' }} value={i18n.language} onChange={handleLanguageChange}>
+            <option value="es">ES</option>
+            <option value="eu">EU</option>
         </select>
     );
 };

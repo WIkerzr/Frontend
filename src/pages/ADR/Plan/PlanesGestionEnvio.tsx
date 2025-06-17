@@ -47,7 +47,7 @@ const Index = () => {
                     </>
                 }
             />
-            {/* <div className="pt-5 space-y-8">
+            <div className="pt-5 space-y-8">
                 <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
                     <div className="panel" id="single_file">
                         <div className="flex items-center justify-between mb-5">
@@ -56,7 +56,7 @@ const Index = () => {
                         <div className="mb-5">
                             <div className="custom-file-container" data-upload-id="myFirstImage">
                                 <div className="label-container">
-                                    <label>Upload </label>
+                                    <label>Subida Archivos </label>
                                     <button
                                         type="button"
                                         className="custom-file-container__image-clear"
@@ -75,7 +75,7 @@ const Index = () => {
                                     {({ imageList, onImageUpload, onImageRemoveAll, onImageUpdate, onImageRemove, isDragging, dragProps }) => (
                                         <div className="upload__image-wrapper">
                                             <button className="custom-file-container__custom-file__custom-file-control" onClick={onImageUpload}>
-                                                Choose File...
+                                                Escoge fila.
                                             </button>
                                             &nbsp;
                                             {imageList.map((image, index) => (
@@ -91,7 +91,7 @@ const Index = () => {
                         </div>
                     </div>
                 </div>
-            </div> */}
+            </div>
         </div>
     );
 };
