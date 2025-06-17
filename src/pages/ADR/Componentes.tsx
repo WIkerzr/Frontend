@@ -209,9 +209,10 @@ export const ModalAccion = () => {
 interface ListadoAccionesProps {
     eje: string;
     number: number;
+    idEje: string;
 }
-export const ListadoAcciones = ({ eje, number }: ListadoAccionesProps) => {
-    const { yearData, setYearData } = useYear();
+export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
+    const { yearData, setYearData, SeleccionEditarAccion } = useYear();
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
 
     useEffect(() => {
@@ -220,7 +221,7 @@ export const ListadoAcciones = ({ eje, number }: ListadoAccionesProps) => {
 
     const { t } = useTranslation();
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         const updatedYearData = {
             ...yearData,
             plan: {
@@ -249,8 +250,12 @@ export const ListadoAcciones = ({ eje, number }: ListadoAccionesProps) => {
                         <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
                         <span className="text-base">{accion.lineaActuaccion}</span>
                         <div className="flex gap-2 justify-end mt-2">
-                            <NavLink to="/adr/acciones/editando" state={{ accion }} className="group">
-                                <button aria-label={`Editar acción`} className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition">
+                            <NavLink to="/adr/acciones/editando" className="group">
+                                <button
+                                    aria-label={`Editar acción`}
+                                    className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
+                                    onClick={() => SeleccionEditarAccion(idEje, accion.id)}
+                                >
                                     <IconPencil />
                                 </button>
                             </NavLink>

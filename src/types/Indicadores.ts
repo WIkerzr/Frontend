@@ -64,3 +64,89 @@ export const indicadorInicial: IndicadorRealizacion = {
     RelatedAxes: '',
     Resultados: [],
 };
+
+export const datosPruebaIndicadoreRealizacion: IndicadorRealizacionAccion[] = [
+    {
+        id: 4,
+        descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+        metaAnual: {
+            hombres: 10,
+            mujeres: 10,
+            total: 20,
+        },
+        ejecutado: {
+            hombres: 0,
+            mujeres: 0,
+            total: 0,
+        },
+        metaFinal: {
+            hombres: 20,
+            mujeres: 20,
+            total: 40,
+        },
+        hipotesis: 'Se espera un ligero aumento.',
+        idsResultados: [4],
+    },
+    {
+        id: 5,
+        descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+        metaAnual: {
+            hombres: 0,
+            mujeres: 0,
+            total: 100,
+        },
+        ejecutado: {
+            hombres: 0,
+            mujeres: 0,
+            total: 0,
+        },
+        metaFinal: {
+            hombres: 0,
+            mujeres: 0,
+            total: 300,
+        },
+        idsResultados: [5],
+    },
+];
+
+export const datosPruebaIndicadoreResultado: IndicadorResultadoAccion[] = [
+    {
+        id: 4,
+        descripcion: 'RS04. Número de personas beneficiadas de las infraestructuras y/o servicios mejorados',
+        metaAnual: {
+            hombres: 10,
+            mujeres: 10,
+            total: 20,
+        },
+        ejecutado: {
+            hombres: 0,
+            mujeres: 0,
+            total: 0,
+        },
+        metaFinal: {
+            hombres: 20,
+            mujeres: 20,
+            total: 40,
+        },
+        hipotesis: '',
+    },
+    {
+        id: 5,
+        descripcion: 'RS05. Número de empresas creadas por personas emprendedoras',
+        metaAnual: {
+            hombres: 0,
+            mujeres: 0,
+            total: 100,
+        },
+        ejecutado: {
+            hombres: 0,
+            mujeres: 0,
+            total: 0,
+        },
+        metaFinal: {
+            hombres: 0,
+            mujeres: 0,
+            total: 300,
+        },
+    },
+];

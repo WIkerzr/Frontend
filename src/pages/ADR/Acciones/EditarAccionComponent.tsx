@@ -8,6 +8,7 @@ import { Estado, StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
+import { useYear } from '../../../contexts/DatosAnualContext';
 
 interface TabCardProps {
     icon: string;
@@ -81,10 +82,8 @@ export function CustomSelect({ value, onChange }: CustomSelectProps) {
 }
 
 interface tablaIndicadoresProps {
-    indicador: IndicadorRealizacionAccion[];
-    indicadoresResultados?: IndicadorRealizacionAccion[];
+    tipoTabla: 'realizacion' | 'resultado';
     creaccion?: boolean;
-    onResultadosRelacionadosChange?: (resultados: number[]) => void;
 }
 
 //Import temporal
@@ -94,20 +93,28 @@ const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResu
 
 //Temporal
 
-export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador, indicadoresResultados, creaccion = false, onResultadosRelacionadosChange }, ref) => {
+export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }, ref) => {
+    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
+    const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
+    if (!indicador) {
+        return;
+    }
+
     const { t } = useTranslation();
     const { anio, estados } = useEstadosPorAnio();
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
     const editarPlan = estadoPlan === 'borrador';
     const editarMemoria = estadoMemoria === 'borrador';
-    // const editarPlan = estadoPlan === 'cerrado';
-    // const editarMemoria = estadoMemoria === 'cerrado';
-    const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>(indicador);
 
+    const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>([]);
     useEffect(() => {
-        setIndicadores(indicador);
-    }, []);
+        const rescargarIndicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
+        if (!rescargarIndicador) {
+            return;
+        }
+        setIndicadores(rescargarIndicador);
+    }, [datosEditandoAccion]);
 
     useEffect(() => {
         if (indicadores != indicador) {
@@ -118,17 +125,10 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     useEffect(() => {
         if (creaccion) {
             const idsUsados = new Set(indicadores.flatMap((r) => r.idsResultados ?? []));
-            const idsResultadosActuales = new Set(indicadoresResultados!.map((res) => res.id));
-            const idsFaltantes = Array.from(idsUsados).filter((id) => !idsResultadosActuales.has(id));
-
-            if (onResultadosRelacionadosChange) {
-                onResultadosRelacionadosChange(idsFaltantes);
-            }
+            const idsResultadosActuales = new Set(indicador!.map((res) => res.id));
         }
     }, [indicadores]);
-    const [page, setPage] = useState(1);
     const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
-    const [recordsData, setRecordsData] = useState(initialRecords);
 
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
@@ -241,12 +241,12 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     useEffect(() => {
         const data = sortBy(initialRecords, sortStatus.columnAccessor);
         setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-        setPage(1);
     }, [sortStatus]);
 
     const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
         const indicadorBase = realizaciones.find((r) => r.id === seleccion.idRealizacion);
-        const nuevosIndicadores = [
+
+        const nuevosIndicadoresRealizacion = [
             ...indicador,
             {
                 id: seleccion.idRealizacion,
@@ -257,8 +257,27 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
                 metaFinal: { hombres: 0, mujeres: 0, total: 0 },
             },
         ];
-        setIndicadores(nuevosIndicadores);
-        //if (onChangeIndicadores) onChangeIndicadores(nuevosIndicadores);
+        const nuevosIndicadoresResultado = [
+            ...datosEditandoAccion?.indicadorAccion?.indicadoreResultado!,
+            ...seleccion.idsResultadosEnRealizacion.map((idResultado) => ({
+                id: idResultado,
+                descripcion: listadoIndicadoresResultados.find((item) => item.id === idResultado)?.descripcion || '',
+                idsResultados: seleccion.idsResultadosEnRealizacion,
+                metaAnual: { hombres: 0, mujeres: 0, total: 0 },
+                ejecutado: { hombres: 0, mujeres: 0, total: 0 },
+                metaFinal: { hombres: 0, mujeres: 0, total: 0 },
+            })),
+        ];
+
+        setIndicadores(nuevosIndicadoresRealizacion);
+
+        setDatosEditandoAccion({
+            ...datosEditandoAccion!,
+            indicadorAccion: {
+                indicadoreRealizacion: nuevosIndicadoresRealizacion,
+                indicadoreResultado: nuevosIndicadoresResultado,
+            },
+        });
     };
 
     const handleOpenModal = () => {
@@ -288,19 +307,15 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
             <div>
                 <DataTable
                     className={`datatable-pagination-horizontal `}
-                    records={recordsData}
+                    records={indicadores}
                     groups={columnGroups}
                     withRowBorders={false}
                     withColumnBorders={true}
                     striped={true}
                     highlightOnHover={true}
-                    // onPageChange={(p) => setPage(p)}
-                    // onRecordsPerPageChange={setPageSize}
                     sortStatus={sortStatus}
                     onSortStatusChange={setSortStatus}
                     minHeight={200}
-                    // paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
-                    // recordsPerPageLabel={t('recorsPerPage')}
                 />
             </div>
         </div>

@@ -1,3 +1,4 @@
+import { datosPruebaIndicadoreRealizacion, datosPruebaIndicadoreResultado, IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 import { DatosAccion } from './TipadoAccion';
 export type Year = number;
 
@@ -133,10 +134,11 @@ export const ejesPrioritariosIniado: Ejes[] = [
         IsActive: true,
         acciones: [
             {
-                id: 1,
+                id: '1',
                 accion: 'Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
                 lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
-                ejeEs: 'Sectores prioritarios - Turismo, comercio y actividades relacionadas',
+                ejeEs: 'Telecomunicaciones',
+                ejeEu: 'Telekomunikazioak',
                 datosPlan: {
                     ejecutora: '1',
                     implicadas: '2',
@@ -184,90 +186,10 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     valFinal: '24',
                 },
                 indicadorAccion: {
-                    indicadoreRealizacion: [
-                        {
-                            id: 4,
-                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
-                            metaAnual: {
-                                hombres: 10,
-                                mujeres: 10,
-                                total: 20,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 20,
-                                mujeres: 20,
-                                total: 40,
-                            },
-                            hipotesis: 'Se espera un ligero aumento.',
-                            idsResultados: [4],
-                        },
-                        {
-                            id: 5,
-                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
-                            metaAnual: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 100,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 300,
-                            },
-                            idsResultados: [5],
-                        },
-                    ],
-                    indicadoreResultado: [
-                        {
-                            id: 4,
-                            descripcion: 'RS04. Número de personas beneficiadas de las infraestructuras y/o servicios mejorados',
-                            metaAnual: {
-                                hombres: 10,
-                                mujeres: 10,
-                                total: 20,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 20,
-                                mujeres: 20,
-                                total: 40,
-                            },
-                            hipotesis: '',
-                        },
-                        {
-                            id: 5,
-                            descripcion: 'RS05. Número de empresas creadas por personas emprendedoras',
-                            metaAnual: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 100,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 300,
-                            },
-                        },
-                    ],
+                    indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
+                    indicadoreResultado: datosPruebaIndicadoreResultado,
+                    // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
+                    // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
             },
         ],

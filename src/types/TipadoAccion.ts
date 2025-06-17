@@ -55,7 +55,7 @@ export interface DatosMemoria {
 }
 
 export interface DatosAccion {
-    id: number;
+    id: string;
     accion: string;
     ejeEs?: string;
     ejeEu?: string;
@@ -69,7 +69,7 @@ export interface DatosAccion {
 }
 
 export const datosInicializadosAccion: DatosAccion = {
-    id: 0,
+    id: '0',
     accion: '',
     ejeEs: '',
     ejeEu: '',
@@ -119,6 +119,10 @@ export const datosInicializadosAccion: DatosAccion = {
         observaciones: '',
         dSeguimiento: '',
         valFinal: '',
+    },
+    indicadorAccion: {
+        indicadoreRealizacion: [],
+        indicadoreResultado: [],
     },
 };
 

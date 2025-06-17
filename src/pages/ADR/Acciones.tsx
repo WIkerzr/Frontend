@@ -9,7 +9,7 @@ import { Ejes } from '../../types/tipadoPlan';
 
 export const datosAcciones: DatosAccion[] = [
     {
-        id: 1,
+        id: '1',
         accion: 'Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
         lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
         ejeEs: 'Sectores prioritarios - Turismo, comercio y actividades relacionadas',
@@ -147,31 +147,31 @@ export const datosAcciones: DatosAccion[] = [
         },
     },
     {
-        id: 2,
+        id: '2',
         accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
-        id: 3,
+        id: '3',
         accion: 'Socialización sobre la importancia de mantener un sector agroalimentario vivo y el consumo de producto local.',
         lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
-        id: 4,
+        id: '4',
         accion: 'Trabajo en coordinación con Turismo de la Cuadrilla para el impulso de esta',
         lineaActuaccion: 'Impulso de los recursos turísticos específicos propios de la comarca y a su puesta en valor',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
-        id: 5,
+        id: '5',
         accion: 'Fomento de la Transformación Agroalimentario de la Llanada Alavesa',
         lineaActuaccion: 'Impulso a la transformación y la diferenciación de los productos',
         ejeEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
     },
     {
-        id: 6,
+        id: '6',
         accion: 'Organización de jornadas y talleres para la sostenibilidad en las explotaciones agroalimentarias (energética, medioambiental)',
         lineaActuaccion:
             'Fomento de iniciativas de producción agrarias sostenibles: impulso a sistemas en ecológico,producción integrada, regenerativa, utilización de variedades autóctonas.Mejora de la eficiencia energética: sustitución de luminarias públicas, campañas de ahorro energético.',
@@ -197,7 +197,7 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { anio } = useEstadosPorAnio();
 
-    const nombresEjesPrioritarios = ejesPrioritarios.slice(0, 3).map((eje) => (i18n.language === 'es' ? eje.nameEs : eje.nameEu));
+    const ejesSeleccionados = ejesPrioritarios.slice(0, 3);
 
     return (
         <div className="panel">
@@ -214,9 +214,9 @@ const Index: React.FC = () => {
             />
             <div className="w-full mx-auto mt-1 px-2">
                 <div className="flex items-start w-full h-100%">
-                    {nombresEjesPrioritarios.map((eje, index) => (
-                        <div key={index} className="flex flex-col flex-1 items-center justify-center p-1">
-                            <ListadoAcciones eje={eje} number={index} />
+                    {ejesSeleccionados.map((eje, index) => (
+                        <div key={eje.id} className="flex flex-col flex-1 items-center justify-center p-1">
+                            <ListadoAcciones eje={i18n.language === 'es' ? eje.nameEs : eje.nameEu} idEje={eje.id} number={index} />
                         </div>
                     ))}
                 </div>

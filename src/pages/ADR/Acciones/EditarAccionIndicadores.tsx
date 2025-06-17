@@ -5,47 +5,26 @@ import { NewModal } from '../../../components/Utils/utils';
 import { TablaIndicadorAccion } from './EditarAccionComponent';
 import { indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import React from 'react';
+import { useYear } from '../../../contexts/DatosAnualContext';
 
 interface tablaIndicadoresProps {
-    indicador: {
-        indicadoreRealizacion: IndicadorRealizacionAccion[];
-        indicadoreResultado: IndicadorResultadoAccion[];
-    };
     creaccion?: boolean;
     onResultadosRelacionadosChange?: (resultados: IndicadorRealizacionAccion[]) => void;
     onChangeIndicadores?: (indicadores: IndicadorRealizacionAccion[]) => void;
 }
 
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador }, ref) => {
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>((ref) => {
     const { t } = useTranslation();
-    const [resultadosSeleccionados, setResultadosSeleccionados] = useState<IndicadorRealizacionAccion[]>(indicador.indicadoreResultado);
-
-    const handleResultadosRelacionadosChange = (nuevosResultados: number[]) => {
-        setResultadosSeleccionados((anteriores) => {
-            let suma = anteriores;
-            let nue = nuevosResultados.map((id) => indicadoresResultado.find((res) => res.id === id));
-            for (let index = 0; index < nue.length; index++) {
-                const element = nue[index];
-                suma.push(element!);
-            }
-            return [...suma];
-        });
-    };
 
     return (
         <>
             <div className="panel mt-6 ">
                 <span className="text-xl">{t('indicadorTipo', { tipo: t('RealizacionMin') })}</span>
-                <TablaIndicadorAccion
-                    indicador={indicador.indicadoreRealizacion}
-                    indicadoresResultados={resultadosSeleccionados}
-                    creaccion={true}
-                    onResultadosRelacionadosChange={handleResultadosRelacionadosChange}
-                />
+                <TablaIndicadorAccion tipoTabla="realizacion" creaccion={true} />
             </div>
             <div className="panel mt-6 ">
                 <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
-                <TablaIndicadorAccion indicador={resultadosSeleccionados} />
+                <TablaIndicadorAccion tipoTabla="resultado" />
             </div>
         </>
     );

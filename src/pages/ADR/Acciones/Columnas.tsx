@@ -45,6 +45,14 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                                         copy[index] = updatedRow;
                                         return copy;
                                     });
+                                } else {
+                                    setIndicadores((prevRows) => {
+                                        const copy = [...prevRows];
+                                        const updatedRow = { ...copy[index] };
+                                        set(updatedRow as object, accessor, Number(e.target.value));
+                                        copy[index] = updatedRow;
+                                        return copy;
+                                    });
                                 }
                             }}
                         />
@@ -98,23 +106,57 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
             // }
 
             if (editableRowIndex === index && editable) {
-                return (
-                    <input
-                        className={`border p-1 rounded ${accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}`}
-                        value={get(row, accessor) ?? ''}
-                        required={true}
-                        style={{ maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300 }}
-                        onChange={(e) => {
-                            setIndicadores((prevRows) => {
-                                const copy = [...prevRows];
-                                const updatedRow = { ...copy[index] };
-                                set(updatedRow as object, accessor, e.target.value);
-                                copy[index] = updatedRow;
-                                return copy;
-                            });
-                        }}
-                    />
-                );
+                if (accessor.endsWith('mujeres') || accessor.endsWith('hombres')) {
+                    return (
+                        <input
+                            className="border p-1 rounded text-center"
+                            value={get(row, accessor) ?? ''}
+                            required={true}
+                            style={{ maxWidth: 60 }}
+                            onChange={(e) => {
+                                const nuevoValor = Number(e.target.value) || 0;
+                                const accessorContrario = accessor.endsWith('mujeres') ? accessor.replace('mujeres', 'hombres') : accessor.replace('hombres', 'mujeres');
+
+                                const valorContrario = Number(get(row, accessorContrario)) || 0;
+
+                                const accessorTotal = accessor.replace(/(mujeres|hombres)$/, 'total');
+
+                                setIndicadores((prevRows) => {
+                                    const copy = [...prevRows];
+                                    const updatedRow = { ...copy[index] };
+
+                                    // Actualiza el campo editado
+                                    set(updatedRow as object, accessor, nuevoValor);
+
+                                    // Actualiza el total sumando el nuevo valor + el contrario
+                                    set(updatedRow as object, accessorTotal, nuevoValor + valorContrario);
+
+                                    copy[index] = updatedRow;
+                                    return copy;
+                                });
+                            }}
+                        />
+                    );
+                } else {
+                    //descripcion o hipotesis
+                    return (
+                        <input
+                            className={`border p-1 rounded text-left`}
+                            value={get(row, accessor) ?? ''}
+                            required={true}
+                            style={{ maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300 }}
+                            onChange={(e) => {
+                                setIndicadores((prevRows) => {
+                                    const copy = [...prevRows];
+                                    const updatedRow = { ...copy[index] };
+                                    set(updatedRow as object, accessor, e.target.value);
+                                    copy[index] = updatedRow;
+                                    return copy;
+                                });
+                            }}
+                        />
+                    );
+                }
             } else {
                 const value = get(row, accessor);
                 const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;

@@ -13,6 +13,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
+import { useYear } from '../../../contexts/DatosAnualContext';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -24,16 +25,14 @@ const Index: React.FC = () => {
             return oldValue === value ? '' : value;
         });
     };
-    const location = useLocation();
-    const accion = location.state?.accion;
-    const [datosAccion, setDatosAccion] = useState<DatosAccion>(accion);
+
+    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
+    if (!datosEditandoAccion) {
+        return;
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setDatosAccion((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
     };
 
     return (
@@ -57,14 +56,14 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
-                                <input type="text" className="form-input w-full" value={datosAccion.accion} onChange={handleChange} name="accion" />
+                                <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleChange} name="accion" />
                             </div>
                             <div className="w-1/2 flex flex-col gap-2 justify-center">
                                 <span className="block  font-semibold mb-1">
-                                    <span className="font-normal text-lg">{i18n.language === 'es' ? datosAccion.ejeEs : datosAccion.ejeEu}</span>
+                                    <span className="font-normal text-lg">{i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu}</span>
                                 </span>
                                 <span className="block  font-semibold">
-                                    <span className="font-normal text-col text-info">{datosAccion.lineaActuaccion}</span>
+                                    <span className="font-normal text-col text-info">{datosEditandoAccion.lineaActuaccion}</span>
                                 </span>
                             </div>
                         </div>
@@ -117,13 +116,13 @@ const Index: React.FC = () => {
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
                             <TabPanel>
-                                <PestanaIndicadores indicador={datosAccion.indicadorAccion!} />
+                                <PestanaIndicadores />
                             </TabPanel>
                             <TabPanel>
-                                <PestanaPlan datosPlan={datosAccion.datosPlan!} />
+                                <PestanaPlan datosPlan={datosEditandoAccion.datosPlan!} />
                             </TabPanel>
                             <TabPanel>
-                                <PestanaMemoria datosMemoria={datosAccion.datosMemoria!} />
+                                <PestanaMemoria datosMemoria={datosEditandoAccion.datosMemoria!} />
                             </TabPanel>
                         </TabPanels>
                     </div>
