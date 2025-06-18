@@ -27,7 +27,9 @@ export const useUsers = (onChange?: (users: UserID[]) => void) => {
     const agregarUsuario = (nuevo: UserID) => actualizarUsers([...users, nuevo]);
     const listadoUsuarios = (dataArray: UserID[]) => actualizarUsers(dataArray);
     const eliminarUsuario = (id: string) => actualizarUsers(users.filter((u) => u.id !== id));
-    const actualizarUsuario = (usuarioActualizado: UserID) => actualizarUsers(users.map((u) => (u.id === usuarioActualizado.id ? usuarioActualizado : u)));
+    const actualizarUsuario = (usuarioActualizado: UserID) => {
+        actualizarUsers(users.map((u) => (u.id === usuarioActualizado.id ? usuarioActualizado : u)));
+    };
 
     return { users, agregarUsuario, listadoUsuarios, eliminarUsuario, actualizarUsuario, refrescarUsuarios };
 };

@@ -5,6 +5,7 @@ import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { User, UserID } from '../../types/users';
 import { useEffect, useState } from 'react';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { newUser } from '../Configuracion/componentes';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
@@ -14,16 +15,48 @@ interface UserDataFormProps {
     successMessage: string | null;
     fadeOut: boolean;
     roleDisabled?: boolean;
+    isNewUser?: boolean;
 }
 
-const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true }) => {
+const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser }) => {
     const { t, i18n } = useTranslation();
     const { regiones } = useRegionContext();
     const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => r.RegionId === userData.ambit) || null);
+    const [conditional, setConditional] = useState<boolean>(false);
+    const [datosUsuario, setDatosUsuario] = useState(userData);
+
+    useEffect(() => {
+        setDatosUsuario(userData);
+    }, [userData]);
+
+    useEffect(() => {
+        if (isNewUser) {
+            setDatosUsuario(newUser);
+        }
+    }, []);
 
     useEffect(() => {
         userData.ambit = regionSeleccionada?.RegionId;
     }, [regionSeleccionada]);
+
+    useEffect(() => {
+        const todosLosCamposRellenosUserModal = Object.entries(userData).every(([key, value]) => {
+            if (key === 'ambit') {
+                if (userData.role !== 'ADR') {
+                    return true;
+                }
+                return typeof value === 'string' ? value.trim() !== '' : value !== null && value !== undefined;
+            }
+
+            if (typeof value === 'string') {
+                return value.trim() !== '';
+            }
+
+            return value !== null && value !== undefined;
+        });
+
+        setConditional(todosLosCamposRellenosUserModal);
+    }, [userData, regionSeleccionada]);
 
     return (
         <div>
@@ -40,24 +73,24 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 type="text"
                                 placeholder="{t('email')}@E-mail.com"
                                 className="form-input ltr:rounded-l-none rtl:rounded-r-none"
-                                value={userData.email as string}
+                                value={datosUsuario.email as string}
                                 name="email"
                                 onChange={onChange}
                             />
                         </div>
                     </div>
-                    <Input nombreInput={t('name')} type="text" value={userData.name as string} onChange={onChange} name="name" />
-                    <Input nombreInput={t('lastName')} type="text" value={userData.lastName as string} onChange={onChange} name="lastName" />
-                    <Input nombreInput={t('secondSurname')} type="text" value={userData.secondSurname as string} onChange={onChange} name="secondSurname" />
+                    <Input nombreInput={t('name')} type="text" value={datosUsuario.name as string} onChange={onChange} name="name" />
+                    <Input nombreInput={t('lastName')} type="text" value={datosUsuario.lastName as string} onChange={onChange} name="lastName" />
+                    <Input nombreInput={t('secondSurname')} type="text" value={datosUsuario.secondSurname as string} onChange={onChange} name="secondSurname" />
                     <div>
                         <label className="block text-sm font-medium mb-1">{t('role')}</label>
-                        <select className="form-select w-full" name="role" value={userData.role as string} onChange={onChange} disabled={roleDisabled}>
+                        <select className="form-select w-full" name="role" value={datosUsuario.role as string} onChange={onChange} disabled={roleDisabled}>
                             <option value="ADR">{t('adr')}</option>
                             <option value="HAZI">{t('hazi')}</option>
                             <option value="GV">{t('gobiernoVasco')}</option>
                         </select>
                     </div>
-                    {userData.role === 'ADR' || userData.role === 'adr' ? (
+                    {datosUsuario.role === 'ADR' || datosUsuario.role === 'adr' ? (
                         <div>
                             <label className="block text-sm font-medium mb-1">{t('region')}</label>
                             <select
@@ -87,7 +120,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                         <p className="text-green-500">{successMessage}</p>
                     </div>
                 )}
-                <BtnFormsSaveCancel options="save" />
+                <BtnFormsSaveCancel options="save" conditionalSave={conditional} />
             </form>
         </div>
     );

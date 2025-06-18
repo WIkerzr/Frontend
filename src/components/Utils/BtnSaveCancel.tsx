@@ -2,11 +2,12 @@ import { useTranslation } from 'react-i18next';
 
 interface BtnSaveCancelProps {
     options: 'save' | 'cancel';
+    conditionalSave?: boolean;
     className?: string;
     onCancel?: () => void;
 }
 
-const BtnFormsSaveCancel = ({ options: tipo, className, onCancel }: BtnSaveCancelProps) => {
+const BtnFormsSaveCancel = ({ options: tipo, conditionalSave, className, onCancel }: BtnSaveCancelProps) => {
     const { t } = useTranslation();
 
     const handleCancel = () => {
@@ -18,7 +19,7 @@ const BtnFormsSaveCancel = ({ options: tipo, className, onCancel }: BtnSaveCance
     return (
         <div className={`mt-4 flex flex-col justify-end items-end ${className ? className : ''}`}>
             {tipo === 'save' ? (
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" disabled={!conditionalSave} className="btn btn-primary">
                     {t('guardar')}
                 </button>
             ) : (
