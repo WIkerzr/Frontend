@@ -1,5 +1,4 @@
 import { get, set } from 'lodash';
-import { useState, useEffect } from 'react';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
@@ -8,12 +7,6 @@ const totalKeys = {
 };
 
 export function editableColumnByPath<T extends object>(accessor: string, title: string, setIndicadores: React.Dispatch<React.SetStateAction<T[]>>, editableRowIndex: number | null, editable = true) {
-    const [indicadorSeleccionado, setIndicadorSeleccionado] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        setIndicadorSeleccionado(undefined);
-    }, [editableRowIndex]);
-
     return {
         accessor,
         title,
@@ -184,7 +177,7 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
         title,
         textAlign: 'center' as DataTableColumnTextAlign,
         sortable: true,
-        render: (row: T, index: number) => {
+        render: (row: T) => {
             if (((title === 'Tot.' || title === 'Total') && accessor === 'metaAnual.total') || accessor === 'metaFinal.total' || accessor === 'ejecutado.total') {
                 const keys = totalKeys[accessor as keyof typeof totalKeys];
                 const hombres = Number(get(row, keys.hombres)) || 0;
@@ -231,7 +224,7 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
                         width = porcentajeMujeres;
                         break;
 
-                    case 'Tot.':
+                    case 'Tot.': {
                         let porcentajeTotal = 0;
                         if (porcentajeHombre != 0 || porcentajeMujeres != 0) {
                             porcentajeTotal = (porcentajeHombre + porcentajeMujeres) / 2;
@@ -240,6 +233,7 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
                         }
                         width = porcentajeTotal;
                         break;
+                    }
                 }
 
                 let colorFrom = '#A1EE89';

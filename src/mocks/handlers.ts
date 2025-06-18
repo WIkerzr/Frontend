@@ -1,6 +1,5 @@
 import { http, HttpResponse } from 'msw';
 import { indicadoresRealizacion, indicadoresResultado } from './BBDD/indicadores';
-import { UserID } from '../types/users';
 
 export const handlers = [
     // http.post('/api/login', async ({ request }) => {

@@ -4,13 +4,11 @@ import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
-import AnimateHeight from 'react-animate-height';
-import { DatosAccion, datosInicializadosAccion } from '../../types/TipadoAccion';
+import { DatosAccion } from '../../types/TipadoAccion';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { sortBy } from 'lodash';
 import { DataTable, DataTableSortStatus, DataTableColumnTextAlign } from 'mantine-datatable';
-import { editableColumnByPath, visualColumnByPath } from './Acciones/Columnas';
-import { Ejes } from '../../types/tipadoPlan';
+import { visualColumnByPath } from './Acciones/Columnas';
 import { useYear } from '../../contexts/DatosAnualContext';
 
 type AccionAccesoria = { id: number; texto: string };
@@ -24,7 +22,6 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
     const [acciones, setAcciones] = useState<AccionAccesoria[]>(listadoMap);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [inputError, setInputError] = useState(false);
-    const { t } = useTranslation();
 
     const handleNuevaAccion = () => {
         if (!nuevaAccion.trim() || acciones.length >= 5) {
@@ -84,8 +81,6 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
         </div>
     );
 };
-
-interface ModalAccionProps {}
 
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();
@@ -274,37 +269,17 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     );
 };
 
-export const Acordeon: React.FC<{ texto: string; num: number; active: string; togglePara: (n: string) => void }> = ({ texto, num, active, togglePara }) => (
-    <div className="space-y-2 font-semibold w-1/3 p-1">
-        <div className="border border-[#d3d3d3] rounded dark:border-[#1b2e4b]">
-            <button
-                type="button"
-                className="w-full p-1 flex items-center text-white-dark dark:bg-[#1b2e4b] min-h-[2.5rem] text-left"
-                onClick={() => togglePara(`${num}`)}
-                style={{ lineHeight: '1.5' }}
-            >
-                <span className="truncate overflow-hidden whitespace-nowrap block w-full">{texto}</span>
-            </button>
-            <AnimateHeight duration={300} height={active === `${num}` ? 'auto' : 0}>
-                <div className="space-y-2 p-4 text-white-dark text-[13px] border-t border-[#d3d3d3] dark:border-[#1b2e4b]">
-                    <p>{texto}</p>
-                </div>
-            </AnimateHeight>
-        </div>
-    </div>
-);
-
 interface tablaIndicadoresProps {
     indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[];
     titulo: string;
 }
 
-export const TablaCuadroMando = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador, titulo }, ref) => {
+export const TablaCuadroMando = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador, titulo }) => {
     const { t } = useTranslation();
     const [initialRecords, setInitialRecords] = useState(sortBy(indicador, 'id'));
-    const [recordsData, setRecordsData] = useState(initialRecords);
+    const [recordsData] = useState(initialRecords);
 
-    const [search, setSearch] = useState('');
+    const [search] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
 
     const columnMetaAnual = [visualColumnByPath('metaAnual.hombres', t('Hombre')), visualColumnByPath('metaAnual.mujeres', t('Mujer')), visualColumnByPath('metaAnual.total', t('Total'))];

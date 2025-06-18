@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
 
-const Dropdown = (props : any, forwardedRef: any) => {
+const Dropdown = (props: any, forwardedRef: any) => {
     const [visibility, setVisibility] = useState<any>(false);
 
     const referenceRef = useRef<any>();
@@ -13,7 +14,7 @@ const Dropdown = (props : any, forwardedRef: any) => {
             {
                 name: 'offset',
                 options: {
-                    offset: props.offset || [(0)],
+                    offset: props.offset || [0],
                 },
             },
         ],
@@ -42,25 +43,13 @@ const Dropdown = (props : any, forwardedRef: any) => {
 
     return (
         <>
-            <button
-                ref={referenceRef}
-                type="button"
-                className={props.btnClassName}
-                onClick={() => setVisibility(!visibility)}
-            >
+            <button ref={referenceRef} type="button" className={props.btnClassName} onClick={() => setVisibility(!visibility)}>
                 {props.button}
             </button>
 
-                <div
-                ref={popperRef}
-                style={styles.popper}
-                {...attributes.popper}
-                className="z-50"
-                onClick={() => setVisibility(!visibility)}
-                >
-                    {visibility && props.children}
-                </div>
-
+            <div ref={popperRef} style={styles.popper} {...attributes.popper} className="z-50" onClick={() => setVisibility(!visibility)}>
+                {visibility && props.children}
+            </div>
         </>
     );
 };

@@ -1,19 +1,17 @@
+/* eslint-disable no-unused-vars */
 import { forwardRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion } from '../../../types/Indicadores';
 import { NewModal } from '../../../components/Utils/utils';
 import { TablaIndicadorAccion } from './EditarAccionComponent';
-import { indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import React from 'react';
-import { useYear } from '../../../contexts/DatosAnualContext';
-
 interface tablaIndicadoresProps {
     creaccion?: boolean;
     onResultadosRelacionadosChange?: (resultados: IndicadorRealizacionAccion[]) => void;
     onChangeIndicadores?: (indicadores: IndicadorRealizacionAccion[]) => void;
 }
 
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>((ref) => {
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, tablaIndicadoresProps>(() => {
     const { t } = useTranslation();
 
     return (
@@ -40,7 +38,7 @@ interface ModalNuevoIndicadorAccionProps {
     onSave?: (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => void;
 }
 
-export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, realizaciones, resultados, onSave }, ref) => {
+export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, realizaciones, resultados, onSave }) => {
     const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
     const [seleccionados, setSeleccionados] = useState<number[]>([]);
     const { t } = useTranslation();

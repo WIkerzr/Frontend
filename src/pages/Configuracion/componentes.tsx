@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../../store';
@@ -5,7 +7,7 @@ import { sortBy } from 'lodash';
 import { UserID } from '../../types/users';
 import Tippy from '@tippyjs/react';
 import { forwardRef, ReactNode, useEffect, useState } from 'react';
-import { Indicador, indicadorInicial, IndicadorRealizacion, IndicadorResultado, indicadorResultadoinicial } from '../../types/Indicadores';
+import { indicadorInicial, IndicadorRealizacion, IndicadorResultado, indicadorResultadoinicial } from '../../types/Indicadores';
 import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 
@@ -15,7 +17,6 @@ import IconTrash from '../../components/Icon/IconTrash';
 import IconPencil from '../../components/Icon/IconPencil';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
-import { TablaIndicadores } from './Indicadores';
 import { useUsers } from './Usuarios';
 
 const newUser: UserID = {
@@ -496,7 +497,6 @@ const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacio
     );
 };
 
-const opcionesIniciales = ['Opción A', 'Opción B', 'Opción C'];
 interface RellenoIndicadorResultadoProps {
     indicadorRealizacion: IndicadorRealizacion;
 }
@@ -504,27 +504,21 @@ interface RellenoIndicadorResultadoProps {
 const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorRealizacion }) => {
     const { t, i18n } = useTranslation();
     const indicadoresResultados: IndicadorResultado[] = JSON.parse(localStorage.getItem('indicadoresResultado') || '[]');
-    const [opciones, setOpciones] = useState(indicadoresResultados);
+    const [opciones] = useState(indicadoresResultados);
     const [seleccion, setSeleccion] = useState('');
     const [modoCrear, setModoCrear] = useState(false);
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
 
-    const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado>(indicadorResultadoinicial);
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorResultado>(indicadorResultadoinicial);
 
     const cambiosIndicadorEditable = (data: any) => {
         setDescripcionEditable(data);
     };
 
-    const cambiosIndicadorResultado = (data: any) => {
-        setIndicadoresResultado(data);
-    };
-
     const nuevoIndicadorResultado = () => {
         indicadorRealizacion.Resultados = [...indicadorRealizacion.Resultados!, descripcionEditable];
         setModoCrear(false);
-        cambiosIndicadorResultado(indicadorRealizacion.Resultados);
         setDescripcionEditable(indicadorResultadoinicial);
     };
 
@@ -532,19 +526,16 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
         indicadorRealizacion.Resultados![filaEditar] = data;
         setModoCrear(false);
         setModoEditar(false);
-        cambiosIndicadorResultado(indicadorRealizacion.Resultados);
         setDescripcionEditable(indicadorResultadoinicial);
     };
 
     const incorporarIndicadorResultado = (selectedOp: IndicadorResultado) => {
         indicadorRealizacion.Resultados = [...indicadorRealizacion.Resultados!, selectedOp];
-        cambiosIndicadorResultado(indicadorRealizacion.Resultados);
     };
 
     const eliminarIndicadorResultado = (selectedOp: IndicadorResultado) => {
         if (indicadorRealizacion.Resultados) {
             indicadorRealizacion.Resultados = indicadorRealizacion.Resultados.filter((resultado) => resultado.Id !== selectedOp.Id);
-            cambiosIndicadorResultado(indicadorRealizacion.Resultados);
         }
     };
 
@@ -561,7 +552,6 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
                                 const selectedValue = e.target.value;
                                 const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
                                 if (selectedOp) {
-                                    setIndicadoresResultado(selectedOp);
                                     incorporarIndicadorResultado(selectedOp);
                                 }
                                 setSeleccion('');
@@ -746,7 +736,7 @@ interface ChangeStatusProps {
     onSuccess?: () => void;
 }
 
-export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ value, onSuccess }, ref) => {
+export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ value, onSuccess }) => {
     const { t } = useTranslation();
     const [localStatus, setLocalStatus] = useState<boolean>(!!value.status);
 
@@ -842,7 +832,7 @@ export const NewUser = forwardRef<HTMLButtonElement, ElimarUserProps>(({ onChang
     );
 });
 
-export const UsersTable = forwardRef<HTMLButtonElement>((ref) => {
+export const UsersTable = forwardRef<HTMLButtonElement>(() => {
     const { users, refrescarUsuarios } = useUsers();
 
     const { t } = useTranslation();
@@ -951,7 +941,6 @@ interface PanelEjesProps {
 }
 
 export const ZonaTitulo: React.FC<PanelEjesProps> = ({ titulo, zonaBtn, zonaExplicativa, zonaExtra }) => {
-    const { t } = useTranslation();
     return (
         <>
             <div className="flex flex-col justify-between mb-6 ">

@@ -153,8 +153,12 @@ export const TablaIndicadores: React.FC<IndicadorProps> = ({ indicadorRealizacio
                 }, 1000);
             }, 5000);
             setIndicadorRealizacion((prev) => prev.filter((indicador) => indicador.Id !== indiRealizacionAEliminar.Id));
-        } catch (err: any) {
-            setErrorMessage(err.message || 'Error inesperado');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setErrorMessage(err.message || 'Error inesperado');
+            } else {
+                console.error('Error desconocido', err);
+            }
         }
     };
 
@@ -198,8 +202,12 @@ export const TablaIndicadores: React.FC<IndicadorProps> = ({ indicadorRealizacio
                     Resultados: ind.Resultados?.filter((r) => r.Id !== indiResultadoAEliminar.Id) || [],
                 }))
             );
-        } catch (err: any) {
-            setErrorMessage(err.message || 'Error inesperado');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setErrorMessage(err.message || 'Error inesperado');
+            } else {
+                console.error('Error desconocido', err);
+            }
         }
     };
     return (
@@ -347,7 +355,6 @@ export const TablaIndicadores: React.FC<IndicadorProps> = ({ indicadorRealizacio
 const Index = () => {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [indicadorRealizacion, setIndicadorRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadorResultado, setIndicadorResultado] = useState<IndicadorResultado[]>([]);
     const [modalNuevo, setModalNuevo] = useState(false);
@@ -375,8 +382,6 @@ const Index = () => {
 
                 setIndicadorResultado(indicadoresResultado);
                 localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-            } catch (err: any) {
-                setError(err.message);
             } finally {
                 setLoading(false);
             }

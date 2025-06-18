@@ -14,7 +14,7 @@ import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
 
 const Header = () => {
-    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
+    const { setRegionSeleccionada } = useRegionContext();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
     const nombreUsuario = user?.name;
@@ -29,7 +29,6 @@ const Header = () => {
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
 
-    const region = regiones.find((r) => r.RegionId === regionSeleccionada);
     return (
         <header className={`z-40 ${themeConfig.semidark && themeConfig.menu === 'horizontal' ? 'dark' : ''}`}>
             <div className="shadow-sm">

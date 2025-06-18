@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
+import { OnlyIfLoggedIn, OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
 const CuadroMando = lazy(() => import('../pages/ADR/CuadroMando'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones'));
@@ -18,62 +18,110 @@ const Usuarios = lazy(() => import('../pages/Configuracion/Usuarios'));
 const routes = [
     {
         path: '/',
-        element: <CuadroMando />,
+        element: (
+            <OnlyIfLoggedIn>
+                <CuadroMando />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'default',
     },
     {
         path: '/adr/CuadroMando',
-        element: <CuadroMando />,
+        element: (
+            <OnlyIfLoggedIn>
+                <CuadroMando />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'CuadroMando',
     },
     {
         path: '/adr/Ejes',
-        element: <Ejes />,
+        element: (
+            <OnlyIfLoggedIn>
+                <Ejes />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'Ejes',
     },
     {
         path: '/adr/acciones',
-        element: <Acciones />,
+        element: (
+            <OnlyIfLoggedIn>
+                <Acciones />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'Acciones',
     },
     {
         path: '/adr/acciones/editando',
-        element: <EditarAccion />,
+        element: (
+            <OnlyIfLoggedIn>
+                <EditarAccion />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'EditarAccion',
     },
     {
         path: '/adr/accionesAccesorias',
-        element: <AccionesAccesorias />,
+        element: (
+            <OnlyIfLoggedIn>
+                <AccionesAccesorias />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'AccionesAccesorias',
     },
     {
         path: '/adr/memoriasAnuales',
-        element: <MemoriasAnuales />,
+        element: (
+            <OnlyIfLoggedIn>
+                <MemoriasAnuales />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'MemoriasAnuales',
     },
     {
         path: '/adr/planesGestion',
-        element: <PlanesGestion />,
+        element: (
+            <OnlyIfLoggedIn>
+                <PlanesGestion />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'PlanesGestion',
     },
     {
         path: '/adr/planesGestionEnvio',
-        element: <PlanesGestionEnvio />,
+        element: (
+            <OnlyIfLoggedIn>
+                <PlanesGestionEnvio />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'PlanesGestionEnvio',
     },
     {
         path: '/adr/servicios',
-        element: <Servicios />,
+        element: (
+            <OnlyIfLoggedIn>
+                <Servicios />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'Servicios',
     },
     {
         path: '/configuracion/indicadores',
-        element: <Indicadores />,
+        element: (
+            <OnlyIfLoggedIn>
+                <Indicadores />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'indicadores',
     },
     {
         path: '/configuracion/usuarios',
-        element: <Usuarios />,
+        element: (
+            <OnlyIfLoggedIn>
+                <Usuarios />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'Usuarios',
     },
     {
@@ -87,7 +135,11 @@ const routes = [
     },
     {
         path: '/profile',
-        element: <Profile />,
+        element: (
+            <OnlyIfLoggedIn>
+                <Profile />
+            </OnlyIfLoggedIn>
+        ),
         layout: 'Profile',
     },
 ];

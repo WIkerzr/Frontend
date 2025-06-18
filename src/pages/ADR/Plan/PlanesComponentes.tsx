@@ -1,13 +1,13 @@
 import Tippy from '@tippyjs/react';
-import { sortBy } from 'lodash';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
-import { forwardRef, useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../../../store';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
-
+import React, { useRef } from 'react';
+const buttonRef = useRef<HTMLButtonElement>(null);
 const initialRecords = [
     {
         id: 1,
@@ -21,13 +21,14 @@ const initialRecords = [
     },
 ];
 
-export const IndicadoresOperativosPlanTable = forwardRef<HTMLButtonElement>(({}, ref) => {
+export const IndicadoresOperativosPlanTable: React.FC = () => {
     const { t } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-
     const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-    const [recordsData, setRecordsData] = useState(initialRecords);
+
+    const [recordsData] = useState(initialRecords);
 
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
 
@@ -45,18 +46,18 @@ export const IndicadoresOperativosPlanTable = forwardRef<HTMLButtonElement>(({},
                             {
                                 accessor: 'vacio2',
                                 title: '',
-                                render: (row) => (
+                                render: () => (
                                     <div className="flex justify-end space-x-3">
                                         <Tippy content={t('editar')}>
                                             {
-                                                <button type="button" ref={ref}>
+                                                <button type="button" ref={buttonRef}>
                                                     <IconPencil />
                                                 </button>
                                             }
                                         </Tippy>
                                         <Tippy content={t('borrar')}>
                                             {
-                                                <button type="button" ref={ref}>
+                                                <button type="button" ref={buttonRef}>
                                                     <IconTrash />
                                                 </button>
                                             }
@@ -76,4 +77,4 @@ export const IndicadoresOperativosPlanTable = forwardRef<HTMLButtonElement>(({},
             </div>
         </div>
     );
-});
+};

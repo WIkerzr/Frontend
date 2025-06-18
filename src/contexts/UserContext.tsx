@@ -3,6 +3,7 @@ import { UserID } from '../types/users';
 
 interface UserContextType {
     user: UserID | null;
+    // eslint-disable-next-line no-unused-vars
     setUser: (user: UserID | null) => void;
 }
 

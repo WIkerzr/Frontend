@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { DatosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
 import { useYear } from '../../../contexts/DatosAnualContext';
 
-export const PestanaMemoria = forwardRef<HTMLButtonElement>(({}, ref) => {
+export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
 
     const { datosEditandoAccion, setDatosEditandoAccion } = useYear();

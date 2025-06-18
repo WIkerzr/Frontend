@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';

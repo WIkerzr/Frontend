@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx --cache"
     },
     "dependencies": {
         "@emotion/react": "~11.10.6",
@@ -45,7 +46,7 @@
         "@vitejs/plugin-react": "~4.3.1",
         "autoprefixer": "~10.4.17",
         "eslint": "^9.29.0",
-        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react": "^7.35.1",
         "globals": "^16.2.0",
         "i18next": "~23.13.0",
         "i18next-browser-languagedetector": "~8.0.0",

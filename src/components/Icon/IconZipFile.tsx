@@ -2,11 +2,10 @@ import { FC } from 'react';
 
 interface IconZipFileProps {
     className?: string;
-    fill?: boolean;
     duotone?: boolean;
 }
 
-const IconZipFile: FC<IconZipFileProps> = ({ className, fill = false, duotone = true }) => {
+const IconZipFile: FC<IconZipFileProps> = ({ className, duotone = true }) => {
     return (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
             <path

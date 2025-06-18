@@ -19,11 +19,11 @@ const Index = () => {
 
             <div className="p-5 flex flex-col gap-4 w-full">
                 {yearData.plan.ejesPrioritarios.map(
-                    (ejes) =>
+                    (ejes, ejesIdx) =>
                         ejes.acciones.length > 0 && (
-                            <div className="paneln0">
-                                {ejes.acciones.map((acciones) => (
-                                    <div className="panel">
+                            <div key={ejes.id || ejesIdx} className="paneln0">
+                                {ejes.acciones.map((acciones, accionesIdx) => (
+                                    <div key={acciones.id || accionesIdx} className="panel">
                                         <h5 className="font-semibold text-lg dark:text-white-light mb-5">{acciones.accion}</h5>
                                         <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} />
                                         <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreResultado ?? []} titulo={t('indicadoresDeResultado')} />

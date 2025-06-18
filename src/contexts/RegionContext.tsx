@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getRegiones, Region } from '../components/Utils/gets/getRegiones';
-import { useAuth } from './AuthContext';
 import { useUser } from './UserContext';
 
 type RegionContextType = {
     regiones: Region[];
     loading: boolean;
-    error: any;
+    error: Error | null;
     regionSeleccionada: number | null;
+    // eslint-disable-next-line no-unused-vars
     setRegionSeleccionada: (id: number | null) => void;
 };
 
@@ -34,7 +34,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [error, setError] = useState<Error | null>(null);
 
     const [regionSeleccionada, setRegionSeleccionadaState] = useState<number | null>(() => {
         const saved = sessionStorage.getItem('regionSeleccionada');

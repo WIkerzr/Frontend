@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
-import { Input, RegionSelect } from '../../components/Utils/inputs';
+import { Input } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { User, UserID } from '../../types/users';
 import { useEffect, useState } from 'react';
@@ -68,7 +69,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 }}
                             >
                                 <option value="notSelect">{t('sinSeleccionar')}</option>
-                                {regiones.map((region, index) => (
+                                {regiones.map((region) => (
                                     <option key={region.RegionId} value={i18n.language === 'eu' ? region.NameEu : region.NameEs}>
                                         {i18n.language === 'eu' ? region.NameEu : region.NameEs}
                                     </option>

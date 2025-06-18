@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 interface LoginFormProps {
@@ -100,19 +99,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                         <h2 className="text-lg font-bold text-center">{t('EmailRestaurarEnviado')}</h2>
                         <h2 className="text-lg font-bold text-center">{t('EmailRestaurarRevisa')}</h2>
                         <p className="text-center text-sm text-gray-500 mt-2">{t('ReenviandoLogin')}...</p>
-
                         <div className="w-full bg-gray-300 rounded h-2 mt-4 overflow-hidden">
                             <div className="h-2 bg-blue-500 animate-[progreso_5s_linear_forwards]" style={{ animationName: 'progreso' }}></div>
                         </div>
-
-                        <style>
-                            {`
-        @keyframes progreso {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-        `}
-                        </style>
+                        <style>{`@keyframes progreso { from { width: 100%; } to { width: 0%; }}`}</style>
                     </>
                 )}
                 {!recordar && (

@@ -4,22 +4,6 @@ import BlankLayout from '../components/Layouts/BlankLayout';
 import DefaultLayout from '../components/Layouts/DefaultLayout';
 import { routes } from './routes';
 
-const protectedPaths = [
-    '/',
-    '/adr/CuadroMando',
-    '/adr/Ejes',
-    '/adr/acciones',
-    '/adr/acciones/editando',
-    '/adr/accionesAccesorias',
-    '/adr/memoriasAnuales',
-    '/adr/planesGestion',
-    '/adr/planesGestionEnvio',
-    '/adr/servicios',
-    '/configuracion/indicadores',
-    '/configuracion/usuarios',
-    '/profile',
-];
-
 const finalRoutes = routes.map((route) => ({
     ...route,
     element: route.layout === 'blank' ? <BlankLayout>{route.element}</BlankLayout> : <DefaultLayout>{route.element}</DefaultLayout>,

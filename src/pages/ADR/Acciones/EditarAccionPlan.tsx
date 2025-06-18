@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosPlan } from '../../../types/TipadoAccion';
 
-export const PestanaPlan = forwardRef<HTMLButtonElement>((ref) => {
+export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
     if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {

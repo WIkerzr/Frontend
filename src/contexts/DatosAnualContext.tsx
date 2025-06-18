@@ -1,4 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
+/* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { YearData, yearIniciado } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';

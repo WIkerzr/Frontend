@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
-import { NewUser, UsersTable } from './componentes';
+import { UsersTable } from './componentes';
 import { UserID, UserRegionId } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
@@ -64,8 +65,12 @@ const Index = () => {
                     const dataArray: UserID[] = Array.isArray(usuariosConRegion) ? usuariosConRegion : Object.values(usuariosConRegion);
                     listadoUsuarios(dataArray);
                     localStorage.setItem('users', JSON.stringify(dataArray));
-                } catch (err: any) {
-                    setError(err.message);
+                } catch (err: unknown) {
+                    if (err instanceof Error) {
+                        setError(err.message);
+                    } else {
+                        console.error('Error desconocido', err);
+                    }
                 } finally {
                     setLoading(false);
                 }

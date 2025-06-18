@@ -1,5 +1,5 @@
+/* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
-import { Region } from './gets/getRegiones';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect } from 'react';
 import { yearIniciado } from '../../types/tipadoPlan';
@@ -51,12 +51,12 @@ interface RegionSelectProps {
     noInput?: boolean;
 }
 
-export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = false, noInput = false }) => {
+export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = false }) => {
     const { i18n, t } = useTranslation();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
     const { setYearData } = useYear();
-    const { regiones, loading, error, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
+    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
     useEffect(() => {

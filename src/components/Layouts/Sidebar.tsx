@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AnimateHeight from 'react-animate-height';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +8,6 @@ import { toggleSidebar } from '../../store/themeConfigSlice';
 import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
 import IconCaretsDown from '../Icon/IconCaretsDown';
-import IconMinus from '../Icon/IconMinus';
 import IconMenuConfiguracion from '../Icon/Menu/IconMenuConfiguracion.svg';
 import IconCaretDown from '../Icon/IconCaretDown';
 import IconServiciosPrestados from '../Icon/Menu/IconServiciosPrestados.svg';
@@ -28,7 +28,7 @@ const Sidebar = () => {
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
     const { user } = useUser();
-    const { regiones, regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -45,7 +45,7 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        const rolUsuario = user!.role as String;
+        const rolUsuario = user!.role as string;
         setRole(rolUsuario.toUpperCase() as UserRole);
     }, []);
 

@@ -6,7 +6,7 @@ type LoginData = {
 
 const serviceBase = 'https://localhost:44300/';
 
-export async function authlogin(loginData: LoginData): Promise<any> {
+export async function authlogin(loginData: LoginData): Promise<unknown> {
     const params = new URLSearchParams();
     params.append('grant_type', 'password');
     params.append('username', loginData.userName);

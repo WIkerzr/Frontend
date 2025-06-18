@@ -5,7 +5,7 @@ import { setAuthUser } from '../../store/authSlice';
 import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRegionContext } from '../../contexts/RegionContext';
-import { User, UserID, UserRole } from '../../types/users';
+import { UserID, UserRole } from '../../types/users';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionContext();
@@ -17,7 +17,6 @@ const useLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { regiones } = useRegionContext();
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -68,7 +67,7 @@ const useLogin = () => {
                 throw new Error(result.message || 'Error desconocido');
             }
 
-            const isUserRole = (value: any): value is UserRole => {
+            const isUserRole = (value: string): value is UserRole => {
                 const allowedRoles: string[] = ['HAZI', 'GOBIERNOVASCO', 'ADR'];
                 return typeof value === 'string' && allowedRoles.includes(value.toUpperCase());
             };
@@ -86,7 +85,6 @@ const useLogin = () => {
             };
 
             const token = result.access_token;
-            const region = regiones.find((r) => r.RegionId === user.ambit);
             setRegionSeleccionada(Number(user.ambit));
 
             login({ user });

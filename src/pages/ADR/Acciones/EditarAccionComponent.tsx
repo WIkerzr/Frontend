@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EstadoLabel } from '../../../types/TipadoAccion';
@@ -93,7 +94,7 @@ const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResu
 
 //Temporal
 
-export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }, ref) => {
+export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }) => {
     const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
     const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
     if (!indicador) {
@@ -122,12 +123,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
         }
     }, [indicador]);
 
-    useEffect(() => {
-        if (creaccion) {
-            const idsUsados = new Set(indicadores.flatMap((r) => r.idsResultados ?? []));
-            const idsResultadosActuales = new Set(indicador!.map((res) => res.id));
-        }
-    }, [indicadores]);
     const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
 
     const [search, setSearch] = useState('');
@@ -258,6 +253,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
             },
         ];
         const nuevosIndicadoresResultado = [
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain, no-unsafe-optional-chaining
             ...datosEditandoAccion?.indicadorAccion?.indicadoreResultado!,
             ...seleccion.idsResultadosEnRealizacion.map((idResultado) => ({
                 id: idResultado,

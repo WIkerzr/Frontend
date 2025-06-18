@@ -1,8 +1,11 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '../types/users';
 
 type AuthContextType = {
-    user: any | null;
+    user: User | null;
     loading: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     login: (userData: any) => void;
     logout: () => void;
 };
@@ -17,7 +20,7 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<any | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
     }, []);
 
-    const login = (userData: any) => {
+    const login = (userData: User) => {
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         sessionStorage.setItem('user', JSON.stringify(userData));
