@@ -1,4 +1,4 @@
-import { datosPruebaIndicadoreRealizacion, datosPruebaIndicadoreResultado } from './Indicadores';
+import { datosPruebaIndicadoreResultado } from './Indicadores';
 import { DatosAccion } from './TipadoAccion';
 export type Year = number;
 
@@ -186,8 +186,50 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     valFinal: '24',
                 },
                 indicadorAccion: {
-                    indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
-                    indicadoreResultado: datosPruebaIndicadoreResultado,
+                    indicadoreRealizacion: [
+                        {
+                            id: 4,
+                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+                            metaAnual: {
+                                hombres: 10,
+                                mujeres: 10,
+                                total: 20,
+                            },
+                            ejecutado: {
+                                hombres: 5,
+                                mujeres: 10,
+                                total: 15,
+                            },
+                            metaFinal: {
+                                hombres: 20,
+                                mujeres: 20,
+                                total: 40,
+                            },
+                            hipotesis: 'Se espera un ligero aumento.',
+                            idsResultados: [4],
+                        },
+                        {
+                            id: 5,
+                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+                            metaAnual: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 100,
+                            },
+                            ejecutado: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 0,
+                            },
+                            metaFinal: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 300,
+                            },
+                            idsResultados: [5],
+                        },
+                    ],
+                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
@@ -246,8 +288,50 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     valFinal: '24',
                 },
                 indicadorAccion: {
-                    indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
-                    indicadoreResultado: datosPruebaIndicadoreResultado,
+                    indicadoreRealizacion: [
+                        {
+                            id: 4,
+                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+                            metaAnual: {
+                                hombres: 10,
+                                mujeres: 10,
+                                total: 20,
+                            },
+                            ejecutado: {
+                                hombres: 5,
+                                mujeres: 10,
+                                total: 15,
+                            },
+                            metaFinal: {
+                                hombres: 20,
+                                mujeres: 20,
+                                total: 40,
+                            },
+                            hipotesis: 'Se espera un ligero aumento.',
+                            idsResultados: [4],
+                        },
+                        {
+                            id: 5,
+                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+                            metaAnual: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 100,
+                            },
+                            ejecutado: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 0,
+                            },
+                            metaFinal: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 300,
+                            },
+                            idsResultados: [5],
+                        },
+                    ],
+                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
@@ -314,8 +398,50 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     valFinal: '24',
                 },
                 indicadorAccion: {
-                    indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
-                    indicadoreResultado: datosPruebaIndicadoreResultado,
+                    indicadoreRealizacion: [
+                        {
+                            id: 4,
+                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+                            metaAnual: {
+                                hombres: 10,
+                                mujeres: 10,
+                                total: 20,
+                            },
+                            ejecutado: {
+                                hombres: 5,
+                                mujeres: 10,
+                                total: 15,
+                            },
+                            metaFinal: {
+                                hombres: 20,
+                                mujeres: 20,
+                                total: 40,
+                            },
+                            hipotesis: 'Se espera un ligero aumento.',
+                            idsResultados: [4],
+                        },
+                        {
+                            id: 5,
+                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+                            metaAnual: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 100,
+                            },
+                            ejecutado: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 0,
+                            },
+                            metaFinal: {
+                                hombres: 0,
+                                mujeres: 0,
+                                total: 300,
+                            },
+                            idsResultados: [5],
+                        },
+                    ],
+                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },

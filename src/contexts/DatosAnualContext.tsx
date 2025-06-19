@@ -9,12 +9,14 @@ interface YearContextType {
     datosEditandoAccion: DatosAccion | undefined;
     setDatosEditandoAccion: (data: DatosAccion) => void;
     SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
+    SeleccionEditarGuardar: () => void;
     NuevaAccion: (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string) => void;
 }
 
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const YearProvider = ({ children }: { children: ReactNode }) => {
+    const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearDataState] = useState<YearData>(() => {
         const stored = localStorage.getItem('datosAno');
         return stored ? JSON.parse(stored) : yearIniciado;
@@ -38,9 +40,37 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
+        setIdEjeEditado(idEjePrioritario);
         const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
         const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
         setDatosEditandoAccion(accionSeleccionado[0]);
+    };
+
+    const SeleccionEditarGuardar = () => {
+        console.log(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion[0].metaFinal);
+
+        const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) => {
+            if (eje.id !== idEjeEditado) {
+                return eje;
+            }
+
+            const nuevasAcciones = eje.acciones.map((accion) => (accion.id === datosEditandoAccion.id ? datosEditandoAccion : accion));
+
+            return {
+                ...eje,
+                acciones: nuevasAcciones,
+            };
+        });
+
+        setYearDataState({
+            ...yearData,
+            plan: {
+                ...yearData.plan,
+                ejesPrioritarios: nuevosEjes,
+            },
+        });
+
+        setIdEjeEditado('');
     };
 
     const NuevaAccion = (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string) => {
@@ -70,7 +100,11 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
         setYearData(updatedYearData);
     };
 
-    return <YearContext.Provider value={{ yearData, setYearData, datosEditandoAccion, setDatosEditandoAccion, NuevaAccion, SeleccionEditarAccion }}>{children}</YearContext.Provider>;
+    return (
+        <YearContext.Provider value={{ yearData, setYearData, datosEditandoAccion, setDatosEditandoAccion, NuevaAccion, SeleccionEditarAccion, SeleccionEditarGuardar }}>
+            {children}
+        </YearContext.Provider>
+    );
 };
 
 export const useYear = (): YearContextType => {

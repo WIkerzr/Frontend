@@ -114,13 +114,8 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                                 setIndicadores((prevRows) => {
                                     const copy = [...prevRows];
                                     const updatedRow = { ...copy[index] };
-
-                                    // Actualiza el campo editado
                                     set(updatedRow as object, accessor, nuevoValor);
-
-                                    // Actualiza el total sumando el nuevo valor + el contrario
                                     set(updatedRow as object, accessorTotal, nuevoValor + valorContrario);
-
                                     copy[index] = updatedRow;
                                     return copy;
                                 });
@@ -128,7 +123,6 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                         />
                     );
                 } else {
-                    //descripcion o hipotesis
                     return (
                         <input
                             className={`border p-1 rounded text-left`}

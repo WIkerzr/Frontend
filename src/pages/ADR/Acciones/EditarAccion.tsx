@@ -17,7 +17,7 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { anio, estados } = useEstadosPorAnio();
 
-    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
+    const { datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar } = useYear();
 
     if (!datosEditandoAccion) {
         return;
@@ -40,7 +40,9 @@ const Index: React.FC = () => {
                 }
                 zonaBtn={
                     <div className="ml-auto flex gap-4 items-center justify-end">
-                        <button className="px-4 py-2 bg-primary text-white rounded">{t('guardar')}</button>
+                        <button className="px-4 py-2 bg-primary text-white rounded" onClick={SeleccionEditarGuardar}>
+                            {t('guardar')}{' '}
+                        </button>
                         <NavLink to="/adr/acciones" className="group">
                             <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
                         </NavLink>
