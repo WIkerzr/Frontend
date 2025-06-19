@@ -80,6 +80,7 @@
     "indicadoresDeRealizacion": "Indicadores de realización",
     "indicadoresDeResultado": "Indicadores de resultado",
     "nuevoIndicadorRealizacion": "Nuevo indicador realización",
+    "nuevoIndicadorOperativo": "Nuevo indicador operativo",
     "newAccion": "Nueva Acción",
     "editAccion": "Editar Acción",
     "miPerfil": "Mi perfil",
@@ -87,6 +88,8 @@
     "recordarContrasena": "Recordar contraseña",
     "hipotesis": "Hipótesis",
     "plurianual": "Plurianualidad",
+
+    "datosNoEncontrados": "Datos no encontrados",
 
 
     "introduccion": "Introducción",

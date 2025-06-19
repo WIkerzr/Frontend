@@ -20,7 +20,6 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 [campo]: e.target.value || '',
             },
         });
-        console.log(datosEditandoAccion);
     };
 
     const handlePresupuestoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

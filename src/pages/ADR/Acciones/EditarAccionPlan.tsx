@@ -18,7 +18,6 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 [campo]: e.target.value || '',
             },
         });
-        console.log(datosEditandoAccion);
     };
     const classNameTextArea = 'w-full border rounded p-2 h-[38px] resize-y';
 

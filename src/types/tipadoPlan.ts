@@ -337,12 +337,35 @@ export const yearIniciado: YearData = {
     nombreRegion: 'Durangaldea',
     plan: {
         id: '0',
-        introduccion: 'introduccion',
+        introduccion: `La Ley 7/2022, de 30 de junio, de Desarrollo Rural, determina la elaboración de nuevos instrumentos de planificación que favorezcan la alineación de los proyectos e iniciativas del medio rural con las políticas institucionales a impulsar.
+En el caso de los PCDR (Programas Comarcales de Desarrollo Rural), la previsión es que se elaboren a lo largo del ejercicio 2024 como herramientas donde se recojan, para cada comarca y bajo una metodología de trabajo común, los objetivos sectoriales y las líneas de actuación a implementar derivados de los PDT (Programas de Desarrollo Territorial) que incidan de forma prioritaria en cada comarca.
+En este contexto, los Planes de Gestión correspondientes al año 2024 se diseñan en base a lo dispuesto en el PDR comarcal 2015-2020, con la finalidad de alcanzar los objetivos que lleven a la comarca hacia la VISION marcada en dicho PDR hasta que los nuevos instrumentos de planificación de referencia estén plenamente desarrollados.
+En este documento se recogen las actuaciones que configuran el Plan de Gestión 2024 de la ADR LAUTADA para el desarrollo del PDR Comarcal de LLANADA ALAVESA`,
         ejes: ejesIniado,
         ejesPrioritarios: ejesPrioritariosIniado,
-        process: 'process',
-        adrInternalTasks: 'adrInternalTasks',
-        operationalIndicators: [{ id: '0', nameEs: 'Inidicador0', nameEu: 'IndicadorEu0', value: 'Valor' }],
+        process: `El despliegue de las herramientas para la nueva LDR (Ley de Desarrollo Rural) va a llevar un trabajo constante durante todo el año:
+ Participación en el diseño de una metodología común para todas las comarcas de Euskadi  Planificación y elaboración del nuevo PCDR Llanada Alavesa donde la ADR será líder y responsable del proceso de elaboración con la participación “botom-up”. Para ello se realizará un diseño de la metodología y se marcan 3 fases:
+o Primer trimestre 2024. Hazi Fundazioa contratará una empresa para la elaboración del diseño y planificación de un PCDR. Las ADRs participarán en este proceso o Segundo trimestre 2024. Capacitación al personal de las ADRs para la elaboración del PCDR o Segundo semestre 2024. Realización PCDR de la Llanada con un proceso participativo  Reuniones de participación y presentación de los PDTs (Programas de Desarrollo Territorial) que serán dos: PDT de diversificación de la actividad económica y PDT de calidad de vida. Las ADRs participarán como organismos y colaboradores de apoyo  Seguir trabajando con GV y DFA en el desarrollo de los nuevos convenios y financiación que se adecúen a las necesidades de la LDR.
+ Se continuará con los grupos de trabajo de legumbres, sala de sacrifico de aves, harina y cocina colectiva y con el grupo de cohesión comarcal para el diseño y organización de las ediciones de 2023 del X Lautada Eguna y VII Semana del Desarrollo Rural.`,
+        adrInternalTasks: `Las tareas internas de gestión que aseguran un adecuado funcionamiento de la ADR son las siguientes:
+Elaboración del PG anual y seguimiento de las actuaciones propuestas.
+Elaboración de la memoria recapitulativa anual analizando el grado de ejecución de las actuaciones previstas.
+Labores propias de la gestión administrativa interna de la asociación: convocatoria de juntas directivas, elaboración de actas y memorias, gestión del presupuesto, etc.
+Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa etc.).`,
+        operationalIndicators: [
+            {
+                id: '0',
+                nameEs: 'Proceso participativo elaboración y metodología del PCDR. Horas Realización de Plan Comarcal Desarrollo Rural (PCDR): Horas',
+                nameEu: 'Parte-hartze prozesuaren prestaketa eta PCDRaren metodologia. Orduak Eskualdeko Landa Garapeneko Plana (PCDR) Ezartzea: Orduak',
+                value: '600',
+            },
+            {
+                id: '1',
+                nameEs: `Participación y presentación del Planes Desarrollo Territoriales (PDTs). Horas`,
+                nameEu: `Participación y presentación del Planes Desarrollo Territoriales (PDTs). Horas`,
+                value: '30 horas',
+            },
+        ],
     },
     memoria: {
         id: '0',
