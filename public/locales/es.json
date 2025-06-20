@@ -27,6 +27,7 @@
     "buscarUsuario":"Buscar usuario...",
     "ReenviandoLogin":"Reenviando al login...",
 
+    "funcionamientoGeneral": "FUNCIONAMIENTO GENERAL DE LA ADR",
     "metaAnual": "Meta Anual",
     "ejecutado": "Ejecutado",
     "metaFinal": "Meta Final",
@@ -94,9 +95,10 @@
 
     "introduccion": "Introducción",
     "ejesPrioritarios": "Ejes prioritarios",
-    "tareasInternasGestionADR": "TAREAS INTERNAS DE GESTIÓN DE LA ADR",
+    "adrInternalTasks": "TAREAS INTERNAS DE GESTIÓN DE LA ADR",
     "indicadoresOperativos": "Indicadores Operativos",
     "valorPrevisto": "Valor previsto",
+    "valueAchieved": "Valor alcanzado",
 
     "sinSeleccionar": "Sin seleccionar",
     "editar": "Editar",

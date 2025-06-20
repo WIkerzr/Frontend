@@ -7,23 +7,18 @@ import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useYear } from '../../contexts/DatosAnualContext';
 
-interface InputProps {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
-    type: 'text' | 'password' | 'email' | 'number' | 'tel' | 'date';
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    value: string;
-    name: string;
-    className?: string;
     divClassName?: string;
 }
 
-export const Input = ({ nombreInput, type, className, onChange, value, name, divClassName }: InputProps) => {
+export const Input = ({ nombreInput, divClassName, className, ...rest }: InputProps) => {
     const { t } = useTranslation();
 
     return (
         <div className={divClassName}>
             <label className={`block text-sm font-medium mb-1 ${className ? className : ''}`}>{t(nombreInput)}</label>
-            <input type={type} className="form-input w-full" value={value} onChange={onChange} name={name} />
+            <input {...rest} className={`form-input w-full`} />
         </div>
     );
 };
