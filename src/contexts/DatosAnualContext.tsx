@@ -2,9 +2,11 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { YearData, yearIniciado } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
+import { useRegionContext } from './RegionContext';
 
 interface YearContextType {
     yearData: YearData;
+    block: boolean;
     setYearData: (data: YearData) => void;
     datosEditandoAccion: DatosAccion | undefined;
     setDatosEditandoAccion: (data: DatosAccion) => void;
@@ -16,6 +18,7 @@ interface YearContextType {
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const YearProvider = ({ children }: { children: ReactNode }) => {
+    const { regionSeleccionada } = useRegionContext();
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearDataState] = useState<YearData>(() => {
         const stored = localStorage.getItem('datosAno');
@@ -44,6 +47,12 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
         const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
         const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
         setDatosEditandoAccion(accionSeleccionado[0]);
+
+        if (accionSeleccionado[0].accionCompartida && !accionSeleccionado[0].accionCompartida.includes(`${regionSeleccionada}`)) {
+            setBlock(true);
+        } else {
+            setBlock(false);
+        }
     };
 
     const SeleccionEditarGuardar = () => {
@@ -99,9 +108,10 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
         };
         setYearData(updatedYearData);
     };
+    const [block, setBlock] = useState<boolean>(false);
 
     return (
-        <YearContext.Provider value={{ yearData, setYearData, datosEditandoAccion, setDatosEditandoAccion, NuevaAccion, SeleccionEditarAccion, SeleccionEditarGuardar }}>
+        <YearContext.Provider value={{ yearData, block, setYearData, datosEditandoAccion, setDatosEditandoAccion, NuevaAccion, SeleccionEditarAccion, SeleccionEditarGuardar }}>
             {children}
         </YearContext.Provider>
     );

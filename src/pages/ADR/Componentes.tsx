@@ -11,6 +11,8 @@ import { DataTable, DataTableSortStatus, DataTableColumnTextAlign } from 'mantin
 import { visualColumnByPath } from './Acciones/Columnas';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../contexts/RegionContext';
+import IconEye from '../../components/Icon/IconEye';
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -213,8 +215,9 @@ interface ListadoAccionesProps {
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const { yearData, setYearData, SeleccionEditarAccion } = useYear();
+    const { regionSeleccionada } = useRegionContext();
+
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
-    const { editarPlan } = useEstadosPorAnio();
 
     useEffect(() => {
         setAcciones(yearData.plan.ejesPrioritarios[number].acciones);
@@ -245,33 +248,41 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
             <span className="text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
 
             <div className="space-y-4">
-                {accionesMostradas.map((accion) => (
-                    <div key={accion.id} className="bg-white border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col ">
-                        <span className="text-base">{accion.accion}</span>
-                        <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
-                        <span className="text-base">{accion.lineaActuaccion}</span>
-                        <div className="flex gap-2 justify-end mt-2">
-                            <NavLink to="/adr/acciones/editando" className="group">
-                                <button
-                                    aria-label={`Editar acción`}
-                                    className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
-                                    onClick={() => SeleccionEditarAccion(idEje, accion.id)}
-                                >
-                                    <IconPencil />
-                                </button>
-                            </NavLink>
-                            {editarPlan && (
-                                <button
-                                    onClick={() => handleDelete(accion.id)}
-                                    aria-label={`Eliminar acción ${accion.id}`}
-                                    className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
-                                >
-                                    <IconTrash />
-                                </button>
-                            )}
+                {accionesMostradas.map((accion) => {
+                    let editable = true;
+                    let colorAccion = 'bg-white';
+                    if (accion.accionCompartida) {
+                        if (accion.accionCompartida?.includes(`${regionSeleccionada}`)) {
+                            colorAccion = 'bg-teal-100';
+                            editable = true;
+                        } else {
+                            editable = false;
+                        }
+                    }
+                    return (
+                        <div key={accion.id} className={`${colorAccion} border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
+                            <span className="text-base">{accion.accion}</span>
+                            <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
+                            <span className="text-base">{accion.lineaActuaccion}</span>
+                            <div className="flex gap-2 justify-end mt-2">
+                                <NavLink to="/adr/acciones/editando" className="group">
+                                    <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => SeleccionEditarAccion(idEje, accion.id)}>
+                                        {editable ? <IconPencil /> : <IconEye />}
+                                    </button>
+                                </NavLink>
+                                {editable === true && (
+                                    <button
+                                        onClick={() => handleDelete(accion.id)}
+                                        aria-label={`Eliminar acción ${accion.id}`}
+                                        className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
+                                    >
+                                        <IconTrash />
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
@@ -349,3 +360,23 @@ export const TablaCuadroMando = forwardRef<HTMLButtonElement, tablaIndicadoresPr
         </div>
     );
 });
+
+interface ErrorFullScreenProps {
+    mensaje: string;
+    irA: string;
+}
+
+export const ErrorFullScreen = ({ mensaje, irA }: ErrorFullScreenProps) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <span className="block text-lg font-semibold text-gray-800 dark:text-white mb-4">{mensaje}</span>
+                <NavLink to={irA} className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                    {t('volver')}
+                </NavLink>
+            </div>
+        </div>
+    );
+};

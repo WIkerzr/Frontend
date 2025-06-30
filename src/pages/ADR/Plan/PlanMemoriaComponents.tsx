@@ -87,8 +87,8 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                 <div>
                     <IndicadoresOperativosTable pantalla={pantalla} />
                 </div>
-                <Campos campo2="detalleSeguimiento" mostrar={pantalla === 'Memoria'} />
-                <Campos campo2="valoracionFinal" mostrar={pantalla === 'Memoria'} />
+                <Campos campo2="dSeguimiento" mostrar={pantalla === 'Memoria'} />
+                <Campos campo2="valFinal" mostrar={pantalla === 'Memoria'} />
             </div>
         </div>
     );

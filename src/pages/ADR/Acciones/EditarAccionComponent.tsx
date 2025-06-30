@@ -40,10 +40,11 @@ const estados: { label: EstadoLabel; color: string }[] = [
 
 type CustomSelectProps = {
     value: EstadoLabel;
+    disabled?: boolean;
     onChange: (value: EstadoLabel) => void;
 };
 
-export function CustomSelect({ value, onChange }: CustomSelectProps) {
+export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
     const selected = estados.find((e) => e.label === value) || estados[0];
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -65,12 +66,12 @@ export function CustomSelect({ value, onChange }: CustomSelectProps) {
 
     return (
         <div className="relative w-full max-w-sm -top-[2px]" ref={dropdownRef}>
-            <button type="button" onClick={() => setOpen(!open)} className={`w-full text-left p-2 rounded border ${selected.color}`}>
+            <button type="button" onClick={() => setOpen(!open)} disabled={disabled} className={`w-full text-left p-2 rounded border ${disabled ? 'bg-gray-600' : selected.color}`}>
                 {selected.label}
             </button>
 
             {open && (
-                <div className="absolute mt-1 w-full border rounded shadow bg-white z-10">
+                <div className={`absolute mt-1 w-full border rounded shadow bg-white z-10`}>
                     {estados.map((estado) => (
                         <div key={estado.label} onClick={() => handleSelect(estado)} className={`p-2 cursor-pointer hover:bg-gray-100 ${estado.color}`}>
                             {estado.label}
@@ -95,7 +96,7 @@ const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResu
 //Temporal
 
 export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }) => {
-    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
+    const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
     if (!indicador) {
         return;
@@ -155,52 +156,57 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
 
     const columns = [
         editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
-        {
-            accessor: 'acciones',
-            title: 'Acciones',
-            render: (_row: IndicadorRealizacionAccion, index: number) =>
-                editableRowIndex === index ? (
-                    <button
-                        className="bg-green-500 text-white px-2 py-1 rounded"
-                        onClick={() => {
-                            const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
-                            const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
-                            const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
-                            let valido = false;
-                            let errorAlert = '';
-                            if (editarMemoria) {
-                                if (ejecutadoOk) {
-                                    valido = true;
-                                } else {
-                                    errorAlert = t('alertTotalesMemoriaActivo');
-                                }
-                            } else if (editarPlan) {
-                                if (metaAnualOk && metaFinalOk) {
-                                    valido = true;
-                                } else {
-                                    errorAlert = t('alertTotalesPlanActivo');
-                                }
-                            }
-                            if (valido) {
-                                setEditableRowIndex(-1);
-                            } else {
-                                alert(t('alertIndicadores', { totales: errorAlert }));
-                            }
-                        }}
-                    >
-                        {t('guardar')}
-                    </button>
-                ) : (
-                    <div className="flex gap-2 w-full">
-                        <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                            {t('editar')}
-                        </button>
-                        <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
-                            {t('eliminar')}
-                        </button>
-                    </div>
-                ),
-        },
+        ...(!block
+            ? [
+                  {
+                      accessor: 'acciones',
+                      title: 'Acciones',
+                      render: (_row: IndicadorRealizacionAccion, index: number) => {
+                          return editableRowIndex === index ? (
+                              <button
+                                  className="bg-green-500 text-white px-2 py-1 rounded"
+                                  onClick={() => {
+                                      const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
+                                      const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
+                                      const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
+                                      let valido = false;
+                                      let errorAlert = '';
+                                      if (editarMemoria) {
+                                          if (ejecutadoOk) {
+                                              valido = true;
+                                          } else {
+                                              errorAlert = t('alertTotalesMemoriaActivo');
+                                          }
+                                      } else if (editarPlan) {
+                                          if (metaAnualOk && metaFinalOk) {
+                                              valido = true;
+                                          } else {
+                                              errorAlert = t('alertTotalesPlanActivo');
+                                          }
+                                      }
+                                      if (valido) {
+                                          setEditableRowIndex(-1);
+                                      } else {
+                                          alert(t('alertIndicadores', { totales: errorAlert }));
+                                      }
+                                  }}
+                              >
+                                  {t('guardar')}
+                              </button>
+                          ) : (
+                              <div className="flex gap-2 w-full">
+                                  <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                                      {t('editar')}
+                                  </button>
+                                  <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
+                                      {t('eliminar')}
+                                  </button>
+                              </div>
+                          );
+                      },
+                  },
+              ]
+            : []),
     ];
     const columnGroups = [
         { id: 'descripcion', title: '', columns: columnNombre },
@@ -289,7 +295,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
         <div>
             <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
                 <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
-                {creaccion && editarPlan && (
+                {creaccion && !block && editarPlan && (
                     <>
                         <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
                             {t('newFileIndicador', { tipo: t('RealizacionMin') })}

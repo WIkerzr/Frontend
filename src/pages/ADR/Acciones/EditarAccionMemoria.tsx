@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { DatosMemoria, EstadoLabel, FuenteFinanciacion } from '../../../types/TipadoAccion';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import Select, { MultiValue } from 'react-select';
+import { InputField, TextArea } from '../../../components/Utils/inputs';
 
 export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
 
-    const { datosEditandoAccion, setDatosEditandoAccion } = useYear();
+    const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
+
     if (!datosEditandoAccion || !datosEditandoAccion.datosMemoria) {
         return;
     }
@@ -91,33 +93,21 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
             <div className="flex gap-4 panel">
                 <div className="flex-1">
                     <label htmlFor="sActual">*{t('sActual')}</label>
-                    <CustomSelect value={datosEditandoAccion.datosMemoria.sActual} onChange={handleSituacionActual} />
+                    <CustomSelect disabled={block} value={datosEditandoAccion.datosMemoria.sActual} onChange={handleSituacionActual} />
                 </div>
             </div>
 
             <div className="flex gap-4 panel">
-                <div className="flex-1">
-                    <label htmlFor="oAccion">*{t('oAccion')}</label>
-                    <textarea
-                        id="oAccion"
-                        name="oAccion"
-                        className="w-full border rounded p-2 h-[38px] resize-y"
-                        value={datosEditandoAccion.datosMemoria.oAccion}
-                        onChange={(e) => handleChangeCampos('oAccion', e)}
-                    />
-                </div>
-                <div className="flex-1">
-                    <label htmlFor="ods">*{t('ods')}</label>
-                    <textarea id="ods" name="ods" className="w-full border rounded p-2 h-[38px] resize-y" value={datosEditandoAccion.datosMemoria.ods} onChange={(e) => handleChangeCampos('ods', e)} />
-                </div>
+                <InputField nombreInput="oAccion" required disabled={block} value={datosEditandoAccion.datosMemoria.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
+                <InputField nombreInput="ods" required disabled={block} value={datosEditandoAccion.datosMemoria.ods} onChange={(e) => handleChangeCampos('ods', e)} />
             </div>
 
             <div className="panel">
-                <label htmlFor="dAccionAvances">*{t('dAccionAvances')}</label>
-                <textarea
-                    id="dAccionAvances"
-                    name="dAccionAvances"
-                    className="w-full border rounded p-2 h-[114px] resize-y"
+                <TextArea
+                    nombreInput="dAccionAvances"
+                    required
+                    className={'h-[114px]'}
+                    disabled={block}
                     value={datosEditandoAccion.datosMemoria.dAccionAvances}
                     onChange={(e) => handleChangeCampos('dAccionAvances', e)}
                 />
@@ -140,6 +130,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                             <td className="px-4 py-2">
                                 <input
                                     type="number"
+                                    disabled={block}
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="cuantia"
                                     value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia}
@@ -150,6 +141,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                 <Select
                                     placeholder={t('seleccionaopcion')}
                                     options={Fuentes_Financiacion}
+                                    isDisabled={block}
                                     isMulti
                                     isSearchable={false}
                                     menuPortalTarget={document.body}
@@ -162,6 +154,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                 <textarea
                                     className="w-full border rounded px-2 py-1 h-[38px] align-middle"
                                     name="origenPublica"
+                                    disabled={block}
                                     value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones}
                                     onChange={handlePresupuestoChange}
                                 />
@@ -190,6 +183,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="previsto"
+                                    disabled={block}
                                     value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.previsto}
                                     onChange={handleEjecucionChange}
                                 />
@@ -199,6 +193,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="ejecutado"
+                                    disabled={block}
                                     value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.ejecutado}
                                     onChange={handleEjecucionChange}
                                 />
@@ -208,6 +203,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="porcentaje"
+                                    disabled={block}
                                     value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.porcentaje}
                                     onChange={handleEjecucionChange}
                                 />
@@ -219,88 +215,49 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
 
             <div className="panel">
                 <div className="flex gap-4">
-                    <div className="flex-1">
-                        <label htmlFor="iMujHom">{t('iMujHom')}</label>
-                        <textarea
-                            id="iMujHom"
-                            name="iMujHom"
-                            className="w-full border rounded p-2 h-[76px] resize-y"
-                            value={datosEditandoAccion.datosMemoria.iMujHom}
-                            onChange={(e) => handleChangeCampos('iMujHom', e)}
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <label htmlFor="uEuskera">{t('uEuskera')}</label>
-                        <textarea
-                            id="uEuskera"
-                            name="uEuskera"
-                            className="w-full border rounded p-2 h-[76px] resize-y"
-                            value={datosEditandoAccion.datosMemoria.uEuskera}
-                            onChange={(e) => handleChangeCampos('uEuskera', e)}
-                        />
-                    </div>
+                    <TextArea nombreInput="iMujHom" className={'h-[76px]'} disabled={block} value={datosEditandoAccion.datosMemoria.iMujHom} onChange={(e) => handleChangeCampos('iMujHom', e)} />
+                    <TextArea nombreInput="uEuskera" className={'h-[76px]'} disabled={block} value={datosEditandoAccion.datosMemoria.uEuskera} onChange={(e) => handleChangeCampos('uEuskera', e)} />
                 </div>
-                <div className="flex gap-4 ">
-                    <div className="flex-1">
-                        <label htmlFor="sostenibilidad">{t('sostenibilidad')}</label>
-                        <textarea
-                            id="sostenibilidad"
-                            name="sostenibilidad"
-                            className="w-full border rounded p-2 h-[76px] resize-y"
-                            value={datosEditandoAccion.datosMemoria.sostenibilidad}
-                            onChange={(e) => handleChangeCampos('sostenibilidad', e)}
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <label htmlFor="dInteligent">{t('dInteligent')}</label>
-                        <textarea
-                            id="dInteligent"
-                            name="dInteligent"
-                            className="w-full border rounded p-2 h-[76px] resize-y"
-                            value={datosEditandoAccion.datosMemoria.dInteligent}
-                            onChange={(e) => handleChangeCampos('dInteligent', e)}
-                        />
-                    </div>
+                <div className="flex gap-4">
+                    <TextArea
+                        nombreInput="sostenibilidad"
+                        className={'h-[76px]'}
+                        disabled={block}
+                        value={datosEditandoAccion.datosMemoria.sostenibilidad}
+                        onChange={(e) => handleChangeCampos('sostenibilidad', e)}
+                    />
+                    <TextArea
+                        nombreInput="dInteligent"
+                        className={'h-[76px]'}
+                        disabled={block}
+                        value={datosEditandoAccion.datosMemoria.dInteligent}
+                        onChange={(e) => handleChangeCampos('dInteligent', e)}
+                    />
                 </div>
             </div>
 
             <div className=" panel">
-                <label htmlFor="observaciones" className="block font-medium mb-1">
-                    {t('observaciones')}
-                </label>
-                <textarea
-                    id="observaciones"
-                    name="observaciones"
-                    className="w-full border rounded p-2 h-[38px]"
+                <TextArea
+                    nombreInput="observaciones"
+                    className={'h-[76px]'}
+                    disabled={block}
                     value={datosEditandoAccion.datosMemoria.observaciones}
                     onChange={(e) => handleChangeCampos('observaciones', e)}
                 />
             </div>
 
             <div className="flex gap-4 panel">
-                <div className="flex-1">
-                    <label htmlFor="dSeguimiento">{t('detalleSeguimiento')}</label>
-                    <textarea
-                        id="dSeguimiento"
-                        name="dSeguimiento"
-                        className="w-full border rounded p-2 h-[38px] resize-y"
-                        value={datosEditandoAccion.datosMemoria.dSeguimiento}
-                        onChange={(e) => handleChangeCampos('dSeguimiento', e)}
-                    />
-                </div>
+                <TextArea
+                    nombreInput="dSeguimiento"
+                    className={'h-[76px]'}
+                    disabled={block}
+                    value={datosEditandoAccion.datosMemoria.dSeguimiento}
+                    onChange={(e) => handleChangeCampos('dSeguimiento', e)}
+                />
             </div>
 
             <div className="flex gap-4 panel">
-                <div className="flex-1">
-                    <label htmlFor="valFinal">{t('valoracionFinal')}</label>
-                    <textarea
-                        id="valFinal"
-                        name="valFinal"
-                        className="w-full border rounded p-2 h-[38px] resize-y"
-                        value={datosEditandoAccion.datosMemoria.valFinal}
-                        onChange={(e) => handleChangeCampos('valFinal', e)}
-                    />
-                </div>
+                <TextArea nombreInput="valFinal" className={'h-[76px]'} disabled={block} value={datosEditandoAccion.datosMemoria.valFinal} onChange={(e) => handleChangeCampos('valFinal', e)} />
             </div>
         </div>
     );

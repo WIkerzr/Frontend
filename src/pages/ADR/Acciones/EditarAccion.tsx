@@ -12,15 +12,16 @@ import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
+import { ErrorFullScreen } from '../Componentes';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { estados, anio, editarPlan } = useEstadosPorAnio();
+    const { estados, anio } = useEstadosPorAnio();
 
-    const { datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar } = useYear();
+    const { datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block } = useYear();
 
     if (!datosEditandoAccion) {
-        return;
+        return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA="/adr/acciones/" />;
     }
 
     const handleAccionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -35,14 +36,18 @@ const Index: React.FC = () => {
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
-                        <span>{t('accionTituloEditado')} 2025</span>
+                        <span>
+                            {t('accionTituloEditado')} {anio}
+                        </span>
                     </h2>
                 }
                 zonaBtn={
                     <div className="ml-auto flex gap-4 items-center justify-end">
-                        <button className="px-4 py-2 bg-primary text-white rounded" onClick={SeleccionEditarGuardar}>
-                            {t('guardar')}{' '}
-                        </button>
+                        {!block && (
+                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={SeleccionEditarGuardar}>
+                                {t('guardar')}{' '}
+                            </button>
+                        )}
                         <NavLink to="/adr/acciones" className="group">
                             <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
                         </NavLink>
@@ -53,7 +58,7 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
-                                {editarPlan ? (
+                                {!block ? (
                                     <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
                                 ) : (
                                     <span className="block  font-semibold">
