@@ -147,16 +147,8 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                 />
                             </td>
                             <td className="px-5 py-2">
-                                <textarea
-                                    className="w-full border rounded px-2 py-1 h-[38px] align-middle"
-                                    name="origenPublica"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.fuenteDeFinanciacion}
-                                    onChange={handlePresupuestoChange}
-                                />
-                            </td>
-                            <td className="px-5 py-2">
                                 <Select
-                                    placeholder="Select an option"
+                                    placeholder={t('seleccionaopcion')}
                                     options={Fuentes_Financiacion}
                                     isMulti
                                     isSearchable={false}
@@ -164,6 +156,14 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                                     onChange={handleFuentesFinanciacionChange}
                                     value={Fuentes_Financiacion.filter((opt) => datosEditandoAccion.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion?.includes(opt.value))}
+                                />
+                            </td>
+                            <td className="px-5 py-2">
+                                <textarea
+                                    className="w-full border rounded px-2 py-1 h-[38px] align-middle"
+                                    name="origenPublica"
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones}
+                                    onChange={handlePresupuestoChange}
                                 />
                             </td>
                         </tr>
