@@ -10,6 +10,7 @@ import { sortBy } from 'lodash';
 import { DataTable, DataTableSortStatus, DataTableColumnTextAlign } from 'mantine-datatable';
 import { visualColumnByPath } from './Acciones/Columnas';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -85,6 +86,8 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();
     const { yearData, NuevaAccion } = useYear();
+    const { editarPlan } = useEstadosPorAnio();
+
     const ejesPrioritarios = yearData.plan.ejesPrioritarios;
     const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(ejesPrioritarios[0].acciones);
 
@@ -127,11 +130,13 @@ export const ModalAccion = () => {
 
     return (
         <>
-            <div className="flex justify-center">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
-                    {t('anadirAccion')}
-                </button>
-            </div>
+            {editarPlan && (
+                <div className="flex justify-center">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
+                        {t('anadirAccion')}
+                    </button>
+                </div>
+            )}
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('newAccion')}>
                 <div className="space-y-5">
                     <div>
@@ -209,6 +214,7 @@ interface ListadoAccionesProps {
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const { yearData, setYearData, SeleccionEditarAccion } = useYear();
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
+    const { editarPlan } = useEstadosPorAnio();
 
     useEffect(() => {
         setAcciones(yearData.plan.ejesPrioritarios[number].acciones);
@@ -254,13 +260,15 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                     <IconPencil />
                                 </button>
                             </NavLink>
-                            <button
-                                onClick={() => handleDelete(accion.id)}
-                                aria-label={`Eliminar acción ${accion.id}`}
-                                className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
-                            >
-                                <IconTrash />
-                            </button>
+                            {editarPlan && (
+                                <button
+                                    onClick={() => handleDelete(accion.id)}
+                                    aria-label={`Eliminar acción ${accion.id}`}
+                                    className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
+                                >
+                                    <IconTrash />
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

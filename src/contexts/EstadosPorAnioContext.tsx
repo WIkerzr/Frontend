@@ -82,5 +82,13 @@ export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) =>
 export const useEstadosPorAnio = () => {
     const ctx = useContext(EstadosPorAnioContext);
     if (!ctx) throw new Error('useEstadosPorAnio debe usarse dentro de EstadosPorAnioProvider');
-    return ctx;
+
+    const { anio, estados } = ctx;
+    const estadoPlan = estados[anio]?.plan ?? 'borrador';
+    const editarPlan = estadoPlan === 'borrador';
+
+    return {
+        ...ctx,
+        editarPlan,
+    };
 };

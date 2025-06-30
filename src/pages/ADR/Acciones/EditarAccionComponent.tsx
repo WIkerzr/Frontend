@@ -102,11 +102,9 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     }
 
     const { t } = useTranslation();
-    const { anio, estados } = useEstadosPorAnio();
-    const estadoPlan = estados[anio]?.plan ?? 'borrador';
-    const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
-    const editarPlan = estadoPlan === 'borrador';
-    const editarMemoria = estadoMemoria === 'borrador';
+    const { editarPlan } = useEstadosPorAnio();
+
+    const editarMemoria = true;
 
     const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>([]);
     useEffect(() => {
@@ -291,7 +289,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
         <div>
             <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
                 <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
-                {creaccion && (
+                {creaccion && editarPlan && (
                     <>
                         <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
                             {t('newFileIndicador', { tipo: t('RealizacionMin') })}

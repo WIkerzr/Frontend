@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosPlan } from '../../../types/TipadoAccion';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
@@ -9,6 +10,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {
         return;
     }
+    const { editarPlan } = useEstadosPorAnio();
 
     const handleChangeCampos = (campo: keyof DatosPlan, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoAccion({
@@ -26,19 +28,46 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             <div className="flex gap-4 panel">
                 <div className="flex-1">
                     <label htmlFor="ejecutora">*{t('ejecutora')}</label>
-                    <textarea required name="ejecutora" className={classNameTextArea} value={datosEditandoAccion.datosPlan.ejecutora} onChange={(e) => handleChangeCampos('ejecutora', e)} />
+                    <textarea
+                        required
+                        name="ejecutora"
+                        disabled={!editarPlan}
+                        className={classNameTextArea}
+                        value={datosEditandoAccion.datosPlan.ejecutora}
+                        onChange={(e) => handleChangeCampos('ejecutora', e)}
+                    />
                 </div>
                 <div className="flex-1">
                     <label htmlFor="implicadas">*{t('implicadas')}</label>
-                    <textarea required name="implicadas" className={classNameTextArea} value={datosEditandoAccion.datosPlan.implicadas} onChange={(e) => handleChangeCampos('implicadas', e)} />
+                    <textarea
+                        required
+                        name="implicadas"
+                        disabled={!editarPlan}
+                        className={classNameTextArea}
+                        value={datosEditandoAccion.datosPlan.implicadas}
+                        onChange={(e) => handleChangeCampos('implicadas', e)}
+                    />
                 </div>
                 <div className="flex-1">
                     <label htmlFor="comarcal">*{t('comarcal')}</label>
-                    <textarea required name="comarcal" className={classNameTextArea} value={datosEditandoAccion.datosPlan.comarcal} onChange={(e) => handleChangeCampos('comarcal', e)} />
+                    <textarea
+                        required
+                        name="comarcal"
+                        disabled={!editarPlan}
+                        className={classNameTextArea}
+                        value={datosEditandoAccion.datosPlan.comarcal}
+                        onChange={(e) => handleChangeCampos('comarcal', e)}
+                    />
                 </div>
                 <div className="flex-1">
                     <label htmlFor="supracomarcal">{t('supracomarcal')}</label>
-                    <textarea name="supracomarcal" className={classNameTextArea} value={datosEditandoAccion.datosPlan.supracomarcal} onChange={(e) => handleChangeCampos('supracomarcal', e)} />
+                    <textarea
+                        name="supracomarcal"
+                        disabled={!editarPlan}
+                        className={classNameTextArea}
+                        value={datosEditandoAccion.datosPlan.supracomarcal}
+                        onChange={(e) => handleChangeCampos('supracomarcal', e)}
+                    />
                 </div>
                 {datosEditandoAccion.plurianual && (
                     <div className="flex-1">
@@ -47,6 +76,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         </label>
                         <input
                             required
+                            disabled={!editarPlan}
                             type="text"
                             name="rangoAnios"
                             className="w-full border rounded p-2 h-[38px]"
@@ -60,11 +90,18 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             <div className="flex gap-4 panel">
                 <div className="flex-1">
                     <label htmlFor="oAccion">*{t('oAccion')}</label>
-                    <textarea required name="oAccion" className={classNameTextArea} value={datosEditandoAccion.datosPlan.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
+                    <textarea
+                        required
+                        name="oAccion"
+                        disabled={!editarPlan}
+                        className={classNameTextArea}
+                        value={datosEditandoAccion.datosPlan.oAccion}
+                        onChange={(e) => handleChangeCampos('oAccion', e)}
+                    />
                 </div>
                 <div className="flex-1">
                     <label htmlFor="ods">*{t('ods')}</label>
-                    <textarea required name="ods" className={classNameTextArea} value={datosEditandoAccion.datosPlan.ods} onChange={(e) => handleChangeCampos('ods', e)} />
+                    <textarea required name="ods" disabled={!editarPlan} className={classNameTextArea} value={datosEditandoAccion.datosPlan.ods} onChange={(e) => handleChangeCampos('ods', e)} />
                 </div>
             </div>
 
@@ -73,6 +110,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 <textarea
                     required
                     name="dAccion"
+                    disabled={!editarPlan}
                     className="w-full border rounded p-2 h-[114px] resize-y"
                     value={datosEditandoAccion.datosPlan.dAccion}
                     onChange={(e) => handleChangeCampos('dAccion', e)}
@@ -86,6 +124,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 <input
                     type="text"
                     name="presupuesto"
+                    disabled={!editarPlan}
                     className="w-full border rounded p-2 h-[38px]"
                     value={datosEditandoAccion.datosPlan.presupuesto}
                     onChange={(e) => handleChangeCampos('presupuesto', e)}
@@ -98,6 +137,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <label htmlFor="iMujHom">{t('iMujHom')}</label>
                         <textarea
                             name="iMujHom"
+                            disabled={!editarPlan}
                             className="w-full border rounded p-2 h-[76px] resize-y"
                             value={datosEditandoAccion.datosPlan.iMujHom}
                             onChange={(e) => handleChangeCampos('iMujHom', e)}
@@ -107,6 +147,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <label htmlFor="uEuskera">{t('uEuskera')}</label>
                         <textarea
                             name="uEuskera"
+                            disabled={!editarPlan}
                             className="w-full border rounded p-2 h-[76px] resize-y"
                             value={datosEditandoAccion.datosPlan.uEuskera}
                             onChange={(e) => handleChangeCampos('uEuskera', e)}
@@ -118,6 +159,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <label htmlFor="sostenibilidad">{t('sostenibilidad')}</label>
                         <textarea
                             name="sostenibilidad"
+                            disabled={!editarPlan}
                             className="w-full border rounded p-2 h-[76px] resize-y"
                             value={datosEditandoAccion.datosPlan.sostenibilidad}
                             onChange={(e) => handleChangeCampos('sostenibilidad', e)}
@@ -127,6 +169,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <label htmlFor="dInteligent">{t('dInteligent')}</label>
                         <textarea
                             name="dInteligent"
+                            disabled={!editarPlan}
                             className="w-full border rounded p-2 h-[76px] resize-y"
                             value={datosEditandoAccion.datosPlan.dInteligent}
                             onChange={(e) => handleChangeCampos('dInteligent', e)}
@@ -141,6 +184,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 </label>
                 <textarea
                     name="observaciones"
+                    disabled={!editarPlan}
                     className="w-full border rounded p-2 h-[38px]"
                     value={datosEditandoAccion.datosPlan.observaciones}
                     onChange={(e) => handleChangeCampos('observaciones', e)}

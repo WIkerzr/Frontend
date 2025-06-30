@@ -15,7 +15,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { anio, estados } = useEstadosPorAnio();
+    const { estados, anio, editarPlan } = useEstadosPorAnio();
 
     const { datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar } = useYear();
 
@@ -53,7 +53,13 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
-                                <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
+                                {editarPlan ? (
+                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
+                                ) : (
+                                    <span className="block  font-semibold">
+                                        <span className="font-normal text-col">{datosEditandoAccion.accion}</span>
+                                    </span>
+                                )}
                             </div>
                             <div className="w-1/2 flex flex-col gap-2 justify-center">
                                 <span className="block  font-semibold mb-1">
