@@ -25,59 +25,58 @@ interface CamposProps {
 interface CamposPlanMemoriaProps {
     pantalla: 'Plan' | 'Memoria';
 }
-
-export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }) => {
+const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
     const { t } = useTranslation();
     const { yearData, setYearData } = useYear();
 
-    const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
-        if (!mostrar) {
-            return null;
-        }
-        if (campo) {
-            const handleChangeCampos = (campo: keyof Plan, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-                setYearData({
-                    ...yearData,
-                    plan: {
-                        ...yearData.plan,
+    if (!mostrar) {
+        return null;
+    }
+    if (campo) {
+        const handleChangeCampos = (campo: keyof Plan, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+            setYearData({
+                ...yearData,
+                plan: {
+                    ...yearData.plan,
+                    [campo]: e.target.value || '',
+                },
+            });
+        };
+        return (
+            <div className="panel flex w-[100%] flex-col">
+                <label htmlFor="introduccion">*{t(campo)}</label>
+                <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.plan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
+            </div>
+        );
+    } else if (campo2) {
+        const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+            setYearData({
+                ...yearData,
+                plan: {
+                    ...yearData.plan,
+                    generalOperationADR: {
+                        ...yearData.plan.generalOperationADR,
                         [campo]: e.target.value || '',
                     },
-                });
-            };
-            return (
-                <div className="panel flex w-[100%] flex-col">
-                    <label htmlFor="introduccion">*{t(campo)}</label>
-                    <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.plan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
-                </div>
-            );
-        } else if (campo2) {
-            const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-                setYearData({
-                    ...yearData,
-                    plan: {
-                        ...yearData.plan,
-                        generalOperationADR: {
-                            ...yearData.plan.generalOperationADR,
-                            [campo]: e.target.value || '',
-                        },
-                    },
-                });
-            };
-            return (
-                <div>
-                    <label htmlFor="introduccion">*{t(campo2)}</label>
-                    <textarea
-                        required
-                        name="introduccion"
-                        className="w-full border rounded p-2 h-[114px] resize-y"
-                        value={yearData.plan.generalOperationADR[campo2]}
-                        onChange={(e) => handleChangeCampos(campo2, e)}
-                    />
-                </div>
-            );
-        }
-    };
+                },
+            });
+        };
+        return (
+            <div>
+                <label htmlFor="introduccion">*{t(campo2)}</label>
+                <textarea
+                    name="introduccion"
+                    className="w-full border rounded p-2 h-[114px] resize-y"
+                    value={yearData.plan.generalOperationADR[campo2]}
+                    onChange={(e) => handleChangeCampos(campo2, e)}
+                />
+            </div>
+        );
+    }
+};
 
+export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }) => {
+    const { t } = useTranslation();
     return (
         <div className=" flex flex-col gap-4">
             <Campos campo="introduccion" mostrar={pantalla === 'Plan'} />
