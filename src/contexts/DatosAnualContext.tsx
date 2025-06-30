@@ -12,7 +12,7 @@ interface YearContextType {
     setDatosEditandoAccion: (data: DatosAccion) => void;
     SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
     SeleccionEditarGuardar: () => void;
-    NuevaAccion: (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string) => void;
+    NuevaAccion: (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
 }
 
 const YearContext = createContext<YearContextType | undefined>(undefined);
@@ -82,7 +82,7 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
         setIdEjeEditado('');
     };
 
-    const NuevaAccion = (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string) => {
+    const NuevaAccion = (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
         const ejesSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
         const datos = {
             ...datosInicializadosAccion,
@@ -90,6 +90,7 @@ export const YearProvider = ({ children }: { children: ReactNode }) => {
             ejeEs: ejesSeleccionado[0].nameEs,
             ejeEu: ejesSeleccionado[0].nameEu,
             lineaActuaccion: nuevaLineaActuaccion,
+            plurianual: plurianual,
         };
         const updatedYearData = {
             ...yearData,

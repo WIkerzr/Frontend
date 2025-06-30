@@ -118,7 +118,7 @@ export const ModalAccion = () => {
             return;
         }
 
-        NuevaAccion(idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion);
+        NuevaAccion(idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
 
         //LLamada al servidor con la nueva accion
 
