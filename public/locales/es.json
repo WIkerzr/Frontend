@@ -208,23 +208,22 @@
     "presuPrevisto":"Presupuesto previsto",
     "presuEjecutado":"Presupuesto ejecutado",
     "porcentEjecutado":"% de ejecución",
-    "detalleSeguimiento":"Detalles de seguimiento",
-    "valoracionFinal":"Valoración final y recomendaciones",
-
-
-
-
-    "rellenaLosCamposVaciosObligatorios": "Rellena los campos vacios obligatorios",
-    "faltaPorSeleccionarEjesPrioritarios": "Faltan por seleccionar los ejes prioritarios",
-    "faltaAccionesPorCrear": "Faltan acciones por crear",
-
-
-
+    "dSeguimiento":"Detalles de seguimiento",
+    "valFinal":"Valoración final y recomendaciones",
 
 
 
 
     
+    "falloAlCargarIndicadores": "Fallo al cargar los indicadores",
+    "falloAlCargarAccion": "Fallo al cargar la acción",
+    "volver": "Volver a la pagina anterior",
+    
+
+    "rellenaLosCamposVaciosObligatorios": "Rellena los campos vacios obligatorios",
+    "faltaPorSeleccionarEjesPrioritarios": "Faltan por seleccionar los ejes prioritarios",
+    "faltaAccionesPorCrear": "Faltan acciones por crear",
+
     "sales": "Ventas",
     "analytics": "Analítica",
     "apps": "Aplicaciones",

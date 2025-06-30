@@ -5,8 +5,8 @@ export type Year = number;
 export interface GeneralOperationADR {
     adrInternalTasks: string;
     operationalIndicators: OperationalIndicators[];
-    detalleSeguimiento?: string;
-    valoracionFinal?: string;
+    dSeguimiento?: string;
+    valFinal?: string;
 }
 export interface OperationalIndicators {
     id: string;
@@ -172,9 +172,11 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     ods: '8',
                     dAccionAvances: '9',
                     presupuestoEjecutado: {
-                        cuantia: '10',
-                        fuenteDeFinanciacion: ['DDFF'],
-                        observaciones: '',
+                        total: '10',
+                        autofinanciacion: '11',
+                        financiacionPublica: '12',
+                        origenPublica: '13',
+                        financiacionPrivada: '14',
                     },
                     ejecucionPresupuestaria: {
                         previsto: '15',
@@ -238,6 +240,7 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
                 plurianual: true,
+                accionCompartida: '10',
             },
             {
                 id: '2',
@@ -272,9 +275,11 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     ods: '8',
                     dAccionAvances: '9',
                     presupuestoEjecutado: {
-                        cuantia: '10',
-                        fuenteDeFinanciacion: ['DDFF'],
-                        observaciones: '',
+                        total: '10',
+                        autofinanciacion: '11',
+                        financiacionPublica: '12',
+                        origenPublica: '13',
+                        financiacionPrivada: '14',
                     },
                     ejecucionPresupuestaria: {
                         previsto: '15',
@@ -380,9 +385,11 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     ods: '8',
                     dAccionAvances: '9',
                     presupuestoEjecutado: {
-                        cuantia: '10',
-                        fuenteDeFinanciacion: ['DDFF'],
-                        observaciones: '',
+                        total: '10',
+                        autofinanciacion: '11',
+                        financiacionPublica: '12',
+                        origenPublica: '13',
+                        financiacionPrivada: '14',
                     },
                     ejecucionPresupuestaria: {
                         previsto: '15',
@@ -446,6 +453,7 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
                 plurianual: false,
+                accionCompartida: '11',
             },
         ],
     },

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect } from 'react';
@@ -9,16 +8,52 @@ import { useYear } from '../../contexts/DatosAnualContext';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
+    required?: boolean;
+    divClassName?: string;
+}
+interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+    nombreInput: string;
+    required?: boolean;
     divClassName?: string;
 }
 
-export const Input = ({ nombreInput, divClassName, className, ...rest }: InputProps) => {
+export const Input = ({ nombreInput, divClassName, className, required, ...rest }: InputProps) => {
     const { t } = useTranslation();
 
     return (
         <div className={divClassName}>
-            <label className={`block text-sm font-medium mb-1 ${className ? className : ''}`}>{t(nombreInput)}</label>
+            <label className={`block text-sm font-medium mb-1 ${className ? className : ''}`}>
+                {required ? '*' : ''}
+                {t(nombreInput)}
+            </label>
             <input {...rest} className={`form-input w-full`} />
+        </div>
+    );
+};
+
+export const InputField = ({ nombreInput, divClassName, className, required, ...rest }: InputProps) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className={`flex-1 ${divClassName}`}>
+            <label htmlFor={nombreInput}>
+                {required ? '*' : ''}
+                {t(nombreInput)}
+            </label>
+            <input {...rest} required={required} name={nombreInput} className={`w-full border rounded p-2 resize-y ${className}`} />
+        </div>
+    );
+};
+export const TextArea = ({ nombreInput, className, required, ...rest }: TextAreaProps) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className="flex-1">
+            <label htmlFor={nombreInput}>
+                {required ? '*' : ''}
+                {t(nombreInput)}
+            </label>
+            <textarea {...rest} required={required} name={nombreInput} className={`w-full border rounded p-2 resize-y ${className}`} />
         </div>
     );
 };

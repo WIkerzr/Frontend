@@ -32,6 +32,8 @@ interface EstadosPorAnioContextType {
     setEstados: React.Dispatch<React.SetStateAction<EstadosPorAnio>>;
     cambiarEstadoPlan: (nuevoEstado: Estado) => void;
     cambiarEstadoMemoria: (nuevoEstado: Estado) => void;
+    planState: Estado;
+    memoriaState: Estado;
 }
 
 const EstadosPorAnioContext = createContext<EstadosPorAnioContextType | undefined>(undefined);
@@ -42,6 +44,8 @@ export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) =>
     const [estados, setEstados] = useState<EstadosPorAnio>({
         [anioActual]: { plan: 'borrador', memoria: 'cerrado' },
     });
+    const [planState] = useState<Estado>(estados[anio].plan);
+    const [memoriaState] = useState<Estado>(estados[anio].memoria);
 
     const cambiarEstadoPlan = (nuevoEstado: Estado) => {
         setEstados((estadosPrev) => ({
@@ -70,6 +74,8 @@ export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) =>
                 setAnio,
                 estados,
                 setEstados,
+                planState,
+                memoriaState,
                 cambiarEstadoPlan,
                 cambiarEstadoMemoria,
             }}

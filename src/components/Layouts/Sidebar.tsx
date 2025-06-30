@@ -36,7 +36,7 @@ const Sidebar = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const anioActual = new Date().getFullYear();
-    const anios = [anioActual - 1, anioActual];
+    const anios = [anioActual];
     const { t } = useTranslation();
     const toggleMenu = (value: string) => {
         setCurrentMenu((oldValue) => {
