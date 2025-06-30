@@ -172,11 +172,9 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     ods: '8',
                     dAccionAvances: '9',
                     presupuestoEjecutado: {
-                        total: '10',
-                        autofinanciacion: '11',
-                        financiacionPublica: '12',
-                        origenPublica: '13',
-                        financiacionPrivada: '14',
+                        cuantia: '10',
+                        fuenteDeFinanciacion: ['DDFF'],
+                        observaciones: '',
                     },
                     ejecucionPresupuestaria: {
                         previsto: '15',
@@ -274,11 +272,9 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     ods: '8',
                     dAccionAvances: '9',
                     presupuestoEjecutado: {
-                        total: '10',
-                        autofinanciacion: '11',
-                        financiacionPublica: '12',
-                        origenPublica: '13',
-                        financiacionPrivada: '14',
+                        cuantia: '10',
+                        fuenteDeFinanciacion: ['DDFF'],
+                        observaciones: '',
                     },
                     ejecucionPresupuestaria: {
                         previsto: '15',
@@ -384,11 +380,9 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     ods: '8',
                     dAccionAvances: '9',
                     presupuestoEjecutado: {
-                        total: '10',
-                        autofinanciacion: '11',
-                        financiacionPublica: '12',
-                        origenPublica: '13',
-                        financiacionPrivada: '14',
+                        cuantia: '10',
+                        fuenteDeFinanciacion: ['DDFF'],
+                        observaciones: '',
                     },
                     ejecucionPresupuestaria: {
                         previsto: '15',

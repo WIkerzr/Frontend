@@ -1,13 +1,12 @@
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 
 export type EstadoLabel = 'Actuación en ejecución' | 'Actuación en espera' | 'Actuación finalizada' | 'Actuación abandonada';
-
+export const FUENTES_FINANCIACION: FuenteFinanciacion[] = ['Gobierno Vasco', 'DDFF', 'Administraciones locales', 'Fuentes Privadas', 'Autofinanciación', 'Otros'];
+export type FuenteFinanciacion = 'Gobierno Vasco' | 'DDFF' | 'Administraciones locales' | 'Fuentes Privadas' | 'Autofinanciación' | 'Otros' | '';
 export interface PresupuestoEjecutado {
-    total: string;
-    autofinanciacion: string;
-    financiacionPublica: string;
-    origenPublica: string;
-    financiacionPrivada: string;
+    cuantia: string;
+    fuenteDeFinanciacion: FuenteFinanciacion[];
+    observaciones: string;
 }
 
 export interface EjecucionPresupuestaria {
@@ -67,6 +66,7 @@ export interface DatosAccion {
         indicadoreResultado: IndicadorResultadoAccion[];
     };
     plurianual: boolean;
+    accionCompartida?: string;
 }
 
 export const datosInicializadosAccion: DatosAccion = {
@@ -102,11 +102,9 @@ export const datosInicializadosAccion: DatosAccion = {
         ods: '',
         dAccionAvances: '',
         presupuestoEjecutado: {
-            total: '',
-            autofinanciacion: '',
-            financiacionPublica: '',
-            origenPublica: '',
-            financiacionPrivada: '',
+            cuantia: '',
+            fuenteDeFinanciacion: [''],
+            observaciones: '',
         },
         ejecucionPresupuestaria: {
             previsto: '',
@@ -126,6 +124,7 @@ export const datosInicializadosAccion: DatosAccion = {
         indicadoreResultado: [],
     },
     plurianual: false,
+    accionCompartida: '',
 };
 
 export const datosPlan: DatosPlan = {
@@ -156,11 +155,9 @@ export const datosMemoria: DatosMemoria = {
     ods: '',
     dAccionAvances: '',
     presupuestoEjecutado: {
-        total: '',
-        autofinanciacion: '',
-        financiacionPublica: '',
-        origenPublica: '',
-        financiacionPrivada: '',
+        cuantia: '',
+        fuenteDeFinanciacion: [''],
+        observaciones: '',
     },
     ejecucionPresupuestaria: {
         previsto: '',

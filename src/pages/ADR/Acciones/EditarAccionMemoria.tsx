@@ -1,8 +1,9 @@
 import { forwardRef } from 'react';
 import { CustomSelect } from './EditarAccionComponent';
 import { useTranslation } from 'react-i18next';
-import { DatosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
+import { DatosMemoria, EstadoLabel, FuenteFinanciacion } from '../../../types/TipadoAccion';
 import { useYear } from '../../../contexts/DatosAnualContext';
+import Select, { MultiValue } from 'react-select';
 
 export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
@@ -11,6 +12,15 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     if (!datosEditandoAccion || !datosEditandoAccion.datosMemoria) {
         return;
     }
+
+    const Fuentes_Financiacion = [
+        { label: 'Gobierno Vasco', value: 'Gobierno Vasco' },
+        { label: 'DDFF', value: 'DDFF' },
+        { label: 'Administraciones locales', value: 'Administraciones locales' },
+        { label: 'Fuentes Privadas', value: 'Fuentes Privadas' },
+        { label: 'Autofinanciación', value: 'Autofinanciación' },
+        { label: 'Otros', value: 'Otros' },
+    ] satisfies { label: string; value: FuenteFinanciacion }[];
 
     const handleChangeCampos = (campo: keyof DatosMemoria, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoAccion({
@@ -31,6 +41,21 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 presupuestoEjecutado: {
                     ...datosEditandoAccion.datosMemoria!.presupuestoEjecutado!,
                     [name]: value || '',
+                },
+            },
+        });
+    };
+
+    const handleFuentesFinanciacionChange = (selected: MultiValue<{ label: string; value: FuenteFinanciacion }>) => {
+        const valores: FuenteFinanciacion[] = selected.map((op) => op.value);
+
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosMemoria: {
+                ...datosEditandoAccion.datosMemoria!,
+                presupuestoEjecutado: {
+                    ...datosEditandoAccion.datosMemoria!.presupuestoEjecutado!,
+                    fuenteDeFinanciacion: valores,
                 },
             },
         });
@@ -105,11 +130,9 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 <table id="presupuestoEjecutado" className="min-w-full border rounded overflow-hidden panel">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="px-4 py-2 text-center font-semibold">{t('tTotal')}</th>
+                            <th className="px-4 py-2 text-center font-semibold">{t('cuantia')}</th>
                             <th className="px-4 py-2 text-center font-semibold">{t('autofinanciación')}</th>
-                            <th className="px-4 py-2 text-center font-semibold">{t('fPublicas')}</th>
-                            <th className="px-4 py-2 text-center font-semibold">{t('origenFPublicas')}</th>
-                            <th className="px-4 py-2 text-center font-semibold">{t('fuentesFPrivadas')}</th>
+                            <th className="px-4 py-2 text-center font-semibold">{t('observaciones')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,26 +141,8 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                 <input
                                     type="number"
                                     className="w-full border rounded px-2 py-1 h-[38px]"
-                                    name="total"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.total}
-                                    onChange={handlePresupuestoChange}
-                                />
-                            </td>
-                            <td className="px-4 py-2">
-                                <input
-                                    type="number"
-                                    className="w-full border rounded px-2 py-1 h-[38px]"
-                                    name="autofinanciacion"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.autofinanciacion}
-                                    onChange={handlePresupuestoChange}
-                                />
-                            </td>
-                            <td className="px-4 py-2">
-                                <input
-                                    type="number"
-                                    className="w-full border rounded px-2 py-1 h-[38px]"
-                                    name="financiacionPublica"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.financiacionPublica}
+                                    name="cuantia"
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -145,17 +150,20 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                 <textarea
                                     className="w-full border rounded px-2 py-1 h-[38px] align-middle"
                                     name="origenPublica"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.origenPublica}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.fuenteDeFinanciacion}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
-                            <td className="px-4 py-2">
-                                <input
-                                    type="number"
-                                    className="w-full border rounded px-2 py-1 h-[38px]"
-                                    name="financiacionPrivada"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.financiacionPrivada}
-                                    onChange={handlePresupuestoChange}
+                            <td className="px-5 py-2">
+                                <Select
+                                    placeholder="Select an option"
+                                    options={Fuentes_Financiacion}
+                                    isMulti
+                                    isSearchable={false}
+                                    menuPortalTarget={document.body}
+                                    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                                    onChange={handleFuentesFinanciacionChange}
+                                    value={Fuentes_Financiacion.filter((opt) => datosEditandoAccion.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion?.includes(opt.value))}
                                 />
                             </td>
                         </tr>
