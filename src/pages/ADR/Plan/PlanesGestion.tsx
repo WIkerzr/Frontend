@@ -44,18 +44,23 @@ const Index = () => {
         }
         return true;
     }
-
     function validarPlan(yearData: YearData): boolean {
-        const algunaFalla = yearData.plan.ejesPrioritarios.some((ejePrioritario) =>
-            ejePrioritario.acciones.some((accion) => {
-                const { faltanindicadoresPlan, faltanCamposPlan } = validarCamposObligatoriosAccion(accion);
-                return faltanindicadoresPlan === false || faltanCamposPlan === false;
-            })
-        );
-        return !algunaFalla;
+        for (let index = 0; index < yearData.plan.ejesPrioritarios.length; index++) {
+            const ejesPrioritarios = yearData.plan.ejesPrioritarios[index];
+            for (let index = 0; index < ejesPrioritarios.acciones.length; index++) {
+                const acciones = ejesPrioritarios.acciones[index];
+                const { faltanindicadoresPlan, faltanCamposPlan } = validarCamposObligatoriosAccion(acciones);
+                if (faltanindicadoresPlan || faltanCamposPlan) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     useEffect(() => {
+        // console.log('validarCamposPlan ' + validarCamposPlan(yearData));
+        // console.log('validarPlan ' + validarPlan(yearData));
         if (validarCamposPlan(yearData) && validarPlan(yearData)) {
             setCamposRellenos(true);
         } else {
