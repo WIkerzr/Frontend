@@ -75,10 +75,10 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
     }
 };
 
-export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }) => {
+export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
     const { t } = useTranslation();
     return (
-        <div className=" flex flex-col gap-4">
+        <div className=" flex flex-col gap-4" ref={ref}>
             <Campos campo="introduccion" mostrar={pantalla === 'Plan'} />
             <Campos campo="proceso" mostrar={pantalla === 'Plan'} />
             <div className="panel">

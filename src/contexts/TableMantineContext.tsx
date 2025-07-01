@@ -6,13 +6,9 @@ import './layout.css';
 
 export default function TableMantineProvider({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
-            <head>
-                <ColorSchemeScript defaultColorScheme="auto" />
-            </head>
-            <body>
-                <MantineProvider defaultColorScheme="auto">{children}</MantineProvider>
-            </body>
-        </html>
+        <>
+            <ColorSchemeScript defaultColorScheme="auto" />
+            <MantineProvider defaultColorScheme="auto">{children}</MantineProvider>
+        </>
     );
 }

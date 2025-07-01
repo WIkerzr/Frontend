@@ -56,8 +56,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const SeleccionEditarGuardar = () => {
-        console.log(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion[0].metaFinal);
-
         const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) => {
             if (eje.id !== idEjeEditado) {
                 return eje;

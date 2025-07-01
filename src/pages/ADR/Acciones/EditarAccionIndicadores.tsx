@@ -38,7 +38,7 @@ interface ModalNuevoIndicadorAccionProps {
     onSave?: (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => void;
 }
 
-export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, realizaciones, resultados, onSave }) => {
+export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, realizaciones, resultados, onSave }, ref) => {
     const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
     const [seleccionados, setSeleccionados] = useState<number[]>([]);
     const { t } = useTranslation();
@@ -68,7 +68,7 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
 
     return (
         <NewModal open={open} onClose={onClose} title={t('nuevoIndicadorRealizacion')}>
-            <div>
+            <div ref={ref}>
                 <label className="block mb-2 font-semibold">{t('seleccionaElIndicador', { tipo: t('Realizacion') })}:</label>
                 <select className="w-full mb-4 border rounded px-2 py-1" value={indicadorRealizacionId ?? ''} onChange={(e) => handleChangeRealizacion(Number(e.target.value))}>
                     <option value="" disabled>

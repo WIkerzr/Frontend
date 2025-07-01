@@ -771,7 +771,7 @@ interface ChangeStatusProps {
     onSuccess?: () => void;
 }
 
-export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(({ value, onSuccess }) => {
+export const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess }) => {
     const { t } = useTranslation();
     const [localStatus, setLocalStatus] = useState<boolean>(!!value.status);
 
@@ -816,13 +816,13 @@ export const ChangeStatus = forwardRef<HTMLTableCellElement, ChangeStatusProps>(
             {localStatus ? '🟢' : '🔴'}
         </button>
     );
-});
+};
 
 interface ElimarUserProps {
     onChange: () => void;
 }
 
-export const NewUser = forwardRef<HTMLButtonElement, ElimarUserProps>(({ onChange }) => {
+export const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }, ref) => {
     const { t } = useTranslation();
 
     const [showModal, setShowModal] = useState(false);
@@ -845,7 +845,7 @@ export const NewUser = forwardRef<HTMLButtonElement, ElimarUserProps>(({ onChang
 
     return (
         <>
-            <div className="flex-grow"></div>
+            <div className="flex-grow" ref={ref}></div>
             <button type="button" className="btn btn-primary w-1/4 " onClick={handleOpen}>
                 {t('agregarUsuario')}
             </button>
