@@ -521,7 +521,7 @@ export const datosRegion: InitialDataResponse = {
                 id: '',
                 status: 'borrador',
                 introduccion: '',
-                ejes: [],
+                ejes: ejesIniado,
                 ejesPrioritarios: [],
                 proceso: '',
                 generalOperationADR: {

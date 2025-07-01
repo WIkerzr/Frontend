@@ -40,12 +40,12 @@ interface EstadosPorAnioContextType {
 const EstadosPorAnioContext = createContext<EstadosPorAnioContextType | undefined>(undefined);
 
 export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) => {
-    const { setYearData } = useYear();
+    const { setYearData, yearData } = useYear();
 
     const anioActual = new Date().getFullYear();
-    const [anio, setAnio] = useState<number>(anioActual);
+    const [anio, setAnio] = useState<number>(anioActual ? anioActual : yearData.year);
     const [estados, setEstados] = useState<EstadosPorAnio>({
-        [anioActual]: { plan: 'borrador', memoria: 'cerrado' },
+        [anioActual]: { plan: yearData.plan.status, memoria: yearData.memoria.status },
     });
     const [planState] = useState<Estado>(estados[anio].plan);
     const [memoriaState] = useState<Estado>(estados[anio].memoria);
