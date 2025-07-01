@@ -17,7 +17,7 @@ interface YearContextType {
 
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
-export const YearProvider = ({ children }: { children: ReactNode }) => {
+export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada } = useRegionContext();
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearDataState] = useState<YearData>(() => {

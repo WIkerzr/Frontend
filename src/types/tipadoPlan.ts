@@ -1,3 +1,4 @@
+import { Estado } from './GeneralTypes';
 import { datosPruebaIndicadoreResultado } from './Indicadores';
 import { DatosAccion } from './TipadoAccion';
 export type Year = number;
@@ -30,9 +31,11 @@ export interface Plan {
     introduccion: string;
     proceso: string;
     generalOperationADR: GeneralOperationADR;
+    status: Estado;
 }
 export interface Memoria {
     id: string;
+    status: Estado;
 }
 
 export interface YearData {
@@ -466,6 +469,7 @@ export const yearIniciado: YearData = {
     nombreRegion: 'Durangaldea',
     plan: {
         id: '0',
+        status: 'borrador',
         introduccion: `La Ley 7/2022, de 30 de junio, de Desarrollo Rural, determina la elaboración de nuevos instrumentos de planificación que favorezcan la alineación de los proyectos e iniciativas del medio rural con las políticas institucionales a impulsar.
 En el caso de los PCDR (Programas Comarcales de Desarrollo Rural), la previsión es que se elaboren a lo largo del ejercicio 2024 como herramientas donde se recojan, para cada comarca y bajo una metodología de trabajo común, los objetivos sectoriales y las líneas de actuación a implementar derivados de los PDT (Programas de Desarrollo Territorial) que incidan de forma prioritaria en cada comarca.
 En este contexto, los Planes de Gestión correspondientes al año 2024 se diseñan en base a lo dispuesto en el PDR comarcal 2015-2020, con la finalidad de alcanzar los objetivos que lleven a la comarca hacia la VISION marcada en dicho PDR hasta que los nuevos instrumentos de planificación de referencia estén plenamente desarrollados.
@@ -502,6 +506,7 @@ Comunicación de la ADR (difusión de actividades propias, elaboración de notas
     },
     memoria: {
         id: '0',
+        status: 'cerrado',
     },
 };
 
@@ -514,6 +519,7 @@ export const datosRegion: InitialDataResponse = {
             nombreRegion: '',
             plan: {
                 id: '',
+                status: 'borrador',
                 introduccion: '',
                 ejes: [],
                 ejesPrioritarios: [],
@@ -525,6 +531,7 @@ export const datosRegion: InitialDataResponse = {
             },
             memoria: {
                 id: '',
+                status: 'borrador',
             },
         },
     ],

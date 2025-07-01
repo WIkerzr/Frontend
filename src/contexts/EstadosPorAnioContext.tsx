@@ -2,8 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useYear } from './DatosAnualContext';
 import { datosRegion } from '../types/tipadoPlan';
-
-export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';
+import { Estado } from '../types/GeneralTypes';
 
 export const StatusColorsFonds: Record<Estado, string> = {
     proceso: 'bg-info',
