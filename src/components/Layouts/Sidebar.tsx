@@ -23,10 +23,11 @@ import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { SideBarList } from '../Utils/utils';
 
 const Sidebar = () => {
     const { anio, estados, setEstados, setAnio } = useEstadosPorAnio();
-    const { setYearData } = useYear();
+    const { yearData, setYearData } = useYear();
     const navigate = useNavigate();
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
@@ -153,56 +154,11 @@ const Sidebar = () => {
                             >
                                 <li className="nav-item">
                                     <ul>
-                                        {role !== 'GOBIERNOVASCO' && (
-                                            <li className="nav-item">
-                                                <NavLink to="/adr/cuadroMando" className="group">
-                                                    <div className="flex items-center">
-                                                        <img src={IconCuadroMando} alt={t('CuadroMando')} className="w-6 h-6" />
-                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('CuadroMando')}</span>
-                                                    </div>
-                                                </NavLink>
-                                            </li>
-                                        )}
-                                        {role !== 'GOBIERNOVASCO' && (
-                                            <li className="nav-item">
-                                                <NavLink to="/adr/ejes" className="group">
-                                                    <div className="flex items-center">
-                                                        <img src={IconEjes} alt={t('Ejes')} className="w-6 h-6" />
-                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Ejes')}</span>
-                                                    </div>
-                                                </NavLink>
-                                            </li>
-                                        )}
-                                        {role !== 'GOBIERNOVASCO' && (
-                                            <li className="nav-item">
-                                                <NavLink to="/adr/acciones" className="group">
-                                                    <div className="flex items-center">
-                                                        <img src={IconAcciones} alt={t('Acciones')} className="w-6 h-6" />
-                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Acciones')}</span>
-                                                    </div>
-                                                </NavLink>
-                                            </li>
-                                        )}
-                                        {role !== 'GOBIERNOVASCO' && (
-                                            <li className="nav-item">
-                                                <NavLink to="/adr/accionesAccesorias" className="group">
-                                                    <div className="flex items-center">
-                                                        <img src={IconAccionesAccesorias} alt={t('AccionesAccesorias')} className="w-6 h-6" />
-                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('AccionesAccesorias')}</span>
-                                                    </div>
-                                                </NavLink>
-                                            </li>
-                                        )}
-                                        {role !== 'GOBIERNOVASCO' && (
-                                            <li className="nav-item">
-                                                <NavLink to="/adr/servicios" className="group">
-                                                    <div className="flex items-center">
-                                                        <img src={IconServiciosPrestados} alt={t('Servicios')} className="w-6 h-6" />
-                                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Servicios')}</span>
-                                                    </div>
-                                                </NavLink>
-                                            </li>
-                                        )}
+                                        <SideBarList texto={t('CuadroMando')} link="/adr/cuadroMando" src={IconCuadroMando} role={role} />
+                                        <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />
+                                        <SideBarList texto={t('Acciones')} link="/adr/acciones" src={IconAcciones} role={role} disabled={yearData.plan.ejesPrioritarios.length != 3} />
+                                        <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesAccesorias" src={IconAccionesAccesorias} role={role} />
+                                        <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
                                         <li className="nav-item">
                                             <NavLink to="/adr/planesGestion" className="group">
                                                 <div className="flex items-center">

@@ -1,5 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
+import { UserRole } from '../../types/users';
 
 interface ModalProps {
     open: boolean;
@@ -42,5 +44,45 @@ export function NewModal({ open, onClose, title, children }: ModalProps) {
                 </div>
             </Dialog>
         </Transition>
+    );
+}
+
+interface SideBarListProps {
+    link: string;
+    src: string;
+    texto: string;
+    role?: UserRole;
+    disabled?: boolean;
+}
+
+export function SideBarList({ link, src, texto, role, disabled }: SideBarListProps) {
+    if (role === 'GOBIERNOVASCO') {
+        return null;
+    }
+
+    const baseClasses = 'flex items-center';
+
+    if (disabled) {
+        return (
+            <li className="nav-item">
+                <NavLink to={link} className="group opacity-80 cursor-not-allowed pointer-events-none">
+                    <div className={baseClasses}>
+                        <img src={src} alt={texto} className="w-6 h-6" />
+                        <span className="ltr:pl-3 rtl:pr-3 text-gray-400">{texto}</span>
+                    </div>
+                </NavLink>
+            </li>
+        );
+    }
+
+    return (
+        <li className="nav-item">
+            <NavLink to={link} className="group">
+                <div className={baseClasses}>
+                    <img src={src} alt={texto} className="w-6 h-6" />
+                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{texto}</span>
+                </div>
+            </NavLink>
+        </li>
     );
 }
