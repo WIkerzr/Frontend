@@ -8,6 +8,7 @@ import { CamposPlanMemoria } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
+import { validarCamposObligatoriosAccion } from '../Componentes';
 
 const Index = () => {
     const { anio, estados, editarPlan } = useEstadosPorAnio();
@@ -43,29 +44,18 @@ const Index = () => {
         }
         return true;
     }
+
     function validarPlan(yearData: YearData): boolean {
-        const plan = yearData.plan;
-        const ejesPrioritarios = plan.ejesPrioritarios.length === 3;
-        if (!ejesPrioritarios) {
-            setMensajeError(t('faltaPorSeleccionarEjesPrioritarios') + '\n');
-            return false;
-        }
-
-        const acciones1 = plan.ejesPrioritarios[0].acciones.length > 0;
-        const acciones2 = plan.ejesPrioritarios[1].acciones.length > 0;
-        const acciones3 = plan.ejesPrioritarios[2].acciones.length > 0;
-
-        if (!acciones1 && !acciones2 && !acciones3) {
-            setMensajeError(t('faltaAccionesPorCrear') + '\n');
-            return false;
-        }
-
-        return true;
+        const algunaFalla = yearData.plan.ejesPrioritarios.some((ejePrioritario) =>
+            ejePrioritario.acciones.some((accion) => {
+                const { faltanindicadoresPlan, faltanCamposPlan } = validarCamposObligatoriosAccion(accion);
+                return faltanindicadoresPlan === false || faltanCamposPlan === false;
+            })
+        );
+        return !algunaFalla;
     }
 
     useEffect(() => {
-        // console.log('validarCamposPlan ' + validarCamposPlan(yearData));
-        // console.log('validarPlan ' + validarPlan(yearData));
         if (validarCamposPlan(yearData) && validarPlan(yearData)) {
             setCamposRellenos(true);
         } else {

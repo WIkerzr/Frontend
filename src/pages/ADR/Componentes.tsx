@@ -13,6 +13,8 @@ import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import IconEye from '../../components/Icon/IconEye';
+import IconInfoCircle from '../../components/Icon/IconInfoCircle';
+import IconInfoTriangle from '../../components/Icon/IconInfoTriangle';
 
 type AccionAccesoria = { id: number; texto: string };
 interface ListadoAccionesAccesoriasProps {
@@ -259,6 +261,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                             editable = false;
                         }
                     }
+
                     return (
                         <div key={accion.id} className={`${colorAccion} border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
                             <span className="text-base">{accion.accion}</span>
@@ -270,21 +273,112 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                         {editable ? <IconPencil /> : <IconEye />}
                                     </button>
                                 </NavLink>
-                                {editable === true && (
-                                    <button
-                                        onClick={() => handleDelete(accion.id)}
-                                        aria-label={`Eliminar acción ${accion.id}`}
-                                        className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
-                                    >
-                                        <IconTrash />
-                                    </button>
-                                )}
+                                <div>
+                                    {editable === true && (
+                                        <button
+                                            onClick={() => handleDelete(accion.id)}
+                                            aria-label={`Eliminar acción ${accion.id}`}
+                                            className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
+                                        >
+                                            <IconTrash />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
+                            <MostrarAvisoCampos datos={accion} />
                         </div>
                     );
                 })}
             </div>
         </div>
+    );
+};
+interface ResultadoValidacion {
+    faltanindicadoresPlan: boolean;
+    faltanIndicadoresMemoria: boolean;
+    faltanCamposPlan: boolean;
+    faltanCamposMemoria: boolean;
+}
+
+export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoValidacion {
+    const faltanindicadoresPlan =
+        !datos.indicadorAccion?.indicadoreRealizacion?.[0] ||
+        !datos.indicadorAccion?.indicadoreRealizacion?.[0].descripcion ||
+        !datos.indicadorAccion?.indicadoreRealizacion?.[0].metaAnual?.total ||
+        !datos.indicadorAccion?.indicadoreRealizacion?.[0].metaFinal?.total;
+
+    const faltanIndicadoresMemoria = !datos.indicadorAccion?.indicadoreRealizacion?.[0] || !datos.indicadorAccion?.indicadoreRealizacion?.[0].ejecutado?.total;
+
+    const faltanCamposPlan =
+        !datos.datosPlan?.ejecutora ||
+        !datos.datosPlan?.implicadas ||
+        !datos.datosPlan?.comarcal ||
+        !datos.datosPlan?.supracomarcal ||
+        (datos.plurianual === true && !datos.datosPlan?.rangoAnios) ||
+        !datos.datosPlan?.oAccion ||
+        !datos.datosPlan?.ods ||
+        !datos.datosPlan?.dAccion;
+
+    const faltanCamposMemoria =
+        !datos.datosMemoria?.sActual ||
+        !datos.datosMemoria?.oAccion ||
+        !datos.datosMemoria?.ods ||
+        !datos.datosMemoria?.dAccionAvances ||
+        !datos.datosMemoria?.presupuestoEjecutado?.cuantia ||
+        !datos.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion ||
+        !datos.datosMemoria?.ejecucionPresupuestaria?.previsto ||
+        !datos.datosMemoria?.ejecucionPresupuestaria?.ejecutado ||
+        !datos.datosMemoria?.ejecucionPresupuestaria?.porcentaje;
+
+    return { faltanindicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
+}
+
+interface MostrarAvisoCamposProps {
+    datos: DatosAccion;
+    plurianual?: boolean;
+    texto?: boolean;
+}
+
+export const MostrarAvisoCampos: React.FC<MostrarAvisoCamposProps> = ({ datos, texto = true }) => {
+    const { t } = useTranslation();
+    const { editarPlan } = useEstadosPorAnio();
+
+    const { faltanindicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosAccion(datos);
+
+    if (!texto) {
+        return null;
+    }
+
+    if (editarPlan) {
+        if (!faltanCamposPlan && !faltanindicadoresPlan) {
+            return null;
+        }
+    } else {
+        if (!faltanCamposMemoria && !faltanIndicadoresMemoria) {
+            return null;
+        }
+    }
+
+    return (
+        <NavLink to="/adr/acciones/editando" className="group">
+            <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
+                {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
+                    <>
+                        <IconInfoCircle />
+                        <span>
+                            <strong>{t('aviso')}:</strong> {t('camposObligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
+                        </span>
+                    </>
+                ) : (
+                    <>
+                        <IconInfoTriangle />
+                        <span>
+                            <strong>{t('aviso')}:</strong> {t('indicadoresOgligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
+                        </span>
+                    </>
+                )}
+            </div>
+        </NavLink>
     );
 };
 
@@ -293,7 +387,7 @@ interface tablaIndicadoresProps {
     titulo: string;
 }
 
-export const TablaCuadroMando = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ indicador, titulo }) => {
+export const TablaCuadroMando = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ indicador, titulo }, ref) => {
     const { t } = useTranslation();
     const [initialRecords, setInitialRecords] = useState(sortBy(indicador, 'id'));
     const [recordsData] = useState(initialRecords);
@@ -344,7 +438,7 @@ export const TablaCuadroMando = forwardRef<HTMLButtonElement, tablaIndicadoresPr
     }, [sortStatus]);
 
     return (
-        <div className="datatables">
+        <div className="datatables" ref={ref}>
             <DataTable
                 className="whitespace-nowrap table-hover mantine-table"
                 records={recordsData}

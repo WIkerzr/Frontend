@@ -3,7 +3,7 @@ import AnimateHeight from 'react-animate-height';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toggleSidebar } from '../../store/themeConfigSlice';
 import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
@@ -27,7 +27,7 @@ import { useYear } from '../../contexts/DatosAnualContext';
 const Sidebar = () => {
     const { anio, estados, setEstados, setAnio } = useEstadosPorAnio();
     const { setYearData } = useYear();
-
+    const navigate = useNavigate();
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
     const { user } = useUser();
@@ -84,6 +84,7 @@ const Sidebar = () => {
                 [selectedData.year]: { plan: selectedData.plan.status, memoria: selectedData.memoria.status },
             });
             setYearData(selectedData);
+            navigate('/');
         }
     };
 

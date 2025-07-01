@@ -96,7 +96,7 @@ const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResu
 
 //Temporal
 
-export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }) => {
+export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }, ref) => {
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
     if (!indicador) {
@@ -293,7 +293,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLButtonElement, tablaIndicador
     const [open, setOpen] = useState(false);
 
     return (
-        <div>
+        <div ref={ref}>
             <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
                 <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
                 {creaccion && !block && editarPlan && (

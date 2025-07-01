@@ -43,6 +43,8 @@
     "proceso":"Proceso",
     "cerrado":"Cerrado",
     "aceptado":"Aceptado",
+    "plan":"plan",
+    "memoria":"memoria",
     "tabPlan":"Información para el Plan",
     "tabMemoria":"Información para la Memoria",
     "Hombre":"Hbr.",
@@ -215,6 +217,9 @@
 
 
     
+    "aviso": "Aviso",
+    "camposObligatorios":"Campos ogligatorios del {{zona}} pendientes por rellenar ",
+    "indicadoresOgligatorios":"Indicadores ogligatorios del {{zona}} pendientes por rellenar ",
     "falloAlCargarIndicadores": "Fallo al cargar los indicadores",
     "falloAlCargarAccion": "Fallo al cargar la acción",
     "volver": "Volver a la pagina anterior",
