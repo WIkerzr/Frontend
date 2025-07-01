@@ -6,6 +6,7 @@ const Acciones = lazy(() => import('../pages/ADR/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
+const IndicadoresADR = lazy(() => import('../pages/ADR/IndicadoresADR'));
 const PlanesGestion = lazy(() => import('../pages/ADR/Plan/PlanesGestion'));
 const PlanesGestionEnvio = lazy(() => import('../pages/ADR/Plan/PlanesGestionEnvio'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
@@ -69,6 +70,15 @@ const routes = [
             </OnlyIfLoggedIn>
         ),
         layout: 'AccionesAccesorias',
+    },
+    {
+        path: '/adr/indicadoresADR',
+        element: (
+            <OnlyIfLoggedIn>
+                <IndicadoresADR />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'IndicadoresADR',
     },
     {
         path: '/adr/memoriasAnuales',
