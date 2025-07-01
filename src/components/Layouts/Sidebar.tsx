@@ -22,21 +22,23 @@ import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { useYear } from '../../contexts/DatosAnualContext';
 
 const Sidebar = () => {
     const { anio, estados, setAnio } = useEstadosPorAnio();
+    const { setYearData } = useYear();
+
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
     const { user } = useUser();
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, regionData } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
     const dispatch = useDispatch();
-    const anioActual = new Date().getFullYear();
-    const anios = [anioActual];
+    const anios = regionData?.data.map((item) => item.year) ?? [];
     const { t } = useTranslation();
     const toggleMenu = (value: string) => {
         setCurrentMenu((oldValue) => {
@@ -73,7 +75,12 @@ const Sidebar = () => {
     }, [location]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setAnio(Number(e.target.value));
+        //setAnio(Number(e.target.value));
+        const selectedYear = Number(e.target.value);
+        const selectedData = regionData?.data.find((d) => d.year === selectedYear);
+        if (selectedData) {
+            setYearData(selectedData);
+        }
     };
 
     return (

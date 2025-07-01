@@ -44,6 +44,7 @@ export interface YearData {
 
 export interface InitialDataResponse {
     data: YearData[];
+    idRegion: string;
 }
 
 export const ejesIniado: Ejes[] = [
@@ -461,7 +462,7 @@ export const ejesPrioritariosIniado: Ejes[] = [
 ];
 
 export const yearIniciado: YearData = {
-    year: 2026,
+    year: 2025,
     nombreRegion: 'Durangaldea',
     plan: {
         id: '0',
@@ -502,4 +503,29 @@ Comunicación de la ADR (difusión de actividades propias, elaboración de notas
     memoria: {
         id: '0',
     },
+};
+
+export const datosRegion: InitialDataResponse = {
+    idRegion: '1',
+    data: [
+        yearIniciado,
+        {
+            year: 2026,
+            nombreRegion: '',
+            plan: {
+                id: '',
+                introduccion: '',
+                ejes: [],
+                ejesPrioritarios: [],
+                proceso: '',
+                generalOperationADR: {
+                    adrInternalTasks: '',
+                    operationalIndicators: [],
+                },
+            },
+            memoria: {
+                id: '',
+            },
+        },
+    ],
 };

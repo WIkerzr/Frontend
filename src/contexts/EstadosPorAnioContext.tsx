@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useYear } from './DatosAnualContext';
+import { datosRegion } from '../types/tipadoPlan';
 
 export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';
 
@@ -39,6 +41,8 @@ interface EstadosPorAnioContextType {
 const EstadosPorAnioContext = createContext<EstadosPorAnioContextType | undefined>(undefined);
 
 export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) => {
+    const { setYearData } = useYear();
+
     const anioActual = new Date().getFullYear();
     const [anio, setAnio] = useState<number>(anioActual);
     const [estados, setEstados] = useState<EstadosPorAnio>({
@@ -66,6 +70,13 @@ export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) =>
             },
         }));
     };
+
+    useEffect(() => {
+        const yearEncontrado = datosRegion.data.find((item) => item.year === anio);
+        if (yearEncontrado) {
+            setYearData(yearEncontrado);
+        }
+    }, [anio]);
 
     return (
         <EstadosPorAnioContext.Provider
