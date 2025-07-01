@@ -25,7 +25,7 @@ import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
 
 const Sidebar = () => {
-    const { anio, estados, setAnio } = useEstadosPorAnio();
+    const { anio, estados, setEstados, setAnio } = useEstadosPorAnio();
     const { setYearData } = useYear();
 
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
@@ -75,10 +75,14 @@ const Sidebar = () => {
     }, [location]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        //setAnio(Number(e.target.value));
         const selectedYear = Number(e.target.value);
         const selectedData = regionData?.data.find((d) => d.year === selectedYear);
+
         if (selectedData) {
+            setAnio(Number(e.target.value));
+            setEstados({
+                [selectedData.year]: { plan: selectedData.plan.status, memoria: selectedData.memoria.status },
+            });
             setYearData(selectedData);
         }
     };
