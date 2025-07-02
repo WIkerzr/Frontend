@@ -21,7 +21,7 @@ interface UserDataFormProps {
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser }) => {
     const { t, i18n } = useTranslation();
     const { regiones } = useRegionContext();
-    const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => r.RegionId === userData.ambit) || null);
+    const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => r.RegionId === Number(userData.ambit)) || null);
     const [conditional, setConditional] = useState<boolean>(false);
     const [datosUsuario, setDatosUsuario] = useState(userData);
 
