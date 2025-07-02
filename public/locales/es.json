@@ -70,7 +70,7 @@
     "explicacionPlanParte2": "Al finalizar, se podrá descargar en Word y/o continuar al paso final, donde se adjuntará el plan junto a sus anexos antes del envío.",
     "explicacionMemoriaParte1": "En esta pantalla se completan los datos generales de la memoria.",
     "explicacionMemoriaParte2borrador": "Al finalizar, se podrá continuar al paso final, donde se adjuntará la memoria junto a sus anexos antes del envío.",
-    "explicacionMemoriaParte2cerrado": "No se podrán introducir datos ni adjuntar archivos hasta que el plan haya sido completado y enviado",
+    "explicacionMemoriaParte2cerrado": "No se podrán adjuntar archivos ni enviar hasta que el plan haya sido completado , enviado y aceptado",
     "explicacionMemoriaParte2proceso": "La memoria se encuentra actualmente en proceso de aceptación por parte de HAZI",
     "explicacionAccion": "Se podrán definir hasta cinco acciones por eje, las cuales deberán enmarcarse dentro de los tres ejes prioritarios ya establecidos.",
     "PlanGestion":"Plan de gestion",

@@ -60,8 +60,8 @@ const Index = () => {
                 }
             />
             <>
-                {estados[anio].memoria === 'borrador' && <CamposPlanMemoria pantalla="Memoria" />}
-                {estados[anio].memoria === 'cerrado' && (
+                {(estados[anio].memoria === 'borrador' || estados[anio].memoria === 'cerrado') && <CamposPlanMemoria pantalla="Memoria" />}
+                {(estados[anio].memoria === 'proceso' || estados[anio].memoria === 'aceptado') && (
                     <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
                         <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
                         <ul className="space-y-3 ">
