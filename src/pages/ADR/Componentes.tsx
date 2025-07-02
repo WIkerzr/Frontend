@@ -255,11 +255,15 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                 {accionesMostradas.map((accion) => {
                     let editable = true;
                     let colorAccion = 'bg-white';
-                    if (accion.accionCompartida) {
-                        if (accion.accionCompartida?.includes(`${regionSeleccionada}`)) {
+                    if (accion.accionCompartida && Array.isArray(accion.accionCompartida.regiones)) {
+                        const regionLider = accion.accionCompartida.regionLider.RegionId === regionSeleccionada;
+                        if (regionLider) {
                             colorAccion = 'bg-teal-100';
                             editable = true;
-                        } else {
+                        }
+                        const regionCooperando = accion.accionCompartida.regiones.find((r) => r.RegionId === regionSeleccionada);
+                        if (regionCooperando) {
+                            colorAccion = 'bg-gray-300';
                             editable = false;
                         }
                     }

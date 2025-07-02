@@ -48,8 +48,11 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
         setDatosEditandoAccion(accionSeleccionado[0]);
 
-        if (accionSeleccionado[0].accionCompartida && !accionSeleccionado[0].accionCompartida.includes(`${regionSeleccionada}`)) {
-            setBlock(true);
+        if (accionSeleccionado[0].accionCompartida && Array.isArray(accionSeleccionado[0].accionCompartida.regiones)) {
+            const regionCompleta = accionSeleccionado[0].accionCompartida.regiones.find((r) => r.RegionId === regionSeleccionada);
+            if (regionCompleta) {
+                setBlock(true);
+            }
         } else {
             setBlock(false);
         }

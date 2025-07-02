@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from '../../contexts/RegionContext';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { yearIniciado } from '../../types/tipadoPlan';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
@@ -44,16 +44,32 @@ export const InputField = ({ nombreInput, divClassName, className, required, ...
         </div>
     );
 };
-export const TextArea = ({ nombreInput, className, required, ...rest }: TextAreaProps) => {
+export const TextArea = ({ nombreInput, className = '', required, value, onChange, ...rest }: TextAreaProps) => {
     const { t } = useTranslation();
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        const el = textareaRef.current;
+        if (el) {
+            el.style.height = 'auto'; // Reset height
+            el.style.height = `${el.scrollHeight}px`; // Set to scroll height
+        }
+    }, [value]);
 
     return (
         <div className="flex-1">
-            <label htmlFor={nombreInput}>
-                {required ? '*' : ''}
-                {t(nombreInput)}
+            <label htmlFor={nombreInput} className="block mb-1">
+                {required ? '*' : ''} {t(nombreInput)}
             </label>
-            <textarea {...rest} required={required} name={nombreInput} className={`w-full border rounded p-2 resize-y ${className}`} />
+            <textarea
+                ref={textareaRef}
+                required={required}
+                name={nombreInput}
+                value={value}
+                onChange={onChange}
+                className={`w-full border rounded p-2 resize-none overflow-hidden ${className}`}
+                {...rest}
+            />
         </div>
     );
 };
@@ -134,6 +150,27 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
             ) : (
                 <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
             )}
+        </div>
+    );
+};
+
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+    title: string;
+    options: readonly string[];
+}
+export const SimpleDropdown = ({ title, options, value }: SelectProps) => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex-1">
+            <label>{t(title)}</label>
+            <select className="w-full border rounded p-2 resize-y" value={value}>
+                <option disabled>{t('seleccionaopcion')}</option>
+                {options.map((text) => (
+                    <option key={text} value={text}>
+                        {text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()}
+                    </option>
+                ))}
+            </select>
         </div>
     );
 };

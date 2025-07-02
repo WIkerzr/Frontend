@@ -5,6 +5,7 @@ import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
 
 type RegionContextType = {
     regiones: Region[];
+    regionActual?: Region;
     regionData: InitialDataResponse | undefined;
     loading: boolean;
     error: Error | null;
@@ -15,6 +16,11 @@ type RegionContextType = {
 
 const RegionContext = createContext<RegionContextType>({
     regiones: [],
+    regionActual: {
+        RegionId: 0,
+        NameEs: '',
+        NameEu: '',
+    },
     regionData: undefined,
     loading: false,
     error: null,
@@ -29,6 +35,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const { user } = useUser();
     const token = sessionStorage.getItem('token');
+    const [regionActual, setRegionActual] = useState<Region>();
     const [regiones, setRegiones] = useState<Region[]>(() => {
         const saved = sessionStorage.getItem('regiones');
         try {
@@ -49,6 +56,12 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (regionSeleccionada !== null && !isNaN(regionSeleccionada)) {
             sessionStorage.setItem('regionSeleccionada', String(regionSeleccionada));
+
+            //Se guarda la region seleccionada para uso futuro
+            const regionCompleta = regiones.find((r) => r.RegionId === regionSeleccionada);
+            if (regionCompleta) {
+                setRegionActual(regionCompleta);
+            }
 
             //Llamada al servidor para obtener los datos de la region
             setRegionData(datosRegion);
@@ -88,6 +101,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         <RegionContext.Provider
             value={{
                 regiones,
+                regionActual,
                 regionData,
                 loading,
                 error,
