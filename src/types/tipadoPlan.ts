@@ -150,20 +150,28 @@ export const ejesPrioritariosIniado: Ejes[] = [
                 ejeEs: 'Telecomunicaciones',
                 ejeEu: 'Telekomunikazioak',
                 datosPlan: {
-                    ejecutora: '1',
-                    implicadas: '2',
-                    comarcal: '3',
-                    supracomarcal: '4',
-                    rangoAnios: '5',
-                    oAccion: '6',
-                    ods: '7',
-                    dAccion: '8',
-                    presupuesto: '9',
-                    iMujHom: '10',
-                    uEuskera: '11',
-                    sostenibilidad: '12',
-                    dInteligent: '13',
-                    observaciones: '14',
+                    ejecutora: 'Durangaldea',
+                    implicadas: 'Durangaldea',
+                    comarcal: 'Municipios con todas las zonas rurales',
+                    supracomarcal: 'Euskadi',
+                    rangoAnios: '',
+                    oAccion: `Objetivos generales: fomentar el dinamismo social y sentimiento de pertenencia a la comarca.
+Objetivos específicos: mejorar la comunicación y conexión intracomarcal.`,
+                    ods: 'Ninguno',
+                    dAccion: `- Se mantiene la X Semana de Desarrollo Rural con el formato de 4 actividades compaginando las culturales-recreativas y las concernientes a temas de interés socio-económico.
+- La semana de Desarrollo Rural se organiza por una comisión abierta a la participación de quien desee, habitualmente toman parte representantes del Ayuntamiento de celebración y del concejo en su caso, las personas técnicas de cultura, la técnica de turismo y la de ACICSA.
+- La semana se iniciará con el encuentro de igualdad de la comarca.
+- Se mantiene el carácter rotatorio del lugar de celebración y la fecha de celebración del X Lautada Eguna el último domingo de octubre, este año se celebrará en Barrundia el 27 de octubre.
+- Acordar la financiación de Lautada Astea y Eguna con la Cuadrilla de la Llanada.
+- Búsqueda de ayudas para ello: Fundación Vital, Eventos,`,
+                    presupuesto: `El presupuesto es de 6.000€ más las actuaciones que se gestionan mediante Hazi Fundazioa,Turismo y ACICSA.
+Se trabajará la financiación 2023 para Lautada Eguna y Lautada Astea conjuntamente para que sea:
+33% 2.000€ Fundación Vital, 33% 2.000€ Cuadrilla de la Llanada Alavesa y 2.000€ Subvención de Eventos de G.Vasco solicitado por la Cuadrilla.`,
+                    iMujHom: '',
+                    uEuskera: '',
+                    sostenibilidad: '',
+                    dInteligent: '',
+                    observaciones: '',
                 },
                 datosMemoria: {
                     ejecutora: '1',
@@ -241,8 +249,86 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
-                plurianual: true,
-                accionCompartida: '10',
+                plurianual: false,
+                accionCompartida: {
+                    regionLider: {
+                        RegionId: 10,
+                        NameEs: 'Durangaldea',
+                        NameEu: 'Durangaldea',
+                    },
+                    regiones: [
+                        {
+                            RegionId: 2,
+                            NameEs: 'Arabako Lautada / Llanada Alavesa',
+                            NameEu: 'Arabako Lautada',
+                        },
+                        {
+                            RegionId: 3,
+                            NameEs: 'Montaña Alavesa / Arabako Mendialdea',
+                            NameEu: 'Montaña Alavesa / Arabako Mendialdea',
+                        },
+                        {
+                            RegionId: 5,
+                            NameEs: 'Estribaciones del Gorbea / Gorbeia Inguruak',
+                            NameEu: 'Estribaciones del Gorbea / Gorbeia Inguruak',
+                        },
+                        {
+                            RegionId: 6,
+                            NameEs: 'Tolosaldea',
+                            NameEu: 'Tolosaldea',
+                        },
+                        {
+                            RegionId: 7,
+                            NameEs: 'Urola Kosta',
+                            NameEu: 'Urola Kosta',
+                        },
+                        {
+                            RegionId: 8,
+                            NameEs: 'Debabarrena',
+                            NameEu: 'Debabarrena',
+                        },
+                        {
+                            RegionId: 9,
+                            NameEs: 'Debagoiena',
+                            NameEu: 'Debagoiena',
+                        },
+                        {
+                            RegionId: 11,
+                            NameEs: 'Goierri',
+                            NameEu: 'Goierri',
+                        },
+                        {
+                            RegionId: 13,
+                            NameEs: 'Busturialdea',
+                            NameEu: 'Busturialdea',
+                        },
+                        {
+                            RegionId: 14,
+                            NameEs: 'Vitoria-Gasteiz',
+                            NameEu: 'Vitoria-Gasteiz',
+                        },
+                        {
+                            RegionId: 15,
+                            NameEs: 'Arratia-Nerbioi',
+                            NameEu: 'Arratia-Nerbioi',
+                        },
+                        {
+                            RegionId: 16,
+                            NameEs: 'Donostialdea-Bidasoa',
+                            NameEu: 'Donostialdea-Bidasoa',
+                        },
+                        {
+                            RegionId: 18,
+                            NameEs: 'Lea-Artibai',
+                            NameEu: 'Lea-Artibai',
+                        },
+                        {
+                            RegionId: 19,
+                            NameEs: 'Uribe',
+                            NameEu: 'Uribe',
+                        },
+                    ],
+                },
             },
             {
                 id: '2',
@@ -253,8 +339,8 @@ export const ejesPrioritariosIniado: Ejes[] = [
                 datosPlan: {
                     ejecutora: '1',
                     implicadas: '2',
-                    comarcal: '3',
-                    supracomarcal: '4',
+                    comarcal: 'Todas las entidades rurales de la comarca',
+                    supracomarcal: 'No',
                     rangoAnios: '5',
                     oAccion: '6',
                     ods: '7',
@@ -361,8 +447,8 @@ export const ejesPrioritariosIniado: Ejes[] = [
                 datosPlan: {
                     ejecutora: '1',
                     implicadas: '2',
-                    comarcal: '3',
-                    supracomarcal: '4',
+                    comarcal: 'Zonas de especial atención',
+                    supracomarcal: 'Euskadi',
                     rangoAnios: '5',
                     oAccion: '6',
                     ods: '7',
@@ -451,7 +537,40 @@ export const ejesPrioritariosIniado: Ejes[] = [
                     // indicadoreResultado: datosPruebaIndicadoreResultado,
                 },
                 plurianual: true,
-                accionCompartida: '11',
+                accionCompartida: {
+                    regionLider: {
+                        RegionId: 11,
+                        NameEs: 'Goierri',
+                        NameEu: 'Goierri',
+                    },
+                    regiones: [
+                        {
+                            RegionId: 1,
+                            NameEs: 'Añana',
+                            NameEu: 'Añana',
+                        },
+                        {
+                            RegionId: 4,
+                            NameEs: 'Rioja Alavesa / Arabako Errioxa',
+                            NameEu: 'Rioja Alavesa / Arabako Errioxa',
+                        },
+                        {
+                            RegionId: 10,
+                            NameEs: 'Durangaldea',
+                            NameEu: 'Durangaldea',
+                        },
+                        {
+                            RegionId: 12,
+                            NameEs: 'Aiaraldea',
+                            NameEu: 'Aiaraldea',
+                        },
+                        {
+                            RegionId: 17,
+                            NameEs: 'Enkarterri-Ezkerraldea',
+                            NameEu: 'Enkarterri-Ezkerraldea',
+                        },
+                    ],
+                },
             },
         ],
     },

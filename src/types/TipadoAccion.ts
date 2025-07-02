@@ -1,3 +1,5 @@
+import { Region } from '../components/Utils/gets/getRegiones';
+import { Comarcal, SupraComarcal } from './GeneralTypes';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 
 export type EstadoLabel = 'Actuación en ejecución' | 'Actuación en espera' | 'Actuación finalizada' | 'Actuación abandonada';
@@ -18,8 +20,8 @@ export interface EjecucionPresupuestaria {
 export interface DatosPlan {
     ejecutora: string;
     implicadas: string;
-    comarcal: string;
-    supracomarcal: string;
+    comarcal: Comarcal;
+    supracomarcal: SupraComarcal;
     rangoAnios: string;
     oAccion: string;
     ods: string;
@@ -53,6 +55,10 @@ export interface DatosMemoria {
     valFinal: string;
 }
 
+export interface AccionCompartida {
+    regionLider: Region;
+    regiones: Region[];
+}
 export interface DatosAccion {
     id: string;
     accion: string;
@@ -66,7 +72,7 @@ export interface DatosAccion {
         indicadoreResultado: IndicadorResultadoAccion[];
     };
     plurianual: boolean;
-    accionCompartida?: string;
+    accionCompartida?: AccionCompartida;
 }
 
 export const datosInicializadosAccion: DatosAccion = {
@@ -78,8 +84,8 @@ export const datosInicializadosAccion: DatosAccion = {
     datosPlan: {
         ejecutora: '',
         implicadas: '',
-        comarcal: '',
-        supracomarcal: '',
+        comarcal: 'No',
+        supracomarcal: 'No',
         rangoAnios: '',
         oAccion: '',
         ods: '',
@@ -124,14 +130,13 @@ export const datosInicializadosAccion: DatosAccion = {
         indicadoreResultado: [],
     },
     plurianual: false,
-    accionCompartida: '',
 };
 
 export const datosPlan: DatosPlan = {
     ejecutora: '',
     implicadas: '',
-    comarcal: '',
-    supracomarcal: '',
+    comarcal: 'No',
+    supracomarcal: 'No',
     rangoAnios: '',
     oAccion: '',
     ods: '',
