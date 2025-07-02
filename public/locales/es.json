@@ -37,6 +37,7 @@
     "editarindicadorRelacionado": "Editar indicador relacionado",
     "crearNueva": "Crear nueva",
     "seleccionaopcion": "Selecciona una opción",
+    "seleccionaMultiOpcion": "Selecciona una o varias",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
     "modalEliminarIndicadoresResultados": "Hay indicadores de Resultados. ¿Está seguro de continuar?",
     "borrador":"Borrador",
@@ -174,6 +175,7 @@
     "errorUserNoFound": "Usuario no encontrado",
 
     "region": "Región",
+    "regionesIncluidasSupracomarcal": "Regiones incluidas en la acción supracomarcal",
     "noRegionSeleccionada": "Sin región seleccionada",
 
 
@@ -186,6 +188,7 @@
     "implicadas":"Entidades implicadas",
     "comarcal":"Tratamiento territorial comarcal",
     "supracomarcal":"Tratamiento territorial supracomarcal",
+    "esSupracomarcal":"¿La acción es supracomarcal?",
     "rangoAnios":"Rango de años (Plurianualidad)",
     "oAccion":"Objetivos de la acción",
     "ods":"Objetivos de Desarrollo Sostenible (ODS) a los que contribuye",
