@@ -40,7 +40,6 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
         setInputError(false);
     };
 
-    const handleEdit = (id: number) => alert('Editar acción ' + id);
     const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
 
     const mostrarInput = acciones.length < 5;
@@ -76,9 +75,11 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
                 <div key={accion.id} className="card-div">
                     <div className="flex-1 text-base text-[#222] mb-0 pr-2">{accion.texto}</div>
                     <div className="flex flex-col justify-start items-end gap-2 border-l border-[#ECECEC] pl-4">
-                        <button onClick={() => handleEdit(accion.id)} aria-label={`Editar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">
-                            <IconPencil />
-                        </button>
+                        <NavLink to="/adr/servicios/editando" className="group">
+                            <button aria-label={`Editar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">
+                                <IconPencil />
+                            </button>
+                        </NavLink>
                         <button onClick={() => handleDelete(accion.id)} aria-label={`Eliminar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">
                             <IconTrash />
                         </button>

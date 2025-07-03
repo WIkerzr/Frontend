@@ -15,6 +15,7 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
     nombreInput: string;
     required?: boolean;
     divClassName?: string;
+    noTitle?: boolean;
 }
 
 export const Input = ({ nombreInput, divClassName, className, required, ...rest }: InputProps) => {
@@ -44,7 +45,7 @@ export const InputField = ({ nombreInput, divClassName, className, required, ...
         </div>
     );
 };
-export const TextArea = ({ nombreInput, className = '', required, value, onChange, ...rest }: TextAreaProps) => {
+export const TextArea = ({ nombreInput, className = '', required, value, onChange, noTitle, ...rest }: TextAreaProps) => {
     const { t } = useTranslation();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -58,9 +59,11 @@ export const TextArea = ({ nombreInput, className = '', required, value, onChang
 
     return (
         <div className="flex-1">
-            <label htmlFor={nombreInput} className="block mb-1">
-                {required ? '*' : ''} {t(nombreInput)}
-            </label>
+            {!noTitle && (
+                <label htmlFor={nombreInput} className="block mb-1">
+                    {required ? '*' : ''} {t(nombreInput)}
+                </label>
+            )}
             <textarea
                 ref={textareaRef}
                 required={required}

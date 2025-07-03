@@ -62,6 +62,7 @@
     "planTitulo": "Plan de Gestión Anual del PCDR",
     "memoriaTitulo": "Memoria de seguimiento anual del PCDR",
     "listadoAcciones":"Acciones previstas para la anualidad",
+    "servicioTituloEditado":"Servicio para la anualidad",
     "accionTituloEditado":"Accion para la anualidad",
     "Ejes": "Ejes",
     "Eje": "Eje",
@@ -75,6 +76,7 @@
     "explicacionAccion": "Se podrán definir hasta cinco acciones por eje, las cuales deberán enmarcarse dentro de los tres ejes prioritarios ya establecidos.",
     "PlanGestion":"Plan de gestion",
     "Acciones": "Acciones",
+    "Servicio": "SERVICIO",
     "AccionesAccesorias": "Acciones accesorias",
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
@@ -102,6 +104,7 @@
     "indicadoresOperativos": "Indicadores Operativos",
     "valorPrevisto": "Valor previsto",
     "valueAchieved": "Valor alcanzado",
+    "valorReal": "Valor real",
 
     "sinSeleccionar": "Sin seleccionar",
     "editar": "Editar",
