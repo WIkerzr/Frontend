@@ -8,7 +8,7 @@ const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'))
 const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
 const IndicadoresADR = lazy(() => import('../pages/ADR/IndicadoresADR'));
 const PlanesGestion = lazy(() => import('../pages/ADR/Plan/PlanesGestion'));
-const PlanesGestionEnvio = lazy(() => import('../pages/ADR/Plan/PlanesGestionEnvio'));
+const GestionEnvio = lazy(() => import('../pages/ADR/Plan/GestionEnvio'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
 const EditarServicios = lazy(() => import('../pages/ADR/EditarServicios'));
 const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
@@ -100,13 +100,22 @@ const routes = [
         layout: 'PlanesGestion',
     },
     {
-        path: '/adr/planesGestionEnvio',
+        path: '/adr/planesGestion/gestionEnvio',
         element: (
             <OnlyIfLoggedIn>
-                <PlanesGestionEnvio />
+                <GestionEnvio />
             </OnlyIfLoggedIn>
         ),
-        layout: 'PlanesGestionEnvio',
+        layout: 'planesGestion/GestionEnvio',
+    },
+    {
+        path: '/adr/memoriasAnuales/gestionEnvio',
+        element: (
+            <OnlyIfLoggedIn>
+                <GestionEnvio />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'memoriasAnuales/GestionEnvio',
     },
     {
         path: '/adr/servicios',

@@ -44,7 +44,7 @@ const Index = () => {
                                     <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
                                     {t('descargarBorrador')}
                                 </button>
-                                <NavLink to="/adr/planesGestionEnvio" state={{ pantalla: 'Memoria' }} className="min-w-[120px]">
+                                <NavLink to="/adr/memoriasAnuales/gestionEnvio" state={{ pantalla: 'Memoria' }} className="min-w-[120px]">
                                     <button className="px-4 py-2 bg-green-500 text-white rounded flex items-center justify-center gap-1 font-medium h-10 w-full">
                                         <img src={IconEnviar} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
                                         {t('enviar')}
