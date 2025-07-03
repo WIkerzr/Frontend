@@ -44,34 +44,52 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
         };
         return (
             <div className="panel flex w-[100%] flex-col">
-                <label htmlFor="introduccion">*{t(campo)}</label>
-                <textarea required name="introduccion" className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.plan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
+                <label htmlFor={campo}>*{t(campo)}</label>
+                <textarea required name={campo} className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.plan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
             </div>
         );
     } else if (campo2) {
-        const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-            setYearData({
-                ...yearData,
-                plan: {
-                    ...yearData.plan,
-                    generalOperationADR: {
-                        ...yearData.plan.generalOperationADR,
+        if (campo2 === 'dSeguimiento' || campo2 === 'valFinal') {
+            const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+                setYearData({
+                    ...yearData,
+                    memoria: {
+                        ...yearData.memoria,
                         [campo]: e.target.value || '',
                     },
-                },
-            });
-        };
-        return (
-            <div>
-                <label htmlFor="introduccion">*{t(campo2)}</label>
-                <textarea
-                    name="introduccion"
-                    className="w-full border rounded p-2 h-[114px] resize-y"
-                    value={yearData.plan.generalOperationADR[campo2]}
-                    onChange={(e) => handleChangeCampos(campo2, e)}
-                />
-            </div>
-        );
+                });
+            };
+            return (
+                <div>
+                    <label htmlFor={campo2}>*{t(campo2)}</label>
+                    <textarea name={campo2} className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.memoria[campo2]} onChange={(e) => handleChangeCampos(campo2, e)} />
+                </div>
+            );
+        } else {
+            const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+                setYearData({
+                    ...yearData,
+                    plan: {
+                        ...yearData.plan,
+                        generalOperationADR: {
+                            ...yearData.plan.generalOperationADR,
+                            [campo]: e.target.value || '',
+                        },
+                    },
+                });
+            };
+            return (
+                <div>
+                    <label htmlFor="introduccion">*{t(campo2)}</label>
+                    <textarea
+                        name="introduccion"
+                        className="w-full border rounded p-2 h-[114px] resize-y"
+                        value={yearData.plan.generalOperationADR[campo2]}
+                        onChange={(e) => handleChangeCampos(campo2, e)}
+                    />
+                </div>
+            );
+        }
     }
 };
 

@@ -36,6 +36,8 @@ export interface Plan {
 export interface Memoria {
     id: string;
     status: Estado;
+    dSeguimiento: string;
+    valFinal: string;
 }
 
 export interface YearData {
@@ -203,8 +205,9 @@ Helburu zehatzak / Objetivos específicos:`,
                     sostenibilidad: '20',
                     dInteligent: '21',
                     observaciones: '22',
-                    dSeguimiento: '23',
-                    valFinal: '24',
+                    dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
+29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
+                    valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
                 },
                 indicadorAccion: {
                     indicadoreRealizacion: [
@@ -631,6 +634,9 @@ Comunicación de la ADR (difusión de actividades propias, elaboración de notas
     memoria: {
         id: '0',
         status: 'borrador',
+        dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
+29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
+        valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
     },
 };
 
@@ -656,6 +662,9 @@ export const datosRegion: InitialDataResponse = {
             memoria: {
                 id: '',
                 status: 'borrador',
+                dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
+29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
+                valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
             },
         },
     ],
