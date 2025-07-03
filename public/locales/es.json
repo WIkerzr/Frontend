@@ -187,6 +187,9 @@
     "seleccionaIndicador":"Selecciona un indicador...",
 
 
+    "archivoPlan":"Archivo PDF correspondiente al Plan",
+    "archivoPCDR":"Archivo PDF correspondiente al PCDR",
+
     "ejecutora":"Entidad ejecutora",
     "implicadas":"Entidades implicadas",
     "comarcal":"Tratamiento territorial comarcal",

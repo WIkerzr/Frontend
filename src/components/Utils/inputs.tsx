@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect, useRef } from 'react';
@@ -5,6 +6,7 @@ import { yearIniciado } from '../../types/tipadoPlan';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useYear } from '../../contexts/DatosAnualContext';
+import ImageUploading, { ImageListType } from 'react-images-uploading';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
@@ -174,6 +176,72 @@ export const SimpleDropdown = ({ title, options, value }: SelectProps) => {
                     </option>
                 ))}
             </select>
+        </div>
+    );
+};
+
+interface AttachProps {
+    files: File[];
+    setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+    // eslint-disable-next-line no-unused-vars
+    onChange: (files: File[]) => void;
+    multiple?: boolean;
+    title?: string;
+}
+
+export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }: AttachProps) => {
+    return (
+        <div className="mb-5 flex flex-col">
+            <ImageUploading
+                multiple={multiple}
+                value={files}
+                onChange={(_imageList) => {
+                    onChange((_imageList as ImageListType).map((item) => item.file as File));
+                }}
+                maxNumber={10}
+                dataURLKey="data_url"
+                acceptType={['pdf', 'png', 'jpg', 'jpeg']}
+            >
+                {({ onImageUpload, dragProps }: any) => (
+                    <div>
+                        <div className="flex flex-col">
+                            {title && (
+                                <div>
+                                    <span>{title}</span>
+                                </div>
+                            )}
+                            <div>
+                                <button type="button" className="px-4 py-2 bg-gray-100 text-gray-700 rounded border border-gray-300 hover:bg-gray-200 w-3/4" onClick={onImageUpload} {...dragProps}>
+                                    Escoge o suelta un archivo aquí a subir
+                                </button>
+                                <span className="ml-4">
+                                    <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200" onClick={onImageUpload}>
+                                        Explorar
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="mt-4 space-y-2">
+                            {files.map((file, idx) => (
+                                <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
+                                    <span className="text-lg">📄</span>
+                                    <span className="flex-1 text-sm">{file.name}</span>
+                                    <button
+                                        className="ml-2 text-red-500 hover:text-red-700"
+                                        onClick={() => {
+                                            const newFiles = files.filter((_, i) => i !== idx);
+                                            setFiles(newFiles);
+                                            onChange(newFiles);
+                                        }}
+                                    >
+                                        ●
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </ImageUploading>
         </div>
     );
 };
