@@ -16,9 +16,10 @@ interface UserDataFormProps {
     fadeOut: boolean;
     roleDisabled?: boolean;
     isNewUser?: boolean;
+    title?: boolean;
 }
 
-const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser }) => {
+const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser, title = true }) => {
     const { t, i18n } = useTranslation();
     const { regiones } = useRegionContext();
     const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => r.RegionId === Number(userData.ambit)) || null);
@@ -61,7 +62,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
-                <h2 className="text-lg font-semibold mb-4">{t('datosUsuarios')}</h2>
+                {title && <h2 className="text-lg font-semibold mb-4">{t('datosUsuarios')}</h2>}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-1">{t('email')}</label>
@@ -71,7 +72,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             </div>
                             <input
                                 type="text"
-                                placeholder="{t('email')}@E-mail.com"
+                                placeholder={`${t('email')}@email.com`}
                                 className="form-input ltr:rounded-l-none rtl:rounded-r-none"
                                 value={datosUsuario.email as string}
                                 name="email"

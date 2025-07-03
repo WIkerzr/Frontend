@@ -20,6 +20,7 @@ import '@mantine/core/styles.css';
 import { useUsers } from './Usuarios';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
+import { NewModal } from '../../components/Utils/utils';
 
 export const newUser: UserID = {
     name: '',
@@ -84,17 +85,19 @@ interface EditarProps extends BaseProps {
     accion: 'editar';
     userData: UserID;
     onClose: () => void;
+    title?: boolean;
 }
 
 interface NuevoProps extends BaseProps {
     accion: 'nuevo';
     userData?: User;
     onClose: () => void;
+    title?: boolean;
 }
 
 type UserDataProps = EditarProps | NuevoProps;
 
-export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion, onClose }) => {
+export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion, onClose, title = true }) => {
     const getInitialUserData = (): UserID => {
         const usersRaw = localStorage.getItem('users');
         try {
@@ -262,6 +265,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 fadeOut={fadeOut}
                 roleDisabled={false}
                 isNewUser={accion === 'nuevo'}
+                title={title}
             />
         </>
     );
@@ -690,16 +694,14 @@ interface EditUserProps {
 }
 
 export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChange }, ref) => {
-    const [showModal, setShowModal] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
+    const { t } = useTranslation();
 
+    const [showModal, setShowModal] = useState(false);
     const handleOpen = () => setShowModal(true);
     const handleClose = () => {
-        setIsClosing(true);
         onChange();
         setTimeout(() => {
             setShowModal(false);
-            setIsClosing(false);
         }, 300);
     };
 
@@ -708,19 +710,9 @@ export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, on
             <button type="button" onClick={handleOpen} ref={ref}>
                 <IconPencil />
             </button>
-            {showModal && (
-                <div
-                    className={`fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
-                    onClick={handleClose}
-                >
-                    <div
-                        className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <UsersDateModalLogic accion="editar" userData={user} onClose={() => handleClose()} />
-                    </div>
-                </div>
-            )}
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('datosUsuarios')}>
+                <UsersDateModalLogic accion="editar" userData={user} onClose={() => handleClose()} title={false} />
+            </NewModal>
         </>
     );
 });
@@ -826,7 +818,7 @@ export const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }
     const { t } = useTranslation();
 
     const [showModal, setShowModal] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
+
     useEffect(() => {
         setTimeout(() => {
             handleClose();
@@ -835,11 +827,9 @@ export const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }
 
     const handleOpen = () => setShowModal(true);
     const handleClose = () => {
-        setIsClosing(true);
         setTimeout(() => {
             setShowModal(false);
             onChange();
-            setIsClosing(false);
         }, 300);
     };
 
@@ -850,19 +840,9 @@ export const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }
                 {t('agregarUsuario')}
             </button>
 
-            {showModal && (
-                <div
-                    className={`fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
-                    onClick={handleClose}
-                >
-                    <div
-                        className={`bg-white p-5 rounded-lg max-w-md w-full transform transition-all duration-300 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <UsersDateModalLogic accion="nuevo" onClose={() => handleClose()} />
-                    </div>
-                </div>
-            )}
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('datosUsuarios')}>
+                <UsersDateModalLogic accion="nuevo" onClose={() => handleClose()} title={false} />
+            </NewModal>
         </>
     );
 });
