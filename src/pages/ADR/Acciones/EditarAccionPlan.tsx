@@ -106,7 +106,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 </div>
                 {regionesSupracomarcal && (
                     <div className="w-full resize-y">
-                        <label>{t('regionesIncluidasSupracomarcal')} </label>
+                        <label>{t('comarcasIncluidasSupracomarcal')} </label>
                         <Multiselect
                             placeholder={t('seleccionaMultiOpcion')}
                             options={regionesEnDropdow}

@@ -136,7 +136,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
 
     return (
         <div>
-            {header ? <></> : <label className="block text-sm font-medium mb-1">{t('region')}</label>}
+            {header ? <></> : <label className="block text-sm font-medium mb-1">{t('comarca')}</label>}
             {role.toUpperCase() != 'ADR' ? (
                 <select
                     disabled={disabled}
@@ -153,7 +153,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
                     ))}
                 </select>
             ) : (
-                <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
+                <div>{region ? region.NameEs : t('noComarcaSeleccionada')}</div>
             )}
         </div>
     );

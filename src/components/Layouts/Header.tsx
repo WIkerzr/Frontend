@@ -55,7 +55,7 @@ const Header = () => {
                             </div>
                         </div>
                     ) : (
-                        // <div>{region ? region.NameEs : t('noRegionSeleccionada')}</div>
+                        // <div>{region ? region.NameEs : t('noComarcaSeleccionada')}</div>
                         <div>
                             <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
                                 <RegionSelect header={true} disabled />

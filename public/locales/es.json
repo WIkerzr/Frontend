@@ -177,9 +177,9 @@
     "errorEmailPass": "Email o contraseña no válida",
     "errorUserNoFound": "Usuario no encontrado",
 
-    "region": "Región",
-    "regionesIncluidasSupracomarcal": "Regiones incluidas en la acción supracomarcal",
-    "noRegionSeleccionada": "Sin región seleccionada",
+    "comarca": "Comarca",
+    "comarcasIncluidasSupracomarcal": "Comarcas incluidas en la acción supracomarcal",
+    "noComarcaSeleccionada": "Sin comarca seleccionada",
 
 
     "seleccionaEjePrioritario":"Selecciona eje prioritario",

@@ -93,7 +93,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                     </div>
                     {datosUsuario.role === 'ADR' || datosUsuario.role === 'adr' ? (
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('region')}</label>
+                            <label className="block text-sm font-medium mb-1">{t('comarca')}</label>
                             <select
                                 className="form-select min-w-max w-full"
                                 style={{ minWidth: 'calc(100% + 10px)' }}
