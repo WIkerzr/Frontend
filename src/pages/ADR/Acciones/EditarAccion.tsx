@@ -74,6 +74,15 @@ const Index: React.FC = () => {
                                     <span className="font-normal text-col text-info">{datosEditandoAccion.lineaActuaccion}</span>
                                 </span>
                             </div>
+                            <div className="flex">
+                                <input
+                                    onChange={(e) => setDatosEditandoAccion({ ...datosEditandoAccion!, plurianual: e.target.checked })}
+                                    type="checkbox"
+                                    className="form-checkbox h-5 w-5 "
+                                    checked={datosEditandoAccion.plurianual}
+                                />
+                                <label>{t('plurianual')}</label>
+                            </div>
                         </div>
                     </div>
                 }
