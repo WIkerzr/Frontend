@@ -98,7 +98,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
             </div>
 
             <div className="flex gap-4 panel">
-                <InputField nombreInput="oAccion" required disabled={block} value={datosEditandoAccion.datosMemoria.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
+                <TextArea nombreInput="oAccion" required className={'h-[114px]'} disabled={block} value={datosEditandoAccion.datosMemoria.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
                 <InputField nombreInput="ods" required disabled={block} value={datosEditandoAccion.datosMemoria.ods} onChange={(e) => handleChangeCampos('ods', e)} />
             </div>
 
