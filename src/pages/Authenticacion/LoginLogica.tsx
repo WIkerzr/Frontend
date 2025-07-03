@@ -6,8 +6,10 @@ import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { UserID, UserRole } from '../../types/users';
+import { useTranslation } from 'react-i18next';
 
 const useLogin = () => {
+    const { t } = useTranslation();
     const { setRegionSeleccionada } = useRegionContext();
 
     const { login } = useAuth();
@@ -102,7 +104,7 @@ const useLogin = () => {
             navigate('/');
         } catch (err) {
             if (err instanceof Error) {
-                setError(err.message);
+                setError(t('error:errorNoSePudoConectarServidor'));
             } else {
                 setError('Ocurrió un error inesperado');
             }

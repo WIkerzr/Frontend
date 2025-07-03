@@ -1,5 +1,9 @@
 {
         "errorFaltaRegionLider": "Falta seleccionar la región líder",
         
-        "errorNoOpciones": "No hay opciones disponibles"
+        "errorNoOpciones": "No hay opciones disponibles",
+
+
+
+        "errorNoSePudoConectarServidor":"No se pudo conectar con el servidor. Inténtelo más tarde"
 }
