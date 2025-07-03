@@ -35,7 +35,9 @@ const Index = () => {
                         <span>
                             {pantalla === 'Plan' ? t('planTitulo') : t('memoriaTitulo')} {anio}
                         </span>
-                        <span className={`${StatusColors[estados[anio]?.plan]}`}>{t(estados[anio]?.plan)}</span>
+                        <span className={pantalla === 'Plan' ? `${StatusColors[estados[anio]?.plan]}` : `${StatusColors[estados[anio]?.memoria]}`}>
+                            {pantalla === 'Plan' ? t(estados[anio]?.plan) : t(estados[anio]?.memoria)}
+                        </span>
                     </h2>
                 }
                 zonaExplicativa={
