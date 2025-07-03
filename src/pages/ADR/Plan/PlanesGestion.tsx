@@ -100,6 +100,7 @@ const Index = () => {
 
                                     <NavLink
                                         to={camposRellenos ? '/adr/planesGestionEnvio' : '#'}
+                                        state={{ pantalla: 'Plan' }}
                                         onClick={(e) => {
                                             if (!camposRellenos) e.preventDefault();
                                         }}

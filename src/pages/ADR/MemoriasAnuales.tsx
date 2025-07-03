@@ -29,7 +29,9 @@ const Index = () => {
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
-                        <span>{t('memoriaTitulo')} 2025</span>
+                        <span>
+                            {t('memoriaTitulo')} {anio}
+                        </span>
                         <span className={`${StatusColors[estados[anio]?.memoria]}`}>{t(estados[anio]?.memoria)}</span>
                     </h2>
                 }
@@ -42,7 +44,7 @@ const Index = () => {
                                     <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
                                     {t('descargarBorrador')}
                                 </button>
-                                <NavLink to="/adr/planesGestionEnvio" className="min-w-[120px]">
+                                <NavLink to="/adr/planesGestionEnvio" state={{ pantalla: 'Memoria' }} className="min-w-[120px]">
                                     <button className="px-4 py-2 bg-green-500 text-white rounded flex items-center justify-center gap-1 font-medium h-10 w-full">
                                         <img src={IconEnviar} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
                                         {t('enviar')}
