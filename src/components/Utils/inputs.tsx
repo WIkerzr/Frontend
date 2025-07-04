@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect, useRef } from 'react';
@@ -6,8 +5,6 @@ import { yearIniciado } from '../../types/tipadoPlan';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useYear } from '../../contexts/DatosAnualContext';
-import ImageUploading, { ImageListType } from 'react-images-uploading';
-
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
     required?: boolean;
@@ -189,59 +186,74 @@ interface AttachProps {
     title?: string;
 }
 
+function isImage(file: File) {
+    return /^image\//.test(file.type);
+}
+
 export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }: AttachProps) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newFiles = e.target.files ? Array.from(e.target.files) : [];
+        setFiles(newFiles);
+        onChange(newFiles);
+    };
+
+    // Drag and drop handlers
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const newFiles = Array.from(e.dataTransfer.files).filter((file) => file.type === 'application/pdf' || file.type.startsWith('image/'));
+        setFiles(newFiles);
+        onChange(newFiles);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
     return (
         <div className="mb-5 flex flex-col">
-            <ImageUploading
-                multiple={multiple}
-                value={files}
-                onChange={(_imageList) => {
-                    onChange((_imageList as ImageListType).map((item) => item.file as File));
-                }}
-                maxNumber={10}
-                dataURLKey="data_url"
-                acceptType={['pdf', 'png', 'jpg', 'jpeg']}
-            >
-                {({ onImageUpload, dragProps }: any) => (
-                    <div>
-                        <div className="flex flex-col">
-                            {title && (
-                                <div>
-                                    <span>{title}</span>
-                                </div>
-                            )}
-                            <div>
-                                <button type="button" className="px-4 py-2 bg-gray-100 text-gray-700 rounded border border-gray-300 hover:bg-gray-200 w-3/4" onClick={onImageUpload} {...dragProps}>
-                                    Escoge o suelta un archivo aquí a subir
-                                </button>
-                                <span className="ml-4">
-                                    <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200" onClick={onImageUpload}>
-                                        Explorar
-                                    </button>
-                                </span>
-                            </div>
-                        </div>
-                        <div className="mt-4 space-y-2">
-                            {files.map((file, idx) => (
-                                <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
-                                    <span className="text-lg">📄</span>
-                                    <span className="flex-1 text-sm">{file.name}</span>
-                                    <button
-                                        className="ml-2 text-red-500 hover:text-red-700"
-                                        onClick={() => {
-                                            const newFiles = files.filter((_, i) => i !== idx);
-                                            setFiles(newFiles);
-                                            onChange(newFiles);
-                                        }}
-                                    >
-                                        ●
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+            {title && <span className="mb-1">{title}</span>}
+            <div className="flex flex-row gap-2 items-center">
+                <div
+                    className="flex-1 bg-gray-100 border border-gray-300 rounded px-4 py-2 flex items-center justify-center cursor-pointer select-none transition-all text-gray-700 hover:bg-gray-200"
+                    onClick={() => fileInputRef.current?.click()}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                >
+                    Escoge o suelta un archivo aquí a subir
+                    <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple={multiple} style={{ display: 'none' }} onChange={handleChange} />
+                </div>
+                <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => fileInputRef.current?.click()}>
+                    Explorar
+                </button>
+            </div>
+            <div className="mt-4 space-y-2">
+                {files.map((file, idx) => (
+                    <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
+                        {isImage(file) ? (
+                            <img src={URL.createObjectURL(file)} alt={file.name} className="w-12 h-12 object-cover rounded" onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)} />
+                        ) : (
+                            <span className="text-lg">📄</span>
+                        )}
+                        <span className="flex-1 text-sm truncate">{file.name}</span>
+                        <button
+                            type="button"
+                            className="ml-2 text-red-500 hover:text-red-700"
+                            onClick={() => {
+                                const newFiles = files.filter((_, i) => i !== idx);
+                                setFiles(newFiles);
+                                onChange(newFiles);
+                            }}
+                            aria-label={`Eliminar archivo ${file.name}`}
+                        >
+                            ❌
+                        </button>
                     </div>
-                )}
-            </ImageUploading>
+                ))}
+            </div>
         </div>
     );
 };

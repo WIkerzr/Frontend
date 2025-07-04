@@ -232,7 +232,11 @@
 
 
 
-    
+    "aceptarPlanOMemoria":"Aceptar {{zona}} {{fecha}}",
+    "rechazarPlanOMemoria":"Rechazar {{zona}} {{fecha}}",
+    "confirmacionAceptar":"¿Estás seguro que deseas ACEPTAR {{zona}} {{fecha}}?",
+    "confirmacionRechazar":"¿Estás seguro que deseas RECHAZAR {{zona}} {{fecha}}?",
+
 
     "enviadoNoSePodraEditar":"Una vez enviado {{txtPantalla}}, no podrá ser editado a menos que Hazi lo permita.",
     "asegurateAntesPdfCorrecto":"Asegurate antes que toda la información se ha introducido correctamente en los PDF antes de enviarlo.",

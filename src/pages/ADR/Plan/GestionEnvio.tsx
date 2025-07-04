@@ -67,7 +67,7 @@ const Index = () => {
 
                     <div className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('finalizarYEnviar', { zona: txtPantalla })}</h3>
-                        {(planFiles.length != 1 || pcdrFiles.length != 1) && (
+                        {(pantalla === 'Plan' ? planFiles.length != 1 || pcdrFiles.length != 1 : planFiles.length != 1) && (
                             <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center">
                                 <IconInfoCircle />
                                 <span>
@@ -77,7 +77,7 @@ const Index = () => {
                         )}
                         <div className="flex justify-center">
                             <button
-                                disabled={planFiles.length != 1 || pcdrFiles.length != 1}
+                                disabled={pantalla === 'Plan' ? planFiles.length != 1 || pcdrFiles.length != 1 : planFiles.length != 1}
                                 className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
                             >
                                 {t('finalizar', { zona: txtPantalla })}
