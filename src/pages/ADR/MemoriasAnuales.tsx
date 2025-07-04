@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { StatusColors, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
-import { CamposPlanMemoria } from './Plan/PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, CamposPlanMemoria } from './Plan/PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../components/Icon/IconEnviar.svg';
 import { useState } from 'react';
+
 interface Archivo {
     nombre: string;
     url: string;
@@ -52,6 +53,7 @@ const Index = () => {
                                 </NavLink>
                             </div>
                         )}
+                        <BotonesAceptacionYRechazo pantalla="Memoria" />
                     </>
                 }
                 zonaExplicativa={

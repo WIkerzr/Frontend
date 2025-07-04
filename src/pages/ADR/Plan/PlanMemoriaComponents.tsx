@@ -11,6 +11,9 @@ import { NewModal } from '../../../components/Utils/utils';
 import { IRootState } from '../../../store';
 import { Input } from '../../../components/Utils/inputs';
 import { nanoid } from '@reduxjs/toolkit';
+import { t } from 'i18next';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useUser } from '../../../contexts/UserContext';
 
 interface CamposProps {
     campo?: {
@@ -119,7 +122,7 @@ interface ModalIndicadorOperativo {
     pantalla: 'Plan' | 'Memoria';
 }
 
-const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ open, idModal, onClose, pantalla }) => {
+const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ open, idModal, onClose, pantalla }, ref) => {
     const { t, i18n } = useTranslation();
     const { yearData, setYearData } = useYear();
 
@@ -171,7 +174,7 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
 
     return (
         <NewModal open={open} onClose={onClose} title={t('indicadoresOperativos')}>
-            <div>
+            <div ref={ref}>
                 <div className=" flex w-[100%] flex-col">
                     <label htmlFor="indicadoresOperativos">*{t('indicadoresOperativos')}</label>
                     <textarea
@@ -238,11 +241,7 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
     );
 });
 
-interface IndicadoresOperativosTableProps {
-    pantalla: 'Plan' | 'Memoria';
-}
-
-const IndicadoresOperativosTable = forwardRef<HTMLBaseElement, IndicadoresOperativosTableProps>(({ pantalla }) => {
+const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
     const { t, i18n } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
@@ -286,7 +285,7 @@ const IndicadoresOperativosTable = forwardRef<HTMLBaseElement, IndicadoresOperat
     };
 
     return (
-        <div>
+        <div ref={ref}>
             <div className="mt-6">
                 {pantalla === 'Plan' && (
                     <div className="flex justify-end mb-2">
@@ -336,4 +335,38 @@ const IndicadoresOperativosTable = forwardRef<HTMLBaseElement, IndicadoresOperat
             </div>
         </div>
     );
+});
+
+export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
+    const { anio, estados } = useEstadosPorAnio();
+    const { user } = useUser();
+
+    const condicionPantalla = pantalla === 'Plan' ? estados[anio]?.plan === 'proceso' : estados[anio]?.memoria === 'proceso';
+    if (condicionPantalla && user?.role === 'HAZI') {
+        return (
+            <div className="ml-auto flex gap-4 items-center justify-end" ref={ref}>
+                <button
+                    className="px-4 py-2 bg-primary text-white rounded"
+                    onClick={() => {
+                        if (window.confirm(t('confirmacionAceptar', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
+                            // Cambio de status a aceptado y envio de notificacion al ADR
+                        }
+                    }}
+                >
+                    {t('aceptarPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                </button>
+                <button
+                    className="px-4 py-2 bg-danger text-white rounded"
+                    onClick={() => {
+                        if (window.confirm(t('confirmacionRechazar', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
+                            // Cambio de status a borrador y envio de notificacion al ADR
+                            // ¿Mensaje al ADR? ¿Motivo de rechazo?
+                        }
+                    }}
+                >
+                    {t('rechazarPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                </button>
+            </div>
+        );
+    }
 });

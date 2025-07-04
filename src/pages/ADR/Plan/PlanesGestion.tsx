@@ -4,7 +4,7 @@ import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { CamposPlanMemoria } from './PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, CamposPlanMemoria } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
@@ -120,6 +120,7 @@ const Index = () => {
                                 {mensajeError && <div className="text-red-500">{mensajeError}</div>}
                             </div>
                         )}
+                        <BotonesAceptacionYRechazo pantalla="Plan" />
                     </>
                 }
                 zonaExplicativa={
