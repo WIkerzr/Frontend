@@ -35,6 +35,7 @@ export interface IndicadorResultado {
     Id: number;
     NameEs: string;
     NameEu?: string;
+    RegionsId?: string;
     Description?: string;
     DisaggregationVariables?: any;
     CalculationMethodology?: any;

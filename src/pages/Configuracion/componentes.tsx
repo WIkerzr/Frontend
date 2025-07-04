@@ -21,6 +21,7 @@ import { useUsers } from './Usuarios';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { NewModal } from '../../components/Utils/utils';
+import { useLocation } from 'react-router-dom';
 
 export const newUser: UserID = {
     name: '',
@@ -174,7 +175,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
         setErrorMessage(null);
         setSuccessMessage(null);
         let response: Response | null = null;
-
+        console.log('location');
+        console.log(location);
         try {
             setIsLoading('loading');
             if (accion === 'editar') {
@@ -282,6 +284,9 @@ type ModalNuevoIndicadorProps = {
 
 export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen, onClose, onSave, accion, datosIndicador, tipoIndicador }) => {
     const { t, i18n } = useTranslation();
+    const { regionSeleccionada } = useRegionContext();
+    const location = useLocation();
+
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(datosIndicador);
     const [mensaje, setMensaje] = useState('');
     const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
@@ -315,6 +320,14 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 
     const handleGuardarNuevoRealizacion = async () => {
         const token = sessionStorage.getItem('token');
+        const datosRealizacion: IndicadorRealizacion = {
+            ...descripcionEditable,
+            RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
+            Resultados: descripcionEditable.Resultados?.map((resultado) => ({
+                ...resultado,
+                RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
+            })),
+        };
         const response = await fetch('https://localhost:44300/api/nuevoIndicadores', {
             method: 'POST',
             headers: {
@@ -322,9 +335,47 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(descripcionEditable),
+            body: JSON.stringify(location.pathname === '/adr/indicadoresADR' ? datosRealizacion : descripcionEditable),
         });
-        validadorRespuestasBBDD(response);
+        if (response.ok) {
+            const indicadorNuevo = await response.json();
+
+            let realizaciones: IndicadorRealizacion[] = [];
+            const storedRealizacion = localStorage.getItem('indicadorRealizacion');
+            if (storedRealizacion) {
+                realizaciones = JSON.parse(storedRealizacion);
+            }
+            realizaciones.push({
+                ...descripcionEditable,
+                Id: indicadorNuevo.data.Id,
+                RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
+            });
+            localStorage.setItem('indicadorRealizacion', JSON.stringify(realizaciones));
+            if (indicadorNuevo.data.Resultados && indicadorNuevo.data.Resultados.length > 0) {
+                let resultados: IndicadorRealizacion[] = [];
+                const storedResultado = localStorage.getItem('indicadoresResultado');
+                if (storedResultado) {
+                    resultados = JSON.parse(storedResultado);
+                }
+                const idsEnresultados = new Set(resultados.map((obj) => obj.Id));
+                indicadorNuevo.data.Resultados.forEach((obj: IndicadorRealizacion) => {
+                    if (!idsEnresultados.has(obj.Id)) {
+                        resultados.push({
+                            Id: obj.Id,
+                            NameEs: obj.NameEs,
+                            CalculationMethodology: obj.CalculationMethodology,
+                            Description: obj.Description,
+                            NameEu: obj.NameEu,
+                            RegionsId: obj.RegionsId,
+                            RelatedAxes: obj.RelatedAxes,
+                            Resultados: obj.Resultados,
+                        });
+                    }
+                });
+                localStorage.setItem('indicadoresResultado', JSON.stringify(resultados));
+            }
+        }
+        //validadorRespuestasBBDD(response);
     };
 
     const handleEditarIndicadorRealizacion = async () => {

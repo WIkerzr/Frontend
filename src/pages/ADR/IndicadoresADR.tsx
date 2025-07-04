@@ -1,98 +1,75 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
-import { Loading } from '../../components/Utils/animations';
 import { ModalNuevoIndicador } from '../Configuracion/componentes';
-import { TablaIndicadores } from './Componentes';
+import { Loading } from '../../components/Utils/animations';
+import { TablaIndicadores } from '../ADR/Componentes';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Index = () => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
-    const dato1 = {
-        Id: 1,
-        NameEs: 'RE01UK. Número de jornadas de información y sensibilización organizadas',
-        NameEu: null,
-        Description: null,
-        DisaggregationVariables: null,
-        CalculationMethodology: null,
-        RelatedAxes: null,
-        Resultados: [
-            {
-                Id: 1,
-                NameEs: 'RS01UK. Número de personas asistentes a jornadas de información y sensibilización',
-                NameEu: null,
-                Description: null,
-                DisaggregationVariables: null,
-                CalculationMethodology: null,
-                RelatedAxes: null,
-            },
-        ],
-    };
+    const { regionSeleccionada } = useRegionContext();
+
     const [indicadorRealizacion, setIndicadorRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadorResultado, setIndicadorResultado] = useState<IndicadorResultado[]>([]);
     const [modalNuevo, setModalNuevo] = useState(false);
 
+    const filtrarPorAdr = (indicadores: IndicadorRealizacion[]): IndicadorRealizacion[] => {
+        return indicadores.filter((indicador) => String(indicador.RegionsId) === String(regionSeleccionada));
+    };
+
     useEffect(() => {
-        const limpiarIndicador = (i: any): IndicadorRealizacion => ({
-            Id: i.Id,
-            NameEs: i.NameEs,
-            NameEu: i.NameEu ?? undefined,
-            Description: i.Description ?? undefined,
-            DisaggregationVariables: i.DisaggregationVariables ?? undefined,
-            CalculationMethodology: i.CalculationMethodology ?? undefined,
-            RelatedAxes: i.RelatedAxes ?? undefined,
-            Resultados: i.Resultados?.map(
-                (r: any): IndicadorResultado => ({
-                    Id: r.Id,
-                    NameEs: r.NameEs,
-                    NameEu: r.NameEu ?? undefined,
-                    Description: r.Description ?? undefined,
-                    DisaggregationVariables: r.DisaggregationVariables ?? undefined,
-                    CalculationMethodology: r.CalculationMethodology ?? undefined,
-                    RelatedAxes: r.RelatedAxes ?? undefined,
-                })
-            ),
-        });
+        setLoading(true);
 
-        const datoLimpio = limpiarIndicador(dato1);
-        setIndicadorRealizacion([datoLimpio]);
-        const indicadoresResultado: IndicadorResultado[] = [datoLimpio]
-            .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
-            .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
-            .sort((a, b) => a.Id - b.Id);
-        setIndicadorResultado(indicadoresResultado);
+        const storedRealizacion = localStorage.getItem('indicadorRealizacion');
+        const storedResultado = localStorage.getItem('indicadoresResultado');
+        if (storedRealizacion && storedResultado) {
+            const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
+            const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
 
-        //     setLoading(true);
-        //     const token = localStorage.getItem('token');
-        //     const fetchUsers = async () => {
-        //         try {
-        //             const res = await fetch('https://localhost:44300/api/indicadores', {
-        //                 headers: {
-        //                     Authorization: `Bearer ` + token,
-        //                     'Content-Type': 'application/json',
-        //                 },
-        //             });
-        //             const data = await res.json();
-        //             const datosIndicador: IndicadorRealizacion[] = data.data;
-        //             if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
-        //             setIndicadorRealizacion(datosIndicador);
+            const indicadoresRealizacionFiltrado = filtrarPorAdr(indicadoresRealizacion);
+            const indicadoresResultadoFiltrado = filtrarPorAdr(indicadoresResultado);
+            setIndicadorRealizacion(indicadoresRealizacionFiltrado);
+            setIndicadorResultado(indicadoresResultadoFiltrado);
+            setLoading(false);
+            return;
+        }
+        const token = localStorage.getItem('token');
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch('https://localhost:44300/api/indicadores', {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                const datosIndicador: IndicadorRealizacion[] = data.data;
+                if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
+                localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
 
-        //             const indicadoresResultado: IndicadorResultado[] = datosIndicador
-        //                 .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
-        //                 .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
-        //                 .sort((a, b) => a.Id - b.Id);
+                const indicadoresResultado: IndicadorResultado[] = datosIndicador
+                    .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
+                    .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
+                    .sort((a, b) => a.Id - b.Id);
 
-        //             setIndicadorResultado(indicadoresResultado);
-        //             localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-        //         } finally {
-        setLoading(false);
-        //         }
-        //     };
-        //     fetchUsers();
-    }, []);
+                localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+
+                const indicadoresRealizacionFiltrado = filtrarPorAdr(datosIndicador);
+                const indicadoresResultadoFiltrado = filtrarPorAdr(indicadoresResultado);
+                setIndicadorRealizacion(indicadoresRealizacionFiltrado);
+                setIndicadorResultado(indicadoresResultadoFiltrado);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUsers();
+    }, [regionSeleccionada]);
 
     return (
-        <div className="w-full gap-5">
+        <div className="flex w-full gap-5">
             {loading ? (
                 <Loading />
             ) : (
@@ -131,5 +108,4 @@ const Index = () => {
         </div>
     );
 };
-
 export default Index;

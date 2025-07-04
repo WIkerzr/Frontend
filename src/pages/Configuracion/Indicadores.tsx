@@ -1,6 +1,6 @@
 import 'tippy.js/dist/tippy.css';
-import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
 import { ModalNuevoIndicador } from './componentes';
 import { Loading } from '../../components/Utils/animations';
@@ -15,6 +15,16 @@ const Index = () => {
 
     useEffect(() => {
         setLoading(true);
+        const storedRealizacion = localStorage.getItem('indicadorRealizacion');
+        const storedResultado = localStorage.getItem('indicadoresResultado');
+        if (storedRealizacion && storedResultado) {
+            const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
+            setIndicadorRealizacion(indicadoresRealizacion);
+            const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
+            setIndicadorResultado(indicadoresResultado);
+            setLoading(false);
+            return;
+        }
         const token = localStorage.getItem('token');
         const fetchUsers = async () => {
             try {
@@ -28,6 +38,7 @@ const Index = () => {
                 const datosIndicador: IndicadorRealizacion[] = data.data;
                 if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
                 setIndicadorRealizacion(datosIndicador);
+                localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
 
                 const indicadoresResultado: IndicadorResultado[] = datosIndicador
                     .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
