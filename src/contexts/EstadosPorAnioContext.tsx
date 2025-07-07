@@ -102,9 +102,12 @@ export const useEstadosPorAnio = () => {
     const { anio, estados } = ctx;
     const estadoPlan = estados[anio]?.plan ?? 'borrador';
     const editarPlan = estadoPlan === 'borrador';
+    const estadoMemoria = estados[anio]?.memoria ?? 'borrador';
+    const editarMemoria = ['borrador', 'cerrado'].includes(estadoMemoria);
 
     return {
         ...ctx,
         editarPlan,
+        editarMemoria,
     };
 };

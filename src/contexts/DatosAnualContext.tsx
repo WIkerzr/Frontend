@@ -1,17 +1,22 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { YearData, yearIniciado } from '../types/tipadoPlan';
+import { servicioIniciadoVacio, YearData, yearIniciado } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { useRegionContext } from './RegionContext';
+import { Servicios } from '../types/GeneralTypes';
 
 interface YearContextType {
     yearData: YearData;
     block: boolean;
     setYearData: (data: YearData) => void;
-    datosEditandoAccion: DatosAccion | undefined;
-    setDatosEditandoAccion: (data: DatosAccion) => void;
+    datosEditandoAccion: DatosAccion;
+    setDatosEditandoAccion: React.Dispatch<React.SetStateAction<DatosAccion>>;
+    datosEditandoServicio: Servicios | null;
+    setDatosEditandoServicio: React.Dispatch<React.SetStateAction<Servicios | null>>;
+    SeleccionEditarServicio: (idServicio: string | null) => void;
     SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
     SeleccionEditarGuardar: () => void;
+    GuardarEdicionServicio: () => void;
     NuevaAccion: (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
 }
 
@@ -24,6 +29,9 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const stored = localStorage.getItem('datosAno');
         return stored ? JSON.parse(stored) : yearIniciado;
     });
+    const setYearData = (data: YearData) => {
+        setYearDataState(data);
+    };
 
     const [datosEditandoAccion, setDatosEditandoAccion] = useState<DatosAccion>(() => {
         const stored = localStorage.getItem('datosAccionModificado');
@@ -38,10 +46,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('datosAccionModificado', JSON.stringify(datosEditandoAccion));
     }, [datosEditandoAccion]);
 
-    const setYearData = (data: YearData) => {
-        setYearDataState(data);
-    };
-
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
         setIdEjeEditado(idEjePrioritario);
         const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
@@ -55,6 +59,25 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             }
         } else {
             setBlock(false);
+        }
+    };
+
+    const [datosEditandoServicio, setDatosEditandoServicio] = useState<Servicios | null>(() => {
+        const stored = localStorage.getItem('datosEditandoServicio');
+        return stored ? JSON.parse(stored) : null;
+    });
+    useEffect(() => {
+        localStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
+    }, [datosEditandoServicio]);
+
+    const SeleccionEditarServicio = (idServicio: string | null) => {
+        if (idServicio) {
+            const servicioSeleccionado = yearData.servicios!.find((servicio) => `${servicio.id}` === idServicio);
+            if (servicioSeleccionado) {
+                setDatosEditandoServicio(servicioSeleccionado);
+            }
+        } else {
+            setDatosEditandoServicio(servicioIniciadoVacio);
         }
     };
 
@@ -83,6 +106,16 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         setIdEjeEditado('');
     };
 
+    const GuardarEdicionServicio = () => {
+        if (!datosEditandoServicio) return;
+
+        const nuevosServicios = yearData.servicios!.map((servicio) => (servicio.id === datosEditandoServicio.id ? datosEditandoServicio : servicio));
+
+        setYearData({
+            ...yearData,
+            servicios: nuevosServicios,
+        });
+    };
     const NuevaAccion = (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
         const ejesSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
         const datos = {
@@ -113,7 +146,22 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [block, setBlock] = useState<boolean>(false);
 
     return (
-        <YearContext.Provider value={{ yearData, block, setYearData, datosEditandoAccion, setDatosEditandoAccion, NuevaAccion, SeleccionEditarAccion, SeleccionEditarGuardar }}>
+        <YearContext.Provider
+            value={{
+                yearData,
+                block,
+                setYearData,
+                datosEditandoAccion,
+                setDatosEditandoAccion,
+                NuevaAccion,
+                SeleccionEditarAccion,
+                SeleccionEditarGuardar,
+                SeleccionEditarServicio,
+                datosEditandoServicio,
+                setDatosEditandoServicio,
+                GuardarEdicionServicio,
+            }}
+        >
             {children}
         </YearContext.Provider>
     );

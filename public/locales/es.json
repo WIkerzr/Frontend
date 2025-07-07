@@ -33,6 +33,7 @@
     "metaFinal": "Meta Final",
     "porcentaje": "Porcentaje",
 
+    "campoObligatorio": "Campo obligatorio",
     "crearindicadorRelacionado": "Crear indicador relacionado",
     "editarindicadorRelacionado": "Editar indicador relacionado",
     "crearNueva": "Crear nueva",
@@ -113,6 +114,7 @@
     "CambiosGuardados": "Cambios guardados correctamente.",
     "CambioContrasena": "Cambio de contraseña",
 
+    "agregarFila": "Agregar Fila",
     "agregarUsuario": "Agregar nuevo usuario",
 
     "unitMed": "Unidad de medida",

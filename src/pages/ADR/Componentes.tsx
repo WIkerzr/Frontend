@@ -28,16 +28,11 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
     const idCounter = useRef(1000);
     const [acciones, setAcciones] = useState<AccionAccesoria[]>(listadoMap);
     const [nuevaAccion, setNuevaAccion] = useState('');
-    const [inputError, setInputError] = useState(false);
+    const { SeleccionEditarServicio } = useYear();
 
     const handleNuevaAccion = () => {
-        if (!nuevaAccion.trim() || acciones.length >= 5) {
-            setInputError(!nuevaAccion.trim());
-            return;
-        }
         setAcciones((prev) => [{ id: idCounter.current++, texto: nuevaAccion.trim() }, ...prev.slice(0, 5 - 1)]);
         setNuevaAccion('');
-        setInputError(false);
     };
 
     const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
@@ -48,34 +43,18 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
         <div className="grid grid-cols-3 gap-x-6 gap-y-6">
             {mostrarInput && (
                 <div className="bg-white rounded-xl border border-[#ECECEC] p-6 flex flex-col shadow-sm">
-                    <label className="text-sm text-gray-500 mb-2">{nombre}</label>
-                    <input
-                        className={`border border-[#ECECEC] rounded p-2 mb-4 text-sm bg-[#FAFAFB] focus:outline-none focus:ring-2 focus:ring-blue-200 transition ${inputError ? 'border-red-400' : ''}`}
-                        value={nuevaAccion}
-                        onChange={(e) => {
-                            setNuevaAccion(e.target.value);
-                            setInputError(false);
-                        }}
-                        placeholder="Introduce el nombre"
-                        maxLength={200}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleNuevaAccion();
-                        }}
-                    />
-                    <button
-                        className="bg-[#4463F7] text-white px-4 py-2 rounded hover:bg-[#254edb] self-end text-sm transition disabled:bg-gray-300"
-                        onClick={handleNuevaAccion}
-                        disabled={acciones.length >= 5}
-                    >
-                        + {nombre}
-                    </button>
+                    <NavLink to="/adr/servicios/editando" className="group" onClick={() => SeleccionEditarServicio(null)}>
+                        <button className="bg-[#4463F7] text-white px-4 py-2 rounded hover:bg-[#254edb] self-end text-sm transition disabled:bg-gray-300" onClick={handleNuevaAccion}>
+                            + {nombre}
+                        </button>
+                    </NavLink>
                 </div>
             )}
             {accionesMostradas.map((accion) => (
                 <div key={accion.id} className="card-div">
                     <div className="flex-1 text-base text-[#222] mb-0 pr-2">{accion.texto}</div>
                     <div className="flex flex-col justify-start items-end gap-2 border-l border-[#ECECEC] pl-4">
-                        <NavLink to="/adr/servicios/editando" className="group">
+                        <NavLink to="/adr/servicios/editando" className="group" onClick={() => SeleccionEditarServicio(accion.id.toString())}>
                             <button aria-label={`Editar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">
                                 <IconPencil />
                             </button>

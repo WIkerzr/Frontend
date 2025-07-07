@@ -1,4 +1,4 @@
-import { Estado } from './GeneralTypes';
+import { Estado, Servicios } from './GeneralTypes';
 import { datosPruebaIndicadoreResultado } from './Indicadores';
 import { DatosAccion } from './TipadoAccion';
 export type Year = number;
@@ -45,6 +45,7 @@ export interface YearData {
     nombreRegion: string;
     plan: Plan;
     memoria: Memoria;
+    servicios?: Servicios[];
 }
 
 export interface InitialDataResponse {
@@ -638,6 +639,37 @@ Comunicación de la ADR (difusión de actividades propias, elaboración de notas
 29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
         valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
     },
+    servicios: [
+        {
+            id: 1,
+            nombre: 'Liderar la realización y el despliegue del nuevo PROGRAMA COMARCAL DE DESARROLLO RURAL (PCDR).',
+            descripcion: `TAREAS INTERNAS:
+En las tareas internas generales se realiza: elaboración del plan de gestión y presupuestos anuales y seguimiento de los mismos; elaboración de cuentas y memoria anuales; encuentros con otras áreas de la Cuadrilla; coordinación de la participación de la asociación y gestión de la información de la misma; trámites administrativos (pagos de nóminas, facturas, actas, escritos, certificaciones, etc…);
+Juntas Directivas y Asambleas Generales o Extraordinarias; atención al público (presencial,teléfono, mail, etc…); solicitud y firma de convenios con Gobierno Vasco, Diputación Foral de Álava y Cuadrilla de Llanada Alavesa y su justificación (parciales y final); prevención de riesgos laborales; gestiones y consultas laborales y fiscales con la gestoría. Gestión del cobro de las aportaciones de los ayuntamientos. Análisis de convocatorias de ayudas (ferias de DFA, cooperación, eventos de G.V.) y colaboración de otros agentes para actividades concretas (tríptico y actividades semana desarrollo rural, identificativo para producto local, etc…).`,
+            indicadores: [
+                {
+                    indicador: 'Tareas Internas ADR. Horas',
+                    previsto: {
+                        valor: '500 horas',
+                    },
+                    alcanzado: {
+                        valor: '',
+                    },
+                },
+                {
+                    indicador: `Cursos y Jornadas de Formación
+Nº y horas`,
+                    previsto: {
+                        valor: `4 cursos
+80 horas`,
+                    },
+                    alcanzado: {
+                        valor: '',
+                    },
+                },
+            ],
+        },
+    ],
 };
 
 export const datosRegion: InitialDataResponse = {
@@ -665,6 +697,23 @@ export const datosRegion: InitialDataResponse = {
                 dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
 29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
                 valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
+            },
+        },
+    ],
+};
+
+export const servicioIniciadoVacio: Servicios = {
+    id: 0,
+    nombre: '',
+    descripcion: ``,
+    indicadores: [
+        {
+            indicador: '',
+            previsto: {
+                valor: '',
+            },
+            alcanzado: {
+                valor: '',
             },
         },
     ],
