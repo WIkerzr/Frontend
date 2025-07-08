@@ -26,10 +26,13 @@ const Index = () => {
     useEffect(() => {
         setEjes(yearData.plan.ejes);
         setSelected(yearData.plan.ejesPrioritarios.map((eje) => eje.id));
+        if (yearData.plan.ejesPrioritarios.length > 1) {
+            setLocked(true);
+        }
     }, []);
 
     const handleSave = () => {
-        if (selected.length === 3) setLocked(true);
+        setLocked(true);
         const ejesPrioritarios = { ...yearData };
         const ejesSeleccionados = yearData.plan.ejes.filter((eje) => selected.includes(eje.id));
 
@@ -45,7 +48,7 @@ const Index = () => {
                     zonaBtn={
                         <>
                             <span className="text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
-                            <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked || selected.length !== 3}>
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked}>
                                 {t('guardar')}
                             </button>
                         </>
@@ -69,7 +72,7 @@ const Index = () => {
                                         className="form-checkbox h-5 w-5 text-green-600 accent-green-600"
                                         checked={selected.includes(accion.id)}
                                         onChange={() => handleCheck(accion.id)}
-                                        disabled={locked || (!selected.includes(accion.id) && selected.length === 3)}
+                                        disabled={locked}
                                         id={`checkbox-${accion.id}`}
                                     />
                                     <label htmlFor={`checkbox-${accion.id}`} className={`ml-3 cursor-pointer w-full ${selected.includes(accion.id) ? 'text-green-700 font-semibold' : ''}`}>

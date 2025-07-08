@@ -175,7 +175,13 @@ const Sidebar = () => {
                                 <li className="nav-item">
                                     <ul>
                                         <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />
-                                        <SideBarList texto={t('Acciones')} link="/adr/acciones" src={IconAcciones} role={role} disabled={yearData.plan.ejesPrioritarios.length != 3} />
+                                        <SideBarList
+                                            texto={t('Acciones')}
+                                            link="/adr/acciones"
+                                            src={IconAcciones}
+                                            role={role}
+                                            disabled={!(yearData.plan.ejesPrioritarios.length > 0 && yearData.plan.ejesPrioritarios.length <= 3)}
+                                        />
                                         <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesAccesorias" src={IconAccionesAccesorias} role={role} />
                                         <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
                                         <li className="nav-item">

@@ -4,15 +4,41 @@ import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { useNavigate } from 'react-router-dom';
+
+interface ModalAvisoProps {
+    isOpen: boolean;
+    onClose: () => void;
+    mensaje: string;
+}
+const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md text-center">
+                <h2 className="text-lg font-semibold mb-4">Aviso</h2>
+                <p className="mb-6">{mensaje}</p>
+                <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const Index: React.FC = () => {
-    const { yearData } = useYear();
-    const ejesPrioritarios = yearData.plan.ejesPrioritarios;
     const { t, i18n } = useTranslation();
+    const { yearData } = useYear();
+    const navigate = useNavigate();
+    const ejesPrioritarios = yearData.plan.ejesPrioritarios;
     const { anio } = useEstadosPorAnio();
 
     const ejesSeleccionados = ejesPrioritarios.slice(0, 3);
 
+    if (!(ejesPrioritarios.length > 0 && ejesPrioritarios.length <= 3)) {
+        return <ModalAviso isOpen={true} mensaje={t('error:errorFaltEjesPrioritarios')} onClose={() => navigate('/adr/ejes')} />;
+    }
     return (
         <div className="panel">
             <ZonaTitulo

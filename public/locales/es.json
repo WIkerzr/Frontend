@@ -12,7 +12,7 @@
     "configuracion": "Configuración",
     "indicadores": "Indicadores",
     "usuarios": "Usuarios",
-    "seleccionar3Ejes": "Se deben seleccionar exactamente tres ejes",
+    "seleccionar3Ejes": "Se deben seleccionar de uno a tres ejes",
     "seleccionarCheckbox3Ejes": "Una vez guardado, no se podrán modificar",
 
     "Accion": "Acción",
