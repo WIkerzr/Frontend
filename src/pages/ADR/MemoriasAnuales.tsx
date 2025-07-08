@@ -6,6 +6,8 @@ import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../components/Icon/IconEnviar.svg';
 import { useState } from 'react';
+import { generarDocumentoWord } from '../../components/Utils/genWORD';
+import { useYear } from '../../contexts/DatosAnualContext';
 
 interface Archivo {
     nombre: string;
@@ -24,6 +26,7 @@ const Index = () => {
     const { anio, estados } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const { yearData } = useYear();
 
     return (
         <div className="panel">
@@ -41,7 +44,12 @@ const Index = () => {
                         {estados[anio]?.memoria === 'borrador' && (
                             <div className="flex items-center gap-4 justify-end">
                                 <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]">{t('guardar')}</button>
-                                <button className="px-4 py-2 bg-gray-400 text-white rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]">
+                                <button
+                                    className="px-4 py-2 bg-gray-400 text-white rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]"
+                                    onClick={() => {
+                                        generarDocumentoWord(yearData, 'Memoria');
+                                    }}
+                                >
                                     <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
                                     {t('descargarBorrador')}
                                 </button>

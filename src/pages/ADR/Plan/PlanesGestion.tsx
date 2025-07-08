@@ -9,6 +9,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
 import { validarCamposObligatoriosAccion } from '../Componentes';
+import { generarDocumentoWord } from '../../../components/Utils/genWORD';
 
 const Index = () => {
     const { anio, estados, editarPlan } = useEstadosPorAnio();
@@ -89,6 +90,7 @@ const Index = () => {
                                         disabled={!camposRellenos}
                                         onClick={() => {
                                             if (!camposRellenos) return;
+                                            generarDocumentoWord(yearData, 'Plan');
                                         }}
                                         className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
                                         ${camposRellenos ? 'bg-gray-400 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
@@ -97,7 +99,6 @@ const Index = () => {
                                         <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
                                         {t('descargarBorrador')}
                                     </button>
-
                                     <NavLink
                                         to={camposRellenos ? '/adr/planesGestion/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Plan' }}
