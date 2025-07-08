@@ -59,6 +59,8 @@
     "Ano": "Año",
     "Tipo": "Tipo",
     "CuadroMando": "Cuadro de mando",
+    "CuadroMandoSelectorTipeAction": "Seleccion tipo",
+    "CuadroMandoSelectorYear": "Seleccion año",
     "informes": "Informes",
     "ejesTitulo": "Selección de ejes prioritarios",
     "planTitulo": "Plan de Gestión Anual del PCDR",

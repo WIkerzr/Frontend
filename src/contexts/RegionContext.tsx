@@ -12,6 +12,7 @@ type RegionContextType = {
     regionSeleccionada: number | null;
     // eslint-disable-next-line no-unused-vars
     setRegionSeleccionada: (id: number | null) => void;
+    allYears: number[];
 };
 
 const RegionContext = createContext<RegionContextType>({
@@ -26,6 +27,7 @@ const RegionContext = createContext<RegionContextType>({
     error: null,
     regionSeleccionada: null,
     setRegionSeleccionada: () => {},
+    allYears: [],
 });
 
 export const useRegionContext = () => useContext(RegionContext);
@@ -97,6 +99,12 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setRegionSeleccionadaState(id);
     };
 
+    const allYears = React.useMemo(() => {
+        if (!regionData?.data) return [];
+        const years = regionData.data.map((item) => item.year);
+        return Array.from(new Set(years)).sort();
+    }, [regionData]);
+
     return (
         <RegionContext.Provider
             value={{
@@ -107,6 +115,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 error,
                 regionSeleccionada,
                 setRegionSeleccionada,
+                allYears,
             }}
         >
             {children}

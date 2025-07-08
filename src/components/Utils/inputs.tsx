@@ -158,7 +158,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
     title: string;
-    options: readonly string[];
+    options: readonly number[] | string[];
 }
 export const SimpleDropdown = ({ title, options, value }: SelectProps) => {
     const { t } = useTranslation();
@@ -169,7 +169,7 @@ export const SimpleDropdown = ({ title, options, value }: SelectProps) => {
                 <option disabled>{t('seleccionaopcion')}</option>
                 {options.map((text) => (
                     <option key={text} value={text}>
-                        {text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()}
+                        {typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : text}
                     </option>
                 ))}
             </select>

@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
-import { useYear } from '../../contexts/DatosAnualContext';
 import { sortBy } from 'lodash';
 import { DataTableSortStatus, DataTableColumnTextAlign, DataTable } from 'mantine-datatable';
 import { forwardRef, useState, useEffect } from 'react';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { visualColumnByPath } from '../ADR/Acciones/Columnas';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 interface tablaIndicadoresProps {
     indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[];
@@ -80,9 +80,16 @@ const TablaCuadroMando = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ in
     );
 });
 
+const actions = ['Todos', 'Acciones', 'Acciones y Proyectos', 'Servicios'];
+
 const Index = () => {
     const { t } = useTranslation();
-    const { yearData } = useYear();
+    const { allYears, regionData } = useRegionContext();
+    const opcionesYear = ['Todos', ...allYears.map(String)];
+
+    const [yearFilter, setYearFilter] = useState<string>(opcionesYear[0]);
+
+    const [tipeAction, setTipeAction] = useState<string>('Todos');
 
     return (
         <div className="panel">
@@ -93,22 +100,84 @@ const Index = () => {
                     </div>
                 }
             />
-
-            <div className="p-5 flex flex-col gap-4 w-full">
-                {yearData.plan.ejesPrioritarios.map(
-                    (ejes, ejesIdx) =>
-                        ejes.acciones.length > 0 && (
-                            <div key={ejes.id || ejesIdx} className="paneln0">
-                                {ejes.acciones.map((acciones, accionesIdx) => (
-                                    <div key={acciones.id || accionesIdx} className="panel">
-                                        <h5 className="font-semibold text-lg dark:text-white-light mb-5">{acciones.accion}</h5>
-                                        <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} />
-                                        <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreResultado ?? []} titulo={t('indicadoresDeResultado')} />
-                                    </div>
-                                ))}
-                            </div>
-                        )
-                )}
+            <div className="p-5 flex flex-col gap-4 w-full paneln0">
+                <div className="flex-1 flex justify-end gap-4">
+                    <div className="w-[200px] ">
+                        <label className="block mb-1">{t('CuadroMandoSelectorTipeAction')}</label>
+                        <select
+                            className="w-full border rounded p-2 resize-y"
+                            value={tipeAction}
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    setTipeAction(e.target.value);
+                                }
+                            }}
+                        >
+                            {actions.map((action) => (
+                                <option key={action} value={action}>
+                                    {action}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="w-[200px]">
+                        <label className="block mb-1">{t('CuadroMandoSelectorYear')}</label>
+                        <select
+                            className="w-full border rounded p-2 resize-y"
+                            value={yearFilter}
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    setYearFilter(e.target.value);
+                                }
+                            }}
+                        >
+                            {opcionesYear.map((anios) => (
+                                <option key={anios} value={anios}>
+                                    {anios}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                {regionData &&
+                    regionData.data.map(
+                        (year, yearIdx) =>
+                            (yearFilter === 'Todos' || `${year.year}` === yearFilter) && (
+                                <div key={year.nombreRegion + yearIdx}>
+                                    {(tipeAction === 'Acciones' || tipeAction === 'Todos') &&
+                                        year.servicios &&
+                                        year.plan.ejesPrioritarios.map(
+                                            (ejes, ejesIdx) =>
+                                                ejes.acciones.length > 0 && (
+                                                    <div key={ejes.id || ejesIdx}>
+                                                        {ejes.acciones.map((acciones, accionesIdx) => (
+                                                            <div key={acciones.id || accionesIdx} className="panel mt-6">
+                                                                <span>
+                                                                    Accion: {year.nombreRegion} + {year.year} + {acciones.accion}
+                                                                </span>
+                                                                <h5 className="font-semibold text-lg dark:text-white-light mb-5">{acciones.accion}</h5>
+                                                                <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} />
+                                                                <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreResultado ?? []} titulo={t('indicadoresDeResultado')} />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )
+                                        )}
+                                    {(tipeAction === 'Servicios' || tipeAction === 'Todos') &&
+                                        year.servicios &&
+                                        year.servicios.map((servicio, servicioIdx) => (
+                                            <div key={servicio.id || servicioIdx} className="panel mt-6">
+                                                <span>
+                                                    Servicio: {year.nombreRegion} + {year.year} + {servicio.nombre}
+                                                </span>
+                                                {/* <h5 className="font-semibold text-lg dark:text-white-light mb-5">{acciones.accion}</h5>
+                                                <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} />
+                                                <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreResultado ?? []} titulo={t('indicadoresDeResultado')} /> */}
+                                            </div>
+                                        ))}
+                                </div>
+                            )
+                    )}
             </div>
         </div>
     );

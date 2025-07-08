@@ -699,6 +699,250 @@ export const datosRegion: InitialDataResponse = {
                 valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
             },
         },
+        {
+            year: 2027,
+            nombreRegion: '',
+            plan: {
+                id: '',
+                status: 'borrador',
+                introduccion: '',
+                ejes: ejesIniado,
+                ejesPrioritarios: [
+                    {
+                        id: '3',
+                        nameEs: 'Telecomunicaciones',
+                        nameEu: 'Telekomunikazioak',
+                        IsActive: true,
+                        acciones: [
+                            {
+                                id: '1',
+                                accion: 'Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
+                                lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
+                                ejeEs: 'Telecomunicaciones',
+                                ejeEu: 'Telekomunikazioak',
+                                datosPlan: {
+                                    ejecutora: 'Durangaldea',
+                                    implicadas: 'Durangaldea',
+                                    comarcal: 'Municipios con todas las zonas rurales',
+                                    supracomarcal: 'Euskadi',
+                                    rangoAnios: '',
+                                    oAccion: `Objetivos generales: fomentar el dinamismo social y sentimiento de pertenencia a la comarca.
+Objetivos específicos: mejorar la comunicación y conexión intracomarcal.`,
+                                    ods: 'Ninguno',
+                                    dAccion: `- Se mantiene la X Semana de Desarrollo Rural con el formato de 4 actividades compaginando las culturales-recreativas y las concernientes a temas de interés socio-económico.
+- La semana de Desarrollo Rural se organiza por una comisión abierta a la participación de quien desee, habitualmente toman parte representantes del Ayuntamiento de celebración y del concejo en su caso, las personas técnicas de cultura, la técnica de turismo y la de ACICSA.
+- La semana se iniciará con el encuentro de igualdad de la comarca.
+- Se mantiene el carácter rotatorio del lugar de celebración y la fecha de celebración del X Lautada Eguna el último domingo de octubre, este año se celebrará en Barrundia el 27 de octubre.
+- Acordar la financiación de Lautada Astea y Eguna con la Cuadrilla de la Llanada.
+- Búsqueda de ayudas para ello: Fundación Vital, Eventos,`,
+                                    presupuesto: `El presupuesto es de 6.000€ más las actuaciones que se gestionan mediante Hazi Fundazioa,Turismo y ACICSA.
+Se trabajará la financiación 2023 para Lautada Eguna y Lautada Astea conjuntamente para que sea:
+33% 2.000€ Fundación Vital, 33% 2.000€ Cuadrilla de la Llanada Alavesa y 2.000€ Subvención de Eventos de G.Vasco solicitado por la Cuadrilla.`,
+                                    iMujHom: '',
+                                    uEuskera: '',
+                                    sostenibilidad: '',
+                                    dInteligent: '',
+                                    observaciones: '',
+                                },
+                                datosMemoria: {
+                                    ejecutora: '1',
+                                    implicadas: '2',
+                                    comarcal: '3',
+                                    supracomarcal: '4',
+                                    rangoAnios: '5',
+                                    sActual: 'Actuación en espera',
+                                    oAccion: `-Mantener y rejuvenecer la población del medio rural.
+-Aumentar la rentabilidad de las explotaciones.
+-Incrementar el número de personas formadas y motivación a la formación.
+Helburu zehatzak / Objetivos específicos:`,
+                                    ods: 'Ninguno',
+                                    dAccionAvances: `-Diversificar el sector impulsando nuevos productos y la transformación agroalimentaria.
+-Favorecer nuevas incorporaciones y rejuvenecer el sector primario.
+-Facilitar la formación y el acceso a infraestructuras y equipos productivos compartidos/colectivos.`,
+                                    presupuestoEjecutado: {
+                                        cuantia: '20',
+                                        fuenteDeFinanciacion: ['Administraciones locales'],
+                                        observaciones: 'observacion 1',
+                                    },
+                                    ejecucionPresupuestaria: {
+                                        previsto: '15',
+                                        ejecutado: '16',
+                                        porcentaje: '17',
+                                    },
+                                    iMujHom: '18',
+                                    uEuskera: '19',
+                                    sostenibilidad: '20',
+                                    dInteligent: '21',
+                                    observaciones: '22',
+                                    dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
+29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
+                                    valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
+                                },
+                                indicadorAccion: {
+                                    indicadoreRealizacion: [
+                                        {
+                                            id: 4,
+                                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+                                            metaAnual: {
+                                                hombres: 10,
+                                                mujeres: 10,
+                                                total: 20,
+                                            },
+                                            ejecutado: {
+                                                hombres: 5,
+                                                mujeres: 10,
+                                                total: 15,
+                                            },
+                                            metaFinal: {
+                                                hombres: 20,
+                                                mujeres: 20,
+                                                total: 40,
+                                            },
+                                            hipotesis: 'Se espera un ligero aumento.',
+                                            idsResultados: [4],
+                                        },
+                                        {
+                                            id: 5,
+                                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+                                            metaAnual: {
+                                                hombres: 0,
+                                                mujeres: 0,
+                                                total: 100,
+                                            },
+                                            ejecutado: {
+                                                hombres: 0,
+                                                mujeres: 0,
+                                                total: 0,
+                                            },
+                                            metaFinal: {
+                                                hombres: 0,
+                                                mujeres: 0,
+                                                total: 300,
+                                            },
+                                            idsResultados: [5],
+                                        },
+                                    ],
+                                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
+                                },
+                                plurianual: false,
+                            },
+                            {
+                                id: '2',
+                                accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
+                                lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
+                                ejeEs: 'Telecomunicaciones',
+                                ejeEu: 'Telekomunikazioak',
+                                datosPlan: {
+                                    ejecutora: '1',
+                                    implicadas: '2',
+                                    comarcal: 'Todas las entidades rurales de la comarca',
+                                    supracomarcal: 'No',
+                                    rangoAnios: '5',
+                                    oAccion: '6',
+                                    ods: '7',
+                                    dAccion: '8',
+                                    presupuesto: '9',
+                                    iMujHom: '10',
+                                    uEuskera: '11',
+                                    sostenibilidad: '12',
+                                    dInteligent: '13',
+                                    observaciones: '14',
+                                },
+                                datosMemoria: {
+                                    ejecutora: '1',
+                                    implicadas: '2',
+                                    comarcal: '3',
+                                    supracomarcal: '4',
+                                    rangoAnios: '5',
+                                    sActual: 'Actuación en espera',
+                                    oAccion: '7',
+                                    ods: '8',
+                                    dAccionAvances: '9',
+                                    presupuestoEjecutado: {
+                                        cuantia: '20',
+                                        fuenteDeFinanciacion: ['Administraciones locales'],
+                                        observaciones: 'observacion 1',
+                                    },
+                                    ejecucionPresupuestaria: {
+                                        previsto: '15',
+                                        ejecutado: '16',
+                                        porcentaje: '17',
+                                    },
+                                    iMujHom: '18',
+                                    uEuskera: '19',
+                                    sostenibilidad: '20',
+                                    dInteligent: '21',
+                                    observaciones: '22',
+                                    dSeguimiento: '23',
+                                    valFinal: '24',
+                                },
+                                indicadorAccion: {
+                                    indicadoreRealizacion: [
+                                        {
+                                            id: 4,
+                                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+                                            metaAnual: {
+                                                hombres: 10,
+                                                mujeres: 10,
+                                                total: 20,
+                                            },
+                                            ejecutado: {
+                                                hombres: 5,
+                                                mujeres: 10,
+                                                total: 15,
+                                            },
+                                            metaFinal: {
+                                                hombres: 20,
+                                                mujeres: 20,
+                                                total: 40,
+                                            },
+                                            hipotesis: 'Se espera un ligero aumento.',
+                                            idsResultados: [4],
+                                        },
+                                        {
+                                            id: 5,
+                                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+                                            metaAnual: {
+                                                hombres: 0,
+                                                mujeres: 0,
+                                                total: 100,
+                                            },
+                                            ejecutado: {
+                                                hombres: 0,
+                                                mujeres: 0,
+                                                total: 0,
+                                            },
+                                            metaFinal: {
+                                                hombres: 0,
+                                                mujeres: 0,
+                                                total: 300,
+                                            },
+                                            idsResultados: [5],
+                                        },
+                                    ],
+                                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
+                                    // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
+                                    // indicadoreResultado: datosPruebaIndicadoreResultado,
+                                },
+                                plurianual: false,
+                            },
+                        ],
+                    },
+                ],
+                proceso: '',
+                generalOperationADR: {
+                    adrInternalTasks: '',
+                    operationalIndicators: [],
+                },
+            },
+            memoria: {
+                id: '',
+                status: 'borrador',
+                dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
+29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
+                valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
+            },
+        },
     ],
 };
 
