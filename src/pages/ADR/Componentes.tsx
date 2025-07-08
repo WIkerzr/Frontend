@@ -1,14 +1,11 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
 import { DatosAccion } from '../../types/TipadoAccion';
-import { indicadorInicial, IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado, IndicadorResultadoAccion } from '../../types/Indicadores';
-import { sortBy } from 'lodash';
-import { DataTable, DataTableSortStatus, DataTableColumnTextAlign } from 'mantine-datatable';
-import { visualColumnByPath } from './Acciones/Columnas';
+import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -367,79 +364,6 @@ export const MostrarAvisoCampos: React.FC<MostrarAvisoCamposProps> = ({ datos, t
         </NavLink>
     );
 };
-
-interface tablaIndicadoresProps {
-    indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[];
-    titulo: string;
-}
-
-export const TablaCuadroMando = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ indicador, titulo }, ref) => {
-    const { t } = useTranslation();
-    const [initialRecords, setInitialRecords] = useState(sortBy(indicador, 'id'));
-    const [recordsData] = useState(initialRecords);
-
-    const [search] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
-
-    const columnMetaAnual = [visualColumnByPath('metaAnual.hombres', t('Hombre')), visualColumnByPath('metaAnual.mujeres', t('Mujer')), visualColumnByPath('metaAnual.total', t('Total'))];
-
-    const columnEjecutadoAnual = [visualColumnByPath('ejecutado.hombres', t('Hombre')), visualColumnByPath('ejecutado.mujeres', t('Mujer')), visualColumnByPath('ejecutado.total', t('Total'))];
-
-    const columnPorcentaje = [visualColumnByPath('porcentajeHombres', t('Hombre')), visualColumnByPath('porcentajeMujeres', t('Mujer')), visualColumnByPath('porcentajeTotal', t('Total'))];
-    //const columnMetaFinal = [visualColumnByPath('metaFinal.hombres', t('Hombre')), visualColumnByPath('metaFinal.mujeres', t('Mujer')), visualColumnByPath('metaFinal.total', t('Total'))];
-    const columnNombre = [visualColumnByPath('descripcion', titulo)];
-
-    const columnGroups = [
-        { id: 'descripcion', title: ``, columns: columnNombre },
-        { id: 'metaAnual', title: t('metaAnual'), textAlign: 'center' as DataTableColumnTextAlign, columns: columnMetaAnual },
-        { id: 'ejecutado', title: t('ejecutado'), textAlign: 'center' as DataTableColumnTextAlign, columns: columnEjecutadoAnual },
-        { id: 'porcentaje', title: t('porcentaje'), textAlign: 'center' as DataTableColumnTextAlign, columns: columnPorcentaje },
-        //{ id: 'metaFinal', title: t('metaFinal'), textAlign: 'center' as DataTableColumnTextAlign, columns: columnMetaFinal },
-    ];
-
-    useEffect(() => {
-        setInitialRecords(() => {
-            if (!search.trim()) return sortBy(indicador, 'id');
-            const s = search.toLowerCase();
-            return indicador.filter(
-                (item) =>
-                    (item.descripcion && String(item.descripcion).toLowerCase().includes(s)) ||
-                    (item.metaAnual?.hombres !== undefined && String(item.metaAnual.hombres).toLowerCase().includes(s)) ||
-                    (item.metaAnual?.mujeres !== undefined && String(item.metaAnual.mujeres).toLowerCase().includes(s)) ||
-                    (item.metaAnual?.total !== undefined && String(item.metaAnual.total).toLowerCase().includes(s)) ||
-                    (item.ejecutado?.hombres !== undefined && String(item.ejecutado.hombres).toLowerCase().includes(s)) ||
-                    (item.ejecutado?.mujeres !== undefined && String(item.ejecutado.mujeres).toLowerCase().includes(s)) ||
-                    (item.ejecutado?.total !== undefined && String(item.ejecutado.total).toLowerCase().includes(s)) ||
-                    (item.metaFinal?.hombres !== undefined && String(item.metaFinal.hombres).toLowerCase().includes(s)) ||
-                    (item.metaFinal?.mujeres !== undefined && String(item.metaFinal.mujeres).toLowerCase().includes(s)) ||
-                    (item.metaFinal?.total !== undefined && String(item.metaFinal.total).toLowerCase().includes(s)) ||
-                    (item.hipotesis && item.hipotesis.toLowerCase().includes(s))
-            );
-        });
-    }, [search, indicador]);
-
-    useEffect(() => {
-        const data = sortBy(initialRecords, sortStatus.columnAccessor);
-        setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-    }, [sortStatus]);
-
-    return (
-        <div className="datatables" ref={ref}>
-            <DataTable
-                className="whitespace-nowrap table-hover mantine-table"
-                records={recordsData}
-                groups={columnGroups}
-                withRowBorders={false}
-                withColumnBorders={true}
-                striped={true}
-                highlightOnHover
-                sortStatus={sortStatus}
-                onSortStatusChange={setSortStatus}
-                minHeight={200}
-            />
-        </div>
-    );
-});
 
 interface ErrorFullScreenProps {
     mensaje: string;

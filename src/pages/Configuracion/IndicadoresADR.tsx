@@ -2,7 +2,7 @@ import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
-import { ModalNuevoIndicador } from '../Configuracion/componentes';
+import { ModalNuevoIndicador } from './componentes';
 import { Loading } from '../../components/Utils/animations';
 import { TablaIndicadores } from '../ADR/Componentes';
 import { useRegionContext } from '../../contexts/RegionContext';

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { DatosMemoria, EstadoLabel, FuenteFinanciacion } from '../../../types/TipadoAccion';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import Select, { MultiValue } from 'react-select';
-import { InputField, TextArea } from '../../../components/Utils/inputs';
+import { TextArea } from '../../../components/Utils/inputs';
 
 export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();

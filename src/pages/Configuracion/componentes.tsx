@@ -335,7 +335,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(location.pathname === '/adr/indicadoresADR' ? datosRealizacion : descripcionEditable),
+            body: JSON.stringify(location.pathname === '/configuracion/indicadoresADR' ? datosRealizacion : descripcionEditable),
         });
         if (response.ok) {
             const indicadorNuevo = await response.json();

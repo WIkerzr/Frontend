@@ -1,12 +1,15 @@
 import { lazy } from 'react';
 import { OnlyIfLoggedIn, OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
-const CuadroMando = lazy(() => import('../pages/ADR/CuadroMando'));
+const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
+const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
-const IndicadoresADR = lazy(() => import('../pages/ADR/IndicadoresADR'));
+const IndicadoresInpacto = lazy(() => import('../pages/Configuracion/IndicadoresInpacto'));
+const IndicadoresADR = lazy(() => import('../pages/Configuracion/IndicadoresADR'));
+const PCDR = lazy(() => import('../pages/Configuracion/PCDR'));
 const PlanesGestion = lazy(() => import('../pages/ADR/Plan/PlanesGestion'));
 const GestionEnvio = lazy(() => import('../pages/ADR/Plan/GestionEnvio'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
@@ -28,13 +31,67 @@ const routes = [
         layout: 'default',
     },
     {
-        path: '/adr/CuadroMando',
+        path: '/configuracion/CuadroMando',
         element: (
             <OnlyIfLoggedIn>
                 <CuadroMando />
             </OnlyIfLoggedIn>
         ),
         layout: 'CuadroMando',
+    },
+    {
+        path: '/configuracion/indicadores',
+        element: (
+            <OnlyIfLoggedIn>
+                <Indicadores />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'indicadores',
+    },
+    {
+        path: '/configuracion/usuarios',
+        element: (
+            <OnlyIfLoggedIn>
+                <Usuarios />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'Usuarios',
+    },
+    {
+        path: '/configuracion/indicadoresInpacto',
+        element: (
+            <OnlyIfLoggedIn>
+                <IndicadoresInpacto />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'IndicadoresInpacto',
+    },
+    {
+        path: '/configuracion/indicadoresADR',
+        element: (
+            <OnlyIfLoggedIn>
+                <IndicadoresADR />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'IndicadoresADR',
+    },
+    {
+        path: '/configuracion/PCDR',
+        element: (
+            <OnlyIfLoggedIn>
+                <PCDR />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'PCDR',
+    },
+    {
+        path: '/configuracion/informes',
+        element: (
+            <OnlyIfLoggedIn>
+                <Informes />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'Informes',
     },
     {
         path: '/adr/Ejes',
@@ -73,22 +130,22 @@ const routes = [
         layout: 'AccionesAccesorias',
     },
     {
-        path: '/adr/indicadoresADR',
+        path: '/adr/servicios',
         element: (
             <OnlyIfLoggedIn>
-                <IndicadoresADR />
+                <Servicios />
             </OnlyIfLoggedIn>
         ),
-        layout: 'IndicadoresADR',
+        layout: 'Servicios',
     },
     {
-        path: '/adr/memoriasAnuales',
+        path: '/adr/servicios/editando',
         element: (
             <OnlyIfLoggedIn>
-                <MemoriasAnuales />
+                <EditarServicios />
             </OnlyIfLoggedIn>
         ),
-        layout: 'MemoriasAnuales',
+        layout: 'EditarServicios',
     },
     {
         path: '/adr/planesGestion',
@@ -109,6 +166,16 @@ const routes = [
         layout: 'planesGestion/GestionEnvio',
     },
     {
+        path: '/adr/memoriasAnuales',
+        element: (
+            <OnlyIfLoggedIn>
+                <MemoriasAnuales />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'MemoriasAnuales',
+    },
+
+    {
         path: '/adr/memoriasAnuales/gestionEnvio',
         element: (
             <OnlyIfLoggedIn>
@@ -116,42 +183,6 @@ const routes = [
             </OnlyIfLoggedIn>
         ),
         layout: 'memoriasAnuales/GestionEnvio',
-    },
-    {
-        path: '/adr/servicios',
-        element: (
-            <OnlyIfLoggedIn>
-                <Servicios />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'Servicios',
-    },
-    {
-        path: '/adr/servicios/editando',
-        element: (
-            <OnlyIfLoggedIn>
-                <EditarServicios />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'EditarServicios',
-    },
-    {
-        path: '/configuracion/indicadores',
-        element: (
-            <OnlyIfLoggedIn>
-                <Indicadores />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'indicadores',
-    },
-    {
-        path: '/configuracion/usuarios',
-        element: (
-            <OnlyIfLoggedIn>
-                <Usuarios />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'Usuarios',
     },
     {
         path: '/Authenticacion/Login',

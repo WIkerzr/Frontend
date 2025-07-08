@@ -111,7 +111,7 @@ const Sidebar = () => {
 
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            {role === 'HAZI' && (
+                            {role != 'GOBIERNOVASCO' && (
                                 <li className="menu nav-item">
                                     <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
                                         <div className="flex items-center">
@@ -124,12 +124,32 @@ const Sidebar = () => {
                                         </div>
                                     </button>
                                     <AnimateHeight duration={300} height={currentMenu === 'configuracion' ? 'auto' : 0}>
-                                        <ul className="sub-menu text-gray-500">
+                                        <ul className="sub-menu text-gray-500 text">
+                                            {role === 'HAZI' && (
+                                                <>
+                                                    <li>
+                                                        <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                                                    </li>
+                                                    <li>
+                                                        <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
+                                                    </li>
+                                                </>
+                                            )}
+
                                             <li>
-                                                <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                                                <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
                                             </li>
                                             <li>
-                                                <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
+                                                <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
+                                            </li>
+                                            <li>
+                                                <SideBarList texto={t('indicadores') + ' ADR'} link="/configuracion/indicadoresADR" src={IconMenuConfiguracion} role={role} />
+                                            </li>
+                                            <li>
+                                                <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
+                                            </li>
+                                            <li>
+                                                <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
                                             </li>
                                         </ul>
                                     </AnimateHeight>
@@ -154,8 +174,6 @@ const Sidebar = () => {
                             >
                                 <li className="nav-item">
                                     <ul>
-                                        <SideBarList texto={t('CuadroMando')} link="/adr/cuadroMando" src={IconCuadroMando} role={role} />
-                                        <SideBarList texto={t('indicadores') + ' ADR'} link="/adr/indicadoresADR" src={IconMenuConfiguracion} role={role} />
                                         <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />
                                         <SideBarList texto={t('Acciones')} link="/adr/acciones" src={IconAcciones} role={role} disabled={yearData.plan.ejesPrioritarios.length != 3} />
                                         <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesAccesorias" src={IconAccionesAccesorias} role={role} />
