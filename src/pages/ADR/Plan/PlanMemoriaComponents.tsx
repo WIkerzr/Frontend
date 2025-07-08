@@ -100,10 +100,23 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
     const { t } = useTranslation();
     return (
         <div className=" flex flex-col gap-4" ref={ref}>
-            <Campos campo="introduccion" mostrar={pantalla === 'Plan'} />
+            {/* <Campos campo="introduccion" mostrar={pantalla === 'Plan'} /> */}
             <Campos campo="proceso" mostrar={pantalla === 'Plan'} />
             <div className="panel">
                 <span className="text-xl  font-semibold text-gray-700 tracking-wide block mb-2">{t('funcionamientoGeneral')}</span>
+                <div className="mb-[10px]">
+                    <span>
+                        Las tareas internas de gestión que aseguran un adecuado funcionamiento de la ADR son las siguientes:
+                        <br />
+                        - Elaboración del PG anual y seguimiento de las actuaciones propuestas.
+                        <br />
+                        - Elaboración de la memoria recapitulativa anual analizando el grado de ejecución de las actuaciones previstas.
+                        <br />
+                        - Labores propias de la gestión administrativa interna de la asociación: convocatoria de juntas directivas, elaboración de actas y memorias, gestión del presupuesto, etc.
+                        <br />- Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de
+                        interés de la comarca, organización de ruedas de prensa, etc.).
+                    </span>
+                </div>
                 <Campos campo2="adrInternalTasks" mostrar={pantalla === 'Plan'} />
                 <div>
                     <IndicadoresOperativosTable pantalla={pantalla} />

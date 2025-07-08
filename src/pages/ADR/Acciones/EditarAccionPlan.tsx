@@ -3,7 +3,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosPlan } from '../../../types/TipadoAccion';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { InputField, SimpleDropdown, TextArea } from '../../../components/Utils/inputs';
-import { opcionesComarcal, opcionesSupraComarcal } from '../../../types/GeneralTypes';
+import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../types/GeneralTypes';
 import Multiselect from 'multiselect-react-dropdown';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { useTranslation } from 'react-i18next';
@@ -122,7 +122,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             <div className="flex-1"></div>
             <div className="flex gap-4 panel">
                 <TextArea required nombreInput="oAccion" className={'h-[38px]'} disabled={bloqueo} value={datosEditandoAccion.datosPlan.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
-                <TextArea required nombreInput="ods" className={'h-[38px]'} disabled={bloqueo} value={datosEditandoAccion.datosPlan.ods} onChange={(e) => handleChangeCampos('ods', e)} />
+                <SimpleDropdown title="ods" disabled={bloqueo} value={datosEditandoAccion.datosPlan.ods} options={opcionesODS} onChange={(e) => handleChangeCampos('ods', e)} />
             </div>
 
             <div className="panel">

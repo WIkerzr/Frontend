@@ -11,6 +11,8 @@ export const opcionesComarcal = [
     'otros',
 ] as const;
 
+export const opcionesODS = ['', 'X', 'Z'] as const;
+
 export type Comarcal = (typeof opcionesComarcal)[number];
 
 export const opcionesSupraComarcal = ['No', 'Territorio histórico', 'Euskadi', 'Otros'] as const;

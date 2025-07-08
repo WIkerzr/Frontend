@@ -97,12 +97,12 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 </div>
             </div>
 
-            <div className="flex gap-4 panel">
+            {/* <div className="flex gap-4 panel">
                 <TextArea nombreInput="oAccion" required className={'h-[114px]'} disabled={block} value={datosEditandoAccion.datosMemoria.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
                 <InputField nombreInput="ods" required disabled={block} value={datosEditandoAccion.datosMemoria.ods} onChange={(e) => handleChangeCampos('ods', e)} />
-            </div>
+            </div> */}
 
-            <div className="panel">
+            {/* <div className="panel">
                 <TextArea
                     nombreInput="dAccionAvances"
                     required
@@ -111,7 +111,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                     value={datosEditandoAccion.datosMemoria.dAccionAvances}
                     onChange={(e) => handleChangeCampos('dAccionAvances', e)}
                 />
-            </div>
+            </div> */}
 
             <div className="panel">
                 <label htmlFor="presupuestoEjecutado" className="block font-medium mb-1">
@@ -213,7 +213,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 </table>
             </div>
 
-            <div className="panel">
+            {/* <div className="panel">
                 <div className="flex gap-4">
                     <TextArea nombreInput="iMujHom" className={'h-[76px]'} disabled={block} value={datosEditandoAccion.datosMemoria.iMujHom} onChange={(e) => handleChangeCampos('iMujHom', e)} />
                     <TextArea nombreInput="uEuskera" className={'h-[76px]'} disabled={block} value={datosEditandoAccion.datosMemoria.uEuskera} onChange={(e) => handleChangeCampos('uEuskera', e)} />
@@ -234,7 +234,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                         onChange={(e) => handleChangeCampos('dInteligent', e)}
                     />
                 </div>
-            </div>
+            </div> */}
 
             <div className=" panel">
                 <TextArea
