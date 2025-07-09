@@ -238,8 +238,10 @@
 
 
 
+    "reabrirPlanOMemoria":"Reabrir {{zona}} {{fecha}}",
     "aceptarPlanOMemoria":"Aceptar {{zona}} {{fecha}}",
     "rechazarPlanOMemoria":"Rechazar {{zona}} {{fecha}}",
+    "confirmacionReabrir":"¿Estás seguro que deseas REABRIR {{zona}} {{fecha}}?",
     "confirmacionAceptar":"¿Estás seguro que deseas ACEPTAR {{zona}} {{fecha}}?",
     "confirmacionRechazar":"¿Estás seguro que deseas RECHAZAR {{zona}} {{fecha}}?",
 

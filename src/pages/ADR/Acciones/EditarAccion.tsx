@@ -16,9 +16,9 @@ import { ErrorFullScreen } from '../Componentes';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { estados, anio } = useEstadosPorAnio();
+    const { anio } = useEstadosPorAnio();
 
-    const { datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block } = useYear();
+    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block } = useYear();
 
     if (!datosEditandoAccion) {
         return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA="/adr/acciones/" />;
@@ -114,7 +114,7 @@ const Index: React.FC = () => {
                                         selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
                                     }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
                                 >
-                                    <TabCard icon={IconPlan} label="tabPlan" status={estados[anio]?.plan} />
+                                    <TabCard icon={IconPlan} label="tabPlan" status={yearData.plan.status} />
                                 </button>
                             )}
                         </Tab>
@@ -125,7 +125,7 @@ const Index: React.FC = () => {
                                         selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
                                     }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
                                 >
-                                    <TabCard icon={IconMemoria} label="tabMemoria" status={estados[anio]?.memoria} />
+                                    <TabCard icon={IconMemoria} label="tabMemoria" status={yearData.memoria.status} />
                                 </button>
                             )}
                         </Tab>

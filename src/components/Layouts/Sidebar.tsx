@@ -26,11 +26,9 @@ import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
 
 const Sidebar = () => {
-    const { anio, estados, setEstados, setAnio } = useEstadosPorAnio();
+    const { anio, setEstados, setAnio } = useEstadosPorAnio();
     const { yearData, setYearData } = useYear();
     const navigate = useNavigate();
-    const estadoPlan = estados[anio]?.plan ?? 'borrador';
-    const estadoMemoria = estados[anio]?.memoria ?? 'cerrado';
     const { user } = useUser();
     const { regionSeleccionada, regionData } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
@@ -190,7 +188,7 @@ const Sidebar = () => {
                                                     <TabCard
                                                         icon={IconPlan}
                                                         label="PlanGestion"
-                                                        status={estadoPlan}
+                                                        status={yearData.plan.status}
                                                         className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
                                                     />
                                                 </div>
@@ -202,7 +200,7 @@ const Sidebar = () => {
                                                     <TabCard
                                                         icon={IconMemoria}
                                                         label="memoriasAnuales"
-                                                        status={estadoMemoria}
+                                                        status={yearData.memoria.status}
                                                         className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
                                                     />
                                                 </div>

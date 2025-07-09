@@ -11,7 +11,7 @@ import { Servicios } from '../../types/GeneralTypes';
 const Index: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { anio, editarPlan, estados, editarMemoria } = useEstadosPorAnio();
+    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
     const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
     const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData } = useYear();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -126,7 +126,7 @@ const Index: React.FC = () => {
                         </h2>
                     }
                     zonaBtn={
-                        (editarPlan || estados[anio].memoria === 'cerrado' || estados[anio].memoria === 'borrador') && (
+                        (editarPlan || editarMemoria) && (
                             <div className="ml-auto flex gap-4 items-center justify-end">
                                 <button className="px-4 py-2 bg-primary text-white rounded" onClick={validarAntesDeGuardar}>
                                     {t('guardar')}{' '}

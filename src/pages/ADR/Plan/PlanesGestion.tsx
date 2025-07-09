@@ -4,7 +4,7 @@ import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { BotonesAceptacionYRechazo, CamposPlanMemoria } from './PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ import { validarCamposObligatoriosAccion } from '../Componentes';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
 
 const Index = () => {
-    const { anio, estados, editarPlan } = useEstadosPorAnio();
+    const { anio, editarPlan } = useEstadosPorAnio();
     const { yearData } = useYear();
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
@@ -77,7 +77,7 @@ const Index = () => {
                         <span>
                             {t('planTitulo')} {anio}
                         </span>
-                        <span className={`${StatusColors[estados[anio]?.plan]}`}>{t(estados[anio]?.plan)}</span>
+                        <span className={`${StatusColors[yearData.plan.status]}`}>{t(yearData.plan.status)}</span>
                     </h2>
                 }
                 zonaBtn={
@@ -122,6 +122,7 @@ const Index = () => {
                             </div>
                         )}
                         <BotonesAceptacionYRechazo pantalla="Plan" />
+                        <BotonReapertura pantalla="Plan" />
                     </>
                 }
                 zonaExplicativa={

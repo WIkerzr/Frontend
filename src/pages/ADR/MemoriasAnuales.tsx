@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { StatusColors, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
-import { BotonesAceptacionYRechazo, CamposPlanMemoria } from './Plan/PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './Plan/PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../components/Icon/IconEnviar.svg';
@@ -23,7 +23,7 @@ const archivos: Archivo[] = [
 ];
 
 const Index = () => {
-    const { anio, estados } = useEstadosPorAnio();
+    const { anio } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const { yearData } = useYear();
@@ -36,12 +36,12 @@ const Index = () => {
                         <span>
                             {t('memoriaTitulo')} {anio}
                         </span>
-                        <span className={`${StatusColors[estados[anio]?.memoria]}`}>{t(estados[anio]?.memoria)}</span>
+                        <span className={`${StatusColors[yearData.memoria.status]}`}>{t(yearData.memoria.status)}</span>
                     </h2>
                 }
                 zonaBtn={
                     <>
-                        {estados[anio]?.memoria === 'borrador' && (
+                        {yearData.memoria.status === 'borrador' && (
                             <div className="flex items-center gap-4 justify-end">
                                 <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]">{t('guardar')}</button>
                                 <button
@@ -62,18 +62,19 @@ const Index = () => {
                             </div>
                         )}
                         <BotonesAceptacionYRechazo pantalla="Memoria" />
+                        <BotonReapertura pantalla="Memoria" />
                     </>
                 }
                 zonaExplicativa={
                     <>
-                        {estados[anio]?.memoria === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
-                        <span className="block">{t(`explicacionMemoriaParte2${estados[anio]?.memoria}`)}</span>
+                        {yearData.memoria.status === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
+                        <span className="block">{t(`explicacionMemoriaParte2${yearData.memoria.status}`)}</span>
                     </>
                 }
             />
             <>
-                {(estados[anio].memoria === 'borrador' || estados[anio].memoria === 'cerrado') && <CamposPlanMemoria pantalla="Memoria" />}
-                {(estados[anio].memoria === 'proceso' || estados[anio].memoria === 'aceptado') && (
+                {(yearData.memoria.status === 'borrador' || yearData.memoria.status === 'cerrado') && <CamposPlanMemoria pantalla="Memoria" />}
+                {(yearData.memoria.status === 'proceso' || yearData.memoria.status === 'aceptado') && (
                     <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
                         <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
                         <ul className="space-y-3 ">

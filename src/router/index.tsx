@@ -3,10 +3,10 @@ import BlankLayout from '../components/Layouts/BlankLayout';
 import DefaultLayout from '../components/Layouts/DefaultLayout';
 import { routes } from './routes';
 import { ProtectedRoute } from '../components/ProtectedRoute'; // Asegúrate de tener este componente
-import { worker } from '../mocks/browser';
+// import { worker } from '../mocks/browser';
 
 if (process.env.NODE_ENV === 'development') {
-    worker.start();
+    // worker.start();
 }
 
 const protectedPaths = [

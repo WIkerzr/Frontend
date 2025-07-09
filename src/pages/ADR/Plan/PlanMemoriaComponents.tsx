@@ -351,10 +351,11 @@ const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaP
 });
 
 export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
-    const { anio, estados } = useEstadosPorAnio();
+    const { anio } = useEstadosPorAnio();
+    const { yearData, setYearData } = useYear();
     const { user } = useUser();
 
-    const condicionPantalla = pantalla === 'Plan' ? estados[anio]?.plan === 'proceso' : estados[anio]?.memoria === 'proceso';
+    const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'proceso' : yearData.memoria.status === 'proceso';
     if (condicionPantalla && user?.role === 'HAZI') {
         return (
             <div className="ml-auto flex gap-4 items-center justify-end" ref={ref}>
@@ -363,6 +364,23 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                     onClick={() => {
                         if (window.confirm(t('confirmacionAceptar', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
                             // Cambio de status a aceptado y envio de notificacion al ADR
+                            if (pantalla === 'Plan') {
+                                setYearData({
+                                    ...yearData,
+                                    plan: {
+                                        ...yearData.plan,
+                                        status: 'aceptado',
+                                    },
+                                });
+                            } else if (pantalla === 'Memoria') {
+                                setYearData({
+                                    ...yearData,
+                                    memoria: {
+                                        ...yearData.memoria,
+                                        status: 'aceptado',
+                                    },
+                                });
+                            }
                         }
                     }}
                 >
@@ -373,11 +391,69 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                     onClick={() => {
                         if (window.confirm(t('confirmacionRechazar', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
                             // Cambio de status a borrador y envio de notificacion al ADR
-                            // ¿Mensaje al ADR? ¿Motivo de rechazo?
+                            if (pantalla === 'Plan') {
+                                setYearData({
+                                    ...yearData,
+                                    plan: {
+                                        ...yearData.plan,
+                                        status: 'borrador',
+                                    },
+                                });
+                            } else if (pantalla === 'Memoria') {
+                                setYearData({
+                                    ...yearData,
+                                    memoria: {
+                                        ...yearData.memoria,
+                                        status: 'borrador',
+                                    },
+                                });
+                            }
                         }
                     }}
                 >
                     {t('rechazarPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                </button>
+            </div>
+        );
+    }
+});
+
+export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
+    const { anio } = useEstadosPorAnio();
+    const { yearData, setYearData } = useYear();
+
+    const { user } = useUser();
+
+    const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'aceptado' : yearData.memoria.status === 'aceptado';
+    if (condicionPantalla && user?.role === 'HAZI') {
+        return (
+            <div className="ml-auto flex gap-4 items-center justify-end" ref={ref}>
+                <button
+                    className="px-4 py-2 bg-primary text-white rounded"
+                    onClick={() => {
+                        if (window.confirm(t('confirmacionReabrir', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
+                            // Cambio de status a aceptado y envio de notificacion al ADR
+                            if (pantalla === 'Plan') {
+                                setYearData({
+                                    ...yearData,
+                                    plan: {
+                                        ...yearData.plan,
+                                        status: 'borrador',
+                                    },
+                                });
+                            } else if (pantalla === 'Memoria') {
+                                setYearData({
+                                    ...yearData,
+                                    memoria: {
+                                        ...yearData.memoria,
+                                        status: 'borrador',
+                                    },
+                                });
+                            }
+                        }
+                    }}
+                >
+                    {t('reabrirPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
                 </button>
             </div>
         );

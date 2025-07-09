@@ -5,10 +5,12 @@ import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAni
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import { useLocation } from 'react-router-dom';
+import { useYear } from '../../../contexts/DatosAnualContext';
 
 const Index = () => {
-    const { anio, estados } = useEstadosPorAnio();
+    const { anio } = useEstadosPorAnio();
     const { t } = useTranslation();
+    const { yearData } = useYear();
     const [planAnexos, setPlanAnexos] = useState<File[]>([]);
     const [planFiles, setPlanFiles] = useState<File[]>([]);
     const [pcdrFiles, setPcdrFiles] = useState<File[]>([]);
@@ -35,8 +37,8 @@ const Index = () => {
                         <span>
                             {pantalla === 'Plan' ? t('planTitulo') : t('memoriaTitulo')} {anio}
                         </span>
-                        <span className={pantalla === 'Plan' ? `${StatusColors[estados[anio]?.plan]}` : `${StatusColors[estados[anio]?.memoria]}`}>
-                            {pantalla === 'Plan' ? t(estados[anio]?.plan) : t(estados[anio]?.memoria)}
+                        <span className={pantalla === 'Plan' ? `${StatusColors[yearData.plan.status]}` : `${StatusColors[yearData.memoria.status]}`}>
+                            {pantalla === 'Plan' ? t(yearData.plan.status) : t(yearData.memoria.status)}
                         </span>
                     </h2>
                 }

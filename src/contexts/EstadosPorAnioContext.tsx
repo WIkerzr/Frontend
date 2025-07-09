@@ -98,12 +98,10 @@ export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) =>
 export const useEstadosPorAnio = () => {
     const ctx = useContext(EstadosPorAnioContext);
     if (!ctx) throw new Error('useEstadosPorAnio debe usarse dentro de EstadosPorAnioProvider');
+    const { yearData } = useYear();
 
-    const { anio, estados } = ctx;
-    const estadoPlan = estados[anio]?.plan ?? 'borrador';
-    const editarPlan = estadoPlan === 'borrador';
-    const estadoMemoria = estados[anio]?.memoria ?? 'borrador';
-    const editarMemoria = ['borrador', 'cerrado'].includes(estadoMemoria);
+    const editarPlan = yearData.plan.status === 'borrador';
+    const editarMemoria = ['borrador', 'cerrado'].includes(yearData.memoria.status);
 
     return {
         ...ctx,
