@@ -43,6 +43,8 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
     const [seleccionados, setSeleccionados] = useState<number[]>([]);
     const { t } = useTranslation();
 
+    console.log(realizaciones);
+
     const realizacionSeleccionada = realizaciones.find((r) => r.id === indicadorRealizacionId);
     const resultadosRelacionados = realizacionSeleccionada?.idsResultados ? resultados.filter((res) => realizacionSeleccionada.idsResultados!.includes(res.id)) : [];
 

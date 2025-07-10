@@ -7,114 +7,129 @@ const totalKeys = {
     'ejecutado.total': { root: 'ejecutado', hombres: 'ejecutado.hombres', mujeres: 'ejecutado.mujeres', total: 'ejecutado.total' },
 };
 
-export function editableColumnByPath<T extends object>(
-    accessor: string,
-    title: string,
-    setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
-    editableRowIndex: number | null,
-    editable = true,
-    anchura?: number
-) {
-    const isNested = accessor.includes('.');
-    if (!anchura) {
-        anchura = isNested ? 60 : accessor === 'descripcion' || accessor === 'hipotesis' ? 300 : 400;
-    }
+export function editableColumnByPath<T extends object>(accessor: string, title: string, setIndicadores: React.Dispatch<React.SetStateAction<T[]>>, editableRowIndex: number | null, editable = true) {
+    const commonStyleNumber: React.CSSProperties = {
+        maxWidth: 60,
+        width: '100%',
+        minWidth: 60,
+        textAlign: 'center',
+        height: 32,
+        lineHeight: '32px',
+        boxSizing: 'border-box',
+    };
+    const wrapperStyleNumber: React.CSSProperties = {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    };
 
+    const commonStyleText: React.CSSProperties = {
+        maxWidth: accessor === 'descripcion' ? 250 : 200,
+        width: '100%',
+        minWidth: accessor === 'descripcion' ? 250 : 200,
+        textAlign: 'left',
+        lineHeight: '32px',
+        boxSizing: 'border-box',
+    };
+    const wrapperStyleText: React.CSSProperties = {
+        display: 'flex',
+        justifyContent: 'left',
+        alignItems: 'start',
+    };
     return {
         accessor,
         title,
         sortable: true,
-        width: anchura,
         render: (row: T, index: number) => {
-            if (((title === 'Tot.' || title === 'Total') && accessor === 'metaAnual.total') || accessor === 'metaFinal.total' || accessor === 'ejecutado.total') {
+            const isEditable = editableRowIndex === index && editable;
+
+            const value = get(row, accessor);
+            const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
+
+            if (accessor.endsWith('total')) {
                 const keys = totalKeys[accessor as keyof typeof totalKeys];
                 const hombres = Number(get(row, keys.hombres)) || 0;
                 const mujeres = Number(get(row, keys.mujeres)) || 0;
                 const total = Number(get(row, keys.total)) || 0;
                 const ambosCero = hombres === 0 && mujeres === 0;
 
-                if (editableRowIndex === index && editable) {
-                    return (
-                        <input
-                            className={ambosCero ? 'border p-1 rounded text-center' : 'border p-1 rounded bg-gray-100 text-gray-700 text-center'}
-                            value={ambosCero ? total : hombres + mujeres}
-                            style={{ maxWidth: anchura }}
-                            readOnly={!ambosCero}
-                            onChange={(e) => {
-                                if (ambosCero) {
-                                    setIndicadores((prevRows) => {
-                                        const copy = [...prevRows];
-                                        const updatedRow = { ...copy[index] };
-                                        set(updatedRow as object, accessor, Number(e.target.value));
-                                        copy[index] = updatedRow;
-                                        return copy;
-                                    });
-                                } else {
-                                    setIndicadores((prevRows) => {
-                                        const copy = [...prevRows];
-                                        const updatedRow = { ...copy[index] };
-                                        set(updatedRow as object, accessor, Number(e.target.value));
-                                        copy[index] = updatedRow;
-                                        return copy;
-                                    });
-                                }
-                            }}
-                        />
-                    );
-                }
-
                 return (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <span
-                            style={{
-                                maxWidth: anchura,
-                                display: 'inline-block',
-                                margin: '0 auto',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            {ambosCero ? total : hombres + mujeres}
-                        </span>
+                    <div style={wrapperStyleNumber}>
+                        {isEditable ? (
+                            <input
+                                className={ambosCero ? 'border p-1 rounded text-center' : 'border p-1 rounded bg-gray-100 text-gray-700 text-center'}
+                                value={ambosCero ? total : hombres + mujeres}
+                                style={commonStyleNumber}
+                                readOnly={!ambosCero}
+                                onChange={(e) => {
+                                    if (ambosCero) {
+                                        setIndicadores((prevRows) => {
+                                            const copy = [...prevRows];
+                                            const updatedRow = { ...copy[index] };
+                                            set(updatedRow as object, accessor, Number(e.target.value));
+                                            copy[index] = updatedRow;
+                                            return copy;
+                                        });
+                                    } else {
+                                        setIndicadores((prevRows) => {
+                                            const copy = [...prevRows];
+                                            const updatedRow = { ...copy[index] };
+                                            set(updatedRow as object, accessor, Number(e.target.value));
+                                            copy[index] = updatedRow;
+                                            return copy;
+                                        });
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <span style={commonStyleNumber}>{ambosCero ? total : hombres + mujeres}</span>
+                        )}
                     </div>
                 );
             }
 
-            if (editableRowIndex === index && editable) {
-                if (accessor.endsWith('mujeres') || accessor.endsWith('hombres')) {
-                    return (
+            if (accessor.endsWith('mujeres') || accessor.endsWith('hombres')) {
+                return (
+                    <div style={wrapperStyleNumber}>
+                        {isEditable ? (
+                            <input
+                                className="border p-1 rounded text-center"
+                                value={get(row, accessor) ?? ''}
+                                required={true}
+                                style={commonStyleNumber}
+                                onChange={(e) => {
+                                    const nuevoValor = Number(e.target.value) || 0;
+                                    const accessorContrario = accessor.endsWith('mujeres') ? accessor.replace('mujeres', 'hombres') : accessor.replace('hombres', 'mujeres');
+
+                                    const valorContrario = Number(get(row, accessorContrario)) || 0;
+
+                                    const accessorTotal = accessor.replace(/(mujeres|hombres)$/, 'total');
+
+                                    setIndicadores((prevRows) => {
+                                        const copy = [...prevRows];
+                                        const updatedRow = { ...copy[index] };
+                                        set(updatedRow as object, accessor, nuevoValor);
+                                        set(updatedRow as object, accessorTotal, nuevoValor + valorContrario);
+                                        copy[index] = updatedRow;
+                                        return copy;
+                                    });
+                                }}
+                            />
+                        ) : (
+                            <span style={commonStyleNumber}>{visual}</span>
+                        )}
+                    </div>
+                );
+            }
+
+            return (
+                <div style={wrapperStyleText}>
+                    {isEditable ? (
                         <input
-                            className="border p-1 rounded text-center"
+                            className="border p-1 rounded text-left"
                             value={get(row, accessor) ?? ''}
                             required={true}
-                            style={{ maxWidth: anchura }}
-                            onChange={(e) => {
-                                const nuevoValor = Number(e.target.value) || 0;
-                                const accessorContrario = accessor.endsWith('mujeres') ? accessor.replace('mujeres', 'hombres') : accessor.replace('hombres', 'mujeres');
-
-                                const valorContrario = Number(get(row, accessorContrario)) || 0;
-
-                                const accessorTotal = accessor.replace(/(mujeres|hombres)$/, 'total');
-
-                                setIndicadores((prevRows) => {
-                                    const copy = [...prevRows];
-                                    const updatedRow = { ...copy[index] };
-                                    set(updatedRow as object, accessor, nuevoValor);
-                                    set(updatedRow as object, accessorTotal, nuevoValor + valorContrario);
-                                    copy[index] = updatedRow;
-                                    return copy;
-                                });
-                            }}
-                        />
-                    );
-                } else {
-                    return (
-                        <input
-                            className={`border p-1 rounded text-left`}
-                            value={get(row, accessor) ?? ''}
-                            required={true}
-                            style={{ maxWidth: anchura }}
+                            style={commonStyleText}
                             onChange={(e) => {
                                 setIndicadores((prevRows) => {
                                     const copy = [...prevRows];
@@ -125,29 +140,11 @@ export function editableColumnByPath<T extends object>(
                                 });
                             }}
                         />
-                    );
-                }
-            } else {
-                const value = get(row, accessor);
-                const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
-                return (
-                    <div style={accessor === 'descripcion' || accessor === 'hipotesis' ? {} : { display: 'flex', justifyContent: 'left' }}>
-                        <span
-                            className={accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}
-                            style={{
-                                maxWidth: anchura,
-                                display: 'inline-block',
-                                margin: '0 auto',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            {visual}
-                        </span>
-                    </div>
-                );
-            }
+                    ) : (
+                        <span style={commonStyleText}>{visual}</span>
+                    )}
+                </div>
+            );
         },
     };
 }

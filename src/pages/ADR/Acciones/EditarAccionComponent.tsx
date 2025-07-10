@@ -119,6 +119,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     const { t } = useTranslation();
 
     const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>([]);
+    const [indicadoresRealizacionesModal, setIndicadoresRealizacionesModal] = useState<IndicadorRealizacionAccion[]>(realizaciones);
     useEffect(() => {
         const rescargarIndicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
         if (!rescargarIndicador) {
@@ -143,6 +144,23 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
         if (window.confirm(t('confirmarEliminarIndicador'))) {
             const nuevosIndicadores = indicadores.filter((_row, idx) => idx !== rowIndex);
             setIndicadores(nuevosIndicadores);
+            if (tipoTabla === 'realizacion') {
+                setDatosEditandoAccion({
+                    ...datosEditandoAccion!,
+                    indicadorAccion: {
+                        indicadoreRealizacion: nuevosIndicadores,
+                        indicadoreResultado: datosEditandoAccion!.indicadorAccion?.indicadoreResultado ?? [],
+                    },
+                });
+            } else {
+                setDatosEditandoAccion({
+                    ...datosEditandoAccion!,
+                    indicadorAccion: {
+                        indicadoreRealizacion: datosEditandoAccion!.indicadorAccion?.indicadoreRealizacion ?? [],
+                        indicadoreResultado: nuevosIndicadores,
+                    },
+                });
+            }
         }
     };
 
@@ -249,6 +267,14 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     }, [search, indicadores]);
 
     useEffect(() => {
+        if (tipoTabla === 'realizacion' && indicadores.length > 0) {
+            const idsIndicadores = new Set(indicadores.map((i) => i.id));
+            const filtrados = realizaciones.filter((item) => !idsIndicadores.has(item.id));
+            setIndicadoresRealizacionesModal(filtrados);
+        }
+    }, [indicadores]);
+
+    useEffect(() => {
         const data = sortBy(initialRecords, sortStatus.columnAccessor);
         setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
     }, [sortStatus]);
@@ -268,8 +294,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
             },
         ];
         const nuevosIndicadoresResultado = [
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain, no-unsafe-optional-chaining
-            ...datosEditandoAccion?.indicadorAccion?.indicadoreResultado!,
+            ...(datosEditandoAccion?.indicadorAccion?.indicadoreResultado ?? []),
             ...seleccion.idsResultadosEnRealizacion.map((idResultado) => ({
                 id: idResultado,
                 descripcion: listadoIndicadoresResultados.find((item) => item.id === idResultado)?.descripcion || '',
@@ -311,7 +336,15 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
                         <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
                             {t('newFileIndicador', { tipo: t('RealizacionMin') })}
                         </button>
-                        {open && <ModalNuevoIndicadorAccion realizaciones={realizaciones} resultados={listadoIndicadoresResultados} open={open} onClose={() => setOpen(false)} onSave={handleSave} />}
+                        {open && (
+                            <ModalNuevoIndicadorAccion
+                                realizaciones={indicadoresRealizacionesModal}
+                                resultados={listadoIndicadoresResultados}
+                                open={open}
+                                onClose={() => setOpen(false)}
+                                onSave={handleSave}
+                            />
+                        )}
                     </>
                 )}
             </div>
