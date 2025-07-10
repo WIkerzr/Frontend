@@ -71,10 +71,9 @@ export const ModalAccion = () => {
     const { yearData, NuevaAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
-    const ejesPrioritarios = yearData.plan.ejesPrioritarios;
-    const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(ejesPrioritarios[0].acciones);
+    // const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(yearData.plan.ejesPrioritarios[0].acciones);
 
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState('0');
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].id);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [plurianual, setNuevaPlurianual] = useState(false);
@@ -82,16 +81,67 @@ export const ModalAccion = () => {
     const [inputError, setInputError] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-    useEffect(() => {
-        const numero = ejesPrioritarios.findIndex((eje) => eje.id.toString() === idEjeSeleccionado);
-        if (numero !== -1) {
-            setAccionesEje(ejesPrioritarios[numero].acciones);
-        } else {
-            setAccionesEje([]);
-        }
-    }, [idEjeSeleccionado]);
+    //Control de acciones totales
+    const [accionesTotales, setAccionesTotales] = useState<number[]>([0, 0, 0]);
 
-    const getEjeLimitado = () => accionesEje.length >= 5;
+    useEffect(() => {
+        const nuevasAccionesTotales = yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length);
+        setAccionesTotales(nuevasAccionesTotales);
+    }, [yearData]);
+
+    useEffect(() => {
+        if (idEjeSeleccionado === '') {
+            setIdEjeSeleccionado(yearData.plan.ejesPrioritarios[0].id);
+        }
+    }, [idEjeSeleccionado, showModal]);
+
+    function validarEstadoEje(
+        index: number,
+        accionesTotales: number[]
+    ): {
+        maxAccion: boolean;
+        otroEjeVacio: boolean;
+        limiteSiVacio: boolean;
+        limitarEje: boolean;
+        disabled: boolean;
+    } {
+        const maxAccion = accionesTotales[index] >= 5;
+        if (yearData.plan.ejesPrioritarios.length === 1) {
+            const otroEjeVacio = false;
+            const limiteSiVacio = false;
+            const limitarEje = false;
+            const disabled = maxAccion;
+            return { maxAccion, otroEjeVacio, limiteSiVacio, limitarEje, disabled };
+        }
+        const ejesVacios = accionesTotales.filter((n) => n === 0).length;
+        const otroEjeVacio = accionesTotales.some((n, i) => i !== index && n === 0);
+        const ejeVacio = accionesTotales.some((n, i) => i === index && n === 0);
+        const limite = 5 - ejesVacios;
+        const limiteSiVacio = accionesTotales.reduce((sum, n) => sum + n, 0) >= limite;
+        const limitarEje = otroEjeVacio && !ejeVacio && limiteSiVacio;
+        const disabled = maxAccion || limitarEje;
+
+        return { maxAccion, otroEjeVacio, limiteSiVacio, limitarEje, disabled };
+    }
+
+    useEffect(() => {
+        if (yearData.plan.ejesPrioritarios.length === 1) {
+            return;
+        }
+        const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.id === idEjeSeleccionado);
+        const { disabled } = validarEstadoEje(index, accionesTotales);
+
+        if (disabled) {
+            const nuevoId = yearData.plan.ejesPrioritarios.find((_, i) => {
+                const { disabled } = validarEstadoEje(i, accionesTotales);
+                return !disabled;
+            })?.id;
+
+            if (nuevoId && nuevoId !== idEjeSeleccionado) {
+                setIdEjeSeleccionado(nuevoId);
+            }
+        }
+    }, [accionesTotales, yearData, idEjeSeleccionado, showModal]);
 
     const handleNuevaAccion = () => {
         if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
@@ -101,7 +151,7 @@ export const ModalAccion = () => {
 
         NuevaAccion(idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
 
-        //LLamada al servidor con la nueva accion
+        //TODO LLamada al servidor con la nueva accion
 
         setIdEjeSeleccionado('');
         setNuevaAccion('');
@@ -113,7 +163,7 @@ export const ModalAccion = () => {
 
     return (
         <>
-            {editarPlan && (
+            {editarPlan && accionesTotales.reduce((sum, n) => sum + n, 0) < 5 && (
                 <div className="flex justify-center">
                     <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
                         {t('anadirAccion')}
@@ -124,17 +174,17 @@ export const ModalAccion = () => {
                 <div className="space-y-5">
                     <div>
                         <label className="block font-medium mb-1">{t('Ejes')}</label>
-                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} defaultValue={'inicial'} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
-                            <option value="inicial" hidden>
-                                {t('seleccionaEjePrioritario')}
-                            </option>
-                            {ejesPrioritarios.map((eje) => (
-                                <option key={eje.id} value={eje.id} disabled={getEjeLimitado()}>
-                                    {i18n.language === 'es' ? eje.nameEs : eje.nameEu} {getEjeLimitado() ? '(Límite alcanzado)' : ''}
-                                </option>
-                            ))}
+                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
+                            {yearData.plan.ejesPrioritarios.map((eje, index) => {
+                                const { maxAccion, limitarEje, disabled } = validarEstadoEje(index, accionesTotales);
+                                const label = `${i18n.language === 'es' ? eje.nameEs : eje.nameEu}${maxAccion ? ` (${t('limiteAlcanzado')})` : limitarEje ? ` (${t('completaEjeVacio')})` : ''}`;
+                                return (
+                                    <option key={eje.id} value={eje.id} disabled={disabled}>
+                                        {label}
+                                    </option>
+                                );
+                            })}
                         </select>
-                        {getEjeLimitado() && <div className="text-xs text-red-500 mt-1">{t('limiteEje')}</div>}
                     </div>
                     <div>
                         <label className="block font-medium mb-1">{t('NombreAccion')}</label>
@@ -147,7 +197,6 @@ export const ModalAccion = () => {
                                 setInputError(false);
                             }}
                             placeholder={t('Introduce nombre acción')}
-                            disabled={getEjeLimitado() || idEjeSeleccionado === '0'}
                         />
                     </div>
                     <div>
@@ -161,8 +210,6 @@ export const ModalAccion = () => {
                                 setInputError(false);
                             }}
                             placeholder={t('Introduce línea de actuación')}
-                            disabled={getEjeLimitado() || idEjeSeleccionado === '0'}
-                            autoComplete="off"
                         />
                     </div>
                     <div className="flex">
@@ -177,10 +224,7 @@ export const ModalAccion = () => {
                         <label>{t('plurianual')}</label>
                     </div>
                     {inputError && <div className="text-xs text-red-500 text-center">{t('rellenarAmbosCampos')}</div>}
-                    <button
-                        onClick={handleNuevaAccion}
-                        className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition ${getEjeLimitado() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
+                    <button onClick={handleNuevaAccion} className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition}`}>
                         {t('guardar')}
                     </button>
                 </div>
@@ -211,10 +255,15 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
             ...yearData,
             plan: {
                 ...yearData.plan,
-                ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) => ({
-                    ...eje,
-                    acciones: eje.acciones.filter((accion) => accion.id !== id),
-                })),
+                ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje, index) => {
+                    if (index === number) {
+                        return {
+                            ...eje,
+                            acciones: eje.acciones.filter((accion) => accion.id !== id),
+                        };
+                    }
+                    return eje;
+                }),
             },
         };
         setYearData(updatedYearData);
@@ -248,8 +297,9 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     return (
                         <div key={accion.id} className={`${colorAccion} border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
                             <span className="text-base">{accion.accion}</span>
-                            <span className="block text-sm text-gray-500 text-left font-medium mb-1">{t('LineaActuaccion')}:</span>
-                            <span className="text-base">{accion.lineaActuaccion}</span>
+                            <span className="block text-sm text-gray-500 text-left font-medium mb-1">
+                                {t('LineaActuaccion')}: {accion.lineaActuaccion}
+                            </span>
                             <div className="flex gap-2 justify-end mt-2">
                                 <NavLink to="/adr/acciones/editando" className="group">
                                     <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => SeleccionEditarAccion(idEje, accion.id)}>

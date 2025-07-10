@@ -80,8 +80,9 @@
     "explicacionAccion": "Se podrán definir hasta cinco acciones por eje, las cuales deberán enmarcarse dentro de los tres ejes prioritarios ya establecidos.",
     "PlanGestion":"Plan de gestion",
     "Acciones": "Acciones",
+    "AccionesPCDR": "Acciones PCDR",
     "Servicio": "SERVICIO",
-    "AccionesAccesorias": "Acciones accesorias",
+    "AccionesAccesorias": "Acciones y proyectos",
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
     "newIndicador": "Nuevo Indicador {{tipo}}",
@@ -101,7 +102,8 @@
     "plurianual": "Plurianualidad",
 
     "datosNoEncontrados": "Datos no encontrados",
-
+  "limiteAlcanzado": "Límite alcanzado",
+  "completaEjeVacio": "Completa eje vacío",
 
     "introduccion": "Introducción",
     "ejesPrioritarios": "Ejes prioritarios",
