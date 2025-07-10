@@ -134,15 +134,9 @@ const Sidebar = () => {
                                                 </>
                                             )}
 
-                                            <li>
-                                                <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
-                                            </li>
-                                            <li>
-                                                <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
-                                            </li>
-                                            <li>
-                                                <SideBarList texto={t('indicadores') + ' ADR'} link="/configuracion/indicadoresADR" src={IconMenuConfiguracion} role={role} />
-                                            </li>
+                                            <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
+                                            <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
+                                            <SideBarList texto={t('indicadores') + ' ADR'} link="/configuracion/indicadoresADR" src={IconMenuConfiguracion} role={role} />
                                             <li>
                                                 <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
                                             </li>
@@ -174,7 +168,7 @@ const Sidebar = () => {
                                     <ul>
                                         <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />
                                         <SideBarList
-                                            texto={t('Acciones')}
+                                            texto={t('AccionesPCDR')}
                                             link="/adr/acciones"
                                             src={IconAcciones}
                                             role={role}
