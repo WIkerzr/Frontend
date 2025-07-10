@@ -241,6 +241,7 @@ interface ListadoAccionesProps {
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const { yearData, setYearData, SeleccionEditarAccion } = useYear();
     const { regionSeleccionada } = useRegionContext();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
 
@@ -279,7 +280,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => {
-                    let editable = true;
+                    let editable = editarPlan || editarMemoria;
                     let colorAccion = 'bg-white';
                     if (accion.accionCompartida && Array.isArray(accion.accionCompartida.regiones)) {
                         const regionLider = accion.accionCompartida.regionLider.RegionId === regionSeleccionada;

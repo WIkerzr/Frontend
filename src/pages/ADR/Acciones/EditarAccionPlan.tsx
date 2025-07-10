@@ -13,10 +13,9 @@ import { Region } from '../../../components/Utils/gets/getRegiones';
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t, i18n } = useTranslation();
     const { regiones, regionActual } = useRegionContext();
-    const { planState } = useEstadosPorAnio();
+    const { editarPlan } = useEstadosPorAnio();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
-    const [planDesabilitado] = useState<boolean>(planState != 'borrador');
-    const [bloqueo] = useState<boolean>(block ? block : planDesabilitado);
+    const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [regionesSupracomarcal, setRegionesSupracomarcal] = useState<boolean>(false);
 
     if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {
@@ -26,6 +25,13 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     useEffect(() => {
         if (datosEditandoAccion.accionCompartida && datosEditandoAccion.accionCompartida.regionLider && datosEditandoAccion.accionCompartida.regionLider.RegionId > 0) {
             setRegionesSupracomarcal(true);
+        }
+        if (!editarPlan) {
+            setBloqueo(true);
+        } else {
+            if (!block) {
+                setBloqueo(false);
+            }
         }
     }, []);
 
@@ -101,7 +107,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                     )}
                     <div className="flex-1">
                         <label>{t('esSupracomarcal')}</label>
-                        <Checkbox checked={regionesSupracomarcal} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
+                        <Checkbox checked={regionesSupracomarcal} disabled={bloqueo} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
                     </div>
                 </div>
                 {regionesSupracomarcal && (
@@ -115,6 +121,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                             onSelect={handleChangeRegionsSupracomarcal}
                             onRemove={handleChangeRegionsSupracomarcal}
                             emptyRecordMsg={t('error:errorNoOpciones')}
+                            disable={bloqueo}
                         />
                     </div>
                 )}

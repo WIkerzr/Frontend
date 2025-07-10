@@ -160,12 +160,12 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
     title: string;
     options: readonly number[] | string[];
 }
-export const SimpleDropdown = ({ title, options, value }: SelectProps) => {
+export const SimpleDropdown = ({ title, options, value, disabled }: SelectProps) => {
     const { t } = useTranslation();
     return (
         <div className="flex-1">
             <label>{t(title)}</label>
-            <select className="w-full border rounded p-2 resize-y" value={value}>
+            <select className="w-full border rounded p-2 resize-y" disabled={disabled} value={value}>
                 <option disabled>{t('seleccionaopcion')}</option>
                 {options.map((text) => (
                     <option key={text} value={text}>

@@ -9,13 +9,13 @@ export const opcionesComarcal = [
     'Municipios con habitat rural disperso',
     'Todas las entidades rurales de la comarca',
     'otros',
-] as const;
+];
 
-export const opcionesODS = ['', 'X', 'Z'] as const;
+export const opcionesODS = ['', 'X', 'Z'];
 
 export type Comarcal = (typeof opcionesComarcal)[number];
 
-export const opcionesSupraComarcal = ['No', 'Territorio histórico', 'Euskadi', 'Otros'] as const;
+export const opcionesSupraComarcal = ['No', 'Territorio histórico', 'Euskadi', 'Otros'];
 
 export type SupraComarcal = (typeof opcionesSupraComarcal)[number];
 

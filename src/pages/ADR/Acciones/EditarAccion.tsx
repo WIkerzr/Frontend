@@ -1,6 +1,6 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { TabCard } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
@@ -16,9 +16,20 @@ import { ErrorFullScreen } from '../Componentes';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { anio } = useEstadosPorAnio();
 
     const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block } = useYear();
+    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const [bloqueo, setBloqueo] = useState<boolean>(block);
+
+    useEffect(() => {
+        if (!editarPlan && !editarMemoria) {
+            setBloqueo(true);
+        } else {
+            if (!block) {
+                setBloqueo(false);
+            }
+        }
+    }, []);
 
     if (!datosEditandoAccion) {
         return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA="/adr/acciones/" />;
@@ -43,7 +54,7 @@ const Index: React.FC = () => {
                 }
                 zonaBtn={
                     <div className="ml-auto flex gap-4 items-center justify-end">
-                        {!block && (
+                        {!bloqueo && (
                             <button className="px-4 py-2 bg-primary text-white rounded" onClick={SeleccionEditarGuardar}>
                                 {t('guardar')}{' '}
                             </button>
@@ -58,7 +69,7 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
-                                {!block ? (
+                                {!bloqueo ? (
                                     <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
                                 ) : (
                                     <span className="block  font-semibold">

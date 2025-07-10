@@ -98,15 +98,25 @@ const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResu
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }, ref) => {
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
+    const [bloqueo, setBloqueo] = useState<boolean>(block);
+
+    useEffect(() => {
+        if (!editarPlan && !editarMemoria) {
+            setBloqueo(true);
+        } else {
+            if (!block) {
+                setBloqueo(false);
+            }
+        }
+    }, []);
+
     const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
     if (!indicador) {
         return;
     }
 
     const { t } = useTranslation();
-    const { editarPlan } = useEstadosPorAnio();
-
-    const editarMemoria = true;
 
     const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>([]);
     useEffect(() => {
@@ -157,7 +167,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
 
     const columns = [
         editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
-        ...(!block
+        ...(!bloqueo
             ? [
                   {
                       accessor: 'acciones',
