@@ -973,7 +973,18 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
                             { accessor: 'lastName', title: t('lastName'), sortable: true },
                             { accessor: 'secondSurname', title: t('secondSurname'), sortable: true },
                             { accessor: 'email', title: t('email'), sortable: true },
-                            { accessor: 'role', title: t('role'), sortable: true },
+                            {
+                                accessor: 'role',
+                                title: t('role'),
+                                sortable: true,
+                                render: (row): React.ReactNode => {
+                                    const map: Record<string, string> = {
+                                        GV: 'Inst. Pública',
+                                    };
+                                    const role = row.role as string;
+                                    return map[role] || role;
+                                },
+                            },
                             { accessor: 'RegionName', title: t('ambit'), sortable: true },
                             {
                                 accessor: 'vacio2',
