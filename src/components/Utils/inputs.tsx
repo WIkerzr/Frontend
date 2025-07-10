@@ -186,7 +186,7 @@ interface AttachProps {
     title?: string;
 }
 
-function isImage(file: File) {
+export function isImage(file: File) {
     return /^image\//.test(file.type);
 }
 

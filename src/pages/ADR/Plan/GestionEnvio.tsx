@@ -13,7 +13,6 @@ const Index = () => {
     const { yearData } = useYear();
     const [planAnexos, setPlanAnexos] = useState<File[]>([]);
     const [planFiles, setPlanFiles] = useState<File[]>([]);
-    const [pcdrFiles, setPcdrFiles] = useState<File[]>([]);
 
     const location = useLocation();
     const pantalla = location.state?.pantalla || '';
@@ -25,9 +24,9 @@ const Index = () => {
     const handlePlanFilesChange = (files: File[]) => {
         setPlanFiles(files);
     };
-    const handlePcdrFilesChange = (files: File[]) => {
-        setPcdrFiles(files);
-    };
+
+    //Todo
+    const pcdrFiles = [1, 2];
 
     return (
         <div className="panel">
@@ -59,7 +58,6 @@ const Index = () => {
                             onChange={handlePlanFilesChange}
                             title={t('archivoCorrespondiente', { zona: pantalla === 'Plan' ? 'al plan' : 'a la memoria' })}
                         />
-                        {pantalla === 'Plan' && <AdjuntarArchivos files={pcdrFiles} setFiles={setPcdrFiles} onChange={handlePcdrFilesChange} title={t('archivoPCDR')} />}
                     </section>
 
                     <section className="panel p-4 shadow-sm">

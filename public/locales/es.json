@@ -198,6 +198,7 @@
     "finalizarYEnviar":"Finalizar y enviar {{zona}}",
     "archivoCorrespondiente":"Archivo PDF correspondiente {{zona}}",
     "archivoPCDR":"Archivo PDF correspondiente al PCDR",
+    "PCDR":"PCDR",
 
     "archivosPdf": "Archivos PDF obligatorios",
     "archivoPdf": "Archivo PDF obligatorio",
