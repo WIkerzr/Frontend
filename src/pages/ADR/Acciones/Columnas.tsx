@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get, set } from 'lodash';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
 const totalKeys = {
@@ -6,11 +7,24 @@ const totalKeys = {
     'ejecutado.total': { root: 'ejecutado', hombres: 'ejecutado.hombres', mujeres: 'ejecutado.mujeres', total: 'ejecutado.total' },
 };
 
-export function editableColumnByPath<T extends object>(accessor: string, title: string, setIndicadores: React.Dispatch<React.SetStateAction<T[]>>, editableRowIndex: number | null, editable = true) {
+export function editableColumnByPath<T extends object>(
+    accessor: string,
+    title: string,
+    setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
+    editableRowIndex: number | null,
+    editable = true,
+    anchura?: number
+) {
+    const isNested = accessor.includes('.');
+    if (!anchura) {
+        anchura = isNested ? 60 : accessor === 'descripcion' || accessor === 'hipotesis' ? 300 : 400;
+    }
+
     return {
         accessor,
         title,
         sortable: true,
+        width: anchura,
         render: (row: T, index: number) => {
             if (((title === 'Tot.' || title === 'Total') && accessor === 'metaAnual.total') || accessor === 'metaFinal.total' || accessor === 'ejecutado.total') {
                 const keys = totalKeys[accessor as keyof typeof totalKeys];
@@ -24,7 +38,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                         <input
                             className={ambosCero ? 'border p-1 rounded text-center' : 'border p-1 rounded bg-gray-100 text-gray-700 text-center'}
                             value={ambosCero ? total : hombres + mujeres}
-                            style={{ maxWidth: 60 }}
+                            style={{ maxWidth: anchura }}
                             readOnly={!ambosCero}
                             onChange={(e) => {
                                 if (ambosCero) {
@@ -53,7 +67,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <span
                             style={{
-                                maxWidth: 60,
+                                maxWidth: anchura,
                                 display: 'inline-block',
                                 margin: '0 auto',
                                 overflow: 'hidden',
@@ -67,34 +81,6 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                 );
             }
 
-            // if (editableRowIndex === index && editable && title === 'Nombre') {
-            //     return (
-            //         <div>
-            //             <select
-            //                 id="indicadores"
-            //                 className="p-2 border rounded focus:outline-none focus:ring focus:ring-blue-200 max-w-[350px] text-center"
-            //                 value={indicadorSeleccionado !== undefined ? indicadorSeleccionado : get(row, accessor) ?? ''}
-            //                 onChange={(e) => {
-            //                     setIndicadorSeleccionado(e.target.value);
-            //                     setIndicadores((prevRows) => {
-            //                         const copy = [...prevRows];
-            //                         const updatedRow = { ...copy[index] };
-            //                         set(updatedRow as object, accessor, e.target.value);
-            //                         copy[index] = updatedRow;
-            //                         return copy;
-            //                     });
-            //                 }}
-            //             >
-            //                 {indicadoresRealizacion.map((inVal) => (
-            //                     <option key={inVal.id} value={inVal.descripcion}>
-            //                         {inVal.descripcion}
-            //                     </option>
-            //                 ))}
-            //             </select>
-            //         </div>
-            //     );
-            // }
-
             if (editableRowIndex === index && editable) {
                 if (accessor.endsWith('mujeres') || accessor.endsWith('hombres')) {
                     return (
@@ -102,7 +88,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                             className="border p-1 rounded text-center"
                             value={get(row, accessor) ?? ''}
                             required={true}
-                            style={{ maxWidth: 60 }}
+                            style={{ maxWidth: anchura }}
                             onChange={(e) => {
                                 const nuevoValor = Number(e.target.value) || 0;
                                 const accessorContrario = accessor.endsWith('mujeres') ? accessor.replace('mujeres', 'hombres') : accessor.replace('hombres', 'mujeres');
@@ -128,7 +114,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                             className={`border p-1 rounded text-left`}
                             value={get(row, accessor) ?? ''}
                             required={true}
-                            style={{ maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300 }}
+                            style={{ maxWidth: anchura }}
                             onChange={(e) => {
                                 setIndicadores((prevRows) => {
                                     const copy = [...prevRows];
@@ -149,7 +135,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                         <span
                             className={accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}
                             style={{
-                                maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300,
+                                maxWidth: anchura,
                                 display: 'inline-block',
                                 margin: '0 auto',
                                 overflow: 'hidden',
@@ -165,6 +151,69 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
         },
     };
 }
+type CustomEditor<T, V> = (value: V, onChange: (value: V) => void, row: T, index: number) => React.ReactNode;
+
+export function editableColumnByPathInput<T extends object, V = unknown>(
+    accessor: string,
+    title: string,
+    setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
+    editableRowIndex: number | null,
+    anchura?: number,
+    customEditor?: CustomEditor<T, V>
+) {
+    const isNested = accessor.includes('.');
+    if (!anchura) {
+        anchura = isNested ? 60 : accessor === 'descripcion' || accessor === 'hipotesis' ? 300 : 400;
+    }
+
+    return {
+        accessor,
+        title,
+        sortable: true,
+        width: anchura,
+        render: (row: T, index: number) => {
+            const value = get(row, accessor) as V;
+
+            if (editableRowIndex != null && editableRowIndex === index) {
+                const onChange = (newValue: V) => {
+                    setIndicadores((prevRows) => {
+                        const copy = [...prevRows];
+                        const updatedRow = { ...copy[index] };
+                        set(updatedRow as object, accessor, newValue);
+                        copy[index] = updatedRow;
+                        return copy;
+                    });
+                };
+
+                if (customEditor) {
+                    return customEditor(value, onChange, row, index);
+                }
+
+                return <input className="border p-1 rounded text-left" value={String(value ?? '')} required style={{ maxWidth: anchura }} onChange={(e) => onChange(e.target.value as V)} />;
+            } else {
+                const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
+
+                return (
+                    <div>
+                        <span
+                            style={{
+                                maxWidth: anchura,
+                                display: 'inline-block',
+                                margin: '0 auto',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {String(visual)}
+                        </span>
+                    </div>
+                );
+            }
+        },
+    };
+}
+
 export function visualColumnByPath<T extends object>(accessor: string, title: string) {
     return {
         accessor,
