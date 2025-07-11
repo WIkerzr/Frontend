@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { get, set } from 'lodash';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
+import IconArrowLeft from '../../../components/Icon/IconArrowLeft';
+import IconEqual from '../../../components/Icon/IconEqual';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
     'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },
@@ -171,6 +173,17 @@ export function editableColumnByPathInput<T extends object, V = unknown>(
         render: (row: T, index: number) => {
             const value = get(row, accessor) as V;
 
+            const style: React.CSSProperties = {
+                width: anchura,
+                maxWidth: anchura,
+                minWidth: anchura,
+                textAlign: 'left',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                boxSizing: 'border-box',
+            };
+
             if (editableRowIndex != null && editableRowIndex === index) {
                 const onChange = (newValue: V) => {
                     setIndicadores((prevRows) => {
@@ -186,24 +199,37 @@ export function editableColumnByPathInput<T extends object, V = unknown>(
                     return customEditor(value, onChange, row, index);
                 }
 
-                return <input className="border p-1 rounded text-left" value={String(value ?? '')} required style={{ maxWidth: anchura }} onChange={(e) => onChange(e.target.value as V)} />;
+                return <input className="border p-1 rounded text-left" value={String(value ?? '')} required style={style} onChange={(e) => onChange(e.target.value as V)} />;
             } else {
+                if (accessor === 'objetivo') {
+                    if (value && (value === 'Aumentar' || value === 'Mantener' || value === 'Disminuir')) {
+                        switch (value) {
+                            case 'Aumentar':
+                                return (
+                                    <div>
+                                        <IconArrowLeft className="w-5 h-5 -rotate-90" />
+                                    </div>
+                                );
+                            case 'Mantener':
+                                return (
+                                    <div>
+                                        <IconEqual className="w-5 h-5" />
+                                    </div>
+                                );
+                            case 'Disminuir':
+                                return (
+                                    <div>
+                                        <IconArrowLeft className="w-5 h-5 rotate-90" />
+                                    </div>
+                                );
+                        }
+                    }
+                }
                 const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
 
                 return (
                     <div>
-                        <span
-                            style={{
-                                maxWidth: anchura,
-                                display: 'inline-block',
-                                margin: '0 auto',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            {String(visual)}
-                        </span>
+                        <span style={style}>{String(visual)}</span>
                     </div>
                 );
             }

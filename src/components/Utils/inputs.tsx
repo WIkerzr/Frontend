@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect, useRef } from 'react';
@@ -157,16 +158,18 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
 };
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-    title: string;
+    title?: string;
     options: readonly number[] | string[];
+    mostrarSeleccionaopcion?: boolean;
+    onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
-export const SimpleDropdown = ({ title, options, value, disabled }: SelectProps) => {
+export const SimpleDropdown = ({ title, options, value, disabled, mostrarSeleccionaopcion = false, onChange }: SelectProps) => {
     const { t } = useTranslation();
     return (
         <div className="flex-1">
-            <label>{t(title)}</label>
-            <select className="w-full border rounded p-2 resize-y" disabled={disabled} value={value}>
-                <option disabled>{t('seleccionaopcion')}</option>
+            {title && <label>{t(title)}</label>}
+            <select className="w-full border rounded p-2 resize-y" disabled={disabled} value={value} onChange={onChange}>
+                <option disabled={!mostrarSeleccionaopcion}>{t('seleccionaopcion')}</option>
                 {options.map((text) => (
                     <option key={text} value={text}>
                         {typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : text}
@@ -180,7 +183,6 @@ export const SimpleDropdown = ({ title, options, value, disabled }: SelectProps)
 interface AttachProps {
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
-    // eslint-disable-next-line no-unused-vars
     onChange: (files: File[]) => void;
     multiple?: boolean;
     title?: string;
