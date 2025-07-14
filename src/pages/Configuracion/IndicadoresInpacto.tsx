@@ -147,8 +147,6 @@ const Index = () => {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>, idTemp: number) => {
-        console.log(indicadores);
-
         const newCategoria = e.target.value;
         setIndicadores((prev) => prev.map((indicador) => (indicador.idTemp === idTemp && indicador.categoria === newCategoria ? { ...indicador, mostrar: true } : indicador)));
 
@@ -328,8 +326,6 @@ const Index = () => {
             }
         }
         localStorage.setItem('indicadoresInpacto', JSON.stringify(indicado));
-        console.log('indicado');
-        console.log(indicado);
     };
 
     return (
