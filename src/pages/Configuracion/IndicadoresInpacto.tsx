@@ -96,8 +96,6 @@ export interface Indicadoreslist {
 const Index = () => {
     const { t } = useTranslation();
     const nuevosIndicadores = convertirIndicadores(listadoIndicadoresImpacto);
-    console.log(nuevosIndicadores);
-
     const [indicadores, setIndicadores] = useState<Indicador[]>(nuevosIndicadores);
     const [mostrarDrop, setMostrarDrop] = useState<number>(0);
 
@@ -131,13 +129,40 @@ const Index = () => {
             const indicadoresMostrados = indicadores.filter((fila) => fila.mostrar);
             const idAModificar = indicadoresMostrados[rowIndex].id;
             setIndicadores((prev) => prev.map((item) => (item.id === idAModificar ? { ...item, alcance: '', mostrar: false, year: '', valorInicial: '', objetivo: undefined } : item)));
+
+            const idTemp = indicadoresMostrados[rowIndex].idTemp;
+            setIndicadores((prev) => {
+                const indicesCoinciden = prev.map((item, index) => ({ item, index })).filter(({ item }) => item.idTemp === idTemp);
+                const ultimoIndex = indicesCoinciden.at(-1)?.index;
+                return prev.map((indicador, i) => (i === ultimoIndex ? { ...indicador, mostrar: true } : indicador));
+            });
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>, index: number, idTemp: number) => {
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>, idTemp: number) => {
         const newCategoria = e.target.value;
         setIndicadores((prev) => prev.map((indicador) => (indicador.idTemp === idTemp && indicador.categoria === newCategoria ? { ...indicador, mostrar: true } : indicador)));
-        setMostrarDrop(0);
+
+        const filtrados = indicadores.filter((i) => i.idTemp === idTemp);
+
+        let cont = 0;
+        for (let index = 0; index < filtrados.length; index++) {
+            const indicador = indicadores[index];
+            if (indicador.mostrar) {
+                cont++;
+            }
+        }
+        if (!(cont === filtrados.length - 1)) {
+            setMostrarDrop(0);
+        } else {
+            setIndicadores((prev) => {
+                const indicesCoinciden = prev.map((item, index) => ({ item, index })).filter(({ item }) => item.idTemp === idTemp);
+
+                const ultimoIndex = indicesCoinciden.at(-1)?.index;
+
+                return prev.map((indicador, i) => (i === ultimoIndex ? { ...indicador, mostrar: false } : indicador));
+            });
+        }
     };
 
     const handleChangeTerritorial = (e: React.ChangeEvent<HTMLSelectElement>, id: number) => {
@@ -207,7 +232,7 @@ const Index = () => {
 
                     return (
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            <SimpleDropdown options={opciones} mostrarSeleccionaopcion={true} onChange={(e) => handleChange(e, index, record.idTemp)} />
+                            <SimpleDropdown options={opciones} mostrarSeleccionaopcion={true} onChange={(e) => handleChange(e, record.idTemp)} />
                         </div>
                     );
                 } else {
@@ -296,10 +321,6 @@ const Index = () => {
                 indicador2.push(indicador);
             }
         }
-        console.log('indicador1');
-        console.log(indicador1);
-        console.log('indicador2');
-        console.log(indicador2);
     };
 
     return (
