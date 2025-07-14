@@ -1,9 +1,10 @@
-import { DataTable, DataTableColumn, DataTableSortStatus } from 'mantine-datatable';
+import { DataTable, DataTableColumn } from 'mantine-datatable';
 import { useEffect, useState } from 'react';
 import { listadoIndicadoresImpacto, IndicadoresImpacto, categorias, unidadesMedida, Categorias } from './IndicadoresImpactoTEMP';
 import { editableColumnByPathInput } from '../ADR/Acciones/Columnas';
 import { useTranslation } from 'react-i18next';
 import { SimpleDropdown } from '../../components/Utils/inputs';
+import { ZonaTitulo } from './componentes';
 
 type typeObjetivo = 'Aumentar' | 'Disminuir' | 'Mantener';
 interface Indicador {
@@ -25,23 +26,30 @@ interface Indicador {
 function convertirIndicadores(impactos: IndicadoresImpacto[]): Indicador[] {
     const resultados: Indicador[] = [];
     let num = 0;
+
     impactos.forEach((item) => {
         if (item.categorias && item.categorias.length > 0) {
+            const multipleCategorias = item.categorias.length > 1;
+
             item.categorias.forEach((catId, index) => {
                 const categoriaEncontrada = categorias.find((cat) => cat.id === catId);
-                resultados.push({
+
+                const fila: Indicador = {
                     id: num++,
                     idTemp: item.id,
                     indicador: item.nameEs,
                     categoria: categoriaEncontrada ? categoriaEncontrada.nameEs : `Categoría ${catId}`,
-                    unidad: categoriaEncontrada ? `${unidadesMedida.find((med) => med.id === categoriaEncontrada!.unidadMedida)?.nameEs}` : `FALLO UNIDAD MEDIDA`,
+                    unidad: categoriaEncontrada ? `${unidadesMedida.find((med) => med.id === categoriaEncontrada.unidadMedida)?.nameEs}` : `FALLO UNIDAD MEDIDA`,
                     alcance: '',
                     year: '',
                     valorInicial: '',
                     valorFinal: '',
-                    mostrar: false,
-                });
-                if (item.categorias!.length - 1 === index) {
+                    mostrar: !multipleCategorias && index === 0, // Mostrar true si solo hay una categoría
+                };
+
+                resultados.push(fila);
+
+                if (multipleCategorias && index === item.categorias!.length - 1) {
                     resultados.push({
                         id: num++,
                         idTemp: item.id,
@@ -53,7 +61,7 @@ function convertirIndicadores(impactos: IndicadoresImpacto[]): Indicador[] {
                         valorInicial: '',
                         valorFinal: '',
                         mostrar: true,
-                        categorias: Array.isArray(item.categorias) ? categorias.filter((cat) => item.categorias!.includes(cat.id)) : [],
+                        categorias: categorias.filter((cat) => item.categorias!.includes(cat.id)),
                     });
                 }
             });
@@ -76,6 +84,7 @@ function convertirIndicadores(impactos: IndicadoresImpacto[]): Indicador[] {
 
     return resultados;
 }
+
 export interface Indicadoreslist {
     id: number;
     nameEs: string;
@@ -87,6 +96,8 @@ export interface Indicadoreslist {
 const Index = () => {
     const { t } = useTranslation();
     const nuevosIndicadores = convertirIndicadores(listadoIndicadoresImpacto);
+    console.log(nuevosIndicadores);
+
     const [indicadores, setIndicadores] = useState<Indicador[]>(nuevosIndicadores);
     const [mostrarDrop, setMostrarDrop] = useState<number>(0);
 
@@ -114,16 +125,12 @@ const Index = () => {
     }, [mostrarDrop]);
 
     const [editableRowIndex, setEditableRowIndex] = useState<number | null>(null);
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Indicador>>({
-        columnAccessor: 'indicador',
-        direction: 'asc',
-    });
 
     const handleEliminarFila = (rowIndex: number) => {
         if (window.confirm(t('confirmarEliminarIndicador'))) {
             const indicadoresMostrados = indicadores.filter((fila) => fila.mostrar);
             const idAModificar = indicadoresMostrados[rowIndex].id;
-            setIndicadores((prev) => prev.map((item) => (item.id === idAModificar ? { ...item, mostrar: false } : item)));
+            setIndicadores((prev) => prev.map((item) => (item.id === idAModificar ? { ...item, alcance: '', mostrar: false, year: '', valorInicial: '', objetivo: undefined } : item)));
         }
     };
 
@@ -133,11 +140,20 @@ const Index = () => {
         setMostrarDrop(0);
     };
 
+    const handleChangeTerritorial = (e: React.ChangeEvent<HTMLSelectElement>, id: number) => {
+        const value = e.target.value;
+        setIndicadores((prev) => prev.map((item) => (item.id === id ? { ...item, alcance: value } : item)));
+    };
+
+    const handleChangeObjetivo = (e: React.ChangeEvent<HTMLSelectElement>, id: number) => {
+        const value = e.target.value as 'Aumentar' | 'Mantener' | 'Disminuir';
+        setIndicadores((prev) => prev.map((item) => (item.id === id ? { ...item, objetivo: value } : item)));
+    };
+
     const columns: DataTableColumn<Indicador>[] = [
         {
             accessor: 'indicador',
             title: 'Indicador',
-            sortable: true,
             width: 400,
             render: (record: Indicador, index) => {
                 const isFirst = indicadores.filter((fila) => fila.mostrar).findIndex((r) => r.indicador === record.indicador) === index;
@@ -171,7 +187,6 @@ const Index = () => {
         {
             accessor: 'categoria',
             title: 'Categoria',
-            sortable: true,
             width: 200,
             render: (record: Indicador, index) => {
                 const isFirst = indicadores.filter((fila) => fila.mostrar).findIndex((r) => r.indicador === record.indicador) === index;
@@ -185,7 +200,7 @@ const Index = () => {
                 }
                 const prueba = mostrarDrop === record.idTemp;
 
-                if (record.categorias && record.categorias.length > 1 && (isFirst || prueba)) {
+                if (record.categorias && record.categorias.length > 0 && (isFirst || prueba)) {
                     const datos = indicadores.filter((ind) => ind.idTemp === record.idTemp);
                     const opcionesYaMostradas = datos.filter((dato) => dato.mostrar && !dato.categorias).map((dato) => dato.categoria);
                     const opciones = record.categorias.map((c) => c.nameEs).filter((name) => !opcionesYaMostradas.includes(name));
@@ -209,9 +224,12 @@ const Index = () => {
                 }
             },
         },
-        { accessor: 'unidad', title: 'Unidad de medida', sortable: true, width: 100 },
-        editableColumnByPathInput<Indicador, string>('alcance', 'Alcance Territorial', setIndicadores, editableRowIndex, 300, (value, onChange) => (
-            <select className="border p-1 rounded" value={value} onChange={(e) => onChange(e.target.value)}>
+        { accessor: 'unidad', title: 'Unidad de medida', width: 100 },
+        editableColumnByPathInput<Indicador, string>('alcance', 'Alcance Territorial', setIndicadores, editableRowIndex, 300, (value, _onChange, record) => (
+            <select className="border p-1 rounded" value={value ?? ''} onChange={(e) => handleChangeTerritorial(e, record.id)}>
+                <option value="" disabled>
+                    {t('seleccionaopcion')}
+                </option>
                 <option value="Comarcal">{t('comarcal')}</option>
                 <option value="ZEA">{t('ZEA')}</option>
                 <option value="Zona rural (ZEA + TER+ zona rural de HRD)">{t('Zrural')}</option>
@@ -220,8 +238,11 @@ const Index = () => {
         )),
         editableColumnByPathInput<Indicador>('year', 'Año', setIndicadores, editableRowIndex, 60),
         editableColumnByPathInput<Indicador>('valorInicial', 'Valor Inicial', setIndicadores, editableRowIndex, 80),
-        editableColumnByPathInput<Indicador, string>('objetivo', 'Objetivo', setIndicadores, editableRowIndex, 100, (value, onChange) => (
-            <select className="border p-1 rounded" value={value} onChange={(e) => onChange(e.target.value)}>
+        editableColumnByPathInput<Indicador, string>('objetivo', 'Objetivo', setIndicadores, editableRowIndex, 100, (value, _onChange, record) => (
+            <select className="border p-1 rounded" value={value ?? ''} onChange={(e) => handleChangeObjetivo(e, record.id)}>
+                <option value="" disabled>
+                    {t('seleccionaOpciones')}
+                </option>
                 <option value="Aumentar">{t('aumentar')}</option>
                 <option value="Mantener">{t('mantener')}</option>
                 <option value="Disminuir">{t('disminuir')}</option>
@@ -264,31 +285,38 @@ const Index = () => {
         },
     ];
 
-    // const sortedIndicadores = [...indicadores].sort((a, b) => {
-    //     const { columnAccessor, direction } = sortStatus;
-    //     const valueA = a[columnAccessor as keyof Indicador] ?? '';
-    //     const valueB = b[columnAccessor as keyof Indicador] ?? '';
-
-    //     if (typeof valueA === 'number' && typeof valueB === 'number') {
-    //         return direction === 'asc' ? valueA - valueB : valueB - valueA;
-    //     }
-
-    //     return direction === 'asc' ? String(valueA).localeCompare(String(valueB)) : String(valueB).localeCompare(String(valueA));
-    // });
+    const handleSave = () => {
+        const indicador1 = [];
+        const indicador2 = [];
+        for (let index = 0; index < indicadores.length; index++) {
+            const indicador = indicadores[index];
+            if (indicador.categorias || !indicador.mostrar) {
+                indicador1.push(indicador);
+            } else {
+                indicador2.push(indicador);
+            }
+        }
+        console.log('indicador1');
+        console.log(indicador1);
+        console.log('indicador2');
+        console.log(indicador2);
+    };
 
     return (
         <div className="panel">
-            <DataTable<Indicador>
-                records={indicadores.filter((fila) => fila.mostrar)}
-                columns={columns}
-                sortStatus={sortStatus}
-                onSortStatusChange={setSortStatus}
-                withRowBorders={false}
-                withColumnBorders
-                striped
-                highlightOnHover
-                minHeight={200}
+            <ZonaTitulo
+                titulo={
+                    <div className="text-xl font-bold flex items-center space-x-2 ">
+                        <span>{t('indicadoresInpacto')}</span>
+                    </div>
+                }
+                zonaBtn={
+                    <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={handleSave}>
+                        {t('guardar')}
+                    </button>
+                }
             />
+            <DataTable<Indicador> records={indicadores.filter((fila) => fila.mostrar)} columns={columns} withRowBorders={false} withColumnBorders striped highlightOnHover minHeight={200} />
         </div>
     );
 };

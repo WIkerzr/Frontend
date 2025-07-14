@@ -38,6 +38,7 @@
     "editarindicadorRelacionado": "Editar indicador relacionado",
     "crearNueva": "Crear nueva",
     "seleccionaopcion": "Selecciona una opción",
+    "seleccionaOpciones": "Opciones",
     "seleccionaMultiOpcion": "Selecciona una o varias",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
     "modalEliminarIndicadoresResultados": "Hay indicadores de Resultados. ¿Está seguro de continuar?",

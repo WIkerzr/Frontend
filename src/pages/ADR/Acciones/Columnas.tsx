@@ -152,7 +152,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
 }
 type CustomEditor<T, V> = (value: V, onChange: (value: V) => void, row: T, index: number) => React.ReactNode;
 
-export function editableColumnByPathInput<T extends object, V = unknown>(
+export function editableColumnByPathInput<T extends { id: number }, V = unknown>(
     accessor: string,
     title: string,
     setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
@@ -168,7 +168,6 @@ export function editableColumnByPathInput<T extends object, V = unknown>(
     return {
         accessor,
         title,
-        sortable: true,
         width: anchura,
         render: (row: T, index: number) => {
             const value = get(row, accessor) as V;
@@ -187,11 +186,14 @@ export function editableColumnByPathInput<T extends object, V = unknown>(
             if (editableRowIndex != null && editableRowIndex === index) {
                 const onChange = (newValue: V) => {
                     setIndicadores((prevRows) => {
-                        const copy = [...prevRows];
-                        const updatedRow = { ...copy[index] };
-                        set(updatedRow as object, accessor, newValue);
-                        copy[index] = updatedRow;
-                        return copy;
+                        return prevRows.map((item) => {
+                            if (item.id === row.id) {
+                                const updatedItem = { ...item };
+                                set(updatedItem as object, accessor, newValue);
+                                return updatedItem;
+                            }
+                            return item;
+                        });
                     });
                 };
 
@@ -227,11 +229,7 @@ export function editableColumnByPathInput<T extends object, V = unknown>(
                 }
                 const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
 
-                return (
-                    <div>
-                        <span style={style}>{String(visual)}</span>
-                    </div>
-                );
+                return <span style={style}>{String(visual)}</span>;
             }
         },
     };
