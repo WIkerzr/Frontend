@@ -99,6 +99,13 @@ const Index = () => {
     const [indicadores, setIndicadores] = useState<Indicador[]>(nuevosIndicadores);
     const [mostrarDrop, setMostrarDrop] = useState<number>(0);
 
+    useEffect(() => {
+        const indicadoresInpacto = localStorage.getItem('indicadoresInpacto');
+        if (indicadoresInpacto && indicadoresInpacto?.length > 0) {
+            setIndicadores(JSON.parse(indicadoresInpacto));
+        }
+    }, []);
+
     //Borrar useEffect
     useEffect(() => {
         //Borrar useEffect
@@ -140,6 +147,8 @@ const Index = () => {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>, idTemp: number) => {
+        console.log(indicadores);
+
         const newCategoria = e.target.value;
         setIndicadores((prev) => prev.map((indicador) => (indicador.idTemp === idTemp && indicador.categoria === newCategoria ? { ...indicador, mostrar: true } : indicador)));
 
@@ -311,16 +320,16 @@ const Index = () => {
     ];
 
     const handleSave = () => {
-        const indicador1 = [];
-        const indicador2 = [];
+        const indicado = [];
         for (let index = 0; index < indicadores.length; index++) {
             const indicador = indicadores[index];
-            if (indicador.categorias || !indicador.mostrar) {
-                indicador1.push(indicador);
-            } else {
-                indicador2.push(indicador);
+            if (!(indicador.categorias || !indicador.mostrar)) {
+                indicado.push(indicador);
             }
         }
+        localStorage.setItem('indicadoresInpacto', JSON.stringify(indicado));
+        console.log('indicado');
+        console.log(indicado);
     };
 
     return (
