@@ -15,6 +15,7 @@ const Index = () => {
     const [indicadorRealizacion, setIndicadorRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadorResultado, setIndicadorResultado] = useState<IndicadorResultado[]>([]);
     const [modalNuevo, setModalNuevo] = useState(false);
+    const [mensajeError, setMensajeError] = useState<string>('');
 
     const filtrarPorAdr = (indicadores: IndicadorRealizacion[]): IndicadorRealizacion[] => {
         return indicadores.filter((indicador) => String(indicador.RegionsId) === String(regionSeleccionada));
@@ -47,7 +48,11 @@ const Index = () => {
                 });
                 const data = await res.json();
                 const datosIndicador: IndicadorRealizacion[] = data.data;
-                if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
+
+                if (!res.ok) {
+                    setMensajeError(data.Message || t('errorObtenerUsuarios'));
+                    throw new Error(data.Message || t('errorObtenerUsuarios'));
+                }
                 localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
 
                 const indicadoresResultado: IndicadorResultado[] = datosIndicador
@@ -75,25 +80,31 @@ const Index = () => {
             ) : (
                 <div className="flex flex-col">
                     <div className="flex flex-col justify-end mb-5 items-end">
-                        <button onClick={() => setModalNuevo(true)} className="btn btn-primary w-[300px]">
-                            Abrir modal nuevo indicador
-                        </button>
-                        <ModalNuevoIndicador
-                            isOpen={modalNuevo}
-                            onClose={() => setModalNuevo(false)}
-                            accion="Nuevo"
-                            datosIndicador={indicadorInicial}
-                            onSave={(nuevoIndicadorRealizacion) => {
-                                setIndicadorRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
-                                if (!nuevoIndicadorRealizacion.Resultados) {
-                                    return;
-                                }
-                                const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadorResultado.some((res) => res.Id === nuevoRes.Id));
-                                if (nuevosResultados.length > 0) {
-                                    setIndicadorResultado((prev) => [...prev, ...nuevosResultados]);
-                                }
-                            }}
-                        />
+                        {mensajeError ? (
+                            <span className="ml-2 text-red-500 hover:text-red-700">{mensajeError}</span>
+                        ) : (
+                            <>
+                                <button onClick={() => setModalNuevo(true)} className="btn btn-primary w-[300px]">
+                                    Abrir modal nuevo indicador
+                                </button>
+                                <ModalNuevoIndicador
+                                    isOpen={modalNuevo}
+                                    onClose={() => setModalNuevo(false)}
+                                    accion="Nuevo"
+                                    datosIndicador={indicadorInicial}
+                                    onSave={(nuevoIndicadorRealizacion) => {
+                                        setIndicadorRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
+                                        if (!nuevoIndicadorRealizacion.Resultados) {
+                                            return;
+                                        }
+                                        const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadorResultado.some((res) => res.Id === nuevoRes.Id));
+                                        if (nuevosResultados.length > 0) {
+                                            setIndicadorResultado((prev) => [...prev, ...nuevosResultados]);
+                                        }
+                                    }}
+                                />
+                            </>
+                        )}
                     </div>
                     <div className="flex flex-row justify-center mb-5 gap-5">
                         <TablaIndicadores

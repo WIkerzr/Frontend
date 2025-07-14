@@ -153,7 +153,7 @@ const Index = () => {
                                                         {ejes.acciones.map((acciones, accionesIdx) => (
                                                             <div key={acciones.id || accionesIdx} className="panel mt-6">
                                                                 <span>
-                                                                    Accion: {year.nombreRegion} + {year.year} + {acciones.accion}
+                                                                    Accion: {year.nombreRegion} {year.year} {acciones.accion}
                                                                 </span>
                                                                 <h5 className="font-semibold text-lg dark:text-white-light mb-5">{acciones.accion}</h5>
                                                                 <TablaCuadroMando indicador={acciones.indicadorAccion?.indicadoreRealizacion ?? []} titulo={t('indicadoresDeRealizacion')} />

@@ -261,6 +261,7 @@
     "enviadoNoSePodraEditar":"Una vez enviado {{txtPantalla}}, no podrá ser editado a menos que Hazi lo permita.",
     "asegurateAntesPdfCorrecto":"Asegurate antes que toda la información se ha introducido correctamente en los PDF antes de enviarlo.",
 
+    "enviar": "Enviar",
     "aviso": "Aviso",
     "camposObligatorios":"Campos ogligatorios del {{zona}} pendientes por rellenar ",
     "faltanArchivosObligatorios":"Faltan los archivos obligatorios.",

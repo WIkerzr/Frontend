@@ -20,20 +20,14 @@ const Index = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>{t('PCDR')}</span>
-                        <span>{t('yearData.plan.status')}</span>
                     </h2>
-                }
-                zonaExplicativa={
-                    <>
-                        <span>{t('enviadoNoSePodraEditar', { txtPantalla: 'txtPantalla' })}</span>
-                        <span>{t('asegurateAntesPdfCorrecto')}</span>
-                    </>
                 }
             />
             <div className="w-2/4 mx-auto">
                 {pcdrFiles.length === 0 ? (
                     <section className="panel p-4 shadow-sm">
-                        <AdjuntarArchivos files={pcdrFiles} setFiles={setPcdrFiles} onChange={handlePcdrFilesChange} title={t('archivoPCDR')} />
+                        <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('adjuntarAnexos', { zona: t('archivoPCDR') })}</h3>
+                        <AdjuntarArchivos files={pcdrFiles} setFiles={setPcdrFiles} onChange={handlePcdrFilesChange} />
                     </section>
                 ) : (
                     pcdrFiles.map((file, idx) => (

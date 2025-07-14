@@ -3,7 +3,7 @@ export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';
 export type EstadosLoading = 'idle' | 'loading' | 'success' | 'error';
 
 export const opcionesComarcal = [
-    'No',
+    'Sin tratamiento territorial comarcal',
     'Zonas de especial atención',
     'Municipios con todas las zonas rurales',
     'Municipios con habitat rural disperso',
@@ -11,11 +11,28 @@ export const opcionesComarcal = [
     'otros',
 ];
 
-export const opcionesODS = ['', 'X', 'Z'];
+export const opcionesODS = [
+    'Fin de la Pobreza',
+    'Hambre Cero',
+    'Salud y Bienestar',
+    'Educación de Calidad',
+    'Igualdad de Género',
+    'Agua Limpia y Saneamiento',
+    'Energía Asequible y no Contaminante',
+    'Industria, Innovación e Infraestructura',
+    'Reducción de las Desigualdades',
+    'Ciudades y Comunidades Sostenibles',
+    'Producción y Consumo Responsables',
+    'Acción por el Clima',
+    'Vida Submarina',
+    'Vida de Ecosistemas Terrestres',
+    'Paz, Justicia e Instituciones Sólidas ',
+    'Alianzas para Lograr los Objetivos',
+];
 
 export type Comarcal = (typeof opcionesComarcal)[number];
 
-export const opcionesSupraComarcal = ['No', 'Territorio histórico', 'Euskadi', 'Otros'];
+export const opcionesSupraComarcal = ['Sin tratamiento territorial supracomarcal', 'Territorio histórico', 'Euskadi', 'Otros'];
 
 export type SupraComarcal = (typeof opcionesSupraComarcal)[number];
 
