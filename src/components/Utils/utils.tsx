@@ -1,7 +1,9 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Fragment, ReactNode, useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types/users';
+import { useTranslation } from 'react-i18next';
+import { ErrorMessage } from './animations';
 
 interface ModalProps {
     open: boolean;
@@ -84,5 +86,70 @@ export function SideBarList({ link, src, texto, role, disabled }: SideBarListPro
                 </div>
             </NavLink>
         </li>
+    );
+}
+interface ModalSaveProps {
+    title?: ReactNode;
+    children: () => Promise<void> | void;
+    nav?: string;
+    onClose?: () => void;
+}
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export function ModalSave({ title = 'Guardando...', children, nav }: ModalSaveProps) {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    const [open, setOpen] = useState(true);
+    const [mensaje, setMensaje] = useState(t('GuardandoCambios'));
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [guardado, setGuardado] = useState(false);
+
+    useEffect(() => {
+        const ejecutar = async () => {
+            try {
+                await children();
+                setLoading(false);
+                setMensaje(t('CambiosGuardados'));
+                setGuardado(true);
+                await delay(3000);
+                setOpen(false);
+            } catch (err: unknown) {
+                setLoading(false);
+                setError(true);
+                setMensaje(err instanceof Error ? err.message : String(err));
+            }
+        };
+
+        ejecutar();
+    }, [children, t]);
+
+    useEffect(() => {
+        if (!open && nav) {
+            navigate(nav);
+        }
+    }, [open]);
+    return (
+        <NewModal open={open} onClose={() => setOpen(false)} title={title}>
+            {error && <ErrorMessage message={mensaje} />}
+            <div className="flex justify-center mt-4">
+                <button
+                    type="button"
+                    className="bg-indigo-500 text-white px-4 py-2 rounded flex items-center disabled:opacity-70 disabled:cursor-not-allowed"
+                    disabled={loading}
+                    onClick={() => setOpen(false)}
+                >
+                    {loading && !guardado && (
+                        <svg className="mr-3 h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                        </svg>
+                    )}
+                    {mensaje}
+                </button>
+            </div>
+        </NewModal>
     );
 }

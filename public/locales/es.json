@@ -123,6 +123,7 @@
     "borrar": "Borrar",
     "ocultar": "Ocultar",
     "contrasenaNoCoincide": "Las contraseñas no coinciden.",
+    "GuardandoCambios": "Guardando cambios...",
     "CambiosGuardados": "Cambios guardados correctamente.",
     "CambioContrasena": "Cambio de contraseña",
 
@@ -144,6 +145,7 @@
     "guardar": "Guardar",
     "cerrar": "Cerrar",
     "anadir": "Añadir",
+    "aceptar": "Aceptar",
     "anadirAccion": "Añadir acción",
     "cancelar": "Cancelar",
     "seguridad": "Seguridad",
