@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { OnlyIfLoggedIn, OnlyIfNotLoggedIn } from '../components/OnlyIfNotLoggedIn';
+import NotFound from './NotFound';
 const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
 const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
@@ -28,6 +29,7 @@ const routes = [
                 <CuadroMando />
             </OnlyIfLoggedIn>
         ),
+        errorElement: <NotFound />,
         layout: 'default',
     },
     {
