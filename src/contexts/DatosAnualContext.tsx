@@ -5,6 +5,7 @@ import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { useRegionContext } from './RegionContext';
 import { Servicios } from '../types/GeneralTypes';
 
+export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
     yearData: YearData;
     block: boolean;
@@ -17,7 +18,7 @@ interface YearContextType {
     SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
     SeleccionEditarGuardar: () => void;
     GuardarEdicionServicio: () => void;
-    NuevaAccion: (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
+    AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
 }
 
 const YearContext = createContext<YearContextType | undefined>(undefined);
@@ -116,33 +117,46 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             servicios: nuevosServicios,
         });
     };
-    const NuevaAccion = (idEjePrioritario: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
-        const ejesSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
+
+    const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
+        const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
+        const ejeSeleccionado = fuenteEjes.find((eje) => eje.id === idEje);
+        if (!ejeSeleccionado) return;
+
         const datos = {
             ...datosInicializadosAccion,
             accion: nuevaAccion,
-            ejeEs: ejesSeleccionado[0].nameEs,
-            ejeEu: ejesSeleccionado[0].nameEu,
+            ejeEs: ejeSeleccionado.nameEs,
+            ejeEu: ejeSeleccionado.nameEu,
             lineaActuaccion: nuevaLineaActuaccion,
-            plurianual: plurianual,
+            plurianual,
         };
-        const updatedYearData = {
-            ...yearData,
-            plan: {
-                ...yearData.plan,
-                ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) => {
-                    if (idEjePrioritario.includes(eje.id)) {
-                        return {
-                            ...eje,
-                            acciones: [...eje.acciones, datos],
-                        };
-                    }
-                    return eje;
-                }),
-            },
-        };
-        setYearData(updatedYearData);
+
+        if (tipo === 'Acciones') {
+            const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) =>
+                eje.id === idEje
+                    ? {
+                          ...eje,
+                          acciones: [...eje.acciones, datos],
+                      }
+                    : eje
+            );
+
+            setYearData({
+                ...yearData,
+                plan: {
+                    ...yearData.plan,
+                    ejesPrioritarios: nuevosEjes,
+                },
+            });
+        } else {
+            setYearData({
+                ...yearData,
+                accionesAccesorias: [...(yearData.accionesAccesorias || []), datos],
+            });
+        }
     };
+
     const [block, setBlock] = useState<boolean>(false);
 
     return (
@@ -153,7 +167,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 setYearData,
                 datosEditandoAccion,
                 setDatosEditandoAccion,
-                NuevaAccion,
+                AgregarAccion,
                 SeleccionEditarAccion,
                 SeleccionEditarGuardar,
                 SeleccionEditarServicio,

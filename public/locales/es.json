@@ -20,7 +20,8 @@
     "EmailRestaurarEnviado": "Hemos enviado un enlace para restaurar tu contraseña.",
     "EmailRestaurarRevisa": "Revisa tu correo electrónico.",
 
-    "eliminar":"Eliminar",
+    "eliminar":"eliminar",
+    "Eliminar":"Eliminar",
     "alertIndicadores":"Se tiene que rellenar como minimo el campo Nombre, y {{totales}}",
     "alertTotalesPlanActivo":"los totales de Meta anual y Meta Final para poder guardar",
     "alertTotalesMemoriaActivo":"el total Ejecutado poder guardar",
@@ -151,6 +152,7 @@
     "estadoBorrador": "BORRADOR",
     "estadoCerrado": "CERRADO",
 
+    "rellenarCampo": "Por favor rellena el campo antes de guardar.",
     "rellenarAmbosCampos": "Por favor rellena ambos campos antes de guardar.",
     "limiteEje": "Límite de acciones alcanzado para este eje",
     "descargarBorrador": "Descargar borrador",
@@ -256,6 +258,7 @@
     "confirmacionReabrir":"¿Estás seguro que deseas REABRIR {{zona}} {{fecha}}?",
     "confirmacionAceptar":"¿Estás seguro que deseas ACEPTAR {{zona}} {{fecha}}?",
     "confirmacionRechazar":"¿Estás seguro que deseas RECHAZAR {{zona}} {{fecha}}?",
+    "confirmacion":"¿Estás seguro de que quieres {{p1}} {{p2}} {{p3}}?",
 
 
     "enviadoNoSePodraEditar":"Una vez enviado {{txtPantalla}}, no podrá ser editado a menos que Hazi lo permita.",

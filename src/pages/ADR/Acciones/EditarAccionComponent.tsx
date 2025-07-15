@@ -228,7 +228,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
                                       {t('editar')}
                                   </button>
                                   <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
-                                      {t('eliminar')}
+                                      {t('Eliminar')}
                                   </button>
                               </div>
                           );

@@ -68,7 +68,7 @@ export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccione
 
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();
-    const { yearData, NuevaAccion } = useYear();
+    const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
     // const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(yearData.plan.ejesPrioritarios[0].acciones);
@@ -149,7 +149,7 @@ export const ModalAccion = () => {
             return;
         }
 
-        NuevaAccion(idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
+        AgregarAccion('Acciones', idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
 
         //TODO LLamada al servidor con la nueva accion
 
@@ -224,6 +224,108 @@ export const ModalAccion = () => {
                         <label>{t('plurianual')}</label>
                     </div>
                     {inputError && <div className="text-xs text-red-500 text-center">{t('rellenarAmbosCampos')}</div>}
+                    <button onClick={handleNuevaAccion} className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition}`}>
+                        {t('guardar')}
+                    </button>
+                </div>
+            </NewModal>
+        </>
+    );
+};
+export const ModalAccionAccesorias = () => {
+    const { t, i18n } = useTranslation();
+    const { yearData, AgregarAccion } = useYear();
+    const { editarPlan } = useEstadosPorAnio();
+    const listadoEjesFiltrado = yearData.plan.ejes.filter((eje) => !yearData.plan.ejesPrioritarios.some((prioritario) => prioritario.id === eje.id));
+
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState<string>(listadoEjesFiltrado[0].id);
+    const [nuevaAccion, setNuevaAccion] = useState('');
+    const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
+    const [plurianual, setNuevaPlurianual] = useState(false);
+
+    const [inputError, setInputError] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleNuevaAccion = () => {
+        if (!nuevaAccion.trim()) {
+            setInputError(true);
+            return;
+        }
+
+        AgregarAccion('AccionesAccesorias', idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
+
+        //TODO LLamada al servidor con la nueva accionAccesorias
+
+        setIdEjeSeleccionado('');
+        setNuevaAccion('');
+        setNuevaLineaActuaccion('');
+        setNuevaPlurianual(false);
+        setInputError(false);
+        setShowModal(false);
+    };
+
+    return (
+        <>
+            {editarPlan && (
+                <div className="flex justify-center">
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
+                        {t('anadirAccion')}
+                    </button>
+                </div>
+            )}
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('newAccion')}>
+                <div className="space-y-5">
+                    <div>
+                        <label className="block font-medium mb-1">{t('Ejes')}</label>
+                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
+                            {listadoEjesFiltrado.map((eje) => {
+                                const label = `${i18n.language === 'es' ? eje.nameEs : eje.nameEu}`;
+                                return (
+                                    <option key={eje.id} value={eje.id}>
+                                        {label}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block font-medium mb-1">{t('NombreAccion')}</label>
+                        <input
+                            type="text"
+                            className={`w-full p-2 border rounded ${inputError && !nuevaAccion.trim() ? 'border-red-400' : ''}`}
+                            value={nuevaAccion}
+                            onChange={(e) => {
+                                setNuevaAccion(e.target.value);
+                                setInputError(false);
+                            }}
+                            placeholder={t('Introduce nombre acción')}
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
+                        <input
+                            type="text"
+                            className={`w-full p-2 border rounded`}
+                            value={nuevaLineaActuaccion}
+                            onChange={(e) => {
+                                setNuevaLineaActuaccion(e.target.value);
+                                setInputError(false);
+                            }}
+                            placeholder={t('Introduce línea de actuación')}
+                        />
+                    </div>
+                    <div className="flex">
+                        <input
+                            onChange={(e) => setNuevaPlurianual(e.target.checked)}
+                            type="checkbox"
+                            className="form-checkbox h-5 w-5 "
+                            checked={plurianual}
+                            //onChange={() => handleCheck(accion.id)}
+                            //id={`checkbox-${accion.id}`}
+                        />
+                        <label>{t('plurianual')}</label>
+                    </div>
+                    {inputError && <div className="text-xs text-red-500 text-center">{t('rellenarCampo')}</div>}
                     <button onClick={handleNuevaAccion} className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition}`}>
                         {t('guardar')}
                     </button>
