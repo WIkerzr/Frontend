@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ListadoAcciones, ModalAccion } from './Componentes';
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
@@ -12,6 +12,7 @@ interface ModalAvisoProps {
     mensaje: string;
 }
 const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     return (
@@ -20,7 +21,7 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
                 <h2 className="text-lg font-semibold mb-4">Aviso</h2>
                 <p className="mb-6">{mensaje}</p>
                 <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
-                    Cerrar
+                    {t('Cerrar')}
                 </button>
             </div>
         </div>
@@ -29,11 +30,15 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { yearData } = useYear();
+    const { yearData, SeleccionVaciarEditarAccion } = useYear();
     const navigate = useNavigate();
     const ejesPrioritarios = yearData.plan.ejesPrioritarios;
     const { anio } = useEstadosPorAnio();
     const ejesSeleccionados = ejesPrioritarios.slice(0, 3);
+
+    useEffect(() => {
+        SeleccionVaciarEditarAccion();
+    }, []);
 
     if (!(ejesPrioritarios.length > 0 && ejesPrioritarios.length <= 3)) {
         return <ModalAviso isOpen={true} mensaje={t('error:errorFaltEjesPrioritarios')} onClose={() => navigate('/adr/ejes')} />;

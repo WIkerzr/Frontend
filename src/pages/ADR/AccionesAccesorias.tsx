@@ -13,8 +13,13 @@ import { DatosAccion } from '../../types/TipadoAccion';
 const Index: React.FC = () => {
     const { anio } = useEstadosPorAnio();
     const { t } = useTranslation();
-    const { yearData, setYearData } = useYear();
+    const { yearData, setYearData, SeleccionEditarAccionAccesoria, SeleccionVaciarEditarAccion } = useYear();
     const [accionesGrup, setAccionesGrup] = useState<DatosAccion[][]>([]);
+
+    useEffect(() => {
+        SeleccionVaciarEditarAccion();
+        setAccionesGrup(grup5(yearData.accionesAccesorias || [], 4));
+    }, []);
 
     const handleDelete = (id: string) => {
         const accionAccesoria = yearData.accionesAccesorias?.filter((item) => item.id === String(id));
@@ -58,15 +63,17 @@ const Index: React.FC = () => {
                             return (
                                 <div key={accion.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
-                                        {t('Eje')}: {accion.ejeEs}
+                                        {t('Eje')}: {yearData.plan.ejes.find((item) => item.id === accion.ejeId)?.nameEs}
                                     </span>
                                     <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('LineaActuaccion')}: {accion.lineaActuaccion}
                                     </span>
                                     <div className="flex gap-2 justify-end mt-2">
-                                        <NavLink to="/adr/acciones/editando" className="group">
-                                            <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition">{editable ? <IconPencil /> : <IconEye />}</button>
+                                        <NavLink to="/adr/accionesYproyectos/editando" state={{ tipo: 'accesoria' }} className="group">
+                                            <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => SeleccionEditarAccionAccesoria(accion.id)}>
+                                                {editable ? <IconPencil /> : <IconEye />}
+                                            </button>
                                         </NavLink>
                                         {editable && (
                                             <button

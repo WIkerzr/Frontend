@@ -16,7 +16,10 @@ interface YearContextType {
     setDatosEditandoServicio: React.Dispatch<React.SetStateAction<Servicios | null>>;
     SeleccionEditarServicio: (idServicio: string | null) => void;
     SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
+    SeleccionEditarAccionAccesoria: (idAccion: string) => void;
+    SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
+    SeleccionEditarGuardarAccesoria: () => void;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
 }
@@ -63,6 +66,41 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const SeleccionVaciarEditarAccion = () => {
+        localStorage.removeItem('datosAccionModificado');
+        setDatosEditandoAccion({
+            id: '0',
+            accion: '',
+            ejeEs: '',
+            ejeEu: '',
+            lineaActuaccion: '',
+            plurianual: false,
+            datosPlan: {
+                ejecutora: '',
+                implicadas: '',
+                comarcal: 'Sin tratamiento territorial comarcal',
+                supracomarcal: 'Sin tratamiento territorial supracomarcal',
+                rangoAnios: '',
+                oAccion: '',
+                ods: '',
+                dAccion: '',
+                presupuesto: '',
+                iMujHom: '',
+                uEuskera: '',
+                sostenibilidad: '',
+                dInteligent: '',
+                observaciones: '',
+            },
+        });
+    };
+
+    const SeleccionEditarAccionAccesoria = (idAccion: string) => {
+        const accionAccesoria = yearData.accionesAccesorias!.find((r) => r.id === idAccion);
+        if (accionAccesoria) {
+            setDatosEditandoAccion(accionAccesoria);
+        }
+    };
+
     const [datosEditandoServicio, setDatosEditandoServicio] = useState<Servicios | null>(() => {
         const stored = localStorage.getItem('datosEditandoServicio');
         return stored ? JSON.parse(stored) : null;
@@ -105,6 +143,15 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         });
 
         setIdEjeEditado('');
+    };
+    const SeleccionEditarGuardarAccesoria = () => {
+        const accionEditada = yearData.accionesAccesorias!.map((accion) => (accion.id === datosEditandoAccion.id ? datosEditandoAccion : accion));
+        console.log(accionEditada);
+
+        setYearData({
+            ...yearData,
+            accionesAccesorias: accionEditada,
+        });
     };
 
     const GuardarEdicionServicio = () => {
@@ -169,7 +216,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 setDatosEditandoAccion,
                 AgregarAccion,
                 SeleccionEditarAccion,
+                SeleccionEditarAccionAccesoria,
+                SeleccionVaciarEditarAccion,
                 SeleccionEditarGuardar,
+                SeleccionEditarGuardarAccesoria,
                 SeleccionEditarServicio,
                 datosEditandoServicio,
                 setDatosEditandoServicio,

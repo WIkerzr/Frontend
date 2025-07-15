@@ -182,7 +182,7 @@ const Sidebar = () => {
                                             role={role}
                                             disabled={!(yearData.plan.ejesPrioritarios.length > 0 && yearData.plan.ejesPrioritarios.length <= 3)}
                                         />
-                                        <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesAccesorias" src={IconAccionesAccesorias} role={role} />
+                                        <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} />
                                         <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
                                         <li className="nav-item">
                                             <NavLink to="/adr/planesGestion" className="group">

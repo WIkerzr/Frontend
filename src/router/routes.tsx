@@ -123,13 +123,22 @@ const routes = [
         layout: 'EditarAccion',
     },
     {
-        path: '/adr/accionesAccesorias',
+        path: '/adr/accionesYproyectos',
         element: (
             <OnlyIfLoggedIn>
                 <AccionesAccesorias />
             </OnlyIfLoggedIn>
         ),
         layout: 'AccionesAccesorias',
+    },
+    {
+        path: '/adr/accionesYproyectos/editando',
+        element: (
+            <OnlyIfLoggedIn>
+                <EditarAccion />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'EditarAccion',
     },
     {
         path: '/adr/servicios',

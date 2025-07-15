@@ -64,6 +64,7 @@ export interface DatosAccion {
     accion: string;
     ejeEs?: string;
     ejeEu?: string;
+    ejeId?: string;
     lineaActuaccion: string;
     datosPlan?: DatosPlan;
     datosMemoria?: DatosMemoria;

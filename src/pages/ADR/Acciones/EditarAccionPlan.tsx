@@ -99,8 +99,20 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 <div className="flex gap-4">
                     <InputField nombreInput="ejecutora" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.ejecutora} onChange={(e) => handleChangeCampos('ejecutora', e)} />
                     <InputField nombreInput="implicadas" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.implicadas} onChange={(e) => handleChangeCampos('implicadas', e)} />
-                    <SimpleDropdown title={'tratamientoComarcal'} disabled={bloqueo} value={datosEditandoAccion.datosPlan?.comarcal} options={opcionesComarcal} />
-                    <SimpleDropdown title={'supracomarcal'} disabled={bloqueo} value={datosEditandoAccion.datosPlan?.supracomarcal} options={opcionesSupraComarcal} />
+                    <SimpleDropdown
+                        title={'tratamientoComarcal'}
+                        disabled={bloqueo}
+                        value={datosEditandoAccion.datosPlan?.comarcal}
+                        options={opcionesComarcal}
+                        onChange={(e) => handleChangeCampos('comarcal', e)}
+                    />
+                    <SimpleDropdown
+                        title={'supracomarcal'}
+                        disabled={bloqueo}
+                        value={datosEditandoAccion.datosPlan?.supracomarcal}
+                        options={opcionesSupraComarcal}
+                        onChange={(e) => handleChangeCampos('supracomarcal', e)}
+                    />
 
                     {datosEditandoAccion.plurianual && (
                         <InputField nombreInput="rangoAnios" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.rangoAnios} onChange={(e) => handleChangeCampos('rangoAnios', e)} />

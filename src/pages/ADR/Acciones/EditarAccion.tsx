@@ -7,19 +7,27 @@ import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { ErrorFullScreen } from '../Componentes';
+import { ModalSave } from '../../../components/Utils/utils';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
+    const location = useLocation();
+    const tipo = location.state?.tipo;
+    let accionAccesoria = false;
+    if (tipo === 'accesoria') {
+        accionAccesoria = true;
+    }
 
-    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block } = useYear();
+    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, SeleccionEditarGuardarAccesoria, block } = useYear();
     const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
+    const [mostrandoModal, setMostrandoModal] = useState(false);
 
     useEffect(() => {
         if (!editarPlan && !editarMemoria) {
@@ -41,6 +49,9 @@ const Index: React.FC = () => {
             accion: `${e.target.value}`,
         });
     };
+    const handleSave = () => {
+        setMostrandoModal(true);
+    };
 
     return (
         <div className="panel">
@@ -55,7 +66,7 @@ const Index: React.FC = () => {
                 zonaBtn={
                     <div className="ml-auto flex gap-4 items-center justify-end">
                         {!bloqueo && (
-                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={SeleccionEditarGuardar}>
+                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleSave}>
                                 {t('guardar')}{' '}
                             </button>
                         )}
@@ -98,7 +109,17 @@ const Index: React.FC = () => {
                     </div>
                 }
             />
-
+            {mostrandoModal && (
+                <ModalSave onClose={() => setMostrandoModal(false)} nav={accionAccesoria ? '/adr/accionesYproyectos' : '/adr/acciones'}>
+                    {async () => {
+                        if (accionAccesoria) {
+                            await SeleccionEditarGuardarAccesoria();
+                        } else {
+                            await SeleccionEditarGuardar();
+                        }
+                    }}
+                </ModalSave>
+            )}
             <div className="mb-5 flex flex-col sm:flex-row">
                 <TabGroup className="w-full">
                     <TabList className="mx-10 mt-3 flex flex-wrap ">
