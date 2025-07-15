@@ -31,9 +31,10 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { yearData, SeleccionVaciarEditarAccion } = useYear();
+    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+
     const navigate = useNavigate();
     const ejesPrioritarios = yearData.plan.ejesPrioritarios;
-    const { anio } = useEstadosPorAnio();
     const ejesSeleccionados = ejesPrioritarios.slice(0, 3);
 
     useEffect(() => {
@@ -55,7 +56,14 @@ const Index: React.FC = () => {
                     </h2>
                 }
                 zonaBtn={<ModalAccion />}
-                zonaExplicativa={<span>{t('explicacionAccion')}</span>}
+                zonaExplicativa={
+                    (editarPlan || editarMemoria) && (
+                        <>
+                            <span>{t('explicacionAccion')}</span>
+                            <span>{t('explicacionAccionParte2')}</span>
+                        </>
+                    )
+                }
             />
             <div className="w-full mx-auto mt-1 px-2">
                 <div className="flex items-start w-full h-100%">

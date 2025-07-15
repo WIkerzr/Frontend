@@ -126,10 +126,12 @@ const Index = () => {
                     </>
                 }
                 zonaExplicativa={
-                    <>
-                        <span>{t('explicacionPlanParte1')}</span>
-                        <span>{t('explicacionPlanParte2')}</span>
-                    </>
+                    editarPlan && (
+                        <>
+                            <span>{t('explicacionPlanParte1')}</span>
+                            <span>{t('explicacionPlanParte2')}</span>
+                        </>
+                    )
                 }
             />
 

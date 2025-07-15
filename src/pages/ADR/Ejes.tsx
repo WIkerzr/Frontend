@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { Ejes } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
     const { yearData, setYearData } = useYear();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const [selected, setSelected] = useState<string[]>([]);
     const [locked, setLocked] = useState(false);
@@ -54,10 +56,12 @@ const Index = () => {
                         </>
                     }
                     zonaExplicativa={
-                        <>
-                            <span>{t('explicacionEje')}</span>
-                            <span>{t('seleccionar3Ejes')}</span>
-                        </>
+                        (editarPlan || editarMemoria) && (
+                            <>
+                                <span>{t('explicacionEje')}</span>
+                                <span>{t('seleccionar3Ejes')}</span>
+                            </>
+                        )
                     }
                 />
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-2 w-full">

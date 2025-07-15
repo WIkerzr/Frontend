@@ -23,7 +23,7 @@ const archivos: Archivo[] = [
 ];
 
 const Index = () => {
-    const { anio } = useEstadosPorAnio();
+    const { anio, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const { yearData } = useYear();
@@ -66,10 +66,12 @@ const Index = () => {
                     </>
                 }
                 zonaExplicativa={
-                    <>
-                        {yearData.memoria.status === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
-                        <span className="block">{t(`explicacionMemoriaParte2${yearData.memoria.status}`)}</span>
-                    </>
+                    editarMemoria && (
+                        <>
+                            {yearData.memoria.status === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
+                            <span className="block">{t(`explicacionMemoriaParte2${yearData.memoria.status}`)}</span>
+                        </>
+                    )
                 }
             />
             <>

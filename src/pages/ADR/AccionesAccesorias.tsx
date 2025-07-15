@@ -54,6 +54,7 @@ const Index: React.FC = () => {
                     </h2>
                 }
                 zonaBtn={<ModalAccionAccesorias />}
+                // zonaExplicativa={(editarPlan || editarMemoria) && <></>}
             />
             <div className="w-full mx-auto mt-1 px-2">
                 {accionesGrup.map((fila: DatosAccion[], filaIndex: number) => (
