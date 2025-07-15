@@ -175,8 +175,6 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
         setErrorMessage(null);
         setSuccessMessage(null);
         let response: Response | null = null;
-        console.log('location');
-        console.log(location);
         try {
             setIsLoading('loading');
             if (accion === 'editar') {

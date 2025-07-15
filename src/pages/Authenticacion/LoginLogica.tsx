@@ -23,20 +23,6 @@ const useLogin = () => {
         e.preventDefault();
 
         try {
-            // const loginData = {
-            //     userName: email,
-            //     password: password,
-            //     useRefreshTokens: true,
-            // };
-
-            // authlogin(loginData)
-            //     .then((response) => {
-            //         console.log('Login exitoso:', response);
-            //     })
-            //     .catch((error) => {
-            //         console.error('Error al hacer login:', error);
-            //     });
-
             const response = await fetch('https://localhost:44300/token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -48,7 +34,6 @@ const useLogin = () => {
                 }).toString(),
             });
 
-            ///////////////////////////////////
             interface BackendResponse {
                 ambit: string;
                 apellido1: string;

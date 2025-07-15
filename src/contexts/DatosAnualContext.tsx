@@ -146,7 +146,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
     const SeleccionEditarGuardarAccesoria = () => {
         const accionEditada = yearData.accionesAccesorias!.map((accion) => (accion.id === datosEditandoAccion.id ? datosEditandoAccion : accion));
-        console.log(accionEditada);
 
         setYearData({
             ...yearData,

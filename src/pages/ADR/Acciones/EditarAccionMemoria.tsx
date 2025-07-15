@@ -97,7 +97,6 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 sActual: value,
             },
         });
-        console.log(datosEditandoAccion);
     };
 
     return (
