@@ -11,7 +11,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 import { DatosAccion } from '../../types/TipadoAccion';
 
 const Index: React.FC = () => {
-    const { anio } = useEstadosPorAnio();
+    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const { yearData, setYearData, SeleccionEditarAccionAccesoria, SeleccionVaciarEditarAccion } = useYear();
     const [accionesGrup, setAccionesGrup] = useState<DatosAccion[][]>([]);
@@ -59,7 +59,7 @@ const Index: React.FC = () => {
                 {accionesGrup.map((fila: DatosAccion[], filaIndex: number) => (
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((accion: DatosAccion) => {
-                            const editable = true;
+                            const editable = editarPlan && editarMemoria;
                             return (
                                 <div key={accion.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">

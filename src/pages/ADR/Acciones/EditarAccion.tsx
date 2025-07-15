@@ -80,7 +80,7 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
-                                {!bloqueo ? (
+                                {editarPlan ? (
                                     <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
                                 ) : (
                                     <span className="block  font-semibold">
@@ -102,6 +102,7 @@ const Index: React.FC = () => {
                                     type="checkbox"
                                     className="form-checkbox h-5 w-5 "
                                     checked={datosEditandoAccion.plurianual}
+                                    disabled={!editarPlan}
                                 />
                                 <label>{t('plurianual')}</label>
                             </div>
