@@ -270,6 +270,7 @@
     "aviso": "Aviso",
     "camposObligatorios":"Campos ogligatorios del {{zona}} pendientes por rellenar ",
     "faltanArchivosObligatorios":"Faltan los archivos obligatorios.",
+    "faltanEnviarAntesPlan": "No es posible enviar la memoria sin haber enviado Plan previamente",
     "indicadoresOgligatorios":"Indicadores ogligatorios del {{zona}} pendientes por rellenar ",
     "falloAlCargarIndicadores": "Fallo al cargar los indicadores",
     "falloAlCargarAccion": "Fallo al cargar la acción",

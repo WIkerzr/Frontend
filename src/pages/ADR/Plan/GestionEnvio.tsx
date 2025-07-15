@@ -3,16 +3,18 @@ import { useState } from 'react';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
-import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import { useLocation } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
+import { Aviso, Boton, ModalSave } from '../../../components/Utils/utils';
 
 const Index = () => {
-    const { anio } = useEstadosPorAnio();
+    const { anio, editarPlan } = useEstadosPorAnio();
+
     const { t } = useTranslation();
-    const { yearData } = useYear();
+    const { yearData, setYearData } = useYear();
     const [planAnexos, setPlanAnexos] = useState<File[]>([]);
     const [planFiles, setPlanFiles] = useState<File[]>([]);
+    const [mostrandoModal, setMostrandoModal] = useState(false);
 
     const location = useLocation();
     const pantalla = location.state?.pantalla || '';
@@ -25,8 +27,26 @@ const Index = () => {
         setPlanFiles(files);
     };
 
-    //Todo
-    const pcdrFiles = [1, 2];
+    const handleGuardarFicheros = () => {
+        //TODO llamada
+        if (pantalla === 'Plan') {
+            setYearData({
+                ...yearData,
+                plan: {
+                    ...yearData.plan,
+                    status: 'proceso',
+                },
+            });
+        } else if (pantalla === 'Memoria') {
+            setYearData({
+                ...yearData,
+                memoria: {
+                    ...yearData.memoria,
+                    status: 'proceso',
+                },
+            });
+        }
+    };
 
     return (
         <div className="panel">
@@ -48,6 +68,13 @@ const Index = () => {
                     </>
                 }
             />
+            {mostrandoModal && (
+                <ModalSave onClose={() => setMostrandoModal(false)} nav={pantalla === 'Plan' ? '/adr/planesGestion' : '/adr/memoriasAnuales'}>
+                    {async () => {
+                        handleGuardarFicheros();
+                    }}
+                </ModalSave>
+            )}
             <div className="flex justify-center items-center">
                 <div className="panel w-2/4">
                     <section className="panel p-4 shadow-sm">
@@ -67,21 +94,15 @@ const Index = () => {
 
                     <div className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('finalizarYEnviar', { zona: txtPantalla })}</h3>
-                        {(pantalla === 'Plan' ? planFiles.length != 1 || pcdrFiles.length != 1 : planFiles.length != 1) && (
-                            <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center">
-                                <IconInfoCircle />
-                                <span>
-                                    <strong>{t('aviso')}:</strong> {t('faltanArchivosObligatorios')}
-                                </span>
-                            </div>
-                        )}
+                        {(pantalla === 'Plan' ? planFiles.length != 1 : planFiles.length != 1) && <Aviso textoAviso={t('faltanArchivosObligatorios')} />}
+                        {pantalla !== 'Plan' && editarPlan && <Aviso textoAviso={t('faltanEnviarAntesPlan')} />}
                         <div className="flex justify-center">
-                            <button
-                                disabled={pantalla === 'Plan' ? planFiles.length != 1 || pcdrFiles.length != 1 : planFiles.length != 1}
-                                className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
-                            >
-                                {t('finalizar', { zona: txtPantalla })}
-                            </button>
+                            <Boton
+                                tipo="guardar"
+                                textoBoton={t('finalizar', { zona: txtPantalla })}
+                                disabled={pantalla === 'Plan' ? planFiles.length != 1 : editarPlan || planFiles.length != 1}
+                                onClick={() => setMostrandoModal(true)}
+                            />
                         </div>
                     </div>
                 </div>

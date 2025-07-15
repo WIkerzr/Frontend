@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from './animations';
+import IconInfoCircle from '../Icon/IconInfoCircle';
 
 interface ModalProps {
     open: boolean;
@@ -151,5 +152,33 @@ export function ModalSave({ title = 'Guardando...', children, nav }: ModalSavePr
                 </button>
             </div>
         </NewModal>
+    );
+}
+
+export function Aviso({ textoAviso }: { textoAviso: string }) {
+    const { t } = useTranslation();
+    return (
+        <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center">
+            <IconInfoCircle />
+            <span>
+                <strong>{t('aviso')}:</strong> {textoAviso}
+            </span>
+        </div>
+    );
+}
+interface BotonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    tipo: 'guardar' | 'cerrar';
+    textoBoton?: string;
+}
+
+export function Boton({ tipo, disabled = false, textoBoton = '', onClick }: BotonProps) {
+    return (
+        <button
+            disabled={disabled}
+            className={`${tipo === 'guardar' ? 'bg-primary' : 'bg-danger'} px-4 py-2  text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px] disabled:cursor-not-allowed`}
+            onClick={onClick}
+        >
+            {textoBoton}
+        </button>
     );
 }
