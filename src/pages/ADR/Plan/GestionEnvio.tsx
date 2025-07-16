@@ -30,6 +30,9 @@ const Index = () => {
     const handleGuardarFicheros = () => {
         //TODO llamada
         if (pantalla === 'Plan') {
+            if (yearData.plan.status === 'proceso') {
+                return;
+            }
             setYearData({
                 ...yearData,
                 plan: {
@@ -38,6 +41,9 @@ const Index = () => {
                 },
             });
         } else if (pantalla === 'Memoria') {
+            if (yearData.memoria.status === 'proceso') {
+                return;
+            }
             setYearData({
                 ...yearData,
                 memoria: {
