@@ -276,6 +276,7 @@
     "faltanArchivosObligatorios":"Faltan los archivos obligatorios.",
     "faltanEnviarAntesPlan": "No es posible enviar la memoria sin haber enviado Plan previamente",
     "indicadoresOgligatorios":"Indicadores ogligatorios del {{zona}} pendientes por rellenar ",
+    "accionMinimaEnEjePrioritario":"Se tiene que introducir minimo una acción al ser eje prioritario",
     "falloAlCargarIndicadores": "Fallo al cargar los indicadores",
     "falloAlCargarAccion": "Fallo al cargar la acción",
     "falloAlCargarServicio": "Fallo al cargar el servicio",

@@ -376,6 +376,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                         </div>
                     );
                 })}
+                {accionesMostradas.length === 0 && <MostrarAvisoCamposAcciones navegar="/adr/acciones/editando" />}
             </div>
         </div>
     );
@@ -437,7 +438,7 @@ export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoVa
     return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
 }
 interface MostrarAvisoCamposAccionesProps {
-    datos: DatosAccion;
+    datos?: DatosAccion;
     plurianual?: boolean;
     texto?: boolean;
     navegar: string;
@@ -446,6 +447,19 @@ interface MostrarAvisoCamposAccionesProps {
 export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ datos, texto = true, navegar }) => {
     const { t } = useTranslation();
     const { editarPlan } = useEstadosPorAnio();
+
+    if (!datos) {
+        return (
+            <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
+                <>
+                    <IconInfoCircle />
+                    <span>
+                        <strong>{t('aviso')}:</strong> {t('accionMinimaEnEjePrioritario')}.
+                    </span>
+                </>
+            </div>
+        );
+    }
 
     const { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosAccion(datos);
 
