@@ -10,10 +10,21 @@ import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
 import { validarCamposObligatoriosAccion } from '../Componentes';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
+interface Archivo {
+    nombre: string;
+    url: string;
+}
+
+const archivos: Archivo[] = [
+    { nombre: 'Memoria.pdf', url: '/docs/Memoria.pdf' },
+    { nombre: 'Anexo1.pdf', url: '/docs/Anexo1.pdf' },
+    { nombre: 'Anexo2.pdf', url: '/docs/Anexo2.pdf' },
+];
 
 const Index = () => {
     const { anio, editarPlan } = useEstadosPorAnio();
     const { yearData } = useYear();
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
 
@@ -134,8 +145,32 @@ const Index = () => {
                     )
                 }
             />
-
-            <CamposPlanMemoria pantalla="Plan" />
+            {editarPlan && <CamposPlanMemoria pantalla="Plan" />}
+            {(yearData.plan.status === 'proceso' || yearData.plan.status === 'aceptado') && (
+                <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
+                    <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
+                    <ul className="space-y-3 ">
+                        {archivos.map((archivo, idx) => (
+                            <li
+                                key={archivo.nombre}
+                                className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
+                                onMouseEnter={() => setHoveredIndex(idx)}
+                                onMouseLeave={() => setHoveredIndex(null)}
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
+                                    <span className="font-medium">{archivo.nombre}</span>
+                                </div>
+                                <a href={archivo.url} download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition">
+                                    <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
+                                        {t('descargar')}
+                                    </button>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };

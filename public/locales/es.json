@@ -75,6 +75,7 @@
     "explicacionEje": "En este apartado se reflejará el proceso realizado para la selección de los ejes prioritarios a implementar en esta anualidad.",
     "explicacionPlanParte1": "En esta pantalla se completan los datos generales del plan.",
 "explicacionPlanParte2": "Se podrán guardar los datos ya introducidos en la pantalla, descargar el plan en formato Word y usar el botón 'Enviar', que adjuntará el plan junto con sus anexos antes del envío.",
+    "ReabrirPlan": "Antes de reabrir el plan, el estado de la memoria debe estar en borrador.",
     "explicacionMemoriaParte1": "En esta pantalla se completan los datos generales de la memoria.",
     "explicacionMemoriaParte2borrador": "Al finalizar, se podrá continuar al paso final, donde se adjuntará la memoria junto a sus anexos antes del envío.",
     "explicacionMemoriaParte2cerrado": "No se podrán adjuntar archivos ni enviar hasta que el plan haya sido completado , enviado y aceptado",
