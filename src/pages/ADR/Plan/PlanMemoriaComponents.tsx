@@ -355,6 +355,7 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
     const { yearData, setYearData } = useYear();
     const { user } = useUser();
 
+    const zona = t(pantalla.toLowerCase()).toUpperCase();
     const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'proceso' : yearData.memoria.status === 'proceso';
     if (condicionPantalla && user?.role === 'HAZI') {
         return (
@@ -362,8 +363,8 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                 <button
                     className="px-4 py-2 bg-primary text-white rounded"
                     onClick={() => {
-                        if (window.confirm(t('confirmacionAceptar', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
-                            // Cambio de status a aceptado y envio de notificacion al ADR
+                        if (window.confirm(t('confirmacionAceptar', { zona: zona, fecha: anio }))) {
+                            //TODO Cambio de status a aceptado y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
                                 setYearData({
                                     ...yearData,
@@ -384,12 +385,12 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                         }
                     }}
                 >
-                    {t('aceptarPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                    {t('aceptarPlanOMemoria', { zona: zona, fecha: anio })}
                 </button>
                 <button
                     className="px-4 py-2 bg-danger text-white rounded"
                     onClick={() => {
-                        if (window.confirm(t('confirmacionRechazar', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
+                        if (window.confirm(t('confirmacionRechazar', { zona: zona, fecha: anio }))) {
                             // Cambio de status a borrador y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
                                 setYearData({
@@ -411,7 +412,7 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                         }
                     }}
                 >
-                    {t('rechazarPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                    {t('rechazarPlanOMemoria', { zona: zona, fecha: anio })}
                 </button>
             </div>
         );
@@ -423,6 +424,7 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
     const { yearData, setYearData } = useYear();
 
     const { user } = useUser();
+    const zona = t(pantalla.toLowerCase()).toUpperCase();
 
     const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'aceptado' : yearData.memoria.status === 'aceptado';
     if (condicionPantalla && user?.role === 'HAZI') {
@@ -434,7 +436,7 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
                     tipo="guardar"
                     disabled={bloquear}
                     onClick={() => {
-                        if (window.confirm(t('confirmacionReabrir', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
+                        if (window.confirm(t('confirmacionReabrir', { zona: zona, fecha: anio }))) {
                             // Cambio de status a aceptado y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
                                 setYearData({
@@ -455,7 +457,7 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
                             }
                         }
                     }}
-                    textoBoton={t('reabrirPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                    textoBoton={t('reabrirPlanOMemoria', { zona: zona, fecha: anio })}
                 />
             </div>
         );
