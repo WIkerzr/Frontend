@@ -9,22 +9,37 @@ import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { PestanaIndicadores } from './EditarAccionIndicadores';
+import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { ErrorFullScreen } from '../Componentes';
-import { ModalSave } from '../../../components/Utils/utils';
+import { Boton, ModalSave } from '../../../components/Utils/utils';
+import { TextArea } from '../../../components/Utils/inputs';
+import { Servicios } from '../../../types/GeneralTypes';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
     const tipo = location.state?.tipo;
-    let accionAccesoria = false;
-    if (tipo === 'accesoria') {
-        accionAccesoria = true;
-    }
 
-    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, SeleccionEditarGuardarAccesoria, block } = useYear();
+    const accionAccesoria = tipo === 'accesoria';
+    const servicio = tipo === 'servicio';
+    const titulo = servicio ? t('servicioTituloEditado') : t('accionTituloEditado');
+    const tituloCampo = servicio ? t('Servicios') : t('Accion');
+    const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : servicio ? '/adr/servicios/' : '/adr/acciones/';
+
+    const {
+        yearData,
+        datosEditandoAccion,
+        setDatosEditandoAccion,
+        SeleccionEditarGuardar,
+        SeleccionEditarGuardarAccesoria,
+        GuardarEdicionServicio,
+        AgregarServicio,
+        block,
+        datosEditandoServicio,
+        setDatosEditandoServicio,
+    } = useYear();
     const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [mostrandoModal, setMostrandoModal] = useState(false);
@@ -39,8 +54,14 @@ const Index: React.FC = () => {
         }
     }, []);
 
+    useEffect(() => {
+        console.log(datosEditandoServicio);
+    }, [datosEditandoServicio]);
+
     if (!datosEditandoAccion) {
-        return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA="/adr/acciones/" />;
+        if (!servicio) {
+            return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
+        }
     }
 
     const handleAccionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -49,6 +70,14 @@ const Index: React.FC = () => {
             accion: `${e.target.value}`,
         });
     };
+
+    const handleServicioChange = (campo: keyof Servicios, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setDatosEditandoServicio((prev) => ({
+            ...prev!,
+            [campo]: `${e.target.value}`,
+        }));
+    };
+
     const handleSave = () => {
         setMostrandoModal(true);
     };
@@ -59,19 +88,15 @@ const Index: React.FC = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('accionTituloEditado')} {anio}
+                            {titulo} {anio}
                         </span>
                     </h2>
                 }
                 zonaBtn={
-                    <div className="ml-auto flex gap-4 items-center justify-end">
-                        {!bloqueo && (
-                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleSave}>
-                                {t('guardar')}{' '}
-                            </button>
-                        )}
-                        <NavLink to="/adr/acciones" className="group">
-                            <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
+                    <div className="ml-auto flex flex-row items-center justify-end gap-4">
+                        {!bloqueo && <Boton tipo="guardar" textoBoton={t('guardar')} onClick={handleSave} disabled={servicio ? !datosEditandoServicio?.nombre : !datosEditandoAccion.accion} />}
+                        <NavLink to={rutaAnterior} className={() => ''}>
+                            <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={handleSave} />
                         </NavLink>
                     </div>
                 }
@@ -79,42 +104,57 @@ const Index: React.FC = () => {
                     <div className="w-full">
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
-                                <label className="block text-sm font-medium mb-1">{t('Accion')}</label>
+                                <label className="block text-sm font-medium mb-1">{tituloCampo}</label>
                                 {editarPlan ? (
-                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={handleAccionChange} name="accion" />
+                                    <input
+                                        type="text"
+                                        className="form-input w-full"
+                                        value={servicio ? datosEditandoServicio?.nombre : datosEditandoAccion.accion}
+                                        onChange={(e) => (servicio ? handleServicioChange('nombre', e) : handleAccionChange(e))}
+                                    />
                                 ) : (
                                     <span className="block  font-semibold">
-                                        <span className="font-normal text-col">{datosEditandoAccion.accion}</span>
+                                        <span className="font-normal text-col">{servicio ? datosEditandoServicio?.nombre : datosEditandoAccion.accion}</span>
                                     </span>
                                 )}
                             </div>
-                            <div className="w-1/2 flex flex-col gap-2 justify-center">
-                                <span className="block  font-semibold mb-1">
-                                    <span className="font-normal text-lg">{i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu}</span>
-                                </span>
-                                <span className="block  font-semibold">
-                                    <span className="font-normal text-col text-info">{datosEditandoAccion.lineaActuaccion}</span>
-                                </span>
-                            </div>
-                            <div className="flex">
-                                <input
-                                    onChange={(e) => setDatosEditandoAccion({ ...datosEditandoAccion!, plurianual: e.target.checked })}
-                                    type="checkbox"
-                                    className="form-checkbox h-5 w-5 "
-                                    checked={datosEditandoAccion.plurianual}
-                                    disabled={!editarPlan}
-                                />
-                                <label>{t('plurianual')}</label>
-                            </div>
+                            {!servicio && (
+                                <>
+                                    <div className="w-1/2 flex flex-col gap-2 justify-center">
+                                        <span className="block  font-semibold mb-1">
+                                            <span className="font-normal text-lg">{i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu}</span>
+                                        </span>
+                                        <span className="block  font-semibold">
+                                            <span className="font-normal text-col text-info">{datosEditandoAccion.lineaActuaccion}</span>
+                                        </span>
+                                    </div>
+                                    <div className="flex">
+                                        <input
+                                            onChange={(e) => setDatosEditandoAccion({ ...datosEditandoAccion!, plurianual: e.target.checked })}
+                                            type="checkbox"
+                                            className="form-checkbox h-5 w-5 "
+                                            checked={datosEditandoAccion.plurianual}
+                                            disabled={!editarPlan}
+                                        />
+                                        <label>{t('plurianual')}</label>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 }
             />
             {mostrandoModal && (
-                <ModalSave onClose={() => setMostrandoModal(false)} nav={accionAccesoria ? '/adr/accionesYproyectos' : '/adr/acciones'}>
+                <ModalSave onClose={() => setMostrandoModal(false)} nav={rutaAnterior}>
                     {async () => {
                         if (accionAccesoria) {
                             await SeleccionEditarGuardarAccesoria();
+                        } else if (servicio) {
+                            if (datosEditandoServicio?.id === 0) {
+                                await AgregarServicio();
+                            } else {
+                                await GuardarEdicionServicio();
+                            }
                         } else {
                             await SeleccionEditarGuardar();
                         }
@@ -164,17 +204,58 @@ const Index: React.FC = () => {
                         </Tab>
                     </TabList>
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
-                        <TabPanels>
-                            <TabPanel>
-                                <PestanaIndicadores />
-                            </TabPanel>
-                            <TabPanel>
-                                <PestanaPlan />
-                            </TabPanel>
-                            <TabPanel>
-                                <PestanaMemoria />
-                            </TabPanel>
-                        </TabPanels>
+                        {servicio ? (
+                            <TabPanels>
+                                <TabPanel>
+                                    <PestanaIndicadoresServicios />
+                                </TabPanel>
+                                <TabPanel>
+                                    <div className="p-5 flex flex-col gap-4 w-full">
+                                        <div className="panel">
+                                            <TextArea
+                                                disabled={!editarPlan}
+                                                nombreInput="Descripcion"
+                                                className={`h-[30%] w-full`}
+                                                value={datosEditandoServicio?.descripcion}
+                                                onChange={(e) => handleServicioChange('descripcion', e)}
+                                            />
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                                <TabPanel>
+                                    <div className="p-5 flex flex-col gap-4 w-full">
+                                        <div className="panel">
+                                            <TextArea
+                                                disabled={!editarMemoria}
+                                                nombreInput="dSeguimiento"
+                                                className={`w-full`}
+                                                value={datosEditandoServicio?.dSeguimiento}
+                                                onChange={(e) => handleServicioChange('dSeguimiento', e)}
+                                            />
+                                            <TextArea
+                                                disabled={!editarMemoria}
+                                                nombreInput="valFinal"
+                                                className={`w-full`}
+                                                value={datosEditandoServicio?.valFinal}
+                                                onChange={(e) => handleServicioChange('valFinal', e)}
+                                            />
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                            </TabPanels>
+                        ) : (
+                            <TabPanels>
+                                <TabPanel>
+                                    <PestanaIndicadores />
+                                </TabPanel>
+                                <TabPanel>
+                                    <PestanaPlan />
+                                </TabPanel>
+                                <TabPanel>
+                                    <PestanaMemoria />
+                                </TabPanel>
+                            </TabPanels>
+                        )}
                     </div>
                 </TabGroup>
             </div>

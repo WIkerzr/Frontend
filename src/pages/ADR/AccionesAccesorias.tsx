@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ModalAccionAccesorias, MostrarAvisoCampos } from './Componentes';
+import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './Componentes';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
@@ -86,7 +86,7 @@ const Index: React.FC = () => {
                                             </button>
                                         )}
                                     </div>
-                                    <MostrarAvisoCampos datos={accion} />
+                                    <MostrarAvisoCamposAcciones datos={accion} navegar="/adr/accionesYproyectos/editando" />
                                 </div>
                             );
                         })}

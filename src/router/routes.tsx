@@ -14,7 +14,6 @@ const PCDR = lazy(() => import('../pages/Configuracion/PCDR'));
 const PlanesGestion = lazy(() => import('../pages/ADR/Plan/PlanesGestion'));
 const GestionEnvio = lazy(() => import('../pages/ADR/Plan/GestionEnvio'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
-const EditarServicios = lazy(() => import('../pages/ADR/EditarServicios'));
 const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
 const Profile = lazy(() => import('../pages/profile/profile'));
 
@@ -153,7 +152,7 @@ const routes = [
         path: '/adr/servicios/editando',
         element: (
             <OnlyIfLoggedIn>
-                <EditarServicios />
+                <EditarAccion />
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarServicios',

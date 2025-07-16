@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
@@ -14,57 +14,7 @@ import IconInfoCircle from '../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../components/Icon/IconInfoTriangle';
 import { ModalNuevoIndicador } from '../Configuracion/componentes';
 import Tippy from '@tippyjs/react';
-
-type AccionAccesoria = { id: number; texto: string };
-interface ListadoAccionesAccesoriasProps {
-    nombre: string;
-    listadoMap: AccionAccesoria[];
-    ACCIONES_MAX: number;
-}
-export const ListadoAccionesAccesorias = ({ nombre, listadoMap }: ListadoAccionesAccesoriasProps) => {
-    const idCounter = useRef(1000);
-    const [acciones, setAcciones] = useState<AccionAccesoria[]>(listadoMap);
-    const [nuevaAccion, setNuevaAccion] = useState('');
-    const { SeleccionEditarServicio } = useYear();
-
-    const handleNuevaAccion = () => {
-        setAcciones((prev) => [{ id: idCounter.current++, texto: nuevaAccion.trim() }, ...prev.slice(0, 5 - 1)]);
-        setNuevaAccion('');
-    };
-
-    const handleDelete = (id: number) => setAcciones((prev) => prev.filter((a) => a.id !== id));
-
-    const mostrarInput = acciones.length < 5;
-    const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
-    return (
-        <div className="grid grid-cols-3 gap-x-6 gap-y-6">
-            {mostrarInput && (
-                <div className="bg-white rounded-xl border border-[#ECECEC] p-6 flex flex-col shadow-sm">
-                    <NavLink to="/adr/servicios/editando" className="group" onClick={() => SeleccionEditarServicio(null)}>
-                        <button className="bg-[#4463F7] text-white px-4 py-2 rounded hover:bg-[#254edb] self-end text-sm transition disabled:bg-gray-300" onClick={handleNuevaAccion}>
-                            + {nombre}
-                        </button>
-                    </NavLink>
-                </div>
-            )}
-            {accionesMostradas.map((accion) => (
-                <div key={accion.id} className="card-div">
-                    <div className="flex-1 text-base text-[#222] mb-0 pr-2">{accion.texto}</div>
-                    <div className="flex flex-col justify-start items-end gap-2 border-l border-[#ECECEC] pl-4">
-                        <NavLink to="/adr/servicios/editando" className="group" onClick={() => SeleccionEditarServicio(accion.id.toString())}>
-                            <button aria-label={`Editar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">
-                                <IconPencil />
-                            </button>
-                        </NavLink>
-                        <button onClick={() => handleDelete(accion.id)} aria-label={`Eliminar acción ${accion.id}`} className="hover:bg-gray-100 p-1.5 rounded transition">
-                            <IconTrash />
-                        </button>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
+import { Servicios } from '../../types/GeneralTypes';
 
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();
@@ -232,6 +182,7 @@ export const ModalAccion = () => {
         </>
     );
 };
+
 export const ModalAccionAccesorias = () => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
@@ -421,7 +372,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                     )}
                                 </div>
                             </div>
-                            <MostrarAvisoCampos datos={accion} />
+                            <MostrarAvisoCamposAcciones datos={accion} navegar="/adr/acciones/editando" />
                         </div>
                     );
                 })}
@@ -429,21 +380,20 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         </div>
     );
 };
-interface ResultadoValidacion {
-    faltanindicadoresPlan: boolean;
+interface ResultadoValidacionAcciones {
+    faltanIndicadoresPlan: boolean;
     faltanIndicadoresMemoria: boolean;
     faltanCamposPlan: boolean;
     faltanCamposMemoria: boolean;
 }
 
-export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoValidacion {
-    const faltanindicadoresPlan =
-        !datos.indicadorAccion?.indicadoreRealizacion?.[0] ||
-        !datos.indicadorAccion?.indicadoreRealizacion?.[0].descripcion ||
-        !datos.indicadorAccion?.indicadoreRealizacion?.[0].metaAnual?.total ||
-        !datos.indicadorAccion?.indicadoreRealizacion?.[0].metaFinal?.total;
+export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoValidacionAcciones {
+    const faltanIndicadoresPlan =
+        (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
+        (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false);
 
-    const faltanIndicadoresMemoria = !datos.indicadorAccion?.indicadoreRealizacion?.[0] || !datos.indicadorAccion?.indicadoreRealizacion?.[0].ejecutado?.total;
+    const faltanIndicadoresMemoria =
+        (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.ejecutado?.total) ?? false) || (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.ejecutado?.total) ?? false);
 
     const faltanCamposPlan =
         !datos.datosPlan?.ejecutora ||
@@ -458,35 +408,53 @@ export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoVa
     const faltanCamposMemoria =
         !datos.datosMemoria?.sActual ||
         !datos.datosMemoria?.oAccion ||
-        !datos.datosMemoria?.ods ||
         !datos.datosMemoria?.dAccionAvances ||
         !datos.datosMemoria?.presupuestoEjecutado?.cuantia ||
-        !datos.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion ||
+        datos.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion.length === 0 ||
         !datos.datosMemoria?.ejecucionPresupuestaria?.previsto ||
         !datos.datosMemoria?.ejecucionPresupuestaria?.ejecutado ||
         !datos.datosMemoria?.ejecucionPresupuestaria?.porcentaje;
 
-    return { faltanindicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
+    return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
 }
 
-interface MostrarAvisoCamposProps {
+interface ResultadoValidacionServicios {
+    faltanIndicadoresPlan: boolean;
+    faltanIndicadoresMemoria: boolean;
+    faltanCamposPlan: boolean;
+    faltanCamposMemoria: boolean;
+}
+
+export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoValidacionServicios {
+    const faltanIndicadoresPlan = datos.indicadores.some((item) => !item.indicador || !item.previsto?.valor);
+
+    const faltanIndicadoresMemoria = !datos.indicadores[0].alcanzado?.valor;
+
+    const faltanCamposPlan = !datos.nombre || !datos.descripcion;
+
+    const faltanCamposMemoria = !datos.dSeguimiento || !datos.valFinal;
+
+    return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
+}
+interface MostrarAvisoCamposAccionesProps {
     datos: DatosAccion;
     plurianual?: boolean;
     texto?: boolean;
+    navegar: string;
 }
 
-export const MostrarAvisoCampos: React.FC<MostrarAvisoCamposProps> = ({ datos, texto = true }) => {
+export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ datos, texto = true, navegar }) => {
     const { t } = useTranslation();
     const { editarPlan } = useEstadosPorAnio();
 
-    const { faltanindicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosAccion(datos);
+    const { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosAccion(datos);
 
     if (!texto) {
         return null;
     }
 
     if (editarPlan) {
-        if (!faltanCamposPlan && !faltanindicadoresPlan) {
+        if (!faltanCamposPlan && !faltanIndicadoresPlan) {
             return null;
         }
     } else {
@@ -496,7 +464,55 @@ export const MostrarAvisoCampos: React.FC<MostrarAvisoCamposProps> = ({ datos, t
     }
 
     return (
-        <NavLink to="/adr/acciones/editando" className="group">
+        <NavLink to={navegar} className="group">
+            <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
+                {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
+                    <>
+                        <IconInfoCircle />
+                        <span>
+                            <strong>{t('aviso')}:</strong> {t('camposObligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
+                        </span>
+                    </>
+                ) : (
+                    <>
+                        <IconInfoTriangle />
+                        <span>
+                            <strong>{t('aviso')}:</strong> {t('indicadoresOgligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
+                        </span>
+                    </>
+                )}
+            </div>
+        </NavLink>
+    );
+};
+
+interface MostrarAvisoCamposServiciosProps {
+    datos: Servicios;
+    texto?: boolean;
+}
+
+export const MostrarAvisoCamposServicios: React.FC<MostrarAvisoCamposServiciosProps> = ({ datos, texto = true }) => {
+    const { t } = useTranslation();
+    const { editarPlan } = useEstadosPorAnio();
+
+    const { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosServicio(datos);
+
+    if (!texto) {
+        return null;
+    }
+
+    if (editarPlan) {
+        if (!faltanCamposPlan && !faltanIndicadoresPlan) {
+            return null;
+        }
+    } else {
+        if (!faltanCamposMemoria && !faltanIndicadoresMemoria) {
+            return null;
+        }
+    }
+
+    return (
+        <NavLink to="/adr/servicios/editando" className="group">
             <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
                 {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
                     <>

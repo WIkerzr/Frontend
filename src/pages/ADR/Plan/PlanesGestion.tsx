@@ -61,8 +61,8 @@ const Index = () => {
             const ejesPrioritarios = yearData.plan.ejesPrioritarios[index];
             for (let index = 0; index < ejesPrioritarios.acciones.length; index++) {
                 const acciones = ejesPrioritarios.acciones[index];
-                const { faltanindicadoresPlan, faltanCamposPlan } = validarCamposObligatoriosAccion(acciones);
-                if (faltanindicadoresPlan || faltanCamposPlan) {
+                const { faltanIndicadoresPlan, faltanCamposPlan } = validarCamposObligatoriosAccion(acciones);
+                if (faltanIndicadoresPlan || faltanCamposPlan) {
                     return false;
                 }
             }

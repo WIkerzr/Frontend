@@ -4,6 +4,7 @@ import { servicioIniciadoVacio, YearData, yearIniciado } from '../types/tipadoPl
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { useRegionContext } from './RegionContext';
 import { Servicios } from '../types/GeneralTypes';
+import { isEqual } from 'lodash';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -22,6 +23,7 @@ interface YearContextType {
     SeleccionEditarGuardarAccesoria: () => void;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
+    AgregarServicio: () => void;
 }
 
 const YearContext = createContext<YearContextType | undefined>(undefined);
@@ -128,40 +130,58 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
             const nuevasAcciones = eje.acciones.map((accion) => (accion.id === datosEditandoAccion.id ? datosEditandoAccion : accion));
 
+            const accionesIguales = nuevasAcciones.every((accion, index) => accion === eje.acciones[index]);
+            if (accionesIguales) return eje;
+
             return {
                 ...eje,
                 acciones: nuevasAcciones,
             };
         });
 
-        setYearDataState({
-            ...yearData,
-            plan: {
-                ...yearData.plan,
-                ejesPrioritarios: nuevosEjes,
-            },
-        });
+        const ejesIguales = nuevosEjes.every((eje, index) => eje === yearData.plan.ejesPrioritarios[index]);
+
+        if (!ejesIguales) {
+            setYearDataState({
+                ...yearData,
+                plan: {
+                    ...yearData.plan,
+                    ejesPrioritarios: nuevosEjes,
+                },
+            });
+        }
 
         setIdEjeEditado('');
     };
+
     const SeleccionEditarGuardarAccesoria = () => {
         const accionEditada = yearData.accionesAccesorias!.map((accion) => (accion.id === datosEditandoAccion.id ? datosEditandoAccion : accion));
 
-        setYearData({
-            ...yearData,
-            accionesAccesorias: accionEditada,
-        });
+        const accionesIguales = accionEditada.every((accion, index) => accion === yearData.accionesAccesorias![index]);
+
+        if (!accionesIguales) {
+            setYearData({
+                ...yearData,
+                accionesAccesorias: accionEditada,
+            });
+        }
     };
 
     const GuardarEdicionServicio = () => {
         if (!datosEditandoServicio) return;
 
+        const servicioOriginal = yearData.servicios?.find((s) => s.id === datosEditandoServicio.id);
+        const serviciosIguales = isEqual(servicioOriginal, datosEditandoServicio);
+
         const nuevosServicios = yearData.servicios!.map((servicio) => (servicio.id === datosEditandoServicio.id ? datosEditandoServicio : servicio));
 
-        setYearData({
-            ...yearData,
-            servicios: nuevosServicios,
-        });
+        if (!serviciosIguales) {
+            setYearData({
+                ...yearData,
+                servicios: nuevosServicios!,
+            });
+        }
+        setDatosEditandoServicio(null);
     };
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
@@ -203,6 +223,16 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const AgregarServicio = () => {
+        if (!datosEditandoServicio) return;
+        const nuevoServicio: Servicios = { ...datosEditandoServicio, id: Date.now() } as Servicios;
+        setYearData({
+            ...yearData,
+            servicios: [...(yearData.servicios || []), nuevoServicio],
+        });
+        setDatosEditandoServicio(null);
+    };
+
     const [block, setBlock] = useState<boolean>(false);
 
     return (
@@ -214,6 +244,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 datosEditandoAccion,
                 setDatosEditandoAccion,
                 AgregarAccion,
+                AgregarServicio,
                 SeleccionEditarAccion,
                 SeleccionEditarAccionAccesoria,
                 SeleccionVaciarEditarAccion,
