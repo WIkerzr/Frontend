@@ -391,7 +391,9 @@ interface ResultadoValidacionAcciones {
 export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoValidacionAcciones {
     const faltanIndicadoresPlan =
         (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
-        (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false);
+        (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
+        datos.indicadorAccion?.indicadoreRealizacion.length === 0 ||
+        datos.indicadorAccion?.indicadoreResultado.length === 0;
 
     const faltanIndicadoresMemoria =
         (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.ejecutado?.total) ?? false) || (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.ejecutado?.total) ?? false);
@@ -403,7 +405,6 @@ export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoVa
         !datos.datosPlan?.supracomarcal ||
         (datos.plurianual === true && !datos.datosPlan?.rangoAnios) ||
         !datos.datosPlan?.oAccion ||
-        !datos.datosPlan?.ods ||
         !datos.datosPlan?.dAccion;
 
     const faltanCamposMemoria =
@@ -427,7 +428,7 @@ interface ResultadoValidacionServicios {
 }
 
 export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoValidacionServicios {
-    const faltanIndicadoresPlan = datos.indicadores.some((item) => !item.indicador || !item.previsto?.valor);
+    const faltanIndicadoresPlan = datos.indicadores.some((item) => !item.indicador || !item.previsto?.valor) || datos.indicadores.length === 0;
 
     const faltanIndicadoresMemoria = !datos.indicadores[0].alcanzado?.valor;
 

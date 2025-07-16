@@ -141,7 +141,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             <div className="flex-1"></div>
             <div className="flex gap-4 panel">
                 <TextArea required nombreInput="oAccion" className={'h-[38px]'} disabled={bloqueo} value={datosEditandoAccion.datosPlan.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
-                <SimpleDropdown title="ods" disabled={bloqueo} value={datosEditandoAccion.datosPlan.ods} options={opcionesODS} onChange={(e) => handleChangeCampos('ods', e)} />
+                <SimpleDropdown title="ods" disabled={bloqueo} value={datosEditandoAccion.datosPlan.ods} options={opcionesODS} onChange={(e) => handleChangeCampos('ods', e)} mostrarSeleccionaopcion />
             </div>
 
             <div className="panel">
