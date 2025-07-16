@@ -7,7 +7,7 @@ import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { useSelector } from 'react-redux';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
-import { NewModal } from '../../../components/Utils/utils';
+import { Aviso, Boton, NewModal } from '../../../components/Utils/utils';
 import { IRootState } from '../../../store';
 import { Input } from '../../../components/Utils/inputs';
 import { nanoid } from '@reduxjs/toolkit';
@@ -426,10 +426,13 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
 
     const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'aceptado' : yearData.memoria.status === 'aceptado';
     if (condicionPantalla && user?.role === 'HAZI') {
+        const bloquear = pantalla === 'Plan' && yearData.memoria.status !== 'borrador';
         return (
             <div className="ml-auto flex gap-4 items-center justify-end" ref={ref}>
-                <button
-                    className="px-4 py-2 bg-primary text-white rounded"
+                {bloquear && <Aviso textoAviso={t('ReabrirPlan')} />}
+                <Boton
+                    tipo="guardar"
+                    disabled={bloquear}
                     onClick={() => {
                         if (window.confirm(t('confirmacionReabrir', { zona: t('memoria').toUpperCase(), fecha: anio }))) {
                             // Cambio de status a aceptado y envio de notificacion al ADR
@@ -452,9 +455,8 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
                             }
                         }
                     }}
-                >
-                    {t('reabrirPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
-                </button>
+                    textoBoton={t('reabrirPlanOMemoria', { zona: t('memoria').toUpperCase(), fecha: anio })}
+                />
             </div>
         );
     }
