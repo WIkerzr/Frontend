@@ -86,6 +86,7 @@
     "Acciones": "Acciones",
     "AccionesPCDR": "Acciones PCDR",
     "Servicio": "SERVICIO",
+    "Servicios": "Servicios",
     "AccionesAccesorias": "Acciones y proyectos",
     "ServiciosPrestados": "Servicios prestados",
     "memoriasAnuales": "Memorias anuales",
@@ -149,6 +150,7 @@
     "anadir": "Añadir",
     "aceptar": "Aceptar",
     "anadirAccion": "Añadir acción",
+    "anadirServicio": "Añadir servicio",
     "cancelar": "Cancelar",
     "seguridad": "Seguridad",
     "contraNueva": "Contraseña nueva",
@@ -276,6 +278,7 @@
     "indicadoresOgligatorios":"Indicadores ogligatorios del {{zona}} pendientes por rellenar ",
     "falloAlCargarIndicadores": "Fallo al cargar los indicadores",
     "falloAlCargarAccion": "Fallo al cargar la acción",
+    "falloAlCargarServicio": "Fallo al cargar el servicio",
     "volver": "Volver a la pagina anterior",
     
 

@@ -52,8 +52,8 @@ export const TextArea = ({ nombreInput, className = '', required, value, onChang
     useEffect(() => {
         const el = textareaRef.current;
         if (el) {
-            el.style.height = 'auto'; // Reset height
-            el.style.height = `${el.scrollHeight}px`; // Set to scroll height
+            el.style.height = 'auto';
+            el.style.height = `${el.scrollHeight}px`;
         }
     }, [value]);
 

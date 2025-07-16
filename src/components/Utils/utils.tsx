@@ -176,7 +176,7 @@ export function Boton({ tipo, disabled = false, textoBoton = '', onClick }: Boto
         <button
             disabled={disabled}
             className={`${
-                tipo === 'guardar' ? 'mb-4 bg-primary' : 'bg-danger'
+                tipo === 'guardar' ? 'mb-4 bg-primary' : 'mb-4 bg-danger'
             } px-4 py-2  text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px] disabled:cursor-not-allowed`}
             onClick={onClick}
         >

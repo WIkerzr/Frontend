@@ -8,6 +8,7 @@ import { useRef, useState } from 'react';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { Servicios } from '../../types/GeneralTypes';
 
+//TODO borrar si no se aprobecha
 const Index: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
