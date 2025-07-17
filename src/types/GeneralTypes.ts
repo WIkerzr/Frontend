@@ -8,7 +8,7 @@ export const opcionesComarcal = [
     'Municipios con todas las zonas rurales',
     'Municipios con habitat rural disperso',
     'Todas las entidades rurales de la comarca',
-    'otros',
+    'Otros',
 ];
 
 export const opcionesODS = [

@@ -20,8 +20,8 @@ export interface EjecucionPresupuestaria {
 export interface DatosPlan {
     ejecutora: string;
     implicadas: string;
-    comarcal: Comarcal;
-    supracomarcal: SupraComarcal;
+    comarcal: Comarcal | string;
+    supracomarcal: SupraComarcal | string;
     rangoAnios: string;
     oAccion: string;
     ods: string;

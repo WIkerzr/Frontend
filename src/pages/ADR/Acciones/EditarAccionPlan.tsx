@@ -92,32 +92,46 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
         NameEs: region.NameEs,
         NameEu: region.NameEu,
     }));
-
+    const opcionesComarcalSinOtros = opcionesComarcal.filter((op) => op !== 'Otros');
+    const opcionesSupraComarcalSinOtros = opcionesSupraComarcal.filter((op) => op !== 'Otros');
     return (
         <div className="p-5 flex flex-col gap-4 w-full">
             <div className="flex gap-4 panel flex-col">
                 <div className="flex gap-4">
                     <InputField nombreInput="ejecutora" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.ejecutora} onChange={(e) => handleChangeCampos('ejecutora', e)} />
                     <InputField nombreInput="implicadas" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.implicadas} onChange={(e) => handleChangeCampos('implicadas', e)} />
-                    <SimpleDropdown
-                        title={'tratamientoComarcal'}
-                        disabled={bloqueo}
-                        value={datosEditandoAccion.datosPlan?.comarcal}
-                        options={opcionesComarcal}
-                        onChange={(e) => handleChangeCampos('comarcal', e)}
-                    />
-                    <SimpleDropdown
-                        title={'supracomarcal'}
-                        disabled={bloqueo}
-                        value={datosEditandoAccion.datosPlan?.supracomarcal}
-                        options={opcionesSupraComarcal}
-                        onChange={(e) => handleChangeCampos('supracomarcal', e)}
-                    />
-
                     {datosEditandoAccion.plurianual && (
                         <InputField nombreInput="rangoAnios" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.rangoAnios} onChange={(e) => handleChangeCampos('rangoAnios', e)} />
                     )}
-                    <div className="flex-1">
+                </div>
+                <div className="flex gap-4">
+                    <SimpleDropdown
+                        title={'tratamientoComarcal'}
+                        disabled={bloqueo}
+                        value={opcionesComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.comarcal) ? datosEditandoAccion.datosPlan?.comarcal : 'Otros'}
+                        options={opcionesComarcal}
+                        onChange={(e) => handleChangeCampos('comarcal', e)}
+                    />
+                    {!opcionesComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.comarcal || '') && (
+                        <InputField nombreInput="tratamientoComarcal" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.comarcal} onChange={(e) => handleChangeCampos('comarcal', e)} />
+                    )}
+                    <SimpleDropdown
+                        title={'supracomarcal'}
+                        disabled={bloqueo}
+                        value={opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal) ? datosEditandoAccion.datosPlan?.supracomarcal : 'Otros'}
+                        options={opcionesSupraComarcal}
+                        onChange={(e) => handleChangeCampos('supracomarcal', e)}
+                    />
+                    {!opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal || '') && (
+                        <InputField
+                            nombreInput="supracomarcal"
+                            required
+                            disabled={bloqueo}
+                            value={datosEditandoAccion.datosPlan.supracomarcal}
+                            onChange={(e) => handleChangeCampos('supracomarcal', e)}
+                        />
+                    )}
+                    <div className="flex flex-col items-center">
                         <label>{t('esSupracomarcal')}</label>
                         <Checkbox checked={regionesSupracomarcal} disabled={bloqueo} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
                     </div>
