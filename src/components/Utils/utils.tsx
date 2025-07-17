@@ -184,3 +184,21 @@ export function Boton({ tipo, disabled = false, textoBoton = '', onClick }: Boto
         </button>
     );
 }
+type ClaveFecha = 'indicadores' | 'usuarios' | 'acciones';
+export function actualizarFechaLLamada(clave: ClaveFecha, fecha: Date = new Date()) {
+    const keyStorage = 'fechasUltimaLlamada';
+    const fechasRaw = localStorage.getItem(keyStorage);
+    const fechas = fechasRaw ? JSON.parse(fechasRaw) : {};
+
+    fechas[clave] = fecha.toISOString();
+
+    localStorage.setItem(keyStorage, JSON.stringify(fechas));
+}
+
+export function obtenerFechaLlamada(clave: ClaveFecha): string | undefined {
+    const fechasRaw = localStorage.getItem('fechasUltimaLlamada');
+    if (!fechasRaw) return undefined;
+
+    const fechas: Partial<Record<ClaveFecha, string>> = JSON.parse(fechasRaw);
+    return fechas[clave];
+}

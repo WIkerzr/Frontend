@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
 import { Loading } from '../../components/Utils/animations';
 import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
+import IconRefresh from '../../components/Icon/IconRefresh';
+import Tippy from '@tippyjs/react';
+import { actualizarFechaLLamada, obtenerFechaLlamada } from '../../components/Utils/utils';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -11,6 +14,40 @@ const Index = () => {
     const [indicadorRealizacion, setIndicadorRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadorResultado, setIndicadorResultado] = useState<IndicadorResultado[]>([]);
     const [modalNuevo, setModalNuevo] = useState(false);
+
+    const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date | null>(() => {
+        const fechaStr = obtenerFechaLlamada('indicadores');
+        return fechaStr ? new Date(fechaStr) : null;
+    });
+
+    const llamadaBBDDIndicadores = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('https://localhost:44300/api/indicadores', {
+                headers: {
+                    Authorization: `Bearer ` + token,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+            const datosIndicador: IndicadorRealizacion[] = data.data;
+            if (!res.ok) throw new Error(data.message || t('errorObtenerIndicadores'));
+            setIndicadorRealizacion(datosIndicador);
+            localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
+
+            const indicadoresResultado: IndicadorResultado[] = datosIndicador
+                .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
+                .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
+                .sort((a, b) => a.Id - b.Id);
+
+            setIndicadorResultado(indicadoresResultado);
+            setFechaUltimoActualizadoBBDD(new Date());
+            localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -24,34 +61,13 @@ const Index = () => {
             setLoading(false);
             return;
         }
-        const token = localStorage.getItem('token');
-        const fetchUsers = async () => {
-            try {
-                const res = await fetch('https://localhost:44300/api/indicadores', {
-                    headers: {
-                        Authorization: `Bearer ` + token,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                const data = await res.json();
-                const datosIndicador: IndicadorRealizacion[] = data.data;
-                if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
-                setIndicadorRealizacion(datosIndicador);
-                localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
 
-                const indicadoresResultado: IndicadorResultado[] = datosIndicador
-                    .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
-                    .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
-                    .sort((a, b) => a.Id - b.Id);
-
-                setIndicadorResultado(indicadoresResultado);
-                localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUsers();
+        llamadaBBDDIndicadores();
     }, []);
+
+    useEffect(() => {
+        actualizarFechaLLamada('indicadores');
+    }, [fechaUltimoActualizadoBBDD]);
 
     return (
         <div className="flex w-full gap-5">
@@ -80,6 +96,22 @@ const Index = () => {
                             }}
                         />
                     </div>
+                    <div className="flex justify-end items-center space-x-2">
+                        {fechaUltimoActualizadoBBDD && (
+                            <div>
+                                {new Date(fechaUltimoActualizadoBBDD).toLocaleString('es-ES', {
+                                    dateStyle: 'medium',
+                                    timeStyle: 'short',
+                                })}
+                            </div>
+                        )}
+                        <Tippy content={t('Actualizar')}>
+                            <button type="button" onClick={llamadaBBDDIndicadores}>
+                                <IconRefresh />
+                            </button>
+                        </Tippy>
+                    </div>
+
                     <div className="flex flex-row justify-center mb-5 gap-5">
                         <TablaIndicadores
                             indicadorRealizacion={indicadorRealizacion}

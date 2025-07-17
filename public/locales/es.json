@@ -186,6 +186,7 @@
     "Actualizar": "Actualizar",
     "errorEnviarServidor": "Error al enviar al servidor",
     "errorObtenerUsuarios": "Error al obtener usuarios",
+    "errorObtenerIndicadores": "Error al obtener indicadores",
     "noSePudoEliminarUsuario": "No se pudo eliminar el usuario",
     "errorEliminarUsuario": "Error inesperado al eliminar el usuario",
 
