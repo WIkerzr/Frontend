@@ -183,6 +183,7 @@
 
     "errorGuardar": "❌ Error al guardar: ",
     "errorActualizarUsuario": "Error al actualizar usuario:",
+    "Actualizar": "Actualizar",
     "errorEnviarServidor": "Error al enviar al servidor",
     "errorObtenerUsuarios": "Error al obtener usuarios",
     "noSePudoEliminarUsuario": "No se pudo eliminar el usuario",

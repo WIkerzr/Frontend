@@ -8,6 +8,7 @@ import { IndicadorResultado, IndicadorRealizacion, indicadorInicial, indicadorRe
 import Tippy from '@tippyjs/react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
+import React from 'react';
 
 type ResultadoMaximos = {
     REmaxSoloNum?: string;
@@ -176,6 +177,7 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
 
+    const [refrescarZona, setRefrescarZona] = useState(false);
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorResultado>(indicadorResultadoinicial);
 
     const cambiosIndicadorEditable = (data: any) => {
@@ -197,99 +199,103 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
 
     const incorporarIndicadorResultado = (selectedOp: IndicadorResultado) => {
         indicadorRealizacion.Resultados = [...indicadorRealizacion.Resultados!, selectedOp];
+        setRefrescarZona((prev) => !prev);
     };
 
     const eliminarIndicadorResultado = (selectedOp: IndicadorResultado) => {
         if (indicadorRealizacion.Resultados) {
             indicadorRealizacion.Resultados = indicadorRealizacion.Resultados.filter((resultado) => resultado.Id !== selectedOp.Id);
         }
+        setRefrescarZona((prev) => !prev);
     };
+    const ZonaListadoResultados = React.memo(() => {
+        return (
+            <>
+                <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
+                <div className="flex gap-2">
+                    <select
+                        className="max-w-md w-full flex-1 border p-2 rounded"
+                        value={seleccion}
+                        onChange={(e) => {
+                            const selectedValue = e.target.value;
+                            const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
+                            if (selectedOp) {
+                                incorporarIndicadorResultado(selectedOp);
+                            }
+                            setSeleccion('');
+                        }}
+                    >
+                        <option value="" disabled>
+                            {t('seleccionaopcion')}
+                        </option>
+                        {opciones
+                            .filter((op) => {
+                                return !indicadorRealizacion.Resultados!.some((resultado) => resultado.Id === op.Id);
+                            })
+                            .map((op) => (
+                                <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
+                                    {i18n.language === 'eu' ? op.NameEu : op.NameEs}
+                                </option>
+                            ))}
+                    </select>
+
+                    <button className="bg-blue-500 text-white px-3 py-2 rounded" onClick={() => setModoCrear(true)} type="button">
+                        {t('crearNueva')}
+                    </button>
+                </div>
+                <div className="h-full 'w-full">
+                    <div className="table-responsive mb-5">
+                        <div className="h-full w-full">
+                            <div className="flex border-b font-bold pt-3">
+                                <div className="flex-1">{t('Realizacion')}</div>
+                            </div>
+
+                            {indicadorRealizacion.Resultados!.slice().map((data, index) => (
+                                <div key={data.Id} className="flex items-center border-b py-3">
+                                    <div className="w-[60px] !px-0  flex-shrink-0">
+                                        <div className="flex space-x-[5px]">
+                                            <Tippy content={t('borrar')}>
+                                                <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
+                                                    <IconTrash />
+                                                </button>
+                                            </Tippy>
+                                            {data.Id === 0 && (
+                                                <Tippy content={t('editar')}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setDescripcionEditable(data);
+                                                            setModoEditar(true);
+                                                            setFilaEditar(index);
+                                                        }}
+                                                    >
+                                                        <IconPencil />
+                                                    </button>
+                                                </Tippy>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 break-words overflow-hidden">
+                                        {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    });
 
     return (
         <div className="max-w-md mx-auto p-4 rounded space-y-4">
             {!modoCrear && !modoEditar ? (
-                <>
-                    <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
-                    <div className="flex gap-2">
-                        <select
-                            className="max-w-md w-full flex-1 border p-2 rounded"
-                            value={seleccion}
-                            onChange={(e) => {
-                                const selectedValue = e.target.value;
-                                const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
-                                if (selectedOp) {
-                                    incorporarIndicadorResultado(selectedOp);
-                                }
-                                setSeleccion('');
-                            }}
-                        >
-                            <option value="" disabled>
-                                {t('seleccionaopcion')}
-                            </option>
-                            {opciones
-                                .filter((op) => {
-                                    return !indicadorRealizacion.Resultados!.some((resultado) => resultado.Id === op.Id);
-                                })
-                                .map((op) => (
-                                    <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
-                                        {i18n.language === 'eu' ? op.NameEu : op.NameEs}
-                                    </option>
-                                ))}
-                        </select>
-
-                        <button className="bg-blue-500 text-white px-3 py-2 rounded" onClick={() => setModoCrear(true)} type="button">
-                            {t('crearNueva')}
-                        </button>
-                    </div>
-                    <div className={`h-full 'w-full'}`}>
-                        <div className="table-responsive mb-5">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>{t('Realizacion')}</th>
-                                        <th className="text-center"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {indicadorRealizacion.Resultados!.slice().map((data, index) => {
-                                        return (
-                                            <tr key={data.Id}>
-                                                <td>
-                                                    <div className="break-words">
-                                                        {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
-                                                    </div>
-                                                </td>
-                                                <td className="text-center">
-                                                    <div className="flex justify-end space-x-3">
-                                                        <Tippy content={t('editar')}>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setDescripcionEditable(data);
-                                                                    setModoEditar(true);
-                                                                    setFilaEditar(index);
-                                                                }}
-                                                            >
-                                                                <IconPencil />
-                                                            </button>
-                                                        </Tippy>
-                                                        <Tippy content={t('borrar')}>
-                                                            <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
-                                                                <IconTrash />
-                                                            </button>
-                                                        </Tippy>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </>
+                <div key={+refrescarZona}>
+                    <ZonaListadoResultados />
+                </div>
             ) : (
-                <div className="flex gap-2 ">
+                <div className="flex gap-2 " key={+refrescarZona}>
                     <div className="space-y-4">
                         <RellenoIndicador
                             indicadorRealizacion={descripcionEditable}
@@ -298,7 +304,14 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
                             sumar={indicadorRealizacion?.Resultados!.filter((r) => r.Id === 0).length}
                         />
                         <div className="flex gap-4">
-                            <button className="bg-gray-400 text-white px-3 py-2 rounded" onClick={() => setModoCrear(false)} type="button">
+                            <button
+                                className="bg-gray-400 text-white px-3 py-2 rounded"
+                                onClick={() => {
+                                    setModoCrear(false);
+                                    setModoEditar(false);
+                                }}
+                                type="button"
+                            >
                                 {t('Cancelar')}
                             </button>
                             {modoCrear ? (
