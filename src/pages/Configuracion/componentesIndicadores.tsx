@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -17,12 +17,8 @@ type ResultadoMaximos = {
     RSmaxConLetras?: string;
 };
 
-let cache: ResultadoMaximos | null = null;
-
 const SacarSiguienteEnumeracionIndicadores = (): ResultadoMaximos => {
-    if (cache) return cache;
-
-    const storedRealizacion = localStorage.getItem('indicadorRealizacion');
+    const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
     const storedResultado = localStorage.getItem('indicadoresResultado');
     const extraNum = (s: string) => +(s.match(/\d+/g)?.pop() || 0);
 
@@ -49,13 +45,10 @@ const SacarSiguienteEnumeracionIndicadores = (): ResultadoMaximos => {
         if (RSconLetras.length) RSmaxConLetras = RSconLetras.reduce((a, b) => (extraNum(b) > extraNum(a) ? b : a));
     }
 
-    cache = { REmaxSoloNum, REmaxConLetras, RSmaxSoloNum, RSmaxConLetras };
-    return cache;
+    return { REmaxSoloNum, REmaxConLetras, RSmaxSoloNum, RSmaxConLetras };
 };
 
-function getNextRECode(code?: string, sumar?: number): string {
-    if (!code) return 'RE01';
-
+function getNextRECode(code: string, sumar?: number): string {
     const match = code.match(/^([A-Z]+)(\d+)([A-Z]*)$/i);
     if (!match) return 'RE01';
 
@@ -71,8 +64,10 @@ interface RellenoIndicadorProps {
     tipoIndicador: 'realizacion' | 'resultado';
     sumar?: number;
 }
+
 const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, sumar }) => {
     const { t, i18n } = useTranslation();
+    const { regionSeleccionada, regiones } = useRegionContext();
     const [formData, setFormData] = useState<IndicadorRealizacion>(indicadorRealizacion);
     const location = useLocation();
     const { REmaxSoloNum, REmaxConLetras, RSmaxSoloNum, RSmaxConLetras } = SacarSiguienteEnumeracionIndicadores();
@@ -89,11 +84,17 @@ const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacio
             setNombreIndicador([izquierdaConPunto, derecha]);
         } else {
             let siguienteindicador = '';
-
+            const region = regiones.find((r) => r.RegionId === regionSeleccionada);
+            if (!region) {
+                return;
+            }
+            const cod = generarCodigosRegiones(region);
             if (tipoIndicador === 'realizacion') {
-                siguienteindicador = getNextRECode(esADR ? REmaxConLetras : REmaxSoloNum, sumar);
+                const letra = 'RE00' + cod[regionSeleccionada!];
+                siguienteindicador = getNextRECode(esADR ? (REmaxConLetras ? REmaxConLetras : letra!) : REmaxSoloNum!, sumar);
             } else if (tipoIndicador === 'resultado') {
-                siguienteindicador = getNextRECode(esADR ? RSmaxConLetras : RSmaxSoloNum, sumar);
+                const letra = 'RS00' + cod[regionSeleccionada!];
+                siguienteindicador = getNextRECode(esADR ? (RSmaxConLetras ? RSmaxConLetras : letra!) : RSmaxSoloNum!, sumar);
             }
             setNombreIndicador([siguienteindicador, '']);
         }
@@ -251,7 +252,7 @@ const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorR
                             </div>
 
                             {indicadorRealizacion.Resultados!.slice().map((data, index) => (
-                                <div key={data.Id} className="flex items-center border-b py-3">
+                                <div key={data.Id + index} className="flex items-center border-b py-3">
                                     <div className="w-[60px] !px-0  flex-shrink-0">
                                         <div className="flex space-x-[5px]">
                                             <Tippy content={t('borrar')}>
@@ -357,6 +358,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             const indicador: IndicadorRealizacion = {
                 ...descripcionEditable,
                 Id: data.data.Id,
+                RegionsId: data.data.RegionsId ? `${data.data.RegionsId}` : undefined,
                 Resultados: data.data.Resultados,
             };
             setMensaje(t('correctoIndicadorGuardado'));
@@ -399,7 +401,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             const indicadorNuevo = await response.json();
 
             let realizaciones: IndicadorRealizacion[] = [];
-            const storedRealizacion = localStorage.getItem('indicadorRealizacion');
+            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
             if (storedRealizacion) {
                 realizaciones = JSON.parse(storedRealizacion);
             }
@@ -597,13 +599,22 @@ export const TablaIndicadores: React.FC<IndicadorProps> = ({ indicadorRealizacio
     const [indicadorSeleccionadoResultadoEditar, setIndicadorSeleccionadoResultadoEditar] = useState<IndicadorRealizacion>();
     const [datosPreEditados, setDatosPreEditados] = useState<IndicadorRealizacion>(indicadorInicial);
 
-    useEffect(() => {
-        localStorage.setItem('indicadorRealizacion', JSON.stringify(indicadorRealizacion));
-    }, [indicadorRealizacion]);
+    const hasUpdatedRealizacion = useRef(false);
+    const hasUpdatedResultado = useRef(false);
 
-    useEffect(() => {
-        localStorage.setItem('indicadoresResultado', JSON.stringify(indicadorResultado));
-    }, [indicadorResultado]);
+    sincronizarIndicadoresLocalStorage({
+        tipo: 'realizacion',
+        datos: indicadorRealizacion,
+        setDatos: setIndicadorRealizacion,
+        hasUpdatedRef: hasUpdatedRealizacion,
+    });
+
+    sincronizarIndicadoresLocalStorage({
+        tipo: 'resultado',
+        datos: indicadorResultado,
+        setDatos: setIndicadorResultado,
+        hasUpdatedRef: hasUpdatedResultado,
+    });
 
     const actualizarIndicadorResultadosAlEliminarEnRealizacion = (indicadorResultadoSeleccionado: IndicadorRealizacion, idExcluir: number[] = []) => {
         let resultadoIds = [...(indicadorResultadoSeleccionado.Resultados?.map((r) => r.Id) || [])];
@@ -935,3 +946,171 @@ export const TablaIndicadores: React.FC<IndicadorProps> = ({ indicadorRealizacio
         </>
     );
 };
+
+type PropsLlamadaIndicadores = {
+    setMensajeError: Dispatch<SetStateAction<string>>;
+    setIndicadorRealizacion: Dispatch<SetStateAction<IndicadorRealizacion[]>>;
+    setIndicadorResultado: Dispatch<SetStateAction<IndicadorResultado[]>>;
+    setFechaUltimoActualizadoBBDD: Dispatch<SetStateAction<Date | null>>;
+    t: (clave: string) => string;
+};
+export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadorRealizacion, setIndicadorResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch('https://localhost:44300/api/indicadores', {
+            headers: {
+                Authorization: `Bearer ` + token,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await res.json();
+        const datosIndicador: IndicadorRealizacion[] = data.data;
+        if (!res.ok) {
+            setMensajeError(data.Message || t('errorObtenerIndicadores'));
+            throw new Error(data.Message || t('errorObtenerIndicadores'));
+        }
+        setIndicadorRealizacion(datosIndicador);
+        localStorage.setItem('indicadoresRealizacion', JSON.stringify(datosIndicador));
+
+        const indicadoresResultado: IndicadorResultado[] = datosIndicador
+            .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
+            .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
+            .sort((a, b) => a.Id - b.Id);
+
+        setIndicadorResultado(indicadoresResultado);
+        setFechaUltimoActualizadoBBDD(new Date());
+        localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+    } catch (e) {
+        console.error('Error llamadaBBDDIndicadores', e);
+    }
+};
+
+interface Region {
+    RegionId: number;
+    NameEs: string;
+    NameEu: string;
+}
+
+function generarCodigoRegion(name: string): string | null {
+    // Normalizar y limpiar el nombre: quitar tildes, convertir a mayúsculas
+    const limpio = name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // quitar tildes
+        .toUpperCase();
+
+    // Dividir palabras por espacio o guion
+    const palabras = limpio.split(/[\s-]+/).filter(Boolean);
+
+    // Función para validar que un string tenga solo letras (A-Z)
+    const soloLetras = (str: string) => /^[A-Z]+$/.test(str);
+
+    // 1. Dos iniciales de las dos primeras palabras
+    if (palabras.length >= 2 && soloLetras(palabras[0][0]) && soloLetras(palabras[1][0])) {
+        return palabras[0][0] + palabras[1][0];
+    }
+
+    // 2. Dos iniciales de la primera palabra (si tiene al menos 2 letras)
+    if (palabras.length >= 1 && palabras[0].length >= 2 && soloLetras(palabras[0].slice(0, 2))) {
+        return palabras[0].slice(0, 2);
+    }
+
+    // 3. Inicial y la letra del medio de la primera palabra (si es impar y tiene al menos 3 letras)
+    if (palabras.length >= 1 && palabras[0].length >= 3 && soloLetras(palabras[0][0])) {
+        const palabra = palabras[0];
+        const medio = Math.floor(palabra.length / 2);
+        if (soloLetras(palabra[medio])) {
+            return palabra[0] + palabra[medio];
+        }
+    }
+
+    // 4. Otros métodos: primera y última letra (si cumple)
+    if (palabras.length >= 1 && palabras[0].length >= 2 && soloLetras(palabras[0][0]) && soloLetras(palabras[0][palabras[0].length - 1])) {
+        return palabras[0][0] + palabras[0][palabras[0].length - 1];
+    }
+
+    // 5. Si no cumple nada, devolver null para indicar que no hay código válido
+    return null;
+}
+
+function generarCodigosRegiones(regiones: Region | Region[]): Record<number, string> {
+    const codigos: Record<number, string> = {};
+    const usados = new Set<string>();
+
+    const listaRegiones = Array.isArray(regiones) ? regiones : [regiones];
+
+    listaRegiones.forEach(({ RegionId, NameEs }) => {
+        const codigo = generarCodigoRegion(NameEs);
+
+        // Intentar evitar duplicados añadiendo un número al final (menos ideal pero para casos límite)
+        let intento = codigo;
+        let sufijo = 1;
+        while (intento && usados.has(intento)) {
+            // cambiar la segunda letra por un número o sustituir si no se puede
+            intento = codigo ? codigo[0] + sufijo.toString() : null;
+            sufijo++;
+        }
+
+        if (intento) {
+            usados.add(intento);
+            codigos[RegionId] = intento;
+        } else {
+            codigos[RegionId] = '??';
+        }
+    });
+
+    return codigos;
+}
+
+type TipoIndicador = 'realizacion' | 'resultado';
+
+interface SincronizarIndicadoresParams<T> {
+    tipo: TipoIndicador;
+    datos: T[];
+    setDatos: React.Dispatch<React.SetStateAction<T[]>>;
+    hasUpdatedRef: React.MutableRefObject<boolean>;
+}
+function sincronizarIndicadoresLocalStorage<T extends { Id: number; RegionsId?: string | number }>({ tipo, datos, hasUpdatedRef }: SincronizarIndicadoresParams<T>) {
+    const { regionSeleccionada } = useRegionContext();
+    const location = useLocation();
+    const esADR = location.pathname?.includes('ADR');
+
+    useEffect(() => {
+        // const storedResultadoFiltrado = localStorage.getItem('COMODIN');
+
+        const clave = tipo === 'realizacion' ? 'indicadoresRealizacion' : 'indicadoresResultado';
+        const claveFiltrado = `${clave}Filtrado`;
+        const indicadorEnLocalStorage = localStorage.getItem(clave);
+        const indicadorFiltradoEnLocalStorage = localStorage.getItem(clave);
+        if (!indicadorEnLocalStorage) return;
+        if (indicadorEnLocalStorage === JSON.stringify(datos)) {
+            return;
+        }
+
+        if (esADR && !regionSeleccionada) {
+            return;
+        }
+
+        if (esADR) {
+            if (indicadorFiltradoEnLocalStorage === JSON.stringify(datos)) {
+                return;
+            }
+            if (!hasUpdatedRef.current) {
+                hasUpdatedRef.current = true;
+                const indicadorCompleto: T[] = JSON.parse(indicadorEnLocalStorage || '[]');
+                console.log(indicadorCompleto);
+                console.log(datos);
+                let completado = [...indicadorCompleto];
+
+                const datosNoRegionSeleccionado = completado.filter((item) => item.RegionsId !== datos[0].RegionsId);
+                completado = [...datosNoRegionSeleccionado, ...datos];
+                localStorage.setItem(claveFiltrado, JSON.stringify(datos));
+                localStorage.setItem(clave, JSON.stringify(completado));
+            } else {
+                hasUpdatedRef.current = false;
+            }
+        } else {
+            localStorage.setItem(clave, JSON.stringify(datos));
+        }
+    }, [datos]);
+}

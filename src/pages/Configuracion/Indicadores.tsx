@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
 import { Loading } from '../../components/Utils/animations';
-import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
+import { llamadaBBDDIndicadores, ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import Tippy from '@tippyjs/react';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../../components/Utils/utils';
@@ -13,6 +13,7 @@ const Index = () => {
     const [loading, setLoading] = useState(true);
     const [indicadorRealizacion, setIndicadorRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadorResultado, setIndicadorResultado] = useState<IndicadorResultado[]>([]);
+    const [mensajeError, setMensajeError] = useState<string>('');
     const [modalNuevo, setModalNuevo] = useState(false);
 
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date | null>(() => {
@@ -20,38 +21,19 @@ const Index = () => {
         return fechaStr ? new Date(fechaStr) : null;
     });
 
-    const llamadaBBDDIndicadores = async () => {
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch('https://localhost:44300/api/indicadores', {
-                headers: {
-                    Authorization: `Bearer ` + token,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            const data = await res.json();
-            const datosIndicador: IndicadorRealizacion[] = data.data;
-            if (!res.ok) throw new Error(data.message || t('errorObtenerIndicadores'));
-            setIndicadorRealizacion(datosIndicador);
-            localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
-
-            const indicadoresResultado: IndicadorResultado[] = datosIndicador
-                .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
-                .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
-                .sort((a, b) => a.Id - b.Id);
-
-            setIndicadorResultado(indicadoresResultado);
-            setFechaUltimoActualizadoBBDD(new Date());
-            localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-        } finally {
-            setLoading(false);
-        }
+    const llamarBBDD = () => {
+        llamadaBBDDIndicadores({
+            setMensajeError,
+            setIndicadorRealizacion,
+            setIndicadorResultado,
+            setFechaUltimoActualizadoBBDD,
+            t,
+        });
     };
 
     useEffect(() => {
         setLoading(true);
-        const storedRealizacion = localStorage.getItem('indicadorRealizacion');
+        const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
         const storedResultado = localStorage.getItem('indicadoresResultado');
         if (storedRealizacion && storedResultado) {
             const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
@@ -60,9 +42,10 @@ const Index = () => {
             setIndicadorResultado(indicadoresResultado);
             setLoading(false);
             return;
+        } else {
+            llamarBBDD();
+            setLoading(false);
         }
-
-        llamadaBBDDIndicadores();
     }, []);
 
     useEffect(() => {
@@ -74,8 +57,9 @@ const Index = () => {
             {loading ? (
                 <Loading />
             ) : (
-                <div className="flex flex-col">
+                <div className="flex flex-col w-full">
                     <div className="flex flex-col justify-end mb-5 items-end">
+                        {mensajeError ?? <span className="ml-2 text-red-500 hover:text-red-700">{mensajeError}</span>}
                         <button onClick={() => setModalNuevo(true)} className="btn btn-primary w-[300px]">
                             Abrir modal nuevo indicador
                         </button>
@@ -106,7 +90,7 @@ const Index = () => {
                             </div>
                         )}
                         <Tippy content={t('Actualizar')}>
-                            <button type="button" onClick={llamadaBBDDIndicadores}>
+                            <button type="button" onClick={llamarBBDD}>
                                 <IconRefresh />
                             </button>
                         </Tippy>

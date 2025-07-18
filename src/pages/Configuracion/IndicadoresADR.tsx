@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
 import { Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
-import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
+import { llamadaBBDDIndicadores, ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../../components/Utils/utils';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
@@ -24,58 +24,88 @@ const Index = () => {
     });
 
     const filtrarPorAdr = (indicadores: IndicadorRealizacion[]): IndicadorRealizacion[] => {
-        return indicadores.filter((indicador) => String(indicador.RegionsId) === String(regionSeleccionada));
+        if (regionSeleccionada) {
+            return indicadores.filter((indicador) => String(indicador.RegionsId) === String(regionSeleccionada));
+        }
+        return [];
     };
 
-    const llamadaBBDDIndicadores = async () => {
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch('https://localhost:44300/api/indicadores', {
-                headers: {
-                    Authorization: `Bearer ` + token,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            const data = await res.json();
-            const datosIndicador: IndicadorRealizacion[] = data.data;
-            if (!res.ok) {
-                setMensajeError(data.Message || t('errorObtenerIndicadores'));
-                throw new Error(data.Message || t('errorObtenerIndicadores'));
-            }
-            setIndicadorRealizacion(datosIndicador);
-            localStorage.setItem('indicadorRealizacion', JSON.stringify(datosIndicador));
-
-            const indicadoresResultado: IndicadorResultado[] = datosIndicador
-                .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
-                .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
-                .sort((a, b) => a.Id - b.Id);
-
-            setIndicadorResultado(indicadoresResultado);
-            setFechaUltimoActualizadoBBDD(new Date());
-            localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-        } finally {
-            setLoading(false);
-        }
+    const [estadoLlamadaBBDDFinalizada, setEstadoLlamadaBBDDFinalizada] = useState(false);
+    const llamarBBDD = () => {
+        llamadaBBDDIndicadores({
+            setMensajeError,
+            setIndicadorRealizacion,
+            setIndicadorResultado,
+            setFechaUltimoActualizadoBBDD,
+            t,
+        }).then(() => {
+            setEstadoLlamadaBBDDFinalizada(true);
+        });
     };
 
     useEffect(() => {
-        setLoading(true);
-
-        const storedRealizacion = localStorage.getItem('indicadorRealizacion');
-        const storedResultado = localStorage.getItem('indicadoresResultado');
-        if (storedRealizacion && storedResultado) {
-            const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
-            const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
-
-            const indicadoresRealizacionFiltrado = filtrarPorAdr(indicadoresRealizacion);
-            const indicadoresResultadoFiltrado = filtrarPorAdr(indicadoresResultado);
-            setIndicadorRealizacion(indicadoresRealizacionFiltrado);
-            setIndicadorResultado(indicadoresResultadoFiltrado);
-            setLoading(false);
-            return;
+        if (estadoLlamadaBBDDFinalizada) {
+            const indicadoresRealizacionRegionSeleccionada = filtrarPorAdr(indicadorRealizacion);
+            const indicadoresResultadoRegionSeleccionada = filtrarPorAdr(indicadorResultado);
+            setIndicadorRealizacion(indicadoresRealizacionRegionSeleccionada);
+            setIndicadorResultado(indicadoresResultadoRegionSeleccionada);
+            setEstadoLlamadaBBDDFinalizada(false);
+            setTimeout(() => {
+                setLoading(false);
+            }, 200);
         }
-        llamadaBBDDIndicadores();
+    }, [estadoLlamadaBBDDFinalizada]);
+
+    function DatosEsRegionSeleccionada(storedRealizacion: string | null, storedResultado: string | null, indicadorPaso: number) {
+        let paso = '';
+        if (indicadorPaso === 1) {
+            paso = 'Filtrado';
+        } else if (indicadorPaso === 2) {
+            paso = 'Original';
+        }
+        const noVacioRealizacion = storedRealizacion && storedRealizacion !== '[]';
+        const noVacioResultado = storedResultado && storedResultado !== '[]';
+        if (!noVacioRealizacion || !noVacioResultado) {
+            console.warn(`${paso} Vacio`);
+            return false;
+        }
+        const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
+        if (indicadoresRealizacion.some((indicador) => String(indicador.RegionsId) === String(regionSeleccionada))) {
+            return true;
+        } else {
+            console.warn(`${paso} Region incorrecta`);
+            return false;
+        }
+    }
+
+    function AsignarSetRegionDesdeLocalStorage(storedRealizacion: string, storedResultado: string) {
+        const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
+        const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
+        const indicadoresRealizacionRegionSeleccionada = filtrarPorAdr(indicadoresRealizacion);
+        const indicadoresResultadoRegionSeleccionada = filtrarPorAdr(indicadoresResultado);
+        setIndicadorRealizacion(indicadoresRealizacionRegionSeleccionada);
+        setIndicadorResultado(indicadoresResultadoRegionSeleccionada);
+        localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionRegionSeleccionada));
+        localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoRegionSeleccionada));
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        setLoading(true);
+        const storedRealizacionFiltrado = localStorage.getItem('indicadoresRealizacionFiltrado');
+        const storedResultadoFiltrado = localStorage.getItem('indicadoresResultadoFiltrado');
+        if (DatosEsRegionSeleccionada(storedRealizacionFiltrado, storedResultadoFiltrado, 1)) {
+            AsignarSetRegionDesdeLocalStorage(storedRealizacionFiltrado!, storedResultadoFiltrado!);
+        } else {
+            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
+            const storedResultado = localStorage.getItem('indicadoresResultado');
+            if (DatosEsRegionSeleccionada(storedRealizacion, storedResultado, 2)) {
+                AsignarSetRegionDesdeLocalStorage(storedRealizacion!, storedResultado!);
+            } else {
+                console.warn('Servidor');
+                llamarBBDD();
+            }
+        }
     }, [regionSeleccionada]);
 
     useEffect(() => {
@@ -87,7 +117,7 @@ const Index = () => {
             {loading ? (
                 <Loading />
             ) : (
-                <div className="flex flex-col">
+                <div className="flex flex-col w-full">
                     <div className="flex flex-col justify-end mb-5 items-end">
                         {mensajeError ? (
                             <span className="ml-2 text-red-500 hover:text-red-700">{mensajeError}</span>
@@ -125,7 +155,7 @@ const Index = () => {
                             </div>
                         )}
                         <Tippy content={t('Actualizar')}>
-                            <button type="button" onClick={llamadaBBDDIndicadores}>
+                            <button type="button" onClick={llamarBBDD}>
                                 <IconRefresh />
                             </button>
                         </Tippy>
