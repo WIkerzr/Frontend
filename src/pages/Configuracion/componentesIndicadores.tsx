@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -9,54 +9,60 @@ import Tippy from '@tippyjs/react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import React from 'react';
+import { Region } from '../../components/Utils/gets/getRegiones';
 
-type ResultadoMaximos = {
-    REmaxSoloNum?: string;
-    REmaxConLetras?: string;
-    RSmaxSoloNum?: string;
-    RSmaxConLetras?: string;
-};
-
-const SacarSiguienteEnumeracionIndicadores = (): ResultadoMaximos => {
-    const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-    const storedResultado = localStorage.getItem('indicadoresResultado');
-    const extraNum = (s: string) => +(s.match(/\d+/g)?.pop() || 0);
-
-    let REmaxSoloNum: string | undefined;
-    let REmaxConLetras: string | undefined;
-    let RSmaxSoloNum: string | undefined;
-    let RSmaxConLetras: string | undefined;
-
-    if (storedRealizacion) {
-        const indicadoresRealizacion = JSON.parse(storedRealizacion) as { NameEs?: string }[];
-        const REiR = indicadoresRealizacion.map((i) => i.NameEs?.split('.')[0]).filter(Boolean) as string[];
-        const REsoloNum = REiR.filter((c) => /\d$/.test(c));
-        const REconLetras = REiR.filter((c) => !/\d$/.test(c));
-        if (REsoloNum.length) REmaxSoloNum = REsoloNum.reduce((a, b) => (extraNum(b) > extraNum(a) ? b : a));
-        if (REconLetras.length) REmaxConLetras = REconLetras.reduce((a, b) => (extraNum(b) > extraNum(a) ? b : a));
+const SacarSiguienteEnumeracionIndicadores = (
+    indicadorRealizacion: IndicadorRealizacion,
+    tipoIndicador: 'realizacion' | 'resultado',
+    suma: number | undefined,
+    regionSeleccionada: number | null,
+    regiones: Region[]
+): string[] => {
+    const storedRealizacionFiltrado = localStorage.getItem('indicadoresRealizacionFiltrado');
+    const storedResultadoFiltrado = localStorage.getItem('indicadoresResultadoFiltrado');
+    let numeroActual = suma ? suma : 0;
+    if (tipoIndicador === 'realizacion') {
+        if (storedRealizacionFiltrado) {
+            const storedRealizacion = JSON.parse(storedRealizacionFiltrado);
+            const realizacion: IndicadorRealizacion = storedRealizacion[storedRealizacion.length - 1];
+            numeroActual = Number(realizacion.NameEs.slice(2, 4));
+        }
+    }
+    if (tipoIndicador === 'resultado') {
+        if (storedResultadoFiltrado && storedResultadoFiltrado !== '[]') {
+            const storedResultado = JSON.parse(storedResultadoFiltrado);
+            const Resultado: IndicadorRealizacion = storedResultado[storedResultado.length - 1];
+            numeroActual = Number(Resultado.NameEs.slice(2, 4));
+        }
     }
 
-    if (storedResultado) {
-        const indicadoresResultado = JSON.parse(storedResultado) as { NameEs?: string }[];
-        const RSiR = indicadoresResultado.map((i) => i.NameEs?.split('.')[0]).filter(Boolean) as string[];
-        const RSsoloNum = RSiR.filter((c) => /\d$/.test(c));
-        const RSconLetras = RSiR.filter((c) => !/\d$/.test(c));
-        if (RSsoloNum.length) RSmaxSoloNum = RSsoloNum.reduce((a, b) => (extraNum(b) > extraNum(a) ? b : a));
-        if (RSconLetras.length) RSmaxConLetras = RSconLetras.reduce((a, b) => (extraNum(b) > extraNum(a) ? b : a));
+    let nombre = indicadorRealizacion.NameEs;
+    const inicializacionNombre = tipoIndicador === 'realizacion' ? 'RE' : 'RS';
+    let codRegion = '';
+    if (indicadorRealizacion.Id === 0) {
+        if (nombre === '') {
+            nombre = inicializacionNombre;
+            if (regionSeleccionada) {
+                codRegion = generarCodigosRegiones(regiones)[regionSeleccionada];
+            }
+        }
+        numeroActual++;
+        const num = numeroActual ? numeroActual : 1;
+        const numeracion = num < 10 ? `0${num}` : `${num}`;
+        return [`${nombre}${numeracion}${codRegion}`, ''];
+    } else {
+        //"RE06DE.45654645645"
+        const nombreIndicadorRealizacion = nombre.slice(0, 2); //RE
+        const num = Number(nombre.slice(2, 4)); //06
+        const numeracion = num < 10 ? `0${num}` : `${num}`;
+        const contienePuntoPos = nombre.slice(4, 5) === '.';
+        const despuesDelPunto = nombre.includes('.') ? nombre.split('.')[1].trim() : '';
+        if (!contienePuntoPos) {
+            codRegion = nombre.slice(4, 6); //DE
+        }
+        return [`${nombreIndicadorRealizacion}${numeracion}${codRegion}`, despuesDelPunto];
     }
-
-    return { REmaxSoloNum, REmaxConLetras, RSmaxSoloNum, RSmaxConLetras };
 };
-
-function getNextRECode(code: string, sumar?: number): string {
-    const match = code.match(/^([A-Z]+)(\d+)([A-Z]*)$/i);
-    if (!match) return 'RE01';
-
-    const [, prefix, numStr, suffix] = match;
-    const increment = 1 + (sumar ?? 0);
-    const nextNum = String(parseInt(numStr, 10) + increment).padStart(numStr.length, '0');
-    return `${prefix}${nextNum}${suffix}.`;
-}
 
 interface RellenoIndicadorProps {
     indicadorRealizacion: IndicadorRealizacion;
@@ -68,37 +74,38 @@ interface RellenoIndicadorProps {
 const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, sumar }) => {
     const { t, i18n } = useTranslation();
     const { regionSeleccionada, regiones } = useRegionContext();
+
     const [formData, setFormData] = useState<IndicadorRealizacion>(indicadorRealizacion);
-    const location = useLocation();
-    const { REmaxSoloNum, REmaxConLetras, RSmaxSoloNum, RSmaxConLetras } = SacarSiguienteEnumeracionIndicadores();
-    const esADR = location.pathname?.includes('ADR');
+    const indicador = useMemo(() => {
+        return SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, sumar, regionSeleccionada, regiones);
+    }, []);
+    // const indicador = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, sumar);
+    const [nombreIndicador, setNombreIndicador] = useState<string>(indicador[1]);
 
-    const [nombreIndicador, setNombreIndicador] = useState<string[]>();
-
-    useEffect(() => {
-        const indicadorNombre = i18n.language === 'eu' ? formData.NameEu : formData.NameEs;
-        if (indicadorNombre && indicadorNombre != '') {
-            const [izquierda, ...resto] = indicadorNombre.split('.');
-            const izquierdaConPunto = izquierda + '.';
-            const derecha = resto.join('.').trim();
-            setNombreIndicador([izquierdaConPunto, derecha]);
-        } else {
-            let siguienteindicador = '';
-            const region = regiones.find((r) => r.RegionId === regionSeleccionada);
-            if (!region) {
-                return;
-            }
-            const cod = generarCodigosRegiones(region);
-            if (tipoIndicador === 'realizacion') {
-                const letra = 'RE00' + cod[regionSeleccionada!];
-                siguienteindicador = getNextRECode(esADR ? (REmaxConLetras ? REmaxConLetras : letra!) : REmaxSoloNum!, sumar);
-            } else if (tipoIndicador === 'resultado') {
-                const letra = 'RS00' + cod[regionSeleccionada!];
-                siguienteindicador = getNextRECode(esADR ? (RSmaxConLetras ? RSmaxConLetras : letra!) : RSmaxSoloNum!, sumar);
-            }
-            setNombreIndicador([siguienteindicador, '']);
-        }
-    }, [formData]);
+    // useEffect(() => {
+    //     const indicadorNombre = i18n.language === 'eu' ? formData.NameEu : formData.NameEs;
+    //     if (indicadorNombre && indicadorNombre != '') {
+    //         const [izquierda, ...resto] = indicadorNombre.split('.');
+    //         const izquierdaConPunto = izquierda + '.';
+    //         const derecha = resto.join('.').trim();
+    //         setNombreIndicador([izquierdaConPunto, derecha]);
+    //     } else {
+    //         let siguienteindicador = '';
+    //         const region = regiones.find((r) => r.RegionId === regionSeleccionada);
+    //         if (!region) {
+    //             return;
+    //         }
+    //         const cod = generarCodigosRegiones(region);
+    //         if (tipoIndicador === 'realizacion') {
+    //             const letra = 'RE00' + cod[regionSeleccionada!];
+    //             siguienteindicador = getNextRECode(esADR ? (REmaxConLetras ? REmaxConLetras : letra!) : REmaxSoloNum!, sumar);
+    //         } else if (tipoIndicador === 'resultado') {
+    //             const letra = 'RS00' + cod[regionSeleccionada!];
+    //             siguienteindicador = getNextRECode(esADR ? (RSmaxConLetras ? RSmaxConLetras : letra!) : RSmaxSoloNum!, sumar);
+    //         }
+    //         setNombreIndicador([siguienteindicador, '']);
+    //     }
+    // }, [formData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -106,11 +113,11 @@ const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacio
         setFormData(updatedData);
         onChange(updatedData);
     };
+
     const handleChangeNombre = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        const finalData = nombreIndicador ? `${nombreIndicador[0]}${value}` : value;
-        setNombreIndicador([nombreIndicador ? nombreIndicador[0] : '', value]);
-        const updatedData = { ...formData, [name]: finalData };
+        setNombreIndicador(value);
+        const updatedData = { ...formData, [name]: `${indicador[0]}.${value}` };
         setFormData(updatedData);
         onChange(updatedData);
     };
@@ -124,14 +131,8 @@ const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacio
             <div>
                 <label className="block font-medium ">{t('nombreIndicador')}</label>
                 <div className="flex border rounded bg-gray-200">
-                    <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{nombreIndicador && <label>{nombreIndicador[0]}</label>}</div>
-                    <input
-                        type="text"
-                        name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
-                        className="flex-1 p-2 border"
-                        value={nombreIndicador ? nombreIndicador[1] : ''}
-                        onChange={handleChangeNombre}
-                    />
+                    <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{<label>{indicador[0]}</label>}</div>
+                    <input type="text" name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'} className="flex-1 p-2 border" value={nombreIndicador} onChange={handleChangeNombre} />
                 </div>
             </div>
             <div>
@@ -338,7 +339,7 @@ type ModalNuevoIndicadorProps = {
     isOpen: boolean;
     onClose: () => void;
     accion: 'Editar' | 'Nuevo';
-    datosIndicador: IndicadorResultado;
+    datosIndicador?: IndicadorRealizacion;
     onSave?: (indicadorActualizado: IndicadorRealizacion) => void;
     tipoIndicador?: 'realizacion' | 'resultado';
 };
@@ -347,11 +348,13 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const { t, i18n } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
     const location = useLocation();
+    const esADR = location.pathname?.includes('ADR');
+    const esNuevo = accion === 'Nuevo';
 
-    const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(datosIndicador);
+    const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(esNuevo ? indicadorInicial : datosIndicador ?? indicadorInicial);
     const [mensaje, setMensaje] = useState('');
     const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
-    const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(accion === 'Nuevo' ? false : hayResultados);
+    const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(esNuevo ? false : hayResultados);
 
     const validadorRespuestasBBDD = async (response: any, data: any) => {
         if (response.ok) {
@@ -395,7 +398,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(location.pathname === '/configuracion/indicadoresADR' ? datosRealizacion : descripcionEditable),
+            body: JSON.stringify(esADR ? datosRealizacion : descripcionEditable),
         });
         if (response.ok) {
             const indicadorNuevo = await response.json();
@@ -543,7 +546,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                                 if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
                                     mensajeError += `${t('errorMissingFields')}`;
                                 }
-                                if (accion === 'Nuevo') {
+                                if (esNuevo) {
                                     handleGuardarNuevoRealizacion();
                                 } else if (tipoIndicador === 'realizacion') {
                                     handleEditarIndicadorRealizacion();
@@ -986,12 +989,6 @@ export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadorReal
     }
 };
 
-interface Region {
-    RegionId: number;
-    NameEs: string;
-    NameEu: string;
-}
-
 function generarCodigoRegion(name: string): string | null {
     // Normalizar y limpiar el nombre: quitar tildes, convertir a mayúsculas
     const limpio = name
@@ -1062,6 +1059,56 @@ function generarCodigosRegiones(regiones: Region | Region[]): Record<number, str
     return codigos;
 }
 
+export function ComodinFormatearCoincidenciasParaTabla(coincidencias: IndicadorRealizacion[]): Record<string, string | number>[] {
+    const tablaIndicador = coincidencias
+        .slice()
+        .reverse()
+        .map((indicador, index) => {
+            const fila: Record<string, string | number> = {
+                Índice: index,
+                Id: indicador.Id,
+                NameEs: indicador.NameEs,
+                RegionsId: indicador.RegionsId ?? '',
+            };
+
+            if (Array.isArray(indicador.Resultados)) {
+                indicador.Resultados.reverse().forEach((resultado, i) => {
+                    fila[`Resultado[${i}].NameEs`] = resultado?.NameEs ?? '';
+                });
+            }
+
+            return fila;
+        });
+
+    localStorage.setItem('COMODIN', JSON.stringify(tablaIndicador));
+    return tablaIndicador;
+}
+
+export function compararFilasDeTabla(tablaA: Record<string, string | number>[], tablaB: Record<string, string | number>[]): void {
+    const longitudMax = Math.max(tablaA.length, tablaB.length);
+
+    for (let i = 0; i < longitudMax; i++) {
+        const filaA = tablaA[i];
+        const filaB = tablaB[i];
+
+        if (!filaA || !filaB) {
+            console.warn(`⚠️ Fila ${i} está ausente en una de las tablas.`);
+            continue;
+        }
+
+        const claves = new Set([...Object.keys(filaA), ...Object.keys(filaB)]);
+
+        claves.forEach((clave) => {
+            const valorA = filaA[clave];
+            const valorB = filaB[clave];
+
+            if (valorA !== valorB) {
+                console.log(`⚠️ Diferencia en fila ${i}, campo "${clave}":\n\t🅰️ "${valorA}"\n\t🅱️ "${valorB}"`);
+            }
+        });
+    }
+}
+
 type TipoIndicador = 'realizacion' | 'resultado';
 
 interface SincronizarIndicadoresParams<T> {
@@ -1102,10 +1149,12 @@ function sincronizarIndicadoresLocalStorage<T extends { Id: number; RegionsId?: 
                 console.log(datos);
                 let completado = [...indicadorCompleto];
 
-                const datosNoRegionSeleccionado = completado.filter((item) => item.RegionsId !== datos[0].RegionsId);
+                const datosNoRegionSeleccionado = completado.filter((item) => item.RegionsId !== regionSeleccionada);
                 completado = [...datosNoRegionSeleccionado, ...datos];
-                localStorage.setItem(claveFiltrado, JSON.stringify(datos));
-                localStorage.setItem(clave, JSON.stringify(completado));
+                const filtradoDatos = JSON.stringify(datos);
+                //const filtradoCompletado = JSON.stringify(datos);
+                localStorage.setItem(claveFiltrado, filtradoDatos);
+                //localStorage.setItem(clave, filtradoCompletado);
             } else {
                 hasUpdatedRef.current = false;
             }

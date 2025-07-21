@@ -1,10 +1,10 @@
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
+import { IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
 import { Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
-import { llamadaBBDDIndicadores, ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
+import { ComodinFormatearCoincidenciasParaTabla, llamadaBBDDIndicadores, ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../../components/Utils/utils';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
@@ -71,6 +71,10 @@ const Index = () => {
         }
         const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
         if (indicadoresRealizacion.some((indicador) => String(indicador.RegionsId) === String(regionSeleccionada))) {
+            const coincidencias = indicadoresRealizacion.filter((indicador) => String(indicador.RegionsId) === String(regionSeleccionada));
+            console.warn(`${paso} PERFECT`);
+
+            console.table(ComodinFormatearCoincidenciasParaTabla(coincidencias));
             return true;
         } else {
             console.warn(`${paso} Region incorrecta`);
@@ -130,7 +134,6 @@ const Index = () => {
                                     isOpen={modalNuevo}
                                     onClose={() => setModalNuevo(false)}
                                     accion="Nuevo"
-                                    datosIndicador={indicadorInicial}
                                     onSave={(nuevoIndicadorRealizacion) => {
                                         setIndicadorRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
                                         if (!nuevoIndicadorRealizacion.Resultados) {
