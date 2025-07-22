@@ -1,56 +1,22 @@
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../../types/Indicadores';
+import { indicadorInicial } from '../../types/Indicadores';
 import { Loading } from '../../components/Utils/animations';
-import { llamadaBBDDIndicadores, ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
+import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import Tippy from '@tippyjs/react';
-import { actualizarFechaLLamada, obtenerFechaLlamada } from '../../components/Utils/utils';
+import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 
 const Index = () => {
     const { t } = useTranslation();
-    const [loading, setLoading] = useState(true);
-    const [indicadorRealizacion, setIndicadorRealizacion] = useState<IndicadorRealizacion[]>([]);
-    const [indicadorResultado, setIndicadorResultado] = useState<IndicadorResultado[]>([]);
-    const [mensajeError, setMensajeError] = useState<string>('');
+    const { setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, loading, mensajeError, fechaUltimoActualizadoBBDD, llamarBBDD, PrimeraLlamada } = useIndicadoresContext();
+
     const [modalNuevo, setModalNuevo] = useState(false);
 
-    const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date | null>(() => {
-        const fechaStr = obtenerFechaLlamada('indicadores');
-        return fechaStr ? new Date(fechaStr) : null;
-    });
-
-    const llamarBBDD = () => {
-        llamadaBBDDIndicadores({
-            setMensajeError,
-            setIndicadorRealizacion,
-            setIndicadorResultado,
-            setFechaUltimoActualizadoBBDD,
-            t,
-        });
-    };
-
     useEffect(() => {
-        setLoading(true);
-        const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-        const storedResultado = localStorage.getItem('indicadoresResultado');
-        if (storedRealizacion && storedResultado) {
-            const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
-            setIndicadorRealizacion(indicadoresRealizacion);
-            const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
-            setIndicadorResultado(indicadoresResultado);
-            setLoading(false);
-            return;
-        } else {
-            llamarBBDD();
-            setLoading(false);
-        }
+        PrimeraLlamada();
     }, []);
-
-    useEffect(() => {
-        actualizarFechaLLamada('indicadores');
-    }, [fechaUltimoActualizadoBBDD]);
 
     return (
         <div className="flex w-full gap-5">
@@ -69,13 +35,13 @@ const Index = () => {
                             accion="Nuevo"
                             datosIndicador={indicadorInicial}
                             onSave={(nuevoIndicadorRealizacion) => {
-                                setIndicadorRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
+                                setIndicadoresRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
                                 if (!nuevoIndicadorRealizacion.Resultados) {
                                     return;
                                 }
-                                const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadorResultado.some((res) => res.Id === nuevoRes.Id));
+                                const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadoresResultado.some((res) => res.Id === nuevoRes.Id));
                                 if (nuevosResultados.length > 0) {
-                                    setIndicadorResultado((prev) => [...prev, ...nuevosResultados]);
+                                    setIndicadoresResultado((prev) => [...prev, ...nuevosResultados]);
                                 }
                             }}
                         />
@@ -97,12 +63,7 @@ const Index = () => {
                     </div>
 
                     <div className="flex flex-row justify-center mb-5 gap-5">
-                        <TablaIndicadores
-                            indicadorRealizacion={indicadorRealizacion}
-                            indicadorResultado={indicadorResultado}
-                            setIndicadorResultado={setIndicadorResultado}
-                            setIndicadorRealizacion={setIndicadorRealizacion}
-                        />
+                        <TablaIndicadores />
                     </div>
                 </div>
             )}

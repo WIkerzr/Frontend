@@ -66,6 +66,15 @@ export const indicadorInicial: IndicadorRealizacion = {
     RelatedAxes: '',
     Resultados: [],
 };
+export const indicadorInicialResultado: IndicadorResultado = {
+    Id: 0,
+    NameEs: '',
+    NameEu: '',
+    Description: '',
+    DisaggregationVariables: '',
+    CalculationMethodology: '',
+    RelatedAxes: '',
+};
 
 export const datosPruebaIndicadoreRealizacion: IndicadorRealizacionAccion[] = [
     {

@@ -67,11 +67,6 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             //Llamada al servidor para obtener los datos de la region
             setRegionData(datosRegion);
-        } else {
-            const regionSele = sessionStorage.getItem('regionSeleccionada');
-            if (regionSele) {
-                setRegionSeleccionadaState(Number(regionSele));
-            }
         }
     }, [regionSeleccionada]);
 

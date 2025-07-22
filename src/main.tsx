@@ -23,6 +23,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import TableMantineProvider from './contexts/TableMantineContext';
 import { EstadosPorAnioProvider } from './contexts/EstadosPorAnioContext';
 import { RegionDataProvider } from './contexts/DatosAnualContext';
+import { IndicadoresProvider } from './contexts/IndicadoresContext';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
@@ -33,11 +34,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                         <MantineProvider>
                             <RegionProvider>
                                 <RegionDataProvider>
-                                    <TableMantineProvider>
-                                        <EstadosPorAnioProvider>
-                                            <RouterProvider router={router} />
-                                        </EstadosPorAnioProvider>
-                                    </TableMantineProvider>
+                                    <IndicadoresProvider>
+                                        <TableMantineProvider>
+                                            <EstadosPorAnioProvider>
+                                                <RouterProvider router={router} />
+                                            </EstadosPorAnioProvider>
+                                        </TableMantineProvider>
+                                    </IndicadoresProvider>
                                 </RegionDataProvider>
                             </RegionProvider>
                         </MantineProvider>
