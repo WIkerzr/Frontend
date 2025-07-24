@@ -17,5 +17,12 @@ export default defineConfig({
         headers: {
             'access-control-allow-origin': '*',
         },
+        proxy: {
+            '/api': {
+                target: 'https://api.hazi.grupo-campus.com',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, '/api'),
+            },
+        },
     },
 });

@@ -1,3 +1,5 @@
+import api from '../../../api/axios';
+
 export interface Region {
     RegionId: number;
     NameEs: string;
@@ -10,19 +12,10 @@ export interface GetRegionesResponse {
     data: Region[];
 }
 
-export async function getRegiones(): Promise<Region[]> {
-    const token = sessionStorage.getItem('token');
-    const response = await fetch('https://localhost:44300/api/regions', {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Error al obtener regiones');
+export async function GetRegiones(): Promise<Region[]> {
+    const response = await api.get<GetRegionesResponse>('/regions');
+    if (!response.data.success) {
+        throw new Error('Error al obtener regiones' + response.data.message);
     }
-    const result: GetRegionesResponse = await response.json();
-    return result.data;
+    return response.data.data;
 }

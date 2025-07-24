@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getRegiones, Region } from '../components/Utils/gets/getRegiones';
+import { GetRegiones, Region } from '../components/Utils/gets/getRegiones';
 import { useUser } from './UserContext';
 import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
 
@@ -75,7 +75,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (user) {
             const regionesStr = sessionStorage.getItem('regiones');
             if (!regionesStr) {
-                getRegiones()
+                GetRegiones()
                     .then((data) => {
                         setRegiones(data);
                         sessionStorage.setItem('regiones', JSON.stringify(data));
