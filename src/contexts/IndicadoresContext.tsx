@@ -56,9 +56,6 @@ const IndicadorContext = createContext<IndicadoresContextType>({
 export const useIndicadoresContext = () => useContext(IndicadorContext);
 
 export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [indicadoresReaBorrar, setIndicadoresReaBorrar] = useState<IndicadorRealizacion[]>([]);
-    const [indicadoresResBorrar, setIndicadoresResBorrar] = useState<IndicadorResultado[]>([]);
-
     const { t } = useTranslation();
     const { user } = useUser();
     const token = sessionStorage.getItem('token');
@@ -156,10 +153,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             if (storedRealizacion && storedResultado) {
                 const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
                 setIndicadoresRealizacion(indicadoresRealizacion);
-                console.log('Primera llamada');
-                console.log(indicadoresRealizacion);
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
-                console.log(indicadoresResultado);
                 setIndicadoresResultado(indicadoresResultado);
                 actualizarIndicadoresADR();
                 setLoading(false);
@@ -195,109 +189,48 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => {
         if (!indicadoresRealizacionADR) {
             setIndicadoresRealizacionADR([]);
-        }
-        setIndicadoresReaBorrar(indicadoresRealizacionADR);
-        if (!indicadoresRealizacionADR) {
-            console.log('indicadoresRealizacionADR');
-            console.log(indicadoresRealizacionADR);
-            console.log('indicadoresReaBorrar');
-            console.log(indicadoresReaBorrar);
+        } else {
+            const regionIdADR = indicadoresRealizacionADR[0]?.RegionsId;
+            if (regionIdADR) {
+                const nuevosIndicadores = [...indicadoresRealizacion.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresRealizacionADR];
+                setIndicadoresRealizacion(nuevosIndicadores);
+            }
+            localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
         }
     }, [indicadoresRealizacionADR]);
 
     useEffect(() => {
         if (!indicadoresResultadoADR) {
             setIndicadoresResultadoADR([]);
-        }
-        setIndicadoresResBorrar(indicadoresRealizacionADR);
-        if (!indicadoresResultadoADR) {
-            console.log('indicadoresResultadoADR');
-            console.log(indicadoresResultadoADR);
-            console.log('indicadoresResBorrar');
-            console.log(indicadoresResBorrar);
+        } else {
+            const regionIdADR = indicadoresResultadoADR[0]?.RegionsId;
+            if (regionIdADR) {
+                const nuevosIndicadores = [...indicadoresResultado.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresResultadoADR];
+                setIndicadoresResultado(nuevosIndicadores);
+            }
+            localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
         }
     }, [indicadoresResultadoADR]);
 
-    // useEffect(() => {
-    //     if (!token) return;
-    //     if (user && (user.role as string) != 'GOBIERNOVASCO') {
-    //         setLoading(true);
-    //         const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-    //         const storedResultado = localStorage.getItem('indicadoresResultado');
-    //         if (storedRealizacion && storedResultado) {
-    //             const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
-    //             setIndicadoresRealizacion(indicadoresRealizacion);
-    //             const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
-    //             setIndicadoresResultado(indicadoresResultado);
-    //             setLoading(false);
-    //             return;
-    //         } else {
-    //             llamarBBDD();
-    //             setLoading(false);
-    //         }
-    //     }
-    // }, [user]);
+    useEffect(() => {
+        if (!indicadoresRealizacion) {
+            setIndicadoresRealizacion([]);
+        } else {
+            localStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
+        }
+    }, [indicadoresRealizacion]);
 
-    // useEffect(() => {
-    //     localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
-    //     localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
-
-    //     setIndicadoresRealizacion((prev) => {
-    //         const idsADR = new Set(indicadoresRealizacionADR.map((ind) => ind.Id));
-    //         const sinADR = prev.filter((ind) => !idsADR.has(ind.Id));
-    //         return [...sinADR, ...indicadoresRealizacionADR];
-    //     });
-    //     setIndicadoresResultado((prev) => {
-    //         const idsADR = new Set(indicadoresResultadoADR.map((ind) => ind.Id));
-    //         const sinADR = prev.filter((ind) => !idsADR.has(ind.Id));
-    //         return [...sinADR, ...indicadoresResultadoADR];
-    //     });
-    //     localStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
-    //     localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-    // }, [indicadoresRealizacionADR, indicadoresResultadoADR]);
-
-    // useEffect(() => {
-    //     localStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
-    //     localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-
-    //     const indicadoresRealizacionADR = filtrarPorAdr(indicadoresRealizacion);
-    //     const indicadoresResultadoADR = filtrarPorAdr(indicadoresResultado);
-    //     localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
-    //     localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
-    // }, [indicadoresRealizacion, indicadoresResultado]);
+    useEffect(() => {
+        if (!indicadoresResultado) {
+            setIndicadoresResultado([]);
+        } else {
+            localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+        }
+    }, [indicadoresResultado]);
 
     useEffect(() => {
         actualizarFechaLLamada('indicadores');
     }, [fechaUltimoActualizadoBBDD]);
-
-    // useEffect(() => {
-    //     if (!token) return;
-    //     if (user && (user.role as string) != 'GOBIERNOVASCO') {
-    //         if (!regionSeleccionada || regionSeleccionada === 0) {
-    //             localStorage.removeItem('indicadoresRealizacionFiltrado');
-    //             localStorage.removeItem('indicadoresResultadoFiltrado');
-    //             setIndicadoresRealizacionADR([]);
-    //             setIndicadoresResultadoADR([]);
-    //         } else {
-    //             const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-    //             const storedResultado = localStorage.getItem('indicadoresResultado');
-    //             if (storedRealizacion) {
-    //                 const indicadoresRealizacionPreFiltrado: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
-    //                 const indicadoresRealizacionRegionSeleccionada = filtrarPorAdr(indicadoresRealizacionPreFiltrado);
-    //                 setIndicadoresRealizacionADR(indicadoresRealizacionRegionSeleccionada);
-    //                 localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionRegionSeleccionada));
-    //             }
-    //             if (storedResultado) {
-    //                 const indicadoresResultadoPreFiltrado: IndicadorResultado[] = JSON.parse(storedResultado);
-    //                 const indicadoresResultadoRegionSeleccionada = filtrarPorAdr(indicadoresResultadoPreFiltrado);
-    //                 setIndicadoresResultadoADR(indicadoresResultadoRegionSeleccionada);
-    //                 localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoRegionSeleccionada));
-    //             }
-    //         }
-
-    //         setLoading(false);
-    //     }
-    // }, [regionSeleccionada, user]);
 
     const [indicadorSeleccionada, setIndicadorSeleccionada] = useState<IndicadorRealizacion | IndicadorResultado | null>(() => {
         const saved = sessionStorage.getItem('indicadorSeleccionada');

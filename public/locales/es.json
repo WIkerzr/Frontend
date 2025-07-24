@@ -43,6 +43,7 @@
     "seleccionaMultiOpcion": "Selecciona una o varias",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
     "modalEliminarIndicadoresResultados": "Hay indicadores de Resultados. ¿Está seguro de continuar?",
+    "NuevoIndicador": "Nuevo indicador",
     "borrador":"Borrador",
     "proceso":"Proceso",
     "cerrado":"Cerrado",
