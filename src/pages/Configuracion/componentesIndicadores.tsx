@@ -33,8 +33,7 @@ const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: Indicador
 export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indicadorRealizacion, onChange, tipoIndicador, indicadorResultado }) => {
     const { t, i18n } = useTranslation();
     const { indicadoresRealizacion, indicadoresResultado, indicadorSeleccionada } = useIndicadoresContext();
-    console.log(origen);
-    // console.log(indicadorSeleccionada);
+
     const { regionSeleccionada, regiones } = useRegionContext();
 
     const SacarSiguienteEnumeracionIndicadores = (indicadorRealizacion: IndicadorRealizacion, tipoIndicador: TipoIndicador): string[] => {
@@ -48,17 +47,6 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
             const posicionPunto = nombre.indexOf('.');
             const indicadorRegion = posicionPunto > 0 && posicionPunto < 5;
 
-            let recuentoIndicadoresResultado = 0;
-
-            const indicadoresRegion = [...indicadoresRealizacion.filter((r) => r.RegionsId !== '1'), ...indicadoresRealizacion];
-
-            for (let index = 0; index < indicadoresRegion.length; index++) {
-                const indicadorR = indicadoresRegion[index];
-                if (indicadorR.Resultados && indicadorR.Resultados.length > 0) {
-                    recuentoIndicadoresResultado += indicadorR.Resultados.length;
-                }
-            }
-            console.log(recuentoIndicadoresResultado);
             if (creacion) {
                 let suma = 0;
                 if (indicadorRegion) {
@@ -73,7 +61,6 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
                     }
 
                     const numeroActual = suma ? 1 + suma : 1;
-                    console.log(numeroActual);
 
                     const num = numeroActual ? numeroActual : 1;
                     const numeracion = num < 10 ? `0${num}` : `${num}`;
@@ -153,10 +140,9 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
                 const numeracion = num < 10 ? `0${num}` : `${num}`;
                 return [`${inicializacionNombre}${numeracion}${codRegion}`];
             }
-        } else if (origen === 'indicadoresADR/TablaIndicadoresRealizacion/Modal') {
+        } else if (origen === 'indicadoresADR/TablaIndicadoresRealizacion/Modal' || origen === 'indicadoresADR/TablaIndicadoresResultado/Modal') {
             return [nombre.slice(0, 6), nombre.slice(7)];
         }
-        console.log(origen);
         return [];
     };
 
@@ -292,8 +278,9 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ori
         const opcionesFiltradas = opciones.filter((op) => {
             const yaAsignado = indicadorRealizacion.Resultados!.some((resultado) => resultado.Id === op.Id);
 
-            const regionCompatible = op.RegionsId === indicadorRealizacion.RegionsId || op.RegionsId === undefined || op.RegionsId === '0' || op.RegionsId === null;
-
+            const regionCompatible = op.RegionsId === indicadorRealizacion.RegionsId;
+            // Listado con los indicadores generales comentado
+            // const regionCompatible = op.RegionsId === indicadorRealizacion.RegionsId || op.RegionsId === undefined || op.RegionsId === '0' || op.RegionsId === null;
             return !yaAsignado && regionCompatible;
         });
 
@@ -301,27 +288,29 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ori
             <>
                 <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
                 <div className="flex gap-2">
-                    <select
-                        className="max-w-md w-full flex-1 border p-2 rounded"
-                        value={seleccion}
-                        onChange={(e) => {
-                            const selectedValue = e.target.value;
-                            const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
-                            if (selectedOp) {
-                                incorporarIndicadorResultado(selectedOp);
-                            }
-                            setSeleccion('');
-                        }}
-                    >
-                        <option value="" disabled>
-                            {t('seleccionaopcion')}
-                        </option>
-                        {opcionesFiltradas.map((op) => (
-                            <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
-                                {i18n.language === 'eu' ? op.NameEu : op.NameEs}
+                    {opcionesFiltradas.length > 0 && (
+                        <select
+                            className="flex-1 border p-2 rounded"
+                            value={seleccion}
+                            onChange={(e) => {
+                                const selectedValue = e.target.value;
+                                const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
+                                if (selectedOp) {
+                                    incorporarIndicadorResultado(selectedOp);
+                                }
+                                setSeleccion('');
+                            }}
+                        >
+                            <option value="" disabled>
+                                {t('seleccionaopcion')}
                             </option>
-                        ))}
-                    </select>
+                            {opcionesFiltradas.map((op) => (
+                                <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
+                                    {i18n.language === 'eu' ? op.NameEu : op.NameEs}
+                                </option>
+                            ))}
+                        </select>
+                    )}
 
                     <button
                         className="bg-blue-500 text-white px-3 py-2 rounded"
@@ -760,13 +749,61 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
 
     const editarIndicadorResultados = (indicadorActualizado: IndicadorResultado) => {
         if (indicadorActualizado.RegionsId) {
-            setIndicadoresResultadoADR((prev) => prev.map((ind) => (ind.RegionsId === `${indicadorActualizado.RegionsId}` && ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
+            setListaResultado((prev) => prev.map((ind) => (ind.RegionsId === `${indicadorActualizado.RegionsId}` && ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
         } else {
-            setIndicadoresResultadoADR((prev) => prev.map((ind) => (ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
+            setListaResultado((prev) => prev.map((ind) => (ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
+        }
+        const nuevaListaRealizacion = listaRealizacion.map((indicadorRealizado) => {
+            if (indicadorRealizado.RegionsId === indicadorActualizado.RegionsId) {
+                const nuevosResultados =
+                    indicadorRealizado.Resultados?.map((indicadorResultado) => {
+                        if (indicadorResultado.Id === indicadorActualizado.Id) {
+                            // Sustituye por el actualizado
+                            return { ...indicadorActualizado };
+                        }
+                        return indicadorResultado;
+                    }) || [];
+                return {
+                    ...indicadorRealizado,
+                    Resultados: nuevosResultados,
+                };
+            }
+            return indicadorRealizado;
+        });
+        setListaRealizacion(nuevaListaRealizacion);
+    };
+
+    const actualizarBorradoIndicadorRealizacion = (indicadorActualizado: IndicadorRealizacion) => {
+        const datosIndicadorRealizacionAnterior = indicadoresRealizacion.find((ind) => ind.Id === indicadorActualizado.Id);
+        if (!datosIndicadorRealizacionAnterior) return;
+
+        const resultadosAnteriores = datosIndicadorRealizacionAnterior.Resultados ?? [];
+        const resultadosActualizados = indicadorActualizado.Resultados ?? [];
+
+        const idsAnteriores = new Set(resultadosAnteriores.map((r) => r.Id));
+        const idsActualizados = new Set(resultadosActualizados.map((r) => r.Id));
+
+        const resultadosEliminados = [...idsAnteriores].filter((id) => !idsActualizados.has(id));
+
+        if (resultadosEliminados.length === 0) return;
+
+        const idsAEliminarDefinitivos: number[] = [];
+
+        for (const idEliminado of resultadosEliminados) {
+            const apareceEnOtroIndicador = indicadoresRealizacion.some((indicador) => indicador.Id !== indicadorActualizado.Id && indicador.Resultados?.some((r) => r.Id === idEliminado));
+
+            if (!apareceEnOtroIndicador) {
+                idsAEliminarDefinitivos.push(idEliminado);
+            }
+        }
+
+        if (idsAEliminarDefinitivos.length > 0) {
+            setIndicadoresResultadoADR((prev) => prev.filter((r) => !idsAEliminarDefinitivos.includes(r.Id)));
         }
     };
 
     const actualizarIndicadorResultados = (indicadorActualizado: IndicadorRealizacion) => {
+        actualizarBorradoIndicadorRealizacion(indicadorActualizado);
         if (esADR) {
             setIndicadoresRealizacionADR((prev) => prev.map((ind) => (ind.RegionsId === `${regionSeleccionada}` && ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
         } else {

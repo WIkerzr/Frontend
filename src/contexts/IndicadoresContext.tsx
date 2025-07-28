@@ -150,7 +150,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setLoading(true);
             const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
             const storedResultado = localStorage.getItem('indicadoresResultado');
-            if (storedRealizacion && storedResultado) {
+            if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]') {
                 const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
                 setIndicadoresRealizacion(indicadoresRealizacion);
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
