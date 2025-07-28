@@ -12,7 +12,7 @@ export interface GetRegionesResponse {
     data: Region[];
 }
 
-export async function GetRegiones(): Promise<Region[]> {
+export async function getRegiones(): Promise<Region[]> {
     const response = await api.get<GetRegionesResponse>('/regions');
     if (!response.data.success) {
         throw new Error('Error al obtener regiones' + response.data.message);

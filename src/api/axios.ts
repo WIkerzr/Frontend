@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: 'https://localhost:44300/api',
 });
 
 api.interceptors.request.use(
@@ -29,13 +29,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const is401 = error.response?.status === 401;
+        const isInLoginPage = window.location.pathname === '/Authenticacion/Login';
+
+        if (is401 && !isInLoginPage) {
             localStorage.removeItem('token');
-            window.location.href = '/login'; // Redirige al login
+
+            setTimeout(() => {
+                window.location.href = '/Authenticacion/Login';
+            }, 1500);
         }
 
         return Promise.reject(error);
     }
 );
-
 export default api;

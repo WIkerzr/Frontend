@@ -125,7 +125,7 @@ const Sidebar = () => {
                                             <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('configuracion')}</span>
                                         </div>
 
-                                        <div className={currentMenu !== 'auth' ? 'rtl:rotate-90 -rotate-90' : ''}>
+                                        <div className={`m-auto transition-transform duration-300 ${currentMenu ? 'rotate-0' : '-rotate-90'}`}>
                                             <IconCaretDown />
                                         </div>
                                     </button>

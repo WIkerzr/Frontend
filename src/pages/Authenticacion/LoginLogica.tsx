@@ -86,7 +86,9 @@ const useLogin = () => {
             localStorage.setItem('token', token);
             sessionStorage.setItem('token', token);
 
-            navigate('/');
+            setTimeout(() => {
+                navigate('/');
+            }, 200);
         } catch (err) {
             if (err instanceof Error) {
                 setError(t('error:errorNoSePudoConectarServidor'));
