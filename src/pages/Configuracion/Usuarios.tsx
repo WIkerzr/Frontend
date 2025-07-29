@@ -59,7 +59,8 @@ const Index = () => {
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
                     const usuariosConRegion = data.map((user: UserRegionId) => {
-                        const region = regiones.find((r) => r.RegionId === user.RegionId);
+                        const region = regiones.find((r) => `${r.RegionId}` === `${user.RegionId}`.padStart(2, '0'));
+
                         return {
                             ...user,
                             RegionName: region ? region.NameEs : '-',
