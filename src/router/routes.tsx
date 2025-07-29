@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
 import NotFound from './NotFound';
+import { Fases } from '../components/Utils/gets/controlDev';
 const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
 const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
@@ -16,38 +17,28 @@ const GestionEnvio = lazy(() => import('../pages/ADR/Plan/GestionEnvio'));
 const Servicios = lazy(() => import('../pages/ADR/Servicios'));
 const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
 const Profile = lazy(() => import('../pages/profile/profile'));
-
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Usuarios'));
 
-const routes = [
+const paginaPorDefectoPorFases = {
+    1: <Usuarios />,
+    2: <IndicadoresADR />,
+    3: <Acciones />,
+    4: <AccionesAccesorias />,
+    5: <PlanesGestion />,
+    6: <IndicadoresInpacto />,
+};
+const HomeComponent = paginaPorDefectoPorFases[Fases] || <CuadroMando />;
+
+const fase1 = [
     {
-        path: '/',
+        path: '/profile',
         element: (
             <OnlyIfLoggedIn>
-                <CuadroMando />
+                <Profile />
             </OnlyIfLoggedIn>
         ),
-        errorElement: <NotFound />,
-        layout: 'default',
-    },
-    {
-        path: '/configuracion/CuadroMando',
-        element: (
-            <OnlyIfLoggedIn>
-                <CuadroMando />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'CuadroMando',
-    },
-    {
-        path: '/configuracion/indicadores',
-        element: (
-            <OnlyIfLoggedIn>
-                <Indicadores />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'indicadores',
+        layout: 'Profile',
     },
     {
         path: '/configuracion/usuarios',
@@ -58,41 +49,16 @@ const routes = [
         ),
         layout: 'Usuarios',
     },
+];
+const fase2 = [
     {
-        path: '/configuracion/indicadoresInpacto',
+        path: '/configuracion/indicadores',
         element: (
             <OnlyIfLoggedIn>
-                <IndicadoresInpacto />
+                <Indicadores />
             </OnlyIfLoggedIn>
         ),
-        layout: 'IndicadoresInpacto',
-    },
-    {
-        path: '/configuracion/indicadoresADR',
-        element: (
-            <OnlyIfLoggedIn>
-                <IndicadoresADR />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'IndicadoresADR',
-    },
-    {
-        path: '/configuracion/PCDR',
-        element: (
-            <OnlyIfLoggedIn>
-                <PCDR />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'PCDR',
-    },
-    {
-        path: '/configuracion/informes',
-        element: (
-            <OnlyIfLoggedIn>
-                <Informes />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'Informes',
+        layout: 'indicadores',
     },
     {
         path: '/adr/Ejes',
@@ -103,6 +69,17 @@ const routes = [
         ),
         layout: 'Ejes',
     },
+    {
+        path: '/configuracion/indicadoresADR',
+        element: (
+            <OnlyIfLoggedIn>
+                <IndicadoresADR />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'IndicadoresADR',
+    },
+];
+const fase3 = [
     {
         path: '/adr/acciones',
         element: (
@@ -121,6 +98,8 @@ const routes = [
         ),
         layout: 'EditarAccion',
     },
+];
+const fase4 = [
     {
         path: '/adr/accionesYproyectos',
         element: (
@@ -156,6 +135,17 @@ const routes = [
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarServicios',
+    },
+];
+const fase5 = [
+    {
+        path: '/configuracion/CuadroMando',
+        element: (
+            <OnlyIfLoggedIn>
+                <CuadroMando />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'CuadroMando',
     },
     {
         path: '/adr/planesGestion',
@@ -194,6 +184,46 @@ const routes = [
         ),
         layout: 'memoriasAnuales/GestionEnvio',
     },
+];
+const fase6 = [
+    {
+        path: '/configuracion/indicadoresInpacto',
+        element: (
+            <OnlyIfLoggedIn>
+                <IndicadoresInpacto />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'IndicadoresInpacto',
+    },
+
+    {
+        path: '/configuracion/PCDR',
+        element: (
+            <OnlyIfLoggedIn>
+                <PCDR />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'PCDR',
+    },
+    {
+        path: '/configuracion/informes',
+        element: (
+            <OnlyIfLoggedIn>
+                <Informes />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'Informes',
+    },
+];
+
+const inicial = [
+    {
+        path: '/',
+        element: <OnlyIfLoggedIn>{HomeComponent}</OnlyIfLoggedIn>,
+        errorElement: <NotFound />,
+        layout: 'default',
+    },
+
     {
         path: '/Authenticacion/Login',
         element: (
@@ -203,15 +233,10 @@ const routes = [
         ),
         layout: 'blank',
     },
-    {
-        path: '/profile',
-        element: (
-            <OnlyIfLoggedIn>
-                <Profile />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'Profile',
-    },
 ];
+const todasLasFases = [fase1, fase2, fase3, fase4, fase5, fase6];
+const fasesActivas = todasLasFases.slice(0, Fases);
+const rutasDeFases = fasesActivas.flat();
+const routes = [...inicial, ...rutasDeFases];
 
 export { routes };
