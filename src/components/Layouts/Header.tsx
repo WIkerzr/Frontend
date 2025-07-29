@@ -12,6 +12,7 @@ import LogoutItem from '../../pages/Authenticacion/logout';
 import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { Fases } from '../Utils/gets/controlDev';
 
 const Header = () => {
     const { setRegionSeleccionada } = useRegionContext();
@@ -49,13 +50,14 @@ const Header = () => {
                     </div>
 
                     {role.toUpperCase() != 'ADR' ? (
-                        <div>
-                            <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <RegionSelect header={true} />
+                        Fases >= 2 && (
+                            <div>
+                                <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                    <RegionSelect header={true} />
+                                </div>
                             </div>
-                        </div>
+                        )
                     ) : (
-                        // <div>{region ? region.NameEs : t('noComarcaSeleccionada')}</div>
                         <div>
                             <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
                                 <RegionSelect header={true} disabled />
@@ -68,68 +70,6 @@ const Header = () => {
                             <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/meneko.png" alt="logo" />
                             <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
                         </div>
-                        {/* Borrar selector rol temporal */}
-                        {/* <div>
-                            <select
-                                value={role}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    let datos;
-                                    switch (value) {
-                                        case 'adr':
-                                            datos = { email: 'test@adr.com', name: 'Jon', role: 'ADR' as UserRole };
-                                            break;
-                                        case 'hazi':
-                                            datos = { email: 'test@hazi.com', name: 'Jon', role: 'HAZI' as UserRole };
-                                            break;
-                                        case 'gobiernoVasco':
-                                            datos = { email: 'test@gv.com', name: 'Jon', role: 'GV' as UserRole };
-                                            break;
-                                        default:
-                                            datos = { email: '', name: '', role: '' as UserRole };
-                                    }
-
-                                    localStorage.setItem('user', JSON.stringify(datos));
-                                    setUser(datos);
-                                }}
-                                className="form-select text-white-dark"
-                                style={{ minWidth: '100px', backgroundColor: '#fff3cd', borderRadius: '8px', border: '1px solid #ffeeba' }}
-                            >
-                                <option value="adr">ADR</option>
-                                <option value="hazi">HAZI</option>
-                                <option value="gobiernoVasco">GOBIERNO</option>
-                            </select>
-                        </div> */}
-                        {/* <div>
-                            {themeConfig.theme === 'light' ? (
-                                <button
-                                    className={`${
-                                        themeConfig.theme === 'light' &&
-                                        'flex items-center p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60'
-                                    }`}
-                                    onClick={() => {
-                                        dispatch(toggleTheme('dark'));
-                                    }}
-                                >
-                                    <IconSun />
-                                </button>
-                            ) : (
-                                ''
-                            )}
-                            {themeConfig.theme === 'dark' && (
-                                <button
-                                    className={`${
-                                        themeConfig.theme === 'dark' &&
-                                        'flex items-center p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60'
-                                    }`}
-                                    onClick={() => {
-                                        dispatch(toggleTheme('light'));
-                                    }}
-                                >
-                                    <IconMoon />
-                                </button>
-                            )}
-                        </div> */}
                         <div>
                             <LanguageSelector />
                         </div>

@@ -24,6 +24,7 @@ import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
+import { Fases } from '../Utils/gets/controlDev';
 
 const Sidebar = () => {
     const { anio, setEstados, setAnio } = useEstadosPorAnio();
@@ -133,37 +134,44 @@ const Sidebar = () => {
                                         <ul className="sub-menu text-gray-500 text">
                                             {role === 'HAZI' && (
                                                 <>
-                                                    <li>
-                                                        <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
-                                                    </li>
+                                                    {Fases >= 2 && (
+                                                        <li>
+                                                            <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                                                        </li>
+                                                    )}
                                                     <li>
                                                         <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
                                                     </li>
                                                 </>
                                             )}
-
-                                            <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
-                                            <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
-                                            <SideBarList texto={t('indicadores') + ' ADR'} link="/configuracion/indicadoresADR" src={IconMenuConfiguracion} role={role} />
-                                            <li>
-                                                <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
-                                            </li>
-                                            <li>
-                                                <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
-                                            </li>
+                                            {Fases >= 5 && <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />}
+                                            {Fases >= 6 && <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />}
+                                            {Fases >= 2 && <SideBarList texto={t('indicadores') + ' ADR'} link="/configuracion/indicadoresADR" src={IconMenuConfiguracion} role={role} />}
+                                            {Fases >= 6 && (
+                                                <>
+                                                    <li>
+                                                        <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
+                                                    </li>
+                                                    <li>
+                                                        <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
+                                                    </li>
+                                                </>
+                                            )}
                                         </ul>
                                     </AnimateHeight>
                                 </li>
                             )}
-                            <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1 justify-center">
-                                <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={handleChange}>
-                                    {anios.map((a) => (
-                                        <option key={a} value={a}>
-                                            {a}
-                                        </option>
-                                    ))}
-                                </select>
-                            </h2>
+                            {Fases >= 2 && (
+                                <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1 justify-center">
+                                    <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={handleChange}>
+                                        {anios.map((a) => (
+                                            <option key={a} value={a}>
+                                                {a}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </h2>
+                            )}
                             <div
                                 style={{
                                     opacity: regionSeleccionada ? 1 : 0.5,
@@ -174,40 +182,50 @@ const Sidebar = () => {
                             >
                                 <li className="nav-item">
                                     <ul>
-                                        <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />
-                                        <SideBarList
-                                            texto={t('AccionesPCDR')}
-                                            link="/adr/acciones"
-                                            src={IconAcciones}
-                                            role={role}
-                                            disabled={!(yearData.plan.ejesPrioritarios.length > 0 && yearData.plan.ejesPrioritarios.length <= 3)}
-                                        />
-                                        <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} />
-                                        <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
-                                        <li className="nav-item">
-                                            <NavLink to="/adr/planesGestion" className="group">
-                                                <div className="flex items-center">
-                                                    <TabCard
-                                                        icon={IconPlan}
-                                                        label="PlanGestion"
-                                                        status={yearData.plan.status}
-                                                        className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
-                                                    />
-                                                </div>
-                                            </NavLink>
-                                        </li>
-                                        <li className="nav-item">
-                                            <NavLink to="/adr/memoriasAnuales" className="group">
-                                                <div className="flex items-center">
-                                                    <TabCard
-                                                        icon={IconMemoria}
-                                                        label="memoriasAnuales"
-                                                        status={yearData.memoria.status}
-                                                        className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
-                                                    />
-                                                </div>
-                                            </NavLink>
-                                        </li>
+                                        {Fases >= 2 && <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />}
+                                        {Fases >= 3 && (
+                                            <SideBarList
+                                                texto={t('AccionesPCDR')}
+                                                link="/adr/acciones"
+                                                src={IconAcciones}
+                                                role={role}
+                                                disabled={!(yearData.plan.ejesPrioritarios.length > 0 && yearData.plan.ejesPrioritarios.length <= 3)}
+                                            />
+                                        )}
+                                        {Fases >= 4 && (
+                                            <>
+                                                <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} />
+                                                <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
+                                            </>
+                                        )}
+                                        {Fases >= 5 && (
+                                            <>
+                                                <li className="nav-item">
+                                                    <NavLink to="/adr/planesGestion" className="group">
+                                                        <div className="flex items-center">
+                                                            <TabCard
+                                                                icon={IconPlan}
+                                                                label="PlanGestion"
+                                                                status={yearData.plan.status}
+                                                                className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                                            />
+                                                        </div>
+                                                    </NavLink>
+                                                </li>
+                                                <li className="nav-item">
+                                                    <NavLink to="/adr/memoriasAnuales" className="group">
+                                                        <div className="flex items-center">
+                                                            <TabCard
+                                                                icon={IconMemoria}
+                                                                label="memoriasAnuales"
+                                                                status={yearData.memoria.status}
+                                                                className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                                            />
+                                                        </div>
+                                                    </NavLink>
+                                                </li>
+                                            </>
+                                        )}
                                     </ul>
                                 </li>
                             </div>
