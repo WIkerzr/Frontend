@@ -3,6 +3,7 @@ import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
 import UserDataForm from './userDateForm';
 import { UserID } from '../../types/users';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 
 const UserDateFormLogic: React.FC = () => {
     const getInitialUserData = (): UserID => {
@@ -64,7 +65,7 @@ const UserDateFormLogic: React.FC = () => {
         const token = sessionStorage.getItem('token');
 
         try {
-            const response = await fetch('https://localhost:44300/api/user', {
+            const response = await fetch(`${ApiTarget}/user`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

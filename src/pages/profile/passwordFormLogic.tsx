@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
 import PasswordForm from './passwordForm';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 
 const PasswordFormLogic = () => {
     const [passwordData, setPasswordData] = useState({
@@ -46,7 +47,7 @@ const PasswordFormLogic = () => {
             }
             if (!savedUser) throw new Error(t('usuarioNoAutenticado'));
 
-            const response = await fetch('https://localhost:44300/api/user/changePassword', {
+            const response = await fetch(`${ApiTarget}/changePassword`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

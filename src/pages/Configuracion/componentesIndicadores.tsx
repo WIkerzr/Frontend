@@ -11,6 +11,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 import React from 'react';
 import { Region } from '../../components/Utils/gets/getRegiones';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -506,7 +507,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
                 RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
             })),
         };
-        const response = await fetch('https://localhost:44300/api/nuevoIndicadores', {
+        const response = await fetch(`${ApiTarget}/nuevoIndicadores`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -557,7 +558,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
 
     const handleEditarIndicadorRealizacion = async () => {
         const token = sessionStorage.getItem('token');
-        const response = await fetch('https://localhost:44300/api/editarIndicadorRealizacion', {
+        const response = await fetch(`${ApiTarget}/editarIndicadorRealizacion`, {
             method: 'PUT',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -575,7 +576,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
 
     const handleEditarIndicadorResultado = async () => {
         const token = sessionStorage.getItem('token');
-        const response = await fetch('https://localhost:44300/api/editarIndicadorResultado', {
+        const response = await fetch(`${ApiTarget}/editarIndicadorResultado`, {
             method: 'PUT',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -829,38 +830,40 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
         }
         const idsParaEliminar = idsEliminados.filter((id) => !resultadosNoRelacionados.has(id));
 
-        if (idsParaEliminar.length > 0) {
-            setListaResultado((prev) => {
-                const filtrados = prev.filter((resultado) => !idsParaEliminar.includes(resultado.Id));
-                return filtrados;
-            });
-        }
+        console.log(idsParaEliminar);
 
-        const idsAgregados = Array.from(idsActualizados).filter((id) => !idsPreEditados.includes(id));
-        const idsExistentes = new Set(listaResultado.map((r) => r.Id));
-        const nuevosResultados = indicadorActualizado.Resultados?.filter((r) => idsAgregados.includes(r.Id) && !idsExistentes.has(r.Id)) || [];
-        if (nuevosResultados.length > 0) {
-            setListaResultado((prev) => [...prev, ...nuevosResultados]);
-        }
-        setListaResultado((prev) =>
-            prev.map((resultadoExistente) => {
-                const actualizado = indicadorActualizado.Resultados?.find((r) => r.Id === resultadoExistente.Id);
-                if (actualizado) {
-                    const cambiado =
-                        resultadoExistente.NameEs !== actualizado.NameEs ||
-                        resultadoExistente.NameEu !== actualizado.NameEu ||
-                        resultadoExistente.Description !== actualizado.Description ||
-                        resultadoExistente.DisaggregationVariables !== actualizado.DisaggregationVariables ||
-                        resultadoExistente.CalculationMethodology !== actualizado.CalculationMethodology ||
-                        resultadoExistente.RelatedAxes !== actualizado.RelatedAxes;
+        // if (idsParaEliminar.length > 0) {
+        //     setListaResultado((prev) => {
+        //         const filtrados = prev.filter((resultado) => !idsParaEliminar.includes(resultado.Id));
+        //         return filtrados;
+        //     });
+        // }
 
-                    if (cambiado) {
-                        return { ...resultadoExistente, ...actualizado };
-                    }
-                }
-                return resultadoExistente;
-            })
-        );
+        // const idsAgregados = Array.from(idsActualizados).filter((id) => !idsPreEditados.includes(id));
+        // const idsExistentes = new Set(listaResultado.map((r) => r.Id));
+        // const nuevosResultados = indicadorActualizado.Resultados?.filter((r) => idsAgregados.includes(r.Id) && !idsExistentes.has(r.Id)) || [];
+        // if (nuevosResultados.length > 0) {
+        //     setListaResultado((prev) => [...prev, ...nuevosResultados]);
+        // }
+        // setListaResultado((prev) =>
+        //     prev.map((resultadoExistente) => {
+        //         const actualizado = indicadorActualizado.Resultados?.find((r) => r.Id === resultadoExistente.Id);
+        //         if (actualizado) {
+        //             const cambiado =
+        //                 resultadoExistente.NameEs !== actualizado.NameEs ||
+        //                 resultadoExistente.NameEu !== actualizado.NameEu ||
+        //                 resultadoExistente.Description !== actualizado.Description ||
+        //                 resultadoExistente.DisaggregationVariables !== actualizado.DisaggregationVariables ||
+        //                 resultadoExistente.CalculationMethodology !== actualizado.CalculationMethodology ||
+        //                 resultadoExistente.RelatedAxes !== actualizado.RelatedAxes;
+
+        //             if (cambiado) {
+        //                 return { ...resultadoExistente, ...actualizado };
+        //             }
+        //         }
+        //         return resultadoExistente;
+        //     })
+        // );
     };
 
     const actualizarEliminarIndicadorRealizacion = (indicadorRealizacionSeleccionado: IndicadorRealizacion) => {
@@ -882,7 +885,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiRealizacionAEliminar.NameEu : indiRealizacionAEliminar.NameEs }));
         if (!confirmDelete) return;
         try {
-            const response = await fetch(`https://localhost:44300/api/eliminarIndicadorRealizacion/${indiRealizacionAEliminar.Id}`, {
+            const response = await fetch(`${ApiTarget}/${indiRealizacionAEliminar.Id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -925,7 +928,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiResultadoAEliminar.NameEu : indiResultadoAEliminar.NameEs }));
         if (!confirmDelete) return;
         try {
-            const response = await fetch(`https://localhost:44300/api/eliminarIndicadorResultado/${indiResultadoAEliminar.Id}`, {
+            const response = await fetch(`${ApiTarget}/${indiResultadoAEliminar.Id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -1134,7 +1137,7 @@ type PropsLlamadaIndicadores = {
 export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRealizacion, setIndicadoresResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
     const token = localStorage.getItem('token');
     try {
-        const res = await fetch('https://localhost:44300/api/indicadores', {
+        const res = await fetch(`${ApiTarget}/indicadores`, {
             headers: {
                 Authorization: `Bearer ` + token,
                 'Content-Type': 'application/json',

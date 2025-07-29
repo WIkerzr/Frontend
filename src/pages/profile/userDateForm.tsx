@@ -113,7 +113,6 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                     ) : (
                         <></>
                     )}
-                    .
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (

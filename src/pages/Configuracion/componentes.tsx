@@ -19,6 +19,7 @@ import { useUsers } from './Usuarios';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { NewModal } from '../../components/Utils/utils';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 
 export const newUser: UserID = {
     name: '',
@@ -176,7 +177,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             setIsLoading('loading');
             if (accion === 'editar') {
                 if ('id' in UserData) {
-                    response = await fetch('https://localhost:44300/api/user', {
+                    response = await fetch(`${ApiTarget}/user`, {
                         method: 'PUT',
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -205,7 +206,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     }
                 }
             } else if (accion === 'nuevo') {
-                response = await fetch('https://localhost:44300/api/newUser', {
+                response = await fetch(`${ApiTarget}/newUser`, {
                     method: 'PUT',
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -307,7 +308,7 @@ export const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, 
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch('https://localhost:44300/api/deleteUser', {
+            const response = await fetch(`${ApiTarget}/deleteUser`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -363,7 +364,7 @@ export const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess }) 
             id: value.id,
         };
         try {
-            await fetch('https://localhost:44300/api/user', {
+            await fetch(`${ApiTarget}/user`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

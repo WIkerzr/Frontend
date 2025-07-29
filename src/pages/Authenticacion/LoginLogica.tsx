@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { UserID, UserRole } from '../../types/users';
 import { useTranslation } from 'react-i18next';
+import { ApiTargetToken } from '../../components/Utils/gets/controlDev';
 
 const useLogin = () => {
     const { t } = useTranslation();
@@ -23,7 +24,7 @@ const useLogin = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('https://localhost:44300/token', {
+            const response = await fetch(ApiTargetToken, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({

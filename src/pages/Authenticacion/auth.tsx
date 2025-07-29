@@ -1,10 +1,12 @@
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
+
 type LoginData = {
     userName: string;
     password: string;
     useRefreshTokens?: boolean;
 };
 
-const serviceBase = 'https://localhost:44300/';
+const serviceBase = ApiTarget;
 
 export async function authlogin(loginData: LoginData): Promise<unknown> {
     const params = new URLSearchParams();

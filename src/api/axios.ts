@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { ApiTarget } from '../components/Utils/gets/controlDev';
 
 const api = axios.create({
-    baseURL: 'https://localhost:44300/api',
+    baseURL: ApiTarget,
 });
 
 api.interceptors.request.use(

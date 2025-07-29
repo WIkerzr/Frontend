@@ -5,6 +5,7 @@ import { UserID, UserRegionId } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 
 export const useUsers = (onChange?: (users: UserID[]) => void) => {
     const [users, setUsers] = useState<UserID[]>(() => {
@@ -49,7 +50,7 @@ const Index = () => {
             setLoading(true);
             const fetchUsers = async () => {
                 try {
-                    const res = await fetch('https://localhost:44300/api/users', {
+                    const res = await fetch(`${ApiTarget}/users`, {
                         headers: {
                             Authorization: `Bearer ` + token,
                             'Content-Type': 'application/json',
