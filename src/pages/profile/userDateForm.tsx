@@ -98,8 +98,13 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 className="form-select min-w-max w-full"
                                 style={{ minWidth: 'calc(100% + 10px)' }}
                                 value={i18n.language === 'eu' ? regionSeleccionada?.NameEu : regionSeleccionada?.NameEs}
+                                name="RegionName"
                                 onChange={(e) => {
+                                    console.log('e.target.name');
+                                    console.log(e.target.name);
+
                                     setRegionSeleccionada(regiones.find((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs) === e.target.value)!);
+                                    onChange(e);
                                 }}
                             >
                                 <option value="notSelect">{t('sinSeleccionar')}</option>
