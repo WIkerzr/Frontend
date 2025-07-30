@@ -12,6 +12,7 @@ import { useUsers } from './Usuarios';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { gestionarErrorServidor } from '../../components/Utils/utils';
 
 export const newUser: UserID = {
     name: '',
@@ -151,7 +152,9 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
         setTimeout(() => {
             setTimeout(() => {
                 setSuccessMessage(null);
-                onClose();
+                if (!(errorMessage && errorMessage.length > 3)) {
+                    onClose();
+                }
                 setFadeOut(false);
                 setIsLoading('idle');
             }, 1000);
@@ -187,6 +190,11 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                             status: UserData.status,
                         }),
                     });
+                    if (response && !response.ok) {
+                        const errorInfo = gestionarErrorServidor(response);
+                        setErrorMessage(errorInfo.mensaje);
+                        return;
+                    }
                     if (response.ok) {
                         const data = await response.json();
                         const region = regiones.find((r) => r.RegionId === data.data.RegionId);
@@ -218,6 +226,11 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     }),
                 });
                 const data = await response.json();
+                if (response && !response.ok) {
+                    const errorInfo = gestionarErrorServidor(response);
+                    setErrorMessage(errorInfo.mensaje);
+                    return;
+                }
                 if (response.ok) {
                     agregarUsuario(data.data);
                 }
@@ -225,7 +238,9 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
 
             if (response && !response.ok) {
                 setIsLoading('error');
-                throw new Error(t('errorEnviarServidor'));
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             } else {
                 setSuccessMessage(t('CambiosGuardados'));
                 setIsLoading('success');
@@ -245,7 +260,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
     }
     return (
         <>
-            <LoadingOverlay isLoading={isLoading} message={mensajeAMostrar} onComplete={() => handleCloseModal()} />
+            <LoadingOverlay isLoading={isLoading} message={mensajeAMostrar} onComplete={handleCloseModal} />
             <UserDataForm
                 onSubmit={handleSubmitUser}
                 userData={UserData}

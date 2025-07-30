@@ -155,7 +155,7 @@ const PasswordFormLogic: React.FC<LoginProps> = ({ code }) => {
         <>
             {successMessage && code ? (
                 <>
-                    <Aviso textoAviso={successMessage} tipoAviso="succes" />
+                    <Aviso textoAviso={successMessage} tipoAviso="success" />
                     <Aviso textoAviso={t('seProcederaACerrarLaPestana')} />
                 </>
             ) : (

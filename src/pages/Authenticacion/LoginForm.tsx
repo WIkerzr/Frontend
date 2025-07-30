@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { gestionarErrorServidor } from '../../components/Utils/utils';
 
 interface LoginFormProps {
     email: string;
@@ -32,8 +33,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                     body: JSON.stringify({ email }),
                 });
 
-                if (!response.ok) {
-                    throw new Error(t('errorEnviarServidor'));
+                if (response && !response.ok) {
+                    const errorInfo = gestionarErrorServidor(response);
+                    setErrorMessage(errorInfo.mensaje);
+                    return;
                 }
 
                 setErrorMessage(null);

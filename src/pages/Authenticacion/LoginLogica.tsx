@@ -84,7 +84,6 @@ const useLogin = () => {
             };
             dispatch(setAuthUser({ user: authUser, token }));
 
-            localStorage.setItem('token', token);
             sessionStorage.setItem('token', token);
 
             setTimeout(() => {

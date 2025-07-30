@@ -12,8 +12,8 @@ interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
     userData: UserID | User;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-    errorMessage: string | null;
-    successMessage: string | null;
+    errorMessage?: string | null;
+    successMessage?: string | null;
     fadeOut: boolean;
     roleDisabled?: boolean;
     isNewUser?: boolean;
@@ -52,9 +52,9 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
     }, [regionSeleccionada]);
 
     useEffect(() => {
-        const todosLosCamposRellenosUserModal = Object.entries(userData).every(([key, value]) => {
+        const todosLosCamposRellenosUserModal = Object.entries(datosUsuario).every(([key, value]) => {
             if (key === 'ambit') {
-                if (userData.role !== 'ADR') {
+                if (datosUsuario.role !== 'ADR') {
                     return true;
                 }
                 return typeof value === 'string' ? value.trim() !== '' : value !== null && value !== undefined;
@@ -68,7 +68,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
         });
 
         setConditional(todosLosCamposRellenosUserModal);
-    }, [userData, regionSeleccionada]);
+    }, [datosUsuario, regionSeleccionada]);
 
     return (
         <div>
@@ -111,8 +111,18 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 value={i18n.language === 'eu' ? regionSeleccionada?.NameEu : regionSeleccionada?.NameEs}
                                 name="RegionName"
                                 onChange={(e) => {
-                                    setRegionSeleccionada(regiones.find((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs) === e.target.value)!);
-                                    onChange(e);
+                                    const regionIdSeleccionado = e.target.value;
+                                    const region = regiones.find((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs) === regionIdSeleccionado);
+                                    setRegionSeleccionada(region!);
+
+                                    const evento = {
+                                        target: {
+                                            name: 'ambit',
+                                            value: region?.RegionId,
+                                        },
+                                    };
+
+                                    onChange(evento as unknown as React.ChangeEvent<HTMLInputElement>);
                                 }}
                             >
                                 <option value="notSelect">{t('sinSeleccionar')}</option>

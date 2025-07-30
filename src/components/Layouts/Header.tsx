@@ -49,21 +49,20 @@ const Header = () => {
                         </button>
                     </div>
 
-                    {role.toUpperCase() != 'ADR' ? (
-                        Fases >= 2 && (
+                    {Fases >= 2 &&
+                        (role.toUpperCase() != 'ADR' ? (
                             <div>
                                 <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
                                     <RegionSelect header={true} />
                                 </div>
                             </div>
-                        )
-                    ) : (
-                        <div>
-                            <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                <RegionSelect header={true} disabled />
+                        ) : (
+                            <div>
+                                <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                    <RegionSelect header={true} disabled />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
 
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <div className="flex justify-end w-full overflow-hidden">

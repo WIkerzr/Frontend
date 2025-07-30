@@ -12,7 +12,7 @@ import React from 'react';
 import { Region } from '../../components/Utils/gets/getRegiones';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { formateaConCeroDelante } from '../../components/Utils/utils';
+import { Aviso, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -432,6 +432,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
     const location = useLocation();
     const esADR = location.pathname?.includes('ADR');
     const esNuevo = accion === 'Nuevo';
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const indicadorInicialConRegionsId: IndicadorRealizacion = {
         ...indicadorInicial,
@@ -517,6 +518,11 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
             },
             body: JSON.stringify(esADR ? datosRealizacion : descripcionEditable),
         });
+        if (response && !response.ok) {
+            const errorInfo = gestionarErrorServidor(response);
+            setErrorMessage(errorInfo.mensaje);
+            return;
+        }
         if (response.ok) {
             const indicadorNuevo = await response.json();
 
@@ -568,7 +574,11 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
             },
             body: JSON.stringify(descripcionEditable),
         });
-
+        if (response && !response.ok) {
+            const errorInfo = gestionarErrorServidor(response);
+            setErrorMessage(errorInfo.mensaje);
+            return;
+        }
         if (response.ok) {
             const indicadoreditado = await response.json();
             validadorRespuestasBBDD(response, indicadoreditado);
@@ -685,6 +695,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
                             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
                         >
                             {t('guardar')}
+                            {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" icon={false} />}
                         </button>
 
                         {mensaje && <p className="text-sm text-center mt-2">{mensaje}</p>}
@@ -978,7 +989,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
         <>
             {listaRealizacion && listaRealizacion.length > 0 && (
                 <div className={`h-full panel w-1/2}`}>
-                    {errorMessage && <span className="text-red-500 text-sm mt-2">{errorMessage}</span>}
+                    {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" icon={false} />}
                     {successMessage && (
                         <div className={`mt-4 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
                             <p className="text-green-500">{successMessage}</p>
@@ -1136,7 +1147,7 @@ type PropsLlamadaIndicadores = {
     t: (clave: string) => string;
 };
 export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRealizacion, setIndicadoresResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     try {
         const res = await fetch(`${ApiTarget}/indicadores`, {
             headers: {

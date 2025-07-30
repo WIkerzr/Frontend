@@ -46,7 +46,7 @@ const Index = () => {
         const storedUsers = localStorage.getItem('users');
 
         if (!storedUsers) {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             setLoading(true);
             const fetchUsers = async () => {
                 try {
@@ -57,7 +57,7 @@ const Index = () => {
                         },
                     });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios'));
+                    if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios') + `: ${data.Message}`);
                     const usuariosConRegion = data.map((user: UserRegionId) => {
                         const region = regiones.find((r) => `${r.RegionId}` === `${user.RegionId}`.padStart(2, '0'));
 

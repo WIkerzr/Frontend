@@ -6,8 +6,17 @@
 
 
         "errorFaltEjesPrioritarios":"Faltan por seleccionar los ejes prioritarios, redirigiendo...",
-        "errorNoSePudoConectarServidor":"No se pudo conectar con el servidor. Inténtelo más tarde",
+        "localStorageNotFound":"Error al leer usuario de localStorage",
 
-        "localStorageNotFound":"Error al leer usuario de localStorage"
-
+        "errorPeticionIncorrecta": "Petición incorrecta. Revisa los datos enviados.",
+        "errorNoAutorizado": "No autorizado. Tu sesión ha expirado o no tienes permisos. Por favor, inicia sesión de nuevo.",
+        "errorAccesoDenegado": "Acceso denegado. No tienes permisos para esta acción.",
+        "errorNoEncontrado": "Recurso no encontrado.",
+        "errorConflicto": "Conflicto. Es posible que ya exista un dato similar.",
+        "errorDatosInvalidos": "Datos no válidos. Revisa los campos del formulario.",
+        "errorInternoServidor": "Error interno del servidor. Intenta más tarde.",
+        "errorDesconocidoConCodigo": "Error desconocido ({{codigo}}).",
+        "errorNoSePudoConectarServidor": "No se pudo conectar con el servidor. Inténtelo más tarde.",
+        "errorGenerico": "Ocurrió un error inesperado.",
+        "errorGenericoConMensaje": "Error: {{mensaje}}"
 }

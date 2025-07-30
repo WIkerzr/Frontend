@@ -4,7 +4,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types/users';
 import { useTranslation } from 'react-i18next';
 import { ErrorMessage } from './animations';
-import IconInfoCircle from '../Icon/IconInfoCircle';
+import { t } from 'i18next';
+import IconInfoTriangle from '../Icon/IconInfoTriangle';
+import IconXCircle from '../Icon/IconXCircle';
+import IconThumbUp from '../Icon/IconThumbUp';
 
 interface ModalProps {
     open: boolean;
@@ -155,23 +158,34 @@ export function ModalSave({ title = 'Guardando...', children, nav }: ModalSavePr
     );
 }
 
+type TipoAviso = 'warning' | 'success' | 'error';
 type AvisoProps = {
     textoAviso: string;
-    tipoAviso?: 'warning' | 'succes';
+    icon?: boolean;
+    tipoAviso?: TipoAviso;
 };
-export function Aviso({ textoAviso, tipoAviso = 'warning' }: AvisoProps) {
+export function Aviso({ textoAviso, icon = true, tipoAviso = 'warning' }: AvisoProps) {
     const { t } = useTranslation();
+    let bgColor = 'bg-warning';
+    let icone = <IconInfoTriangle />;
+    if (tipoAviso === 'success') {
+        bgColor = 'bg-success';
+        icone = <IconThumbUp />;
+    } else if (tipoAviso === 'error') {
+        bgColor = 'bg-red-600';
+        icone = <IconXCircle />;
+    }
 
-    const color = tipoAviso === 'succes' ? 'bg-success' : 'bg-warning';
     return (
-        <div className={color + ' text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center'}>
-            <IconInfoCircle />
+        <div className={`${bgColor} text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center`}>
+            {icon && icone}
             <span>
                 <strong>{t('aviso')}:</strong> {textoAviso}
             </span>
         </div>
     );
 }
+
 interface BotonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     tipo: 'guardar' | 'cerrar';
     textoBoton?: string;
@@ -211,4 +225,51 @@ export function obtenerFechaLlamada(clave: ClaveFecha): string | undefined {
 
 export function formateaConCeroDelante(numero: number | string): string {
     return Number(numero) < 10 ? `0${numero}` : `${numero}`;
+}
+
+interface ErrorTraducido {
+    mensaje: string;
+    tipo: 'error' | 'warning' | 'info';
+}
+
+export function gestionarErrorServidor(error: unknown): ErrorTraducido {
+    if (error instanceof Response) {
+        switch (error.status) {
+            case 400:
+                return { mensaje: t('error:errorPeticionIncorrecta'), tipo: 'warning' };
+            case 401:
+                return { mensaje: t('error:errorNoAutorizado'), tipo: 'error' };
+            case 403:
+                return { mensaje: t('error:errorAccesoDenegado'), tipo: 'error' };
+            case 404:
+                return { mensaje: t('error:errorNoEncontrado'), tipo: 'warning' };
+            case 409:
+                return { mensaje: t('error:errorConflicto'), tipo: 'warning' };
+            case 422:
+                return { mensaje: t('error:errorDatosInvalidos'), tipo: 'warning' };
+            case 500:
+                return { mensaje: t('error:errorInternoServidor'), tipo: 'error' };
+            default:
+                return { mensaje: t('error:errorDesconocidoConCodigo', { codigo: error.status }), tipo: 'error' };
+        }
+    }
+
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        return {
+            mensaje: t('error:errorNoSePudoConectarServidor'),
+            tipo: 'error',
+        };
+    }
+
+    if (error instanceof Error) {
+        return {
+            mensaje: t('error:errorGenericoConMensaje', { mensaje: error.message }),
+            tipo: 'error',
+        };
+    }
+
+    return {
+        mensaje: t('error:errorGenerico'),
+        tipo: 'error',
+    };
 }

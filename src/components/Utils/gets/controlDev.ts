@@ -1,4 +1,4 @@
-const modoDev = true;
+const modoDev = false;
 
 export const ApiTarget = modoDev
     ? 'https://localhost:44300/api' // API local
