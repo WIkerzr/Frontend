@@ -236,25 +236,34 @@ export function gestionarErrorServidor(error: unknown): ErrorTraducido {
     if (error instanceof Response) {
         switch (error.status) {
             case 400:
+                console.error(`400:${t('error:errorPeticionIncorrecta')}`);
                 return { mensaje: t('error:errorPeticionIncorrecta'), tipo: 'warning' };
             case 401:
+                console.error(`401:${t('error:errorNoAutorizado')}`);
                 return { mensaje: t('error:errorNoAutorizado'), tipo: 'error' };
             case 403:
+                console.error(`403:${t('error:errorAccesoDenegado')}`);
                 return { mensaje: t('error:errorAccesoDenegado'), tipo: 'error' };
             case 404:
+                console.error(`404:${t('error:errorNoEncontrado')}`);
                 return { mensaje: t('error:errorNoEncontrado'), tipo: 'warning' };
             case 409:
+                console.error(`409:${t('error:errorConflicto')}`);
                 return { mensaje: t('error:errorConflicto'), tipo: 'warning' };
             case 422:
+                console.error(`422:${t('error:errorDatosInvalidos')}`);
                 return { mensaje: t('error:errorDatosInvalidos'), tipo: 'warning' };
             case 500:
+                console.error(`500:${t('error:errorInternoServidor')}`);
                 return { mensaje: t('error:errorInternoServidor'), tipo: 'error' };
             default:
+                console.error(t('error:errorDesconocidoConCodigo'));
                 return { mensaje: t('error:errorDesconocidoConCodigo', { codigo: error.status }), tipo: 'error' };
         }
     }
 
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error(t('error:errorNoSePudoConectarServidor'));
         return {
             mensaje: t('error:errorNoSePudoConectarServidor'),
             tipo: 'error',
@@ -262,12 +271,14 @@ export function gestionarErrorServidor(error: unknown): ErrorTraducido {
     }
 
     if (error instanceof Error) {
+        console.error(t('error:errorGenericoConMensaje'));
         return {
             mensaje: t('error:errorGenericoConMensaje', { mensaje: error.message }),
             tipo: 'error',
         };
     }
 
+    console.error(t('error:errorGenerico'));
     return {
         mensaje: t('error:errorGenerico'),
         tipo: 'error',
