@@ -47,7 +47,7 @@ const PasswordFormLogic = () => {
             }
             if (!savedUser) throw new Error(t('usuarioNoAutenticado'));
 
-            const response = await fetch(`${ApiTarget}/changePassword`, {
+            const response = await fetch(`${ApiTarget}/user/changePassword`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

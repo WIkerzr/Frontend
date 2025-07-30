@@ -19,7 +19,7 @@ const BtnFormsSaveCancel = ({ options: tipo, conditionalSave, className, onCance
     return (
         <div className={`mt-4 flex flex-col justify-end items-end ${className ? className : ''}`}>
             {tipo === 'save' ? (
-                <button type="submit" disabled={!conditionalSave} className="btn btn-primary">
+                <button type="submit" disabled={conditionalSave} className="btn btn-primary">
                     {t('guardar')}
                 </button>
             ) : (
