@@ -67,7 +67,7 @@ const Header = () => {
 
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <div className="flex justify-end w-full overflow-hidden">
-                            <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/meneko.png" alt="logo" />
+                            <img className="mr-5 w-20 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/logo.svg" alt="logo" />
                             <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
                         </div>
                         <div>
