@@ -155,10 +155,16 @@ export function ModalSave({ title = 'Guardando...', children, nav }: ModalSavePr
     );
 }
 
-export function Aviso({ textoAviso }: { textoAviso: string }) {
+type AvisoProps = {
+    textoAviso: string;
+    tipoAviso?: 'warning' | 'succes';
+};
+export function Aviso({ textoAviso, tipoAviso = 'warning' }: AvisoProps) {
     const { t } = useTranslation();
+
+    const color = tipoAviso === 'succes' ? 'bg-success' : 'bg-warning';
     return (
-        <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center">
+        <div className={color + ' text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2 justify-center'}>
             <IconInfoCircle />
             <span>
                 <strong>{t('aviso')}:</strong> {textoAviso}

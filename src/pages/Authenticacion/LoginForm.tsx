@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 
 interface LoginFormProps {
     email: string;
@@ -14,16 +15,52 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
     const { t } = useTranslation();
     const [recordar, setRecordar] = useState<boolean>(false);
     const [recordarSegundoPaso, setRecordarSegundoPaso] = useState<boolean>(false);
-    {
-        useEffect(() => {
-            const timer = setTimeout(() => {
-                setRecordarSegundoPaso(false);
-                setRecordar(false);
-            }, 5000);
 
-            return () => clearTimeout(timer);
-        }, [recordarSegundoPaso]);
-    }
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!recordar) return;
+        const recordarPassword = async () => {
+            try {
+                const response = await fetch(`${ApiTarget}/Usuario/RecordarPassword`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(t('errorEnviarServidor'));
+                }
+
+                setErrorMessage(null);
+
+                setTimeout(() => setSuccessMessage(null), 6000);
+
+                setTimeout(() => {
+                    setRecordarSegundoPaso(false);
+                    setRecordar(false);
+                }, 5000);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setErrorMessage(err.message || 'Error inesperado');
+                } else {
+                    console.error('Error desconocido', err);
+                }
+
+                setTimeout(() => {
+                    setRecordarSegundoPaso(false);
+                    setRecordar(false);
+                }, 5000);
+            }
+        };
+
+        recordarPassword();
+    }, [recordarSegundoPaso]);
+
     return (
         <div className="relative flex flex-col items-center justify-center">
             <div className="h-[400px] w-[440px]">
@@ -47,6 +84,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                                     className="form-input ps-12 placeholder:text-white-dark"
                                 />
                             </div>
+                            {successMessage && <div className="w-full flex flex-col  text-success bg-warning-ligh p-3.5">{successMessage}</div>}
+                            {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                         </div>
                         {recordar ? (
                             <></>

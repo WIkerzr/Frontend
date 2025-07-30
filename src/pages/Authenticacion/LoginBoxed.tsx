@@ -1,9 +1,14 @@
 import { LanguageSelector } from '../../components/Utils/inputs';
 import LoginForm from './LoginForm';
 import LoginLogica from './LoginLogica';
+import PasswordFormLogic from '../profile/passwordFormLogic';
+import { useParams } from 'react-router-dom';
 
 const LoginBoxed = () => {
+    const { '*': code } = useParams();
+    const isRecovering = !!code;
     const { email, setEmail, password, setPassword, submitForm, error } = LoginLogica();
+
     return (
         <div>
             <div className="absolute inset-0">
@@ -16,7 +21,13 @@ const LoginBoxed = () => {
                         <div className="absolute top-10 right-20 z-10">
                             <LanguageSelector />
                         </div>
-                        <LoginForm email={email} setEmail={setEmail} password={password} setPassword={setPassword} onSubmit={submitForm} error={error} />
+                        {isRecovering ? (
+                            <>
+                                <PasswordFormLogic code={code} />
+                            </>
+                        ) : (
+                            <LoginForm email={email} setEmail={setEmail} password={password} setPassword={setPassword} onSubmit={submitForm} error={error} />
+                        )}
                     </div>
                 </div>
             </div>

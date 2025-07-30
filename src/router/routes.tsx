@@ -233,6 +233,11 @@ const inicial = [
         ),
         layout: 'blank',
     },
+    {
+        path: '/Authenticacion/Login/Recuperar/*',
+        element: <Login />,
+        layout: 'blank',
+    },
 ];
 const todasLasFases = [fase1, fase2, fase3, fase4, fase5, fase6];
 const fasesActivas = todasLasFases.slice(0, Fases);

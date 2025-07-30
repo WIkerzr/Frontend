@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 interface PasswordFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
     passwordData: {
+        email: string;
         contraNueva: string;
         repetirContra: string;
     };
@@ -14,9 +15,10 @@ interface PasswordFormProps {
     errorMessage: string | null;
     successMessage: string | null;
     fadeOut: boolean;
+    code?: string;
 }
 
-const PasswordForm: React.FC<PasswordFormProps> = ({ onSubmit, passwordData, onChange, errorMessage, successMessage, fadeOut }) => {
+const PasswordForm: React.FC<PasswordFormProps> = ({ onSubmit, passwordData, onChange, errorMessage, successMessage, fadeOut, code }) => {
     const { t } = useTranslation();
     const [conditional, setConditional] = useState<boolean>(false);
     const [mensaje, setMensaje] = useState<string>('');
@@ -40,6 +42,7 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ onSubmit, passwordData, onC
             <form className="panel h-full" onSubmit={onSubmit}>
                 <h2 className="text-lg font-semibold mb-4">{t('CambioContrasena')}</h2>
                 <div className="space-y-4">
+                    {code && <Input nombreInput="email" type="email" value={passwordData.email} onChange={onChange} name="email" />}
                     <Input nombreInput="contraNueva" type="password" value={passwordData.contraNueva} onChange={onChange} name="contraNueva" />
                     <Input nombreInput="repetirContra" type="password" value={passwordData.repetirContra} onChange={onChange} name="repetirContra" />
                 </div>
