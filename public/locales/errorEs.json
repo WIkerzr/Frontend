@@ -6,5 +6,8 @@
 
 
         "errorFaltEjesPrioritarios":"Faltan por seleccionar los ejes prioritarios, redirigiendo...",
-        "errorNoSePudoConectarServidor":"No se pudo conectar con el servidor. Inténtelo más tarde"
+        "errorNoSePudoConectarServidor":"No se pudo conectar con el servidor. Inténtelo más tarde",
+
+        "localStorageNotFound":"Error al leer usuario de localStorage"
+
 }

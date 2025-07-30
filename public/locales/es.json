@@ -164,6 +164,9 @@
     "estadoBorrador": "BORRADOR",
     "estadoCerrado": "CERRADO",
 
+    "EliminarUsuario": "Eliminar usuario",
+    "confirmacionEliminarUsuario": "¿Estás seguro de que deseas eliminar este usuario?",
+    "confirmacionEliminateUsuario": "¿Estas seguro que deseas eliminar tu usuario?",
     "rellenarCampo": "Por favor rellena el campo antes de guardar.",
     "rellenarAmbosCampos": "Por favor rellena ambos campos antes de guardar.",
     "limiteEje": "Límite de acciones alcanzado para este eje",

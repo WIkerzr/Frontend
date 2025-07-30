@@ -11,17 +11,21 @@ import { NewModal } from '../../components/Utils/utils';
 import { IRootState } from '../../store';
 import { UserID } from '../../types/users';
 import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
+import { useUser } from '../../contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 import { useUsers } from './Usuarios';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EditUserProps {
-    user: UserID;
+    editUser: UserID;
     onChange: () => void;
 }
 
-const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChange }, ref) => {
+const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onChange }, ref) => {
     const { t } = useTranslation();
-
+    const { user } = useUser();
     const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
     const handleOpen = () => setShowModal(true);
     const handleClose = () => {
         onChange();
@@ -32,21 +36,34 @@ const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChange 
 
     return (
         <>
-            <button type="button" onClick={handleOpen} ref={ref}>
+            <button type="button" onClick={() => (editUser.id === user?.id ? navigate('/profile') : handleOpen())} ref={ref}>
                 <IconPencil />
             </button>
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('datosUsuarios')}>
-                <UsersDateModalLogic accion="editar" userData={user} onClose={() => handleClose()} title={false} />
+                <UsersDateModalLogic accion="editar" userData={editUser} onClose={() => handleClose()} title={false} />
             </NewModal>
         </>
     );
 });
 
-const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChange }, ref) => {
+const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onChange }, ref) => {
     const { t } = useTranslation();
     const { eliminarUsuario } = useUsers();
+    const { user } = useUser();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/Authenticacion/Login');
+    };
+
     const handleDelete = async () => {
-        const confirmDelete = window.confirm(t('¿Estás seguro de que deseas eliminar este usuario?'));
+        let mensaje = t('confirmacionEliminarUsuario');
+        if (user && editUser.id === user.id) {
+            mensaje = t('confirmacionEliminateUsuario');
+        }
+        const confirmDelete = window.confirm(mensaje);
         const token = sessionStorage.getItem('token');
 
         if (!confirmDelete) return;
@@ -59,7 +76,7 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChang
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ id: user.id }),
+                body: JSON.stringify({ id: editUser.id }),
             });
 
             if (!response.ok) {
@@ -69,17 +86,20 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ user, onChang
             alert(t('usuarioEliminadoCorrectamente'));
 
             if (response.ok) {
-                eliminarUsuario(user.id);
+                eliminarUsuario(editUser.id);
                 onChange();
+                if (user && editUser.id === user.id) {
+                    handleLogout();
+                }
             }
         } catch (error) {
-            console.error('Error al leer usuario de localStorage', error);
+            console.error(t('error:localStorageNotFound'), error);
             return null;
         }
     };
 
     return (
-        <button type="button" onClick={handleDelete} ref={ref} title={t('Eliminar usuario')}>
+        <button type="button" onClick={handleDelete} ref={ref} title={t('EliminarUsuario')}>
             <IconTrash />
         </button>
     );
@@ -268,10 +288,10 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
                                 render: (row) => (
                                     <div className="flex justify-end space-x-3">
                                         <Tippy content={t('editar')}>
-                                            <EditUser user={row} onChange={() => refrescarUsuarios()} />
+                                            <EditUser editUser={row} onChange={() => refrescarUsuarios()} />
                                         </Tippy>
                                         <Tippy content={t('borrar')}>
-                                            <DeleteUser user={row} onChange={() => refrescarUsuarios()} />
+                                            <DeleteUser editUser={row} onChange={() => refrescarUsuarios()} />
                                         </Tippy>
                                     </div>
                                 ),
