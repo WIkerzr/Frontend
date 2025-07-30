@@ -48,11 +48,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                     setRecordar(false);
                 }, 5000);
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setErrorMessage(err.message || 'Error inesperado');
-                } else {
-                    console.error('Error desconocido', err);
-                }
+                const errorInfo = gestionarErrorServidor(err);
+                setErrorMessage(errorInfo.mensaje);
 
                 setTimeout(() => {
                     setRecordarSegundoPaso(false);

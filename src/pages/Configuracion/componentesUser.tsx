@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { NewModal } from '../../components/Utils/utils';
+import { Aviso, gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
 import { IRootState } from '../../store';
 import { UserID } from '../../types/users';
 import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
@@ -46,9 +46,16 @@ const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onCha
     );
 });
 
-const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onChange }, ref) => {
+interface DeleteUserProps {
+    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
+    editUser: UserID;
+    onChange: () => void;
+}
+
+const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ editUser, setErrorMessage, onChange }, ref) => {
     const { t } = useTranslation();
     const { eliminarUsuario } = useUsers();
+
     const { user } = useUser();
     const { logout } = useAuth();
     const navigate = useNavigate();
@@ -79,8 +86,10 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onC
                 body: JSON.stringify({ id: editUser.id }),
             });
 
-            if (!response.ok) {
-                throw new Error(t('noSePudoEliminarUsuario'));
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             }
 
             alert(t('usuarioEliminadoCorrectamente'));
@@ -93,7 +102,8 @@ const DeleteUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onC
                 }
             }
         } catch (error) {
-            console.error(t('error:localStorageNotFound'), error);
+            const errorInfo = gestionarErrorServidor(error);
+            setErrorMessage(errorInfo.mensaje);
             return null;
         }
     };
@@ -202,6 +212,7 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
     const [page, setPage] = useState(1);
     const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus<UserID>>({ columnAccessor: 'id', direction: 'asc' });
@@ -247,6 +258,7 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
             </div>
             <div className="panel mt-6">
                 <div className="datatables">
+                    {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" />}
                     <DataTable<UserID>
                         records={recordsPaginados}
                         totalRecords={datosMostrar.length}
@@ -291,7 +303,7 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
                                             <EditUser editUser={row} onChange={() => refrescarUsuarios()} />
                                         </Tippy>
                                         <Tippy content={t('borrar')}>
-                                            <DeleteUser editUser={row} onChange={() => refrescarUsuarios()} />
+                                            <DeleteUser editUser={row} setErrorMessage={setErrorMessage} onChange={() => refrescarUsuarios()} />
                                         </Tippy>
                                     </div>
                                 ),

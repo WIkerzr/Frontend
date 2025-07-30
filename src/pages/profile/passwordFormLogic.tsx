@@ -3,7 +3,7 @@ import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import PasswordForm from './passwordForm';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { Aviso } from '../../components/Utils/utils';
+import { Aviso, gestionarErrorServidor } from '../../components/Utils/utils';
 
 interface LoginProps {
     code?: string;
@@ -78,8 +78,10 @@ const PasswordFormLogic: React.FC<LoginProps> = ({ code }) => {
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(t('errorEnviarServidor'));
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             }
 
             setErrorMessage(null);
@@ -92,11 +94,8 @@ const PasswordFormLogic: React.FC<LoginProps> = ({ code }) => {
                 }, 1000);
             }, 5000);
         } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorMessage(err.message || 'Error inesperado');
-            } else {
-                console.error('Error desconocido', err);
-            }
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage(errorInfo.mensaje);
         } finally {
             setIsSubmitting(false);
         }
@@ -127,8 +126,10 @@ const PasswordFormLogic: React.FC<LoginProps> = ({ code }) => {
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(t('errorEnviarServidor'));
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             }
 
             setErrorMessage(null);
@@ -141,11 +142,8 @@ const PasswordFormLogic: React.FC<LoginProps> = ({ code }) => {
                 }, 1000);
             }, 5000);
         } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorMessage(err.message || 'Error inesperado');
-            } else {
-                console.error('Error desconocido', err);
-            }
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage(errorInfo.mensaje);
         } finally {
             setIsSubmitting(false);
         }

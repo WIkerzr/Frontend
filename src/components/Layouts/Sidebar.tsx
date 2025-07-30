@@ -23,7 +23,7 @@ import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
-import { Aviso, SideBarList } from '../Utils/utils';
+import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/gets/controlDev';
 
 const Sidebar = () => {

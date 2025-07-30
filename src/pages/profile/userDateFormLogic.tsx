@@ -4,6 +4,7 @@ import { useState } from 'react';
 import UserDataForm from './userDateForm';
 import { UserID } from '../../types/users';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { gestionarErrorServidor } from '../../components/Utils/utils';
 
 const UserDateFormLogic: React.FC = () => {
     const getInitialUserData = (): UserID => {
@@ -84,8 +85,10 @@ const UserDateFormLogic: React.FC = () => {
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(t('errorEnviarServidor'));
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             }
 
             localStorage.setItem(
@@ -111,11 +114,8 @@ const UserDateFormLogic: React.FC = () => {
                 }, 1000);
             }, 5000);
         } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorMessage(err.message || 'Error inesperado');
-            } else {
-                console.error('Error desconocido', err);
-            }
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage(errorInfo.mensaje);
         } finally {
             setIsSubmitting(false);
         }

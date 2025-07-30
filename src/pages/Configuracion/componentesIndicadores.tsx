@@ -597,6 +597,12 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
             body: JSON.stringify(descripcionEditable),
         });
 
+        if (response && !response.ok) {
+            const errorInfo = gestionarErrorServidor(response);
+            setErrorMessage(errorInfo.mensaje);
+            return;
+        }
+
         if (response.ok) {
             const indicadoreditado = await response.json();
             validadorRespuestasBBDD(response, indicadoreditado);
@@ -680,13 +686,19 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
                                 if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
                                     mensajeError += `${t('errorMissingFields')}`;
                                 }
-                                if (esNuevo) {
-                                    handleGuardarNuevoRealizacion();
-                                } else if (tipoIndicador === 'realizacion') {
-                                    handleEditarIndicadorRealizacion();
-                                } else if (tipoIndicador === 'resultado') {
-                                    handleEditarIndicadorResultado();
+                                try {
+                                    if (esNuevo) {
+                                        handleGuardarNuevoRealizacion();
+                                    } else if (tipoIndicador === 'realizacion') {
+                                        handleEditarIndicadorRealizacion();
+                                    } else if (tipoIndicador === 'resultado') {
+                                        handleEditarIndicadorResultado();
+                                    }
+                                } catch (error) {
+                                    const errorInfo = gestionarErrorServidor(error);
+                                    setErrorMessage(errorInfo.mensaje);
                                 }
+
                                 if (mensajeError && mensajeError?.length > 0) {
                                     setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + mensajeError : t('errorGuardar') + mensajeError));
                                     return;
@@ -910,8 +922,10 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(t('errorEnviarServidor'));
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             }
 
             actualizarEliminarIndicadorRealizacion(indiRealizacionAEliminar);
@@ -925,11 +939,8 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
                 }, 1000);
             }, 5000);
         } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorMessage(err.message || 'Error inesperado');
-            } else {
-                console.error('Error desconocido', err);
-            }
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage(errorInfo.mensaje);
         }
     };
 
@@ -953,10 +964,11 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(t('errorEnviarServidor'));
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
             }
-
             setSuccessMessage(t('eliminacionExitosa'));
             setTimeout(() => {
                 setFadeOut(true);
@@ -977,11 +989,8 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
                 return nuevoArray;
             });
         } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorMessage(err.message || 'Error inesperado');
-            } else {
-                console.error('Error desconocido', err);
-            }
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage(errorInfo.mensaje);
         }
     };
 
