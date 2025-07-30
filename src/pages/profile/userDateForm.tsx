@@ -39,7 +39,10 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
 
     useEffect(() => {
         if ('id' in userData && regionSeleccionada) {
-            const regionNames = regiones[Number(regionSeleccionada.RegionId)];
+            const regionNames = regiones.find((region) => region.RegionId === regionSeleccionada.RegionId);
+            if (!regionNames) {
+                return;
+            }
             setDatosUsuario((prev) => ({
                 ...prev,
                 ambit: regionSeleccionada!.RegionId,
