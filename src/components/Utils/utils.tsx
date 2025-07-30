@@ -202,3 +202,7 @@ export function obtenerFechaLlamada(clave: ClaveFecha): string | undefined {
     const fechas: Partial<Record<ClaveFecha, string>> = JSON.parse(fechasRaw);
     return fechas[clave];
 }
+
+export function formateaConCeroDelante(numero: number | string): string {
+    return Number(numero) < 10 ? `0${numero}` : `${numero}`;
+}

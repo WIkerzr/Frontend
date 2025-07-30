@@ -12,6 +12,7 @@ import React from 'react';
 import { Region } from '../../components/Utils/gets/getRegiones';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { formateaConCeroDelante } from '../../components/Utils/utils';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -64,7 +65,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
                     const numeroActual = suma ? 1 + suma : 1;
 
                     const num = numeroActual ? numeroActual : 1;
-                    const numeracion = num < 10 ? `0${num}` : `${num}`;
+                    const numeracion = formateaConCeroDelante(num);
                     return [`${inicializacionNombre}${numeracion}${codRegion}`];
                 }
             } else {
@@ -76,7 +77,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
             let numeroActual = Number(realizacion.NameEs.slice(2, 4));
             numeroActual++;
             const num = numeroActual ? numeroActual : 1;
-            const numeracion = num < 10 ? `0${num}` : `${num}`;
+            const numeracion = formateaConCeroDelante(num);
             return [`${inicializacionNombre}${numeracion}`];
         } else if (origen === 'indicadoresNuevo/Modal/SelectorOCreador') {
             const storedRealiza: IndicadorResultado[] = indicadoresResultado.filter((re) => re.RegionsId === '0' || re.RegionsId === undefined || re.RegionsId === null);
@@ -90,7 +91,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
             }
             numeroActual = suma ? numeroActual + suma : numeroActual;
             const num = numeroActual ? numeroActual : 1;
-            const numeracion = num < 10 ? `0${num}` : `${num}`;
+            const numeracion = formateaConCeroDelante(num);
             return [`${inicializacionNombre}${numeracion}`];
         } else if (origen === 'indicadoresADRNuevo/Modal') {
             const storedResultado = localStorage.getItem('indicadoresResultadoFiltrado');
@@ -111,7 +112,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
             }
             numeroActual++;
             const num = numeroActual ? numeroActual : 1;
-            const numeracion = num < 10 ? `0${num}` : `${num}`;
+            const numeracion = formateaConCeroDelante(num);
             return [`${inicializacionNombre}${numeracion}${codRegion}`];
         } else if (origen === 'indicadoresADRNuevo/Modal/SelectorOCreador' || origen === 'indicadoresADR/TablaIndicadoresRealizacion/Modal/SelectorOCreador') {
             if (!creacion) {
@@ -138,7 +139,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ origen, indi
                 }
                 numeroActual = numeroActual ? 1 + numeroActual : 1;
                 const num = numeroActual ? numeroActual : 1;
-                const numeracion = num < 10 ? `0${num}` : `${num}`;
+                const numeracion = formateaConCeroDelante(num);
                 return [`${inicializacionNombre}${numeracion}${codRegion}`];
             }
         } else if (origen === 'indicadoresADR/TablaIndicadoresRealizacion/Modal' || origen === 'indicadoresADR/TablaIndicadoresResultado/Modal') {

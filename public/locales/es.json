@@ -164,6 +164,8 @@
     "estadoBorrador": "BORRADOR",
     "estadoCerrado": "CERRADO",
 
+    "minimoPassword": "Logitud de contraseña minimo 8",
+    "diferentesPassword": "Contraseñas son diferentes",
     "EliminarUsuario": "Eliminar usuario",
     "confirmacionEliminarUsuario": "¿Estás seguro de que deseas eliminar este usuario?",
     "confirmacionEliminateUsuario": "¿Estas seguro que deseas eliminar tu usuario?",

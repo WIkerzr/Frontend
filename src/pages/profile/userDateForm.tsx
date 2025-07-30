@@ -6,6 +6,7 @@ import { User, UserID } from '../../types/users';
 import { useEffect, useState } from 'react';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { newUser } from '../Configuracion/componentes';
+import { formateaConCeroDelante } from '../../components/Utils/utils';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
@@ -22,7 +23,7 @@ interface UserDataFormProps {
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser, title = true }) => {
     const { t, i18n } = useTranslation();
     const { regiones } = useRegionContext();
-    const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => r.RegionId === Number(userData.ambit)) || null);
+    const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(`${userData.ambit}`)) || null);
     const [conditional, setConditional] = useState<boolean>(false);
     const [datosUsuario, setDatosUsuario] = useState(userData);
 
@@ -37,7 +38,14 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
     }, []);
 
     useEffect(() => {
-        userData.ambit = regionSeleccionada?.RegionId;
+        if ('id' in userData && regionSeleccionada) {
+            const regionNames = regiones[Number(regionSeleccionada.RegionId)];
+            setDatosUsuario((prev) => ({
+                ...prev,
+                ambit: regionSeleccionada!.RegionId,
+                RegionName: i18n.language === 'eu' ? regionNames.NameEu : regionNames.NameEs,
+            }));
+        }
     }, [regionSeleccionada]);
 
     useEffect(() => {
@@ -100,9 +108,6 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 value={i18n.language === 'eu' ? regionSeleccionada?.NameEu : regionSeleccionada?.NameEs}
                                 name="RegionName"
                                 onChange={(e) => {
-                                    console.log('e.target.name');
-                                    console.log(e.target.name);
-
                                     setRegionSeleccionada(regiones.find((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs) === e.target.value)!);
                                     onChange(e);
                                 }}
@@ -125,7 +130,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                         <p className="text-green-500">{successMessage}</p>
                     </div>
                 )}
-                <BtnFormsSaveCancel options="save" conditionalSave={conditional} />
+                <BtnFormsSaveCancel options="save" conditionalSave={!conditional} />
             </form>
         </div>
     );
