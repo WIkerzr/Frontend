@@ -116,18 +116,25 @@ const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ editUser, s
 });
 
 interface ChangeStatusProps {
+    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
     value: UserID;
     onSuccess?: () => void;
 }
 
-const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess }) => {
+const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, setErrorMessage }) => {
     const { t } = useTranslation();
     const [localStatus, setLocalStatus] = useState<boolean>(!!value.status);
+    const { user } = useUser();
+    const { logout } = useAuth();
 
     const handleToggle = async () => {
         const token = sessionStorage.getItem('token');
         const newStatus = !localStatus;
         setLocalStatus(newStatus);
+        if (user?.id === value.id) {
+            const confirmar = window.confirm(t('autoDesabilitando'));
+            if (!confirmar) return;
+        }
 
         const datosUsuario = {
             name: value.name,
@@ -140,7 +147,7 @@ const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess }) => {
             id: value.id,
         };
         try {
-            await fetch(`${ApiTarget}/user`, {
+            const response = await fetch(`${ApiTarget}/user`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -152,11 +159,19 @@ const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess }) => {
                     id: value.id,
                 }),
             });
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setErrorMessage(errorInfo.mensaje);
+                return;
+            }
             updateUserInLocalStorage(datosUsuario, 'editar');
             onSuccess?.();
+            if (user?.id === value.id) {
+                logout();
+            }
         } catch (err) {
-            console.error('Error actualizando el estado:', err);
-            setLocalStatus(!newStatus);
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage(errorInfo.mensaje);
         }
     };
 
@@ -275,7 +290,7 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
                             {
                                 accessor: 'status',
                                 title: '',
-                                render: (row) => <ChangeStatus key={`status-${row.email}`} value={row} />,
+                                render: (row) => <ChangeStatus key={`status-${row.email}`} setErrorMessage={setErrorMessage} value={row} />,
                             },
                             { accessor: 'name', title: t('name'), sortable: true },
                             { accessor: 'lastName', title: t('lastName'), sortable: true },

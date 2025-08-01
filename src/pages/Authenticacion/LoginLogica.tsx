@@ -6,11 +6,10 @@ import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { UserID, UserRole } from '../../types/users';
-import { useTranslation } from 'react-i18next';
 import { ApiTargetToken } from '../../components/Utils/gets/controlDev';
+import { gestionarErrorServidor } from '../../components/Utils/utils';
 
 const useLogin = () => {
-    const { t } = useTranslation();
     const { setRegionSeleccionada } = useRegionContext();
 
     const { login } = useAuth();
@@ -20,6 +19,7 @@ const useLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -51,8 +51,10 @@ const useLogin = () => {
             ////////////////////////////////
             const result: BackendResponse = await response.json();
 
-            if (!response.ok) {
-                throw new Error(result.message || 'Error desconocido');
+            if (response && !response.ok) {
+                const errorInfo = gestionarErrorServidor(response);
+                setError(errorInfo.mensaje);
+                return;
             }
 
             const isUserRole = (value: string): value is UserRole => {
@@ -90,11 +92,8 @@ const useLogin = () => {
                 navigate('/');
             }, 200);
         } catch (err) {
-            if (err instanceof Error) {
-                setError(t('error:errorNoSePudoConectarServidor'));
-            } else {
-                setError('Ocurrió un error inesperado');
-            }
+            const errorInfo = gestionarErrorServidor(err);
+            setError(errorInfo.mensaje);
         }
     };
 

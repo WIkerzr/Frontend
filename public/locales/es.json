@@ -187,6 +187,7 @@
     "gobiernoVasco": "Inst. Pública",
     "paginacion":"Mostrando {{from}} de {{to}} con {{totalRecords}} entradas",
     "recorsPerPage":"Registros por páginas",
+    "autoDesabilitando":"Estás intentando deshabilitar tu propio usuario. ¿Seguro que quieres continuar?",
 
     "errorGuardar": "❌ Error al guardar: ",
     "errorActualizarUsuario": "Error al actualizar usuario:",

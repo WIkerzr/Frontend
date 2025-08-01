@@ -134,7 +134,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState<EstadosLoading>('idle');
 
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
 
     const handleUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -196,6 +196,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         return;
                     }
                     if (response.ok) {
+                        setIsLoading('success');
                         const data = await response.json();
                         const region = regiones.find((r) => r.RegionId === data.data.RegionId);
                         const datosUsuario = {
@@ -227,24 +228,26 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 });
                 const data = await response.json();
                 if (response && !response.ok) {
+                    setIsLoading('error');
                     const errorInfo = gestionarErrorServidor(response);
                     setErrorMessage(errorInfo.mensaje);
                     return;
                 }
                 if (response.ok) {
+                    setIsLoading('success');
                     agregarUsuario(data.data);
                 }
             }
 
-            if (response && !response.ok) {
-                setIsLoading('error');
-                const errorInfo = gestionarErrorServidor(response);
-                setErrorMessage(errorInfo.mensaje);
-                return;
-            } else {
-                setSuccessMessage(t('CambiosGuardados'));
-                setIsLoading('success');
-            }
+            // if (response && !response.ok) {
+            //     setIsLoading('error');
+            //     const errorInfo = gestionarErrorServidor(response);
+            //     setErrorMessage(errorInfo.mensaje);
+            //     return;
+            // } else {
+            //     setSuccessMessage(t('CambiosGuardados'));
+            //     setIsLoading('success');
+            // }
         } catch (err: any) {
             setIsLoading('error');
             setErrorMessage(err.message || 'Error inesperado');
