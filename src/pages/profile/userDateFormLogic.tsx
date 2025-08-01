@@ -4,7 +4,7 @@ import { useState } from 'react';
 import UserDataForm from './userDateForm';
 import { UserID } from '../../types/users';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { gestionarErrorServidor } from '../../components/Utils/utils';
+import { formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 
 const UserDateFormLogic: React.FC = () => {
     const getInitialUserData = (): UserID => {
@@ -79,7 +79,7 @@ const UserDateFormLogic: React.FC = () => {
                     secondSurname: UserData.secondSurname,
                     role: initialData.role,
                     email: UserData.email,
-                    RegionId: UserData.ambit,
+                    RegionId: formateaConCeroDelante(`${UserData.ambit}`),
                     id: UserData.id,
                     status: UserData.status,
                 }),
