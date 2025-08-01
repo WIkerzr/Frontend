@@ -6,11 +6,17 @@ import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { UsersTable } from './componentesUser';
-import { formateaConCeroDelante } from '../../components/Utils/utils';
+import { formateaConCeroDelante, obtenerFechaLlamada } from '../../components/Utils/utils';
 
 export const useUsers = (onChange?: (users: UserID[]) => void) => {
     const { regiones } = useRegionContext();
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
+        const fechaStr = obtenerFechaLlamada('users');
+        return fechaStr ? new Date(fechaStr) : new Date();
+    });
 
     const [users, setUsers] = useState<UserID[]>(() => {
         const saved = localStorage.getItem('users');
@@ -31,8 +37,8 @@ export const useUsers = (onChange?: (users: UserID[]) => void) => {
                 }
             }
         });
-        setUsers(nuevoUsers);
         localStorage.setItem('users', JSON.stringify(nuevoUsers));
+        setUsers(nuevoUsers);
     };
 
     const refrescarUsuarios = () => {
@@ -44,25 +50,17 @@ export const useUsers = (onChange?: (users: UserID[]) => void) => {
 
     const agregarUsuario = (nuevo: UserID) => actualizarUsers([...users, nuevo]);
     const listadoUsuarios = (dataArray: UserID[]) => actualizarUsers(dataArray);
-    const eliminarUsuario = (id: string) => actualizarUsers(users.filter((u) => u.id !== id));
+    const eliminarUsuario = (id: string) => {
+        actualizarUsers(users.filter((u) => u.id !== id));
+    };
     const actualizarUsuario = (usuarioActualizado: UserID) => {
         actualizarUsers(users.map((u) => (u.id === usuarioActualizado.id ? usuarioActualizado : u)));
     };
 
-    return { users, agregarUsuario, listadoUsuarios, eliminarUsuario, actualizarUsuario, refrescarUsuarios };
-};
-
-const Index = () => {
-    const { t } = useTranslation();
-    const { users, listadoUsuarios } = useUsers();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const { regiones } = useRegionContext();
-
-    useEffect(() => {
+    const llamadaBBDDUsers = (primeraLLamada?: boolean) => {
         const storedUsers = localStorage.getItem('users');
 
-        if (!storedUsers) {
+        if (!primeraLLamada || !storedUsers) {
             const token = sessionStorage.getItem('token');
             setLoading(true);
             const fetchUsers = async () => {
@@ -83,6 +81,7 @@ const Index = () => {
                             RegionName: region ? region.NameEs : '-',
                         };
                     });
+                    setFechaUltimoActualizadoBBDD(new Date());
                     const dataArray: UserID[] = Array.isArray(usuariosConRegion) ? usuariosConRegion : Object.values(usuariosConRegion);
                     listadoUsuarios(dataArray);
                     localStorage.setItem('users', JSON.stringify(dataArray));
@@ -98,6 +97,16 @@ const Index = () => {
             };
             fetchUsers();
         }
+    };
+
+    return { users, agregarUsuario, listadoUsuarios, eliminarUsuario, actualizarUsuario, refrescarUsuarios, fechaUltimoActualizadoBBDD, llamadaBBDDUsers, loading, error };
+};
+
+const Index = () => {
+    const { users, loading, error, llamadaBBDDUsers } = useUsers();
+
+    useEffect(() => {
+        llamadaBBDDUsers(true);
     }, []);
 
     if (loading) return <Loading />;

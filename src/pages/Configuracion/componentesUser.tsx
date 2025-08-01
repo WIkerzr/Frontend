@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { Aviso, gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
+import { gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
 import { IRootState } from '../../store';
 import { UserID } from '../../types/users';
 import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
@@ -15,6 +15,7 @@ import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { useUsers } from './Usuarios';
 import { useAuth } from '../../contexts/AuthContext';
+import IconRefresh from '../../components/Icon/IconRefresh';
 
 interface EditUserProps {
     editUser: UserID;
@@ -220,7 +221,7 @@ const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }, ref) 
 });
 
 export const UsersTable = forwardRef<HTMLButtonElement>(() => {
-    const { users, refrescarUsuarios } = useUsers();
+    const { users, refrescarUsuarios, fechaUltimoActualizadoBBDD, llamadaBBDDUsers } = useUsers();
 
     const { t } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
@@ -271,9 +272,32 @@ export const UsersTable = forwardRef<HTMLButtonElement>(() => {
                 <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('buscarUsuario')} value={search} onChange={(e) => setSearch(e.target.value)} />
                 <NewUser onChange={() => refrescarUsuarios()} />
             </div>
+            <div className="flex justify-between items-center mb-2">
+                <div>{errorMessage && <span className="text-red-500 hover:text-red-700">{errorMessage}</span>}</div>
+
+                <div className="flex items-center space-x-2">
+                    {fechaUltimoActualizadoBBDD && (
+                        <div>
+                            {new Date(fechaUltimoActualizadoBBDD).toLocaleString('es-ES', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                            })}
+                        </div>
+                    )}
+                    <Tippy content={t('Actualizar')}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                llamadaBBDDUsers();
+                            }}
+                        >
+                            <IconRefresh />
+                        </button>
+                    </Tippy>
+                </div>
+            </div>
             <div className="panel mt-6">
                 <div className="datatables">
-                    {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" />}
                     <DataTable<UserID>
                         records={recordsPaginados}
                         totalRecords={datosMostrar.length}
