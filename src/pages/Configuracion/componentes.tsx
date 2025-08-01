@@ -12,7 +12,7 @@ import { useUsers } from './Usuarios';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { gestionarErrorServidor } from '../../components/Utils/utils';
+import { formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 
 export const newUser: UserID = {
     name: '',
@@ -198,7 +198,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     if (response.ok) {
                         setIsLoading('success');
                         const data = await response.json();
-                        const region = regiones.find((r) => r.RegionId === data.data.RegionId);
+                        const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(data.data.RegionId));
                         const datosUsuario = {
                             ...data.data,
                             RegionName: region ? (i18n.language === 'es' ? region.NameEs : region.NameEu) : 'Desconocido',
@@ -208,7 +208,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 }
             } else if (accion === 'nuevo') {
                 response = await fetch(`${ApiTarget}/newUser`, {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: {
                         Authorization: `Bearer ${token}`,
                         Accept: 'application/json',

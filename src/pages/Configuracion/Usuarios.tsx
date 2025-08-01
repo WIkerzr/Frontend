@@ -6,14 +6,31 @@ import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { UsersTable } from './componentesUser';
+import { formateaConCeroDelante } from '../../components/Utils/utils';
 
 export const useUsers = (onChange?: (users: UserID[]) => void) => {
+    const { regiones } = useRegionContext();
+    const { i18n } = useTranslation();
+
     const [users, setUsers] = useState<UserID[]>(() => {
         const saved = localStorage.getItem('users');
         return saved ? JSON.parse(saved) : [];
     });
 
     const actualizarUsers = (nuevoUsers: UserID[]) => {
+        nuevoUsers.forEach((user) => {
+            if (user.role === 'ADR') {
+                if (!user.RegionName?.trim()) {
+                    const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(user.RegionId as string | number));
+                    if (region) {
+                        user.RegionName = i18n.language === 'es' ? region.NameEs : region.NameEu;
+                    } else {
+                        user.RegionName = 'Desconocido';
+                        console.error(`Usuario con ID ${user.id} no tiene RegionName ni coincidencia en regiones.`);
+                    }
+                }
+            }
+        });
         setUsers(nuevoUsers);
         localStorage.setItem('users', JSON.stringify(nuevoUsers));
     };
