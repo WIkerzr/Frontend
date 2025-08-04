@@ -4,11 +4,34 @@ import { ZonaTitulo } from '../Configuracion/componentes';
 import { Ejes } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { formateaConCeroDelante } from '../../components/Utils/utils';
+import { useRegionContext } from '../../contexts/RegionContext';
+
+const llamadaBBDDEjes = (regionSeleccionada: number | null) => {
+    const handleEditarIndicadorResultado = async () => {
+        const token = sessionStorage.getItem('token');
+        const response = await fetch(`${ApiTarget}/ejes/${formateaConCeroDelante(`${regionSeleccionada}`)}`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response && !response.ok) {
+            return;
+        }
+    };
+    handleEditarIndicadorResultado();
+};
 
 const Index = () => {
     const { t, i18n } = useTranslation();
     const { yearData, setYearData } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { regionSeleccionada } = useRegionContext();
 
     const [selected, setSelected] = useState<string[]>([]);
     const [locked, setLocked] = useState(false);
@@ -31,6 +54,10 @@ const Index = () => {
         if (yearData.plan.ejesPrioritarios.length > 1) {
             setLocked(true);
         }
+    }, []);
+
+    useEffect(() => {
+        llamadaBBDDEjes(regionSeleccionada);
     }, []);
 
     const handleSave = () => {
