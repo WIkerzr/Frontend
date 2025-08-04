@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
+import { useUser } from '../../contexts/UserContext';
 
 interface LoginFormProps {
     email: string;
@@ -15,6 +16,7 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPassword, onSubmit, error }) => {
     const { t } = useTranslation();
     const [recordar, setRecordar] = useState<boolean>(false);
+    const { recordarSesion, setRecordarSesion } = useUser();
     const [recordarSegundoPaso, setRecordarSegundoPaso] = useState<boolean>(false);
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -110,7 +112,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                             <>
                                 <div>
                                     <label className="flex cursor-pointer items-center">
-                                        <input type="checkbox" className="form-checkbox bg-white dark:bg-black" defaultChecked={true} />
+                                        <input checked={recordarSesion} type="checkbox" className="form-checkbox bg-white dark:bg-black" onChange={(e) => setRecordarSesion(e.target.checked)} />
                                         <span className="text-white-dark">{t('RecordarSesion')}</span>
                                     </label>
                                 </div>
@@ -153,7 +155,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                     </div>
                 )}
             </div>
-            <div className="flex justify-between w-[60%] mx-auto mt-8">
+            <div className={`flex justify-between w-[60%] mx-auto ${error ? 'mt-14' : 'mt-8'}`}>
                 <img className="max-h-[40px] w-auto" src="/assets/images/logo.svg" alt="logo" />
                 <img className="max-h-[40px] w-auto" src="/assets/images/meneko.png" alt="logo" />
                 <img className="max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />

@@ -63,7 +63,7 @@ const UserDateFormLogic: React.FC = () => {
         setIsSubmitting(true);
         setErrorMessage(null);
         setSuccessMessage(null);
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
 
         try {
             const response = await fetch(`${ApiTarget}/user`, {

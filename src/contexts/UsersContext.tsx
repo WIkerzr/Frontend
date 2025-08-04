@@ -73,7 +73,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
         const storedUsers = localStorage.getItem('users');
 
         if (!primeraLLamada || !storedUsers) {
-            const token = sessionStorage.getItem('token');
+            const token = sessionStorage.getItem('access_token');
             setLoading(true);
             const fetchUsers = async () => {
                 try {

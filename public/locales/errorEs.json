@@ -18,5 +18,10 @@
         "errorDesconocidoConCodigo": "Error desconocido ({{codigo}}).",
         "errorNoSePudoConectarServidor": "No se pudo conectar con el servidor. Inténtelo más tarde.",
         "errorGenerico": "Ocurrió un error inesperado.",
-        "errorGenericoConMensaje": "Error: {{mensaje}}"
+        "errorGenericoConMensaje": "Error: {{mensaje}}",
+
+        
+        "errorCorreoUsuarioNoValido": "El correo introducido no es válido, por favor revíselo",
+        "errorContrasenaUsuarioNoValido": "La contraseña introducida no es válida, por favor reescriba la contraseña",
+        "errorActivoUsuarioNoValido": "El usuario esta deshabilitado"
 }

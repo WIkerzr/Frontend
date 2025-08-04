@@ -36,7 +36,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [regionData, setRegionData] = useState<InitialDataResponse>();
 
     const { user } = useUser();
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem('access_token');
     const [regionActual, setRegionActual] = useState<Region>();
     const [regiones, setRegiones] = useState<Region[]>(() => {
         const saved = sessionStorage.getItem('regiones');

@@ -10,7 +10,7 @@ import { useRegionContext } from '../../contexts/RegionContext';
 
 const llamadaBBDDEjes = (regionSeleccionada: number | null) => {
     const handleEditarIndicadorResultado = async () => {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const response = await fetch(`${ApiTarget}/ejes/${formateaConCeroDelante(`${regionSeleccionada}`)}`, {
             method: 'GET',
             headers: {

@@ -8,6 +8,7 @@ import { t } from 'i18next';
 import IconInfoTriangle from '../Icon/IconInfoTriangle';
 import IconXCircle from '../Icon/IconXCircle';
 import IconThumbUp from '../Icon/IconThumbUp';
+import { ApiTargetToken } from './gets/controlDev';
 
 interface ModalProps {
     open: boolean;
@@ -283,4 +284,56 @@ export function gestionarErrorServidor(error: unknown): ErrorTraducido {
         mensaje: t('error:errorGenerico'),
         tipo: 'error',
     };
+}
+
+export async function FetchConRefreshRetry(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    const accessToken = sessionStorage.getItem('access_token');
+    const refreshToken = sessionStorage.getItem('refresh_token');
+
+    // Añadimos Authorization
+    const headers = new Headers(init?.headers);
+    if (accessToken) {
+        headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+
+    const response = await fetch(input, { ...init, headers });
+
+    if (response.status !== 401) {
+        return response;
+    }
+
+    if (!refreshToken) {
+        return response;
+    }
+
+    // Intentamos refrescar token
+    const refreshResponse = await fetch(`${ApiTargetToken}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+            client_id: 'webApp',
+        }),
+    });
+
+    if (!refreshResponse.ok) {
+        // No se pudo refrescar token, devolver 401 original
+        return response;
+    }
+
+    const datosRefresh = await refreshResponse.json();
+
+    // Guardamos tokens nuevos
+    localStorage.setItem('access_token', datosRefresh.access_token);
+    if (datosRefresh.refresh_token) {
+        localStorage.setItem('refresh_token', datosRefresh.refresh_token);
+    }
+
+    // Reintentamos la petición original con token nuevo
+    headers.set('Authorization', `Bearer ${datosRefresh.access_token}`);
+
+    const retryResponse = await fetch(input, { ...init, headers });
+
+    return retryResponse;
 }

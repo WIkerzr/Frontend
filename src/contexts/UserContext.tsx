@@ -1,10 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { createContext, useContext, useState } from 'react';
 import { UserID } from '../types/users';
 
 interface UserContextType {
     user: UserID | null;
-    // eslint-disable-next-line no-unused-vars
     setUser: (user: UserID | null) => void;
+    recordarSesion: boolean;
+    setRecordarSesion: (value: boolean) => void;
 }
 
 const defaultUser = (): UserID | null => {
@@ -20,10 +22,13 @@ const defaultUser = (): UserID | null => {
 const UserContext = createContext<UserContextType>({
     user: null,
     setUser: () => {},
+    recordarSesion: false,
+    setRecordarSesion: () => {},
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUserState] = useState<UserID | null>(defaultUser());
+    const [recordarSesion, setRecordarSesion] = useState<boolean>(false);
 
     const setUser = (newUser: UserID | null) => {
         setUserState(newUser);
@@ -34,7 +39,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
+    return <UserContext.Provider value={{ user, setUser, recordarSesion, setRecordarSesion }}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => useContext(UserContext);

@@ -13,7 +13,7 @@ export async function authlogin(loginData: LoginData): Promise<unknown> {
     params.append('grant_type', 'password');
     params.append('username', loginData.userName);
     params.append('password', loginData.password);
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem('access_token');
 
     const response = await fetch(serviceBase + 'token', {
         method: 'POST',

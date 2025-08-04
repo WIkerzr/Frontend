@@ -64,7 +64,7 @@ export const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ edit
             mensaje = t('confirmacionEliminateUsuario');
         }
         const confirmDelete = window.confirm(mensaje);
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
 
         if (!confirmDelete) return;
 
@@ -120,7 +120,7 @@ export const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, se
     const { logout } = useAuth();
 
     const handleToggle = async () => {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const newStatus = !localStatus;
         setLocalStatus(newStatus);
         if (user?.id === value.id) {

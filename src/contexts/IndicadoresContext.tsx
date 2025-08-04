@@ -58,7 +58,7 @@ export const useIndicadoresContext = () => useContext(IndicadorContext);
 export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { t } = useTranslation();
     const { user } = useUser();
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem('access_token');
     const { regionSeleccionada } = useRegionContext();
     const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);

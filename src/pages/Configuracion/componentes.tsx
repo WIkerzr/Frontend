@@ -11,7 +11,7 @@ import '@mantine/core/styles.css';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
+import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 import { useUsers } from '../../contexts/UsersContext';
 
 export const newUser: UserID = {
@@ -171,7 +171,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
     };
 
     const handleSubmitUser = async (e: React.FormEvent) => {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         e.preventDefault();
         setIsSubmitting(true);
         setErrorMessage(null);
@@ -181,7 +181,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             setIsLoading('loading');
             if (accion === 'editar') {
                 if ('id' in UserData) {
-                    response = await fetch(`${ApiTarget}/user`, {
+                    response = await FetchConRefreshRetry(`${ApiTarget}/user`, {
                         method: 'PUT',
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -266,6 +266,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
             setIsLoading('error');
             setErrorMessage(err.message || 'Error inesperado');
         } finally {
+            setIsLoading('error');
             setIsSubmitting(false);
         }
     };

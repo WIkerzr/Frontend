@@ -10,7 +10,7 @@ api.interceptors.request.use(
         if (config.url?.includes('/token')) {
             return config;
         }
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const idioma = localStorage.getItem('i18nextLng') || 'es';
 
         if (token) {
@@ -34,7 +34,7 @@ api.interceptors.response.use(
         const isInLoginPage = window.location.pathname === '/Authenticacion/Login';
 
         if (is401 && !isInLoginPage) {
-            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('access_token');
 
             setTimeout(() => {
                 window.location.href = '/Authenticacion/Login';

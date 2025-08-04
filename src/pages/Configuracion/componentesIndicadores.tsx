@@ -500,7 +500,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
     };
 
     const handleGuardarNuevoRealizacion = async () => {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const datosRealizacion: IndicadorRealizacion = {
             ...descripcionEditable,
             RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
@@ -564,7 +564,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
     };
 
     const handleEditarIndicadorRealizacion = async () => {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const response = await fetch(`${ApiTarget}/editarIndicadorRealizacion`, {
             method: 'PUT',
             headers: {
@@ -586,7 +586,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
     };
 
     const handleEditarIndicadorResultado = async () => {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const response = await fetch(`${ApiTarget}/editarIndicadorResultado`, {
             method: 'PUT',
             headers: {
@@ -905,7 +905,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
     const eliminarIndicadorRealizacion = async (indiRealizacionAEliminar: IndicadorRealizacion) => {
         setErrorMessage(null);
         setSuccessMessage(null);
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiRealizacionAEliminar.NameEu : indiRealizacionAEliminar.NameEs }));
         if (!confirmDelete) return;
         try {
@@ -947,7 +947,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
     const eliminarIndicadorResultado = async (indiResultadoAEliminar: IndicadorResultado) => {
         setErrorMessage(null);
         setSuccessMessage(null);
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiResultadoAEliminar.NameEu : indiResultadoAEliminar.NameEs }));
         if (!confirmDelete) return;
         try {
@@ -1156,7 +1156,7 @@ type PropsLlamadaIndicadores = {
     t: (clave: string) => string;
 };
 export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRealizacion, setIndicadoresResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem('access_token');
     try {
         const res = await fetch(`${ApiTarget}/indicadores`, {
             headers: {

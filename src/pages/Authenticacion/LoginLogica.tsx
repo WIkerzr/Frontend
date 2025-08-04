@@ -8,12 +8,14 @@ import { useRegionContext } from '../../contexts/RegionContext';
 import { UserID, UserRole } from '../../types/users';
 import { ApiTargetToken } from '../../components/Utils/gets/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
+import { useTranslation } from 'react-i18next';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionContext();
+    const { t } = useTranslation();
 
     const { login } = useAuth();
-    const { setUser } = useUser();
+    const { setUser, recordarSesion } = useUser();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -45,52 +47,74 @@ const useLogin = () => {
                 rol: string;
                 message: string;
                 access_token: string;
+                refresh_token: string;
                 userId: string;
             }
-
-            ////////////////////////////////
-            const result: BackendResponse = await response.json();
-
-            if (response && !response.ok) {
-                const errorInfo = gestionarErrorServidor(response);
-                setError(errorInfo.mensaje);
-                return;
+            interface BackendError {
+                error: string;
+                error_description: string;
             }
 
-            const isUserRole = (value: string): value is UserRole => {
-                const allowedRoles: string[] = ['HAZI', 'GOBIERNOVASCO', 'ADR'];
-                return typeof value === 'string' && allowedRoles.includes(value.toUpperCase());
-            };
+            function isBackendError(result: BackendResponse | BackendError): result is BackendError {
+                return (result as BackendError).error !== undefined;
+            }
 
-            const user: UserID = {
-                name: result.nombre,
-                lastName: result.apellido1,
-                secondSurname: result.apellido2,
-                email: result.userName,
-                role: isUserRole(result.rol) ? result.rol : 'GOBIERNOVASCO',
-                ambit: result.ambit != '' ? result.ambit : parseInt(result.ambit, 10),
-                password: '',
-                status: result.emailConfirmed === 'True',
-                id: result.userId,
-            };
+            const result: BackendResponse | BackendError = await response.json();
 
-            const token = result.access_token;
-            setRegionSeleccionada(Number(user.ambit));
+            if (response && !response.ok) {
+                if (isBackendError(result)) {
+                    if (result.error === 'invalid_grant1') {
+                        setError(t('error:errorCorreoUsuarioNoValido'));
+                    } else if (result.error === 'invalid_grant2') {
+                        setError(t('error:errorContrasenaUsuarioNoValido'));
+                    } else if (result.error === 'invalid_grant3') {
+                        setError(t('error:El usuario esta deshabilitado'));
+                    }
+                } else {
+                    const errorInfo = gestionarErrorServidor(response);
+                    setError(errorInfo.mensaje);
+                }
 
-            login({ user });
+                return;
+            }
+            if (!isBackendError(result)) {
+                const isUserRole = (value: string): value is UserRole => {
+                    const allowedRoles: string[] = ['HAZI', 'GOBIERNOVASCO', 'ADR'];
+                    return typeof value === 'string' && allowedRoles.includes(value.toUpperCase());
+                };
+                const user: UserID = {
+                    name: result.nombre,
+                    lastName: result.apellido1,
+                    secondSurname: result.apellido2,
+                    email: result.userName,
+                    role: isUserRole(result.rol) ? result.rol : 'GOBIERNOVASCO',
+                    ambit: result.ambit != '' ? result.ambit : parseInt(result.ambit, 10),
+                    password: '',
+                    status: result.emailConfirmed === 'True',
+                    id: result.userId,
+                };
 
-            setUser(user);
-            const authUser = {
-                name: result.nombre,
-                email: result.userName,
-            };
-            dispatch(setAuthUser({ user: authUser, token }));
+                const token = result.access_token;
+                const refreshToken = result.refresh_token;
+                setRegionSeleccionada(Number(user.ambit));
 
-            sessionStorage.setItem('token', token);
+                login({ user });
 
-            setTimeout(() => {
-                navigate('/');
-            }, 200);
+                setUser(user);
+                const authUser = {
+                    name: result.nombre,
+                    email: result.userName,
+                };
+                dispatch(setAuthUser({ user: authUser, token }));
+
+                sessionStorage.setItem('access_token', token);
+                if (recordarSesion) {
+                    sessionStorage.setItem('refresh_token', refreshToken);
+                }
+                setTimeout(() => {
+                    navigate('/');
+                }, 200);
+            }
         } catch (err) {
             const errorInfo = gestionarErrorServidor(err);
             setError(errorInfo.mensaje);

@@ -58,7 +58,7 @@ const PasswordFormLogic: React.FC<LoginProps> = ({ code }) => {
 
         try {
             let user;
-            const token = sessionStorage.getItem('token');
+            const token = sessionStorage.getItem('access_token');
             const savedUser = sessionStorage.getItem('user');
             if (savedUser) {
                 user = JSON.parse(savedUser);
