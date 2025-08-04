@@ -49,10 +49,37 @@ const Index = () => {
         );
     }, [search, users]);
 
+    const sortedUsers = useMemo(() => {
+        const sorted = [...filteredUsers];
+        const { columnAccessor, direction } = sortStatus;
+
+        if (!columnAccessor) return sorted;
+
+        sorted.sort((a, b) => {
+            const aValue = a[columnAccessor as keyof UserID];
+            const bValue = b[columnAccessor as keyof UserID];
+
+            if (aValue == null) return 1;
+            if (bValue == null) return -1;
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            }
+
+            if (typeof aValue === 'number' && typeof bValue === 'number') {
+                return direction === 'asc' ? aValue - bValue : bValue - aValue;
+            }
+
+            return direction === 'asc' ? String(aValue).localeCompare(String(bValue)) : String(bValue).localeCompare(String(aValue));
+        });
+
+        return sorted;
+    }, [filteredUsers, sortStatus]);
+
     const pagedUsers = useMemo(() => {
         const start = (page - 1) * pageSize;
-        return filteredUsers.slice(start, start + pageSize);
-    }, [filteredUsers, page, pageSize]);
+        return sortedUsers.slice(start, start + pageSize);
+    }, [sortedUsers, page, pageSize]);
 
     const handleChangeDelete = (id: string) => {
         setUsers((prev) => prev.filter((u) => u.id !== id));
@@ -101,7 +128,7 @@ const Index = () => {
                         <div className="datatables">
                             <DataTable<UserID>
                                 records={pagedUsers}
-                                totalRecords={filteredUsers.length}
+                                totalRecords={sortedUsers.length}
                                 recordsPerPage={pageSize}
                                 page={page}
                                 onPageChange={(p) => setPage(p)}
