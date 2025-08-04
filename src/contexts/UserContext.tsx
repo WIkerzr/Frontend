@@ -28,7 +28,7 @@ const UserContext = createContext<UserContextType>({
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUserState] = useState<UserID | null>(defaultUser());
-    const [recordarSesion, setRecordarSesion] = useState<boolean>(false);
+    const [recordarSesion, setRecordarSesion] = useState<boolean>(true);
 
     const setUser = (newUser: UserID | null) => {
         setUserState(newUser);

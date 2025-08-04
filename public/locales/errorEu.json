@@ -18,5 +18,10 @@
         "errorDesconocidoConCodigo": "Errore ezezaguna ({{codigo}}).",
         "errorNoSePudoConectarServidor": "Ezin izan da zerbitzarira konektatu. Saiatu berriro geroago.",
         "errorGenerico": "Ustekabeko errorea gertatu da.",
-        "errorGenericoConMensaje": "Errorea: {{mensaje}}"
+        "errorGenericoConMensaje": "Errorea: {{mensaje}}",
+
+        
+ "errorCorreoUsuarioNoValido": "Sartutako posta elektronikoa ez da baliogarria, mesedez egiaztatu.",
+  "errorContrasenaUsuarioNoValido": "Sartutako pasahitza ez da baliogarria, mesedez berridatzi pasahitza.",
+  "errorActivoUsuarioNoValido": "Erabiltzailea desgaituta dago."
 }

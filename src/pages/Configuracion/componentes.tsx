@@ -13,7 +13,6 @@ import { EstadosLoading } from '../../types/GeneralTypes';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 import { useUsers } from '../../contexts/UsersContext';
-
 export const newUser: UserID = {
     name: '',
     lastName: '',
@@ -134,7 +133,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState<EstadosLoading>('idle');
 
-    const { i18n } = useTranslation();
+    const [mensajeAMostrar, setMensajeAMostrar] = useState('');
+    const { t, i18n } = useTranslation();
 
     const handleUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -205,7 +205,9 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         return;
                     }
                     if (response.ok) {
+                        setErrorMessage(null);
                         setIsLoading('success');
+                        setSuccessMessage(t('CambiosGuardados'));
                         const data = await response.json();
                         const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(data.data.RegionId));
                         const datosUsuario = {
@@ -244,6 +246,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 }
                 if (response.ok) {
                     setIsLoading('success');
+                    setSuccessMessage(t('UsuarioCreadoCorrectamente'));
                     const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(data.data.RegionId));
                     const dataConRegionName = {
                         ...data.data,
@@ -252,30 +255,22 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     agregarUsuario(dataConRegionName);
                 }
             }
-
-            // if (response && !response.ok) {
-            //     setIsLoading('error');
-            //     const errorInfo = gestionarErrorServidor(response);
-            //     setErrorMessage(errorInfo.mensaje);
-            //     return;
-            // } else {
-            //     setSuccessMessage(t('CambiosGuardados'));
-            //     setIsLoading('success');
-            // }
         } catch (err: any) {
             setIsLoading('error');
             setErrorMessage(err.message || 'Error inesperado');
         } finally {
-            setIsLoading('error');
             setIsSubmitting(false);
         }
     };
-    let mensajeAMostrar = '';
-    if (isLoading === 'success') {
-        mensajeAMostrar = successMessage ? successMessage : '';
-    } else if (isLoading === 'error') {
-        mensajeAMostrar = errorMessage ? errorMessage : '';
-    }
+
+    useEffect(() => {
+        if (isLoading === 'success') {
+            setMensajeAMostrar(successMessage ? successMessage : '');
+        } else if (isLoading === 'error') {
+            setMensajeAMostrar(errorMessage ? errorMessage : '');
+        }
+    }, [isLoading]);
+
     return (
         <>
             <LoadingOverlay isLoading={isLoading} message={mensajeAMostrar} onComplete={handleCloseModal} />
@@ -377,6 +372,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, messa
                             <line x1="15" y1="9" x2="9" y2="15" strokeLinecap="round" strokeLinejoin="round" />
                             <line x1="9" y1="9" x2="15" y2="15" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
+                        {/* <IconXCircle/> */}
                     </div>
                     <p className="mt-2 text-red-600 font-semibold bg-white">{message}</p>
                 </div>
