@@ -188,6 +188,7 @@
     "paginacion":"Mostrando {{from}} de {{to}} con {{totalRecords}} entradas",
     "recorsPerPage":"Registros por páginas",
     "autoDesabilitando":"Estás intentando deshabilitar tu propio usuario. ¿Seguro que quieres continuar?",
+    "noData":"No hay datos para mostrar",
 
     "errorGuardar": "❌ Error al guardar: ",
     "errorActualizarUsuario": "Error al actualizar usuario:",

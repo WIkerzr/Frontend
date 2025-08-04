@@ -24,6 +24,7 @@ import TableMantineProvider from './contexts/TableMantineContext';
 import { EstadosPorAnioProvider } from './contexts/EstadosPorAnioContext';
 import { RegionDataProvider } from './contexts/DatosAnualContext';
 import { IndicadoresProvider } from './contexts/IndicadoresContext';
+import { UsersProvider } from './contexts/UsersContext';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
@@ -33,15 +34,17 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                     <AuthProvider>
                         <MantineProvider>
                             <RegionProvider>
-                                <RegionDataProvider>
-                                    <IndicadoresProvider>
-                                        <TableMantineProvider>
-                                            <EstadosPorAnioProvider>
-                                                <RouterProvider router={router} />
-                                            </EstadosPorAnioProvider>
-                                        </TableMantineProvider>
-                                    </IndicadoresProvider>
-                                </RegionDataProvider>
+                                <UsersProvider>
+                                    <RegionDataProvider>
+                                        <IndicadoresProvider>
+                                            <TableMantineProvider>
+                                                <EstadosPorAnioProvider>
+                                                    <RouterProvider router={router} />
+                                                </EstadosPorAnioProvider>
+                                            </TableMantineProvider>
+                                        </IndicadoresProvider>
+                                    </RegionDataProvider>
+                                </UsersProvider>
                             </RegionProvider>
                         </MantineProvider>
                     </AuthProvider>

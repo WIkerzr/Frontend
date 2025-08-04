@@ -53,7 +53,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
 
     useEffect(() => {
         const todosLosCamposRellenosUserModal = Object.entries(datosUsuario).every(([key, value]) => {
-            if (key === 'ambit') {
+            if (key === 'ambit' || key === 'RegionName') {
                 if (datosUsuario.role !== 'ADR') {
                     return true;
                 }
@@ -70,6 +70,14 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
         setConditional(todosLosCamposRellenosUserModal);
     }, [datosUsuario, regionSeleccionada]);
 
+    const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (e.target.value !== 'HAZI') {
+            userData.RegionName = '';
+            userData.ambit = '';
+            setRegionSeleccionada(null);
+        }
+        onChange(e);
+    };
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
@@ -85,24 +93,24 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 type="text"
                                 placeholder={`${t('email')}@email.com`}
                                 className="form-input ltr:rounded-l-none rtl:rounded-r-none"
-                                value={datosUsuario.email as string}
+                                value={userData.email as string}
                                 name="email"
                                 onChange={onChange}
                             />
                         </div>
                     </div>
-                    <Input nombreInput={t('name')} type="text" value={datosUsuario.name as string} onChange={onChange} name="name" />
-                    <Input nombreInput={t('lastName')} type="text" value={datosUsuario.lastName as string} onChange={onChange} name="lastName" />
-                    <Input nombreInput={t('secondSurname')} type="text" value={datosUsuario.secondSurname as string} onChange={onChange} name="secondSurname" />
+                    <Input nombreInput={t('name')} type="text" value={userData.name as string} onChange={onChange} name="name" />
+                    <Input nombreInput={t('lastName')} type="text" value={userData.lastName as string} onChange={onChange} name="lastName" />
+                    <Input nombreInput={t('secondSurname')} type="text" value={userData.secondSurname as string} onChange={onChange} name="secondSurname" />
                     <div>
                         <label className="block text-sm font-medium mb-1">{t('role')}</label>
-                        <select className="form-select w-full" name="role" value={datosUsuario.role as string} onChange={onChange} disabled={roleDisabled}>
+                        <select className="form-select w-full" name="role" value={userData.role as string} onChange={(e) => handleRoleChange(e)} disabled={roleDisabled}>
                             <option value="ADR">{t('adr')}</option>
                             <option value="HAZI">{t('hazi')}</option>
                             <option value="GV">{t('gobiernoVasco')}</option>
                         </select>
                     </div>
-                    {datosUsuario.role === 'ADR' || datosUsuario.role === 'adr' ? (
+                    {userData.role === 'ADR' || userData.role === 'adr' ? (
                         <div>
                             <label className="block text-sm font-medium mb-1">{t('comarca')}</label>
                             <select

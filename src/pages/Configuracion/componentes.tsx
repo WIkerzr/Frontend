@@ -8,11 +8,11 @@ import { User } from '../../types/users';
 import UserDataForm from '../profile/userDateForm';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
-import { useUsers } from './Usuarios';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
+import { useUsers } from '../../contexts/UsersContext';
 
 export const newUser: UserID = {
     name: '',
@@ -138,10 +138,19 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
 
     const handleUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setUserData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
+        setUserData((prevData) => {
+            const updatedData = {
+                ...prevData,
+                [name]: value,
+            };
+
+            if (name === 'role' && value !== 'adr') {
+                updatedData.ambit = '';
+            }
+
+            return updatedData;
+        });
+
         if (isSubmitting) {
             setErrorMessage(null);
             setSuccessMessage(null);
@@ -201,7 +210,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(data.data.RegionId));
                         const datosUsuario = {
                             ...data.data,
-                            RegionName: region ? (i18n.language === 'es' ? region.NameEs : region.NameEu) : 'Desconocido',
+                            RegionName: region ? (i18n.language === 'es' ? region.NameEs : region.NameEu) : '-',
                         };
                         actualizarUsuario(datosUsuario);
                     }
@@ -235,7 +244,12 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 }
                 if (response.ok) {
                     setIsLoading('success');
-                    agregarUsuario(data.data);
+                    const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(data.data.RegionId));
+                    const dataConRegionName = {
+                        ...data.data,
+                        RegionName: region ? (i18n.language === 'es' ? region.NameEs : region.NameEu) : 'Desconocido',
+                    };
+                    agregarUsuario(dataConRegionName);
                 }
             }
 

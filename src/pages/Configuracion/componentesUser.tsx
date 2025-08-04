@@ -1,28 +1,21 @@
-import Tippy from '@tippyjs/react';
-import { sortBy } from 'lodash';
-import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { forwardRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
-import { IRootState } from '../../store';
 import { UserID } from '../../types/users';
 import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { useUsers } from './Usuarios';
 import { useAuth } from '../../contexts/AuthContext';
-import IconRefresh from '../../components/Icon/IconRefresh';
 
 interface EditUserProps {
     editUser: UserID;
     onChange: () => void;
 }
 
-const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onChange }, ref) => {
+export const EditUser = forwardRef<HTMLButtonElement, EditUserProps>(({ editUser, onChange }, ref) => {
     const { t } = useTranslation();
     const { user } = useUser();
     const [showModal, setShowModal] = useState(false);
@@ -53,9 +46,8 @@ interface DeleteUserProps {
     onChange: () => void;
 }
 
-const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ editUser, setErrorMessage, onChange }, ref) => {
+export const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ editUser, setErrorMessage, onChange }, ref) => {
     const { t } = useTranslation();
-    const { eliminarUsuario } = useUsers();
 
     const { user } = useUser();
     const { logout } = useAuth();
@@ -96,7 +88,6 @@ const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ editUser, s
             alert(t('usuarioEliminadoCorrectamente'));
 
             if (response.ok) {
-                eliminarUsuario(editUser.id);
                 onChange();
                 if (user && editUser.id === user.id) {
                     handleLogout();
@@ -122,7 +113,7 @@ interface ChangeStatusProps {
     onSuccess?: () => void;
 }
 
-const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, setErrorMessage }) => {
+export const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, setErrorMessage }) => {
     const { t } = useTranslation();
     const [localStatus, setLocalStatus] = useState<boolean>(!!value.status);
     const { user } = useUser();
@@ -183,11 +174,7 @@ const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, setErrorM
     );
 };
 
-interface ElimarUserProps {
-    onChange: () => void;
-}
-
-const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }, ref) => {
+export const NewUser = () => {
     const { t } = useTranslation();
 
     const [showModal, setShowModal] = useState(false);
@@ -202,13 +189,12 @@ const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }, ref) 
     const handleClose = () => {
         setTimeout(() => {
             setShowModal(false);
-            onChange();
         }, 300);
     };
 
     return (
         <>
-            <div className="flex-grow" ref={ref}></div>
+            <div className="flex-grow"></div>
             <button type="button" className="btn btn-primary w-1/4 " onClick={handleOpen}>
                 {t('agregarUsuario')}
             </button>
@@ -218,142 +204,4 @@ const NewUser = forwardRef<HTMLDivElement, ElimarUserProps>(({ onChange }, ref) 
             </NewModal>
         </>
     );
-});
-
-export const UsersTable = forwardRef<HTMLButtonElement>(() => {
-    const { users, refrescarUsuarios, fechaUltimoActualizadoBBDD, llamadaBBDDUsers } = useUsers();
-
-    const { t } = useTranslation();
-    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
-    const [page, setPage] = useState(1);
-    const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
-    const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<UserID>>({ columnAccessor: 'id', direction: 'asc' });
-
-    const [datosMostrar, setDatosMostrar] = useState<UserID[]>([]);
-    const [recordsPaginados, setRecordsPaginados] = useState<UserID[]>([]);
-
-    useEffect(() => {
-        let data = [...users];
-
-        if (search.trim()) {
-            const s = search.toLowerCase();
-            data = data.filter(
-                (item) =>
-                    (item.status && String(item.status).toLowerCase().includes(s)) ||
-                    (item.name as string).toLowerCase().includes(s) ||
-                    (item.lastName as string).toLowerCase().includes(s) ||
-                    (item.secondSurname as string).toLowerCase().includes(s) ||
-                    (item.email as string).toLowerCase().includes(s) ||
-                    (item.role as string).toLowerCase().includes(s) ||
-                    (item.RegionName && (item.RegionName as string).toLowerCase().includes(s))
-            );
-        }
-
-        data = sortBy(data, sortStatus.columnAccessor);
-        if (sortStatus.direction === 'desc') data = data.reverse();
-
-        setDatosMostrar(data);
-        setPage(1);
-    }, [users, search, sortStatus]);
-
-    useEffect(() => {
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize;
-        setRecordsPaginados(datosMostrar.slice(from, to));
-    }, [datosMostrar, page, pageSize]);
-
-    return (
-        <div>
-            <div className="flex items-center space-x-4 mb-5 w-[100%]">
-                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('buscarUsuario')} value={search} onChange={(e) => setSearch(e.target.value)} />
-                <NewUser onChange={() => refrescarUsuarios()} />
-            </div>
-            <div className="flex justify-between items-center mb-2">
-                <div>{errorMessage && <span className="text-red-500 hover:text-red-700">{errorMessage}</span>}</div>
-
-                <div className="flex items-center space-x-2">
-                    {fechaUltimoActualizadoBBDD && (
-                        <div>
-                            {new Date(fechaUltimoActualizadoBBDD).toLocaleString('es-ES', {
-                                dateStyle: 'medium',
-                                timeStyle: 'short',
-                            })}
-                        </div>
-                    )}
-                    <Tippy content={t('Actualizar')}>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                llamadaBBDDUsers();
-                            }}
-                        >
-                            <IconRefresh />
-                        </button>
-                    </Tippy>
-                </div>
-            </div>
-            <div className="panel mt-6">
-                <div className="datatables">
-                    <DataTable<UserID>
-                        records={recordsPaginados}
-                        totalRecords={datosMostrar.length}
-                        recordsPerPage={pageSize}
-                        page={page}
-                        onPageChange={(p) => setPage(p)}
-                        recordsPerPageOptions={PAGE_SIZES}
-                        onRecordsPerPageChange={setPageSize}
-                        sortStatus={sortStatus}
-                        onSortStatusChange={setSortStatus}
-                        highlightOnHover
-                        className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'}`}
-                        columns={[
-                            {
-                                accessor: 'status',
-                                title: '',
-                                render: (row) => <ChangeStatus key={`status-${row.email}`} setErrorMessage={setErrorMessage} value={row} />,
-                            },
-                            { accessor: 'name', title: t('name'), sortable: true },
-                            { accessor: 'lastName', title: t('lastName'), sortable: true },
-                            { accessor: 'secondSurname', title: t('secondSurname'), sortable: true },
-                            { accessor: 'email', title: t('email'), sortable: true },
-                            {
-                                accessor: 'role',
-                                title: t('role'),
-                                sortable: true,
-                                render: (row): React.ReactNode => {
-                                    const map: Record<string, string> = {
-                                        GV: 'Inst. Pública',
-                                    };
-                                    const role = row.role as string;
-                                    return map[role] || role;
-                                },
-                            },
-                            { accessor: 'RegionName', title: t('ambit'), sortable: true },
-                            {
-                                accessor: 'vacio2',
-                                title: '',
-                                render: (row) => (
-                                    <div className="flex justify-end space-x-3">
-                                        <Tippy content={t('editar')}>
-                                            <EditUser editUser={row} onChange={() => refrescarUsuarios()} />
-                                        </Tippy>
-                                        <Tippy content={t('borrar')}>
-                                            <DeleteUser editUser={row} setErrorMessage={setErrorMessage} onChange={() => refrescarUsuarios()} />
-                                        </Tippy>
-                                    </div>
-                                ),
-                            },
-                        ]}
-                        minHeight={200}
-                        paginationText={({ from, to, totalRecords }) => t('paginacion', { from: `${from}`, to: `${to}`, totalRecords: `${totalRecords}` })}
-                        recordsPerPageLabel={t('recorsPerPage')}
-                    />
-                </div>
-            </div>
-        </div>
-    );
-});
+};
