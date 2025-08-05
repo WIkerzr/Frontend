@@ -12,7 +12,7 @@ import React from 'react';
 import { Region } from '../../components/Utils/gets/getRegiones';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { Aviso, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
+import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -509,7 +509,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
                 RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
             })),
         };
-        const response = await fetch(`${ApiTarget}/nuevoIndicadores`, {
+        const response = await FetchConRefreshRetry(`${ApiTarget}/nuevoIndicadores`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -565,7 +565,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
 
     const handleEditarIndicadorRealizacion = async () => {
         const token = sessionStorage.getItem('access_token');
-        const response = await fetch(`${ApiTarget}/editarIndicadorRealizacion`, {
+        const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorRealizacion`, {
             method: 'PUT',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -587,7 +587,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ origen
 
     const handleEditarIndicadorResultado = async () => {
         const token = sessionStorage.getItem('access_token');
-        const response = await fetch(`${ApiTarget}/editarIndicadorResultado`, {
+        const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorResultado`, {
             method: 'PUT',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -909,7 +909,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiRealizacionAEliminar.NameEu : indiRealizacionAEliminar.NameEs }));
         if (!confirmDelete) return;
         try {
-            const response = await fetch(`${ApiTarget}/${indiRealizacionAEliminar.Id}`, {
+            const response = await FetchConRefreshRetry(`${ApiTarget}/${indiRealizacionAEliminar.Id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -951,7 +951,7 @@ export const TablaIndicadores: React.FC<TablaIndicadoresProps> = ({ origen }) =>
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiResultadoAEliminar.NameEu : indiResultadoAEliminar.NameEs }));
         if (!confirmDelete) return;
         try {
-            const response = await fetch(`${ApiTarget}/${indiResultadoAEliminar.Id}`, {
+            const response = await FetchConRefreshRetry(`${ApiTarget}/${indiResultadoAEliminar.Id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -1158,7 +1158,7 @@ type PropsLlamadaIndicadores = {
 export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRealizacion, setIndicadoresResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
     const token = sessionStorage.getItem('access_token');
     try {
-        const res = await fetch(`${ApiTarget}/indicadores`, {
+        const res = await FetchConRefreshRetry(`${ApiTarget}/indicadores`, {
             headers: {
                 Authorization: `Bearer ` + token,
                 'Content-Type': 'application/json',

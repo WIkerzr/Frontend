@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
+import { FetchConRefreshRetry, gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
 import { UserID } from '../../types/users';
 import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
 import { useUser } from '../../contexts/UserContext';
@@ -69,7 +69,7 @@ export const DeleteUser = forwardRef<HTMLButtonElement, DeleteUserProps>(({ edit
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch(`${ApiTarget}/deleteUser`, {
+            const response = await FetchConRefreshRetry(`${ApiTarget}/deleteUser`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -139,7 +139,7 @@ export const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, se
             id: value.id,
         };
         try {
-            const response = await fetch(`${ApiTarget}/user`, {
+            const response = await FetchConRefreshRetry(`${ApiTarget}/user`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

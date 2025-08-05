@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRegionContext } from './RegionContext';
 import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../components/Utils/gets/controlDev';
-import { actualizarFechaLLamada, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
+import { actualizarFechaLLamada, FetchConRefreshRetry, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { UserIDList, UserRegionId } from '../types/users';
 
 interface UsersContextType {
@@ -82,7 +82,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
             setLoading(true);
             const fetchUsers = async () => {
                 try {
-                    const res = await fetch(`${ApiTarget}/users`, {
+                    const res = await FetchConRefreshRetry(`${ApiTarget}/users`, {
                         headers: {
                             Authorization: `Bearer ` + token,
                             'Content-Type': 'application/json',

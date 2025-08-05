@@ -4,7 +4,7 @@ import { useState } from 'react';
 import UserDataForm from './userDateForm';
 import { UserID } from '../../types/users';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
+import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 
 const UserDateFormLogic: React.FC = () => {
     const getInitialUserData = (): UserID => {
@@ -66,7 +66,7 @@ const UserDateFormLogic: React.FC = () => {
         const token = sessionStorage.getItem('access_token');
 
         try {
-            const response = await fetch(`${ApiTarget}/user`, {
+            const response = await FetchConRefreshRetry(`${ApiTarget}/user`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,

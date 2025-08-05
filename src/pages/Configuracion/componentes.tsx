@@ -218,7 +218,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     }
                 }
             } else if (accion === 'nuevo') {
-                response = await fetch(`${ApiTarget}/newUser`, {
+                response = await FetchConRefreshRetry(`${ApiTarget}/newUser`, {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${token}`,
