@@ -1,27 +1,41 @@
-/* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { indicadorInicialResultado, IndicadorRealizacion, IndicadorResultado } from '../types/Indicadores';
+import { IndicadorRealizacion, IndicadorResultado } from '../types/Indicadores';
 import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from './RegionContext';
 import { useUser } from './UserContext';
 
+type IndicadorTipo = 'Realizacion' | 'Resultado';
+export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
+
+interface IndicadorSeleccionado {
+    tipo: IndicadorTipo;
+    ADR: boolean;
+    indicador: IndicadorRealizacion | IndicadorResultado | null;
+    accion: Acciones;
+    resultadosRelacionados?: IndicadorResultado[]; // solo si tipo === 'Realizacion'
+}
+const indicadorSeleccionadoInicial: IndicadorSeleccionado = {
+    tipo: 'Resultado',
+    ADR: false,
+    indicador: null,
+    accion: null,
+};
+
 type IndicadoresContextType = {
     indicadoresRealizacion: IndicadorRealizacion[];
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     indicadoresResultado: IndicadorResultado[];
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
-    // indicadoresRealizacionRegion: IndicadorRealizacion[][];
-    // setIndicadoresRealizacionRegion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[][]>>;
-    // indicadoresResultadoRegion: IndicadorResultado[][];
-    // setIndicadoresResultadoRegion: React.Dispatch<React.SetStateAction<IndicadorResultado[][]>>;
     indicadoresRealizacionADR: IndicadorRealizacion[];
     setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     indicadoresResultadoADR: IndicadorResultado[];
     setIndicadoresResultadoADR: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
-    indicadorSeleccionada: IndicadorRealizacion | IndicadorResultado | null;
-    SeleccionEditarIndicador: (indicador: IndicadorRealizacion | IndicadorResultado | null) => void;
+
+    indicadorSeleccionado: IndicadorSeleccionado | null;
+    setIndicadorSeleccionado: React.Dispatch<React.SetStateAction<IndicadorSeleccionado | null>>;
+
     loading: boolean;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
     fechaUltimoActualizadoBBDD: Date;
@@ -39,18 +53,14 @@ const IndicadorContext = createContext<IndicadoresContextType>({
     setIndicadoresRealizacionADR: () => {},
     indicadoresResultadoADR: [],
     setIndicadoresResultadoADR: () => {},
-    indicadorSeleccionada: indicadorInicialResultado,
-    SeleccionEditarIndicador: () => {},
+    indicadorSeleccionado: indicadorSeleccionadoInicial,
+    setIndicadorSeleccionado: () => {},
     loading: true,
     setLoading: () => {},
     fechaUltimoActualizadoBBDD: new Date(),
     mensajeError: '',
     llamarBBDD: () => {},
     PrimeraLlamada: () => {},
-    // indicadoresRealizacionRegion: [],
-    // setIndicadoresRealizacionRegion: () => {},
-    // indicadoresResultadoRegion: [],
-    // setIndicadoresResultadoRegion: () => {},
 });
 
 export const useIndicadoresContext = () => useContext(IndicadorContext);
@@ -63,9 +73,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);
     const [indicadoresRealizacionADR, setIndicadoresRealizacionADR] = useState<IndicadorRealizacion[]>([]);
-    // const [indicadoresRealizacionRegion, setIndicadoresRealizacionRegion] = useState<IndicadorRealizacion[][]>([]);
     const [indicadoresResultadoADR, setIndicadoresResultadoADR] = useState<IndicadorResultado[]>([]);
-    // const [indicadoresResultadoRegion, setIndicadoresResultadoRegion] = useState<IndicadorResultado[][]>([]);
     const [loading, setLoading] = useState(true);
 
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
@@ -145,6 +153,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const PrimeraLlamada = () => {
+        setMensajeError('');
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
             setLoading(true);
@@ -173,18 +182,6 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             }
         }
     }, [regionSeleccionada]);
-
-    // useEffect(() => {
-    //     if (!regionSeleccionada) {
-    //         return;
-    //     }
-    //     setIndicadoresRealizacionADR(indicadoresRealizacionRegion[regionSeleccionada]);
-    //     setIndicadoresResultadoADR(indicadoresResultadoRegion[regionSeleccionada]);
-    //     console.log('indicadoresRealizacionRegion');
-    //     console.log(indicadoresRealizacionRegion);
-    //     console.log('indicadoresResultadoRegion');
-    //     console.log(indicadoresResultadoRegion);
-    // }, [regionSeleccionada]);
 
     useEffect(() => {
         if (!indicadoresRealizacionADR) {
@@ -232,15 +229,31 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         actualizarFechaLLamada('indicadores');
     }, [fechaUltimoActualizadoBBDD]);
 
-    const [indicadorSeleccionada, setIndicadorSeleccionada] = useState<IndicadorRealizacion | IndicadorResultado | null>(() => {
-        const saved = sessionStorage.getItem('indicadorSeleccionada');
-        return saved ? (JSON.parse(saved) as IndicadorRealizacion) : null;
+    const [indicadorSeleccionado, setIndicadorSeleccionado] = useState<IndicadorSeleccionado | null>(() => {
+        const saved = sessionStorage.getItem('indicadorSeleccionado');
+        if (saved) {
+            try {
+                return JSON.parse(saved) as IndicadorSeleccionado;
+            } catch {
+                return {
+                    tipo: 'Resultado',
+                    ADR: false,
+                    indicador: null,
+                    accion: null,
+                };
+            }
+        } else {
+            return {
+                tipo: 'Resultado',
+                ADR: false,
+                indicador: null,
+                accion: null,
+            };
+        }
     });
-
-    const SeleccionEditarIndicador = (indicador: IndicadorRealizacion | IndicadorResultado | null) => {
-        setIndicadorSeleccionada(indicador);
-        sessionStorage.setItem('indicadorSeleccionada', JSON.stringify(indicador));
-    };
+    useEffect(() => {
+        sessionStorage.setItem('estadoIndicador', JSON.stringify(indicadorSeleccionado));
+    }, [indicadorSeleccionado]);
 
     return (
         <IndicadorContext.Provider
@@ -253,18 +266,14 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 setIndicadoresRealizacionADR,
                 indicadoresResultadoADR,
                 setIndicadoresResultadoADR,
-                indicadorSeleccionada,
-                SeleccionEditarIndicador,
                 fechaUltimoActualizadoBBDD,
                 mensajeError,
+                indicadorSeleccionado,
+                setIndicadorSeleccionado,
                 loading,
                 setLoading,
                 llamarBBDD,
                 PrimeraLlamada,
-                // indicadoresRealizacionRegion,
-                // indicadoresResultadoRegion,
-                // setIndicadoresRealizacionRegion,
-                // setIndicadoresResultadoRegion,
             }}
         >
             {children}

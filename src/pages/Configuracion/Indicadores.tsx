@@ -1,7 +1,6 @@
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { indicadorInicial } from '../../types/Indicadores';
 import { Loading } from '../../components/Utils/animations';
 import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
 import IconRefresh from '../../components/Icon/IconRefresh';
@@ -11,8 +10,18 @@ import { PrintFecha } from '../../components/Utils/utils';
 
 const Index = () => {
     const { t } = useTranslation();
-    const { setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, loading, mensajeError, fechaUltimoActualizadoBBDD, llamarBBDD, PrimeraLlamada, setLoading } =
-        useIndicadoresContext();
+    const {
+        setIndicadoresRealizacion,
+        indicadoresResultado,
+        setIndicadoresResultado,
+        loading,
+        mensajeError,
+        fechaUltimoActualizadoBBDD,
+        llamarBBDD,
+        PrimeraLlamada,
+        setLoading,
+        setIndicadorSeleccionado,
+    } = useIndicadoresContext();
 
     const [modalNuevo, setModalNuevo] = useState(false);
 
@@ -27,15 +36,24 @@ const Index = () => {
             ) : (
                 <div className="flex flex-col w-full">
                     <div className="flex flex-col justify-end mb-5 items-end">
-                        <button onClick={() => setModalNuevo(true)} className="btn btn-primary w-[300px]">
+                        <button
+                            onClick={() => {
+                                setModalNuevo(true);
+                                setIndicadorSeleccionado({
+                                    tipo: 'Realizacion',
+                                    ADR: false,
+                                    indicador: null,
+                                    accion: 'Crear',
+                                });
+                            }}
+                            className="btn btn-primary w-[300px]"
+                        >
                             {t('NuevoIndicador')}
                         </button>
                         <ModalNuevoIndicador
                             origen="indicadoresNuevo"
                             isOpen={modalNuevo}
                             onClose={() => setModalNuevo(false)}
-                            accion="Nuevo"
-                            datosIndicador={indicadorInicial}
                             onSave={(nuevoIndicadorRealizacion) => {
                                 setIndicadoresRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
                                 if (!nuevoIndicadorRealizacion.Resultados) {

@@ -13,8 +13,18 @@ import { PrintFecha } from '../../components/Utils/utils';
 
 const Index = () => {
     const { t } = useTranslation();
-    const { setIndicadoresRealizacionADR, indicadoresResultadoADR, setIndicadoresResultadoADR, mensajeError, fechaUltimoActualizadoBBDD, llamarBBDD, loading, setLoading, PrimeraLlamada } =
-        useIndicadoresContext();
+    const {
+        setIndicadoresRealizacionADR,
+        indicadoresResultadoADR,
+        setIndicadoresResultadoADR,
+        mensajeError,
+        fechaUltimoActualizadoBBDD,
+        llamarBBDD,
+        loading,
+        setLoading,
+        PrimeraLlamada,
+        setIndicadorSeleccionado,
+    } = useIndicadoresContext();
     const [modalNuevo, setModalNuevo] = useState(false);
     const { regionSeleccionada } = useRegionContext();
     const { user } = useUser();
@@ -33,14 +43,24 @@ const Index = () => {
                     {(role.toUpperCase() !== 'HAZI' || (role.toUpperCase() === 'HAZI' && regionSeleccionada != null)) && (
                         <div className="flex flex-col justify-end mb-5 items-end">
                             <>
-                                <button onClick={() => setModalNuevo(true)} className="btn btn-primary w-[300px]">
+                                <button
+                                    onClick={() => {
+                                        setModalNuevo(true);
+                                        setIndicadorSeleccionado({
+                                            tipo: 'Realizacion',
+                                            ADR: true,
+                                            indicador: null,
+                                            accion: 'Crear',
+                                        });
+                                    }}
+                                    className="btn btn-primary w-[300px]"
+                                >
                                     {t('NuevoIndicador')}
                                 </button>
                                 <ModalNuevoIndicador
                                     origen="indicadoresADRNuevo"
                                     isOpen={modalNuevo}
                                     onClose={() => setModalNuevo(false)}
-                                    accion="Nuevo"
                                     onSave={(nuevoIndicadorRealizacion) => {
                                         setIndicadoresRealizacionADR((prev) => [...prev, nuevoIndicadorRealizacion]);
                                         if (!nuevoIndicadorRealizacion.Resultados) {

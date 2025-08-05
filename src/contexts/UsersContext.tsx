@@ -77,6 +77,10 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
     const llamadaBBDDUsers = (primeraLLamada?: boolean) => {
         const storedUsers = localStorage.getItem('users');
 
+        if (primeraLLamada) {
+            setError(null);
+        }
+
         if (!primeraLLamada || !storedUsers) {
             const token = sessionStorage.getItem('access_token');
             setLoading(true);
