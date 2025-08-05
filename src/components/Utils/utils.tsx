@@ -337,3 +337,38 @@ export async function FetchConRefreshRetry(input: RequestInfo, init?: RequestIni
 
     return retryResponse;
 }
+
+interface FechaProps {
+    date: string | Date | null;
+}
+const mesesEu = ['urtarrila', 'otsaila', 'martxoa', 'apirila', 'maiatza', 'ekaina', 'uztaila', 'abuztua', 'iraila', 'urria', 'azaroa', 'abendua'];
+
+function formatFechaEu(date: Date) {
+    const day = date.getDate();
+    const month = mesesEu[date.getMonth()];
+    const hour = date.getHours().toString().padStart(2, '0');
+    const minute = date.getMinutes().toString().padStart(2, '0');
+    const second = date.getSeconds().toString().padStart(2, '0');
+    return `${day} ${month} ${hour}:${minute}:${second}`;
+}
+
+export function PrintFecha({ date }: FechaProps) {
+    if (!date) {
+        return <></>;
+    }
+    const { i18n } = useTranslation();
+
+    const locale = i18n.language === 'eu' ? 'eu' : 'es-ES';
+
+    const fechaObj = date instanceof Date ? date : new Date(date);
+
+    const formatter = new Intl.DateTimeFormat(locale, {
+        day: 'numeric',
+        month: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+
+    return <div>{locale === 'eu' ? formatFechaEu(fechaObj) : formatter.format(fechaObj)}</div>;
+}

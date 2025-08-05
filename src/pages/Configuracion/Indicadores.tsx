@@ -7,6 +7,7 @@ import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores'
 import IconRefresh from '../../components/Icon/IconRefresh';
 import Tippy from '@tippyjs/react';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
+import { PrintFecha } from '../../components/Utils/utils';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -51,14 +52,7 @@ const Index = () => {
                         <div>{mensajeError && <span className="text-red-500 hover:text-red-700">{mensajeError}</span>}</div>
 
                         <div className="flex items-center space-x-2">
-                            {fechaUltimoActualizadoBBDD && (
-                                <div>
-                                    {new Date(fechaUltimoActualizadoBBDD).toLocaleString('es-ES', {
-                                        dateStyle: 'medium',
-                                        timeStyle: 'short',
-                                    })}
-                                </div>
-                            )}
+                            <PrintFecha date={fechaUltimoActualizadoBBDD} />
                             <Tippy content={t('Actualizar')}>
                                 <button
                                     type="button"

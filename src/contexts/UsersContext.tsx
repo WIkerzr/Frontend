@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRegionContext } from './RegionContext';
 import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../components/Utils/gets/controlDev';
-import { formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
+import { actualizarFechaLLamada, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { UserIDList, UserRegionId } from '../types/users';
 
 interface UsersContextType {
@@ -30,12 +30,17 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
         const fechaStr = obtenerFechaLlamada('users');
         return fechaStr ? new Date(fechaStr) : new Date();
     });
+
     const [users, setUsers] = useState<UserIDList[]>([]);
 
     useEffect(() => {
         const saved = localStorage.getItem('users');
         setUsers(saved ? JSON.parse(saved) : []);
     }, []);
+
+    useEffect(() => {
+        actualizarFechaLLamada('users');
+    }, [fechaUltimoActualizadoBBDD]);
 
     const actualizarUsers = (nuevoUsers: UserIDList[]) => {
         nuevoUsers.forEach((user) => {

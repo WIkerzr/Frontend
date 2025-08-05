@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import { IRootState } from '../../store';
 import { UserID } from '../../types/users';
+import { PrintFecha } from '../../components/Utils/utils';
 
 const Index = () => {
     const { users, setUsers, loading, error, llamadaBBDDUsers, fechaUltimoActualizadoBBDD } = useUsers();
@@ -109,14 +110,7 @@ const Index = () => {
                         <div>{errorMessage && <span className="text-red-500 hover:text-red-700">{errorMessage}</span>}</div>
 
                         <div className="flex items-center space-x-2">
-                            {fechaUltimoActualizadoBBDD && (
-                                <div>
-                                    {new Date(fechaUltimoActualizadoBBDD).toLocaleString('es-ES', {
-                                        dateStyle: 'medium',
-                                        timeStyle: 'short',
-                                    })}
-                                </div>
-                            )}
+                            <PrintFecha date={fechaUltimoActualizadoBBDD} />
                             <Tippy content={t('Actualizar')}>
                                 <button type="button" onClick={() => llamadaBBDDUsers()}>
                                     <IconRefresh />
