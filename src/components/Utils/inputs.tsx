@@ -6,6 +6,7 @@ import { yearIniciado } from '../../types/tipadoPlan';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { formateaConCeroDelante } from './utils';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
     required?: boolean;
@@ -108,6 +109,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
     const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
+
     useEffect(() => {
         const savedRegion = sessionStorage.getItem('regionSeleccionada');
         if (savedRegion !== null && !isNaN(Number(savedRegion))) {
@@ -117,8 +119,9 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
 
     useEffect(() => {
         if (regionSeleccionada !== null) {
-            sessionStorage.setItem('regionSeleccionada', regionSeleccionada.toString());
+            sessionStorage.setItem('regionSeleccionada', formateaConCeroDelante(regionSeleccionada));
         }
+        //TODO llamada YearData segun region
         setYearData(yearIniciado);
     }, [regionSeleccionada]);
 
@@ -140,12 +143,12 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
                     disabled={disabled}
                     className="form-select min-w-max w-full"
                     style={{ minWidth: 'calc(100% + 10px)' }}
-                    value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada.toString()}
+                    value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : formateaConCeroDelante(regionSeleccionada)}
                     onChange={handleChange}
                 >
                     <option value="notSelect">{t('sinSeleccionar')}</option>
                     {regiones.map((region) => (
-                        <option key={region.RegionId} value={region.RegionId.toString()}>
+                        <option key={region.RegionId} value={region.RegionId}>
                             {getRegionName(region)}
                         </option>
                     ))}

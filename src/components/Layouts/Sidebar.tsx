@@ -163,12 +163,18 @@ const Sidebar = () => {
                             )}
                             {Fases >= 2 && (
                                 <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1 justify-center">
-                                    <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={handleChange}>
-                                        {anios.map((a) => (
-                                            <option key={a} value={a}>
-                                                {a}
+                                    <select value={anio} className="py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent" onChange={handleChange} disabled={anios.length === 0}>
+                                        {anios.length > 0 ? (
+                                            anios.map((a) => (
+                                                <option key={a} value={a}>
+                                                    {a}
+                                                </option>
+                                            ))
+                                        ) : (
+                                            <option value={new Date().getFullYear()} disabled>
+                                                {new Date().getFullYear()}
                                             </option>
-                                        ))}
+                                        )}
                                     </select>
                                 </h2>
                             )}

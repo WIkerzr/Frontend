@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getRegiones, Region } from '../components/Utils/gets/getRegiones';
 import { useUser } from './UserContext';
 import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
+import { formateaConCeroDelante } from '../components/Utils/utils';
 
 type RegionContextType = {
     regiones: Region[];
@@ -57,15 +58,14 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     useEffect(() => {
         if (regionSeleccionada !== null && !isNaN(regionSeleccionada)) {
-            sessionStorage.setItem('regionSeleccionada', String(regionSeleccionada));
+            const regionSeleccionadaCon0 = formateaConCeroDelante(regionSeleccionada);
+            sessionStorage.setItem('regionSeleccionada', regionSeleccionadaCon0);
 
-            //Se guarda la region seleccionada para uso futuro
-            const regionCompleta = regiones.find((r) => r.RegionId === regionSeleccionada);
+            const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionadaCon0);
             if (regionCompleta) {
                 setRegionActual(regionCompleta);
             }
 
-            //Llamada al servidor para obtener los datos de la region
             setRegionData(datosRegion);
         }
     }, [regionSeleccionada]);
@@ -84,14 +84,6 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     .finally(() => setLoading(false));
                 return;
             }
-
-            // const regions = JSON.parse(regionesStr);
-            // if (regions.length > 0) {
-            //     const regionesArr = JSON.parse(regionesStr);
-            //     setRegiones(regionesArr);
-            //     setRegionSeleccionadaState(user);
-            //     setLoading(false);
-            // }
         }
     }, [user]);
 
