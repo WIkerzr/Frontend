@@ -279,6 +279,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 userData={UserData}
                 onChange={handleUserChange}
                 errorMessage={errorMessage}
+                setErrorMessage={setErrorMessage}
                 successMessage={successMessage}
                 fadeOut={fadeOut}
                 roleDisabled={false}

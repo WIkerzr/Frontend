@@ -84,9 +84,9 @@ const UserDateFormLogic: React.FC = () => {
                     status: UserData.status,
                 }),
             });
-
+            const data = await response.json();
             if (response && !response.ok) {
-                const errorInfo = gestionarErrorServidor(response);
+                const errorInfo = gestionarErrorServidor(response, data);
                 setErrorMessage(errorInfo.mensaje);
                 return;
             }
@@ -121,7 +121,17 @@ const UserDateFormLogic: React.FC = () => {
         }
     };
 
-    return <UserDataForm onSubmit={handleSubmitUser} userData={UserData} onChange={handleUserChange} errorMessage={errorMessage} successMessage={successMessage} fadeOut={fadeOut} />;
+    return (
+        <UserDataForm
+            onSubmit={handleSubmitUser}
+            userData={UserData}
+            onChange={handleUserChange}
+            errorMessage={errorMessage}
+            setErrorMessage={setErrorMessage}
+            successMessage={successMessage}
+            fadeOut={fadeOut}
+        />
+    );
 };
 
 export default UserDateFormLogic;

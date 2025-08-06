@@ -7,12 +7,15 @@ import { useEffect, useState } from 'react';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { newUser } from '../Configuracion/componentes';
 import { formateaConCeroDelante } from '../../components/Utils/utils';
+import { useUser } from '../../contexts/UserContext';
+import { useUsers } from '../../contexts/UsersContext';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
     userData: UserID | User;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     errorMessage?: string | null;
+    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
     successMessage?: string | null;
     fadeOut: boolean;
     roleDisabled?: boolean;
@@ -20,12 +23,21 @@ interface UserDataFormProps {
     title?: boolean;
 }
 
-const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser, title = true }) => {
+const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, setErrorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser, title = true }) => {
     const { t, i18n } = useTranslation();
     const { regiones } = useRegionContext();
     const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(`${userData.ambit}`)) || null);
     const [conditional, setConditional] = useState<boolean>(false);
     const [datosUsuario, setDatosUsuario] = useState(userData);
+    const { user } = useUser();
+    const [email, setEmail] = useState<string[]>([]);
+    const { users } = useUsers();
+
+    useEffect(() => {
+        if ((user!.role as string) === 'HAZI') {
+            setEmail(users.map((usuario) => usuario.email));
+        }
+    }, []);
 
     useEffect(() => {
         setDatosUsuario(userData);
@@ -66,8 +78,11 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
 
             return value !== null && value !== undefined;
         });
-
-        setConditional(todosLosCamposRellenosUserModal);
+        if (errorMessage) {
+            setConditional(false);
+        } else {
+            setConditional(todosLosCamposRellenosUserModal);
+        }
     }, [datosUsuario, regionSeleccionada]);
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -78,6 +93,26 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
         }
         onChange(e);
     };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/\s/g, '');
+        const otrosEmails = email.filter((e) => e !== user!.email);
+        if (otrosEmails.includes(value)) {
+            setErrorMessage(t('emailYaRegistrado'));
+        } else {
+            setErrorMessage(null);
+        }
+        const customEvent = {
+            ...e,
+            target: {
+                ...e.target,
+                name: 'email',
+                value: value,
+            },
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(customEvent);
+    };
+
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
@@ -95,7 +130,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 className="form-input ltr:rounded-l-none rtl:rounded-r-none"
                                 value={userData.email as string}
                                 name="email"
-                                onChange={onChange}
+                                onChange={(e) => handleEmailChange(e)}
                             />
                         </div>
                     </div>
