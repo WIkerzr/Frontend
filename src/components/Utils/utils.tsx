@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, ReactNode, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -233,10 +234,15 @@ interface ErrorTraducido {
     tipo: 'error' | 'warning' | 'info';
 }
 
-export function gestionarErrorServidor(error: unknown): ErrorTraducido {
+export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraducido {
     if (error instanceof Response) {
         switch (error.status) {
             case 400:
+                if (data && data.Message) {
+                    if (data.Message === 'El email ya está registrado.') {
+                        return { mensaje: t('emailYaRegistrado'), tipo: 'warning' };
+                    }
+                }
                 console.error(`400:${t('error:errorPeticionIncorrecta')}`);
                 return { mensaje: t('error:errorPeticionIncorrecta'), tipo: 'warning' };
             case 401:
@@ -321,13 +327,15 @@ export async function FetchConRefreshRetry(input: RequestInfo, init?: RequestIni
         // No se pudo refrescar token, devolver 401 original
         return response;
     }
-
+    if (refreshResponse.ok) {
+        console.log('%c✅ Sesión recuperada correctamente', 'color: green; font-weight: bold;');
+    }
     const datosRefresh = await refreshResponse.json();
 
     // Guardamos tokens nuevos
-    localStorage.setItem('access_token', datosRefresh.access_token);
+    sessionStorage.setItem('access_token', datosRefresh.access_token);
     if (datosRefresh.refresh_token) {
-        localStorage.setItem('refresh_token', datosRefresh.refresh_token);
+        sessionStorage.setItem('refresh_token', datosRefresh.refresh_token);
     }
 
     // Reintentamos la petición original con token nuevo
