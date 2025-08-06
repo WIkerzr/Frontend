@@ -51,7 +51,6 @@ const Index = () => {
                             {t('NuevoIndicador')}
                         </button>
                         <ModalNuevoIndicador
-                            origen="indicadoresNuevo"
                             isOpen={modalNuevo}
                             onClose={() => setModalNuevo(false)}
                             onSave={(nuevoIndicadorRealizacion) => {
@@ -86,7 +85,7 @@ const Index = () => {
                     </div>
 
                     <div className="flex flex-row justify-center mb-5 gap-5">
-                        <TablaIndicadores origen="indicadores" />
+                        <TablaIndicadores />
                     </div>
                 </div>
             )}

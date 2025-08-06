@@ -83,6 +83,29 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const [mensajeError, setMensajeError] = useState<string>('');
 
+    const [indicadorSeleccionado, setIndicadorSeleccionado] = useState<IndicadorSeleccionado | null>(() => {
+        const saved = sessionStorage.getItem('indicadorSeleccionado');
+        if (saved) {
+            try {
+                return JSON.parse(saved) as IndicadorSeleccionado;
+            } catch {
+                return {
+                    tipo: 'Resultado',
+                    ADR: false,
+                    indicador: null,
+                    accion: null,
+                };
+            }
+        } else {
+            return {
+                tipo: 'Resultado',
+                ADR: false,
+                indicador: null,
+                accion: null,
+            };
+        }
+    });
+
     const llamarBBDD = async () => {
         await llamadaBBDDIndicadores({
             setMensajeError,
@@ -229,28 +252,6 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         actualizarFechaLLamada('indicadores');
     }, [fechaUltimoActualizadoBBDD]);
 
-    const [indicadorSeleccionado, setIndicadorSeleccionado] = useState<IndicadorSeleccionado | null>(() => {
-        const saved = sessionStorage.getItem('indicadorSeleccionado');
-        if (saved) {
-            try {
-                return JSON.parse(saved) as IndicadorSeleccionado;
-            } catch {
-                return {
-                    tipo: 'Resultado',
-                    ADR: false,
-                    indicador: null,
-                    accion: null,
-                };
-            }
-        } else {
-            return {
-                tipo: 'Resultado',
-                ADR: false,
-                indicador: null,
-                accion: null,
-            };
-        }
-    });
     useEffect(() => {
         sessionStorage.setItem('estadoIndicador', JSON.stringify(indicadorSeleccionado));
     }, [indicadorSeleccionado]);
