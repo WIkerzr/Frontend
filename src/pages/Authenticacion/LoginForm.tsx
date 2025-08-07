@@ -21,6 +21,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await onSubmit(e);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     useEffect(() => {
         if (!recordar) return;
@@ -72,7 +83,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                     </h1>
                 </div>
                 {!recordarSegundoPaso ? (
-                    <form className="space-y-5 dark:text-white" onSubmit={onSubmit}>
+                    <form className="space-y-5 dark:text-white" onSubmit={handleLogin}>
                         <div>
                             <label htmlFor="Email">{t('email')}</label>
                             <div className="relative text-white-dark">
@@ -118,9 +129,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                                 </div>
                                 <button
                                     type="submit"
-                                    className="!mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(33,92,79,0.44)] text-white font-bold py-3 rounded bg-gradient-to-r from-[#215C4F] to-[#268D8C] hover:opacity-90 transition"
+                                    className="!mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(33,92,79,0.44)] text-white font-bold py-3 rounded bg-gradient-to-r from-[#215C4F] to-[#268D8C] hover:opacity-90 transition flex items-center justify-center gap-3"
+                                    disabled={isSubmitting}
                                 >
-                                    {t('Entrar')}
+                                    {isSubmitting ? (
+                                        <>
+                                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                            </svg>
+                                            {t('Entrando')}
+                                        </>
+                                    ) : (
+                                        t('Entrar')
+                                    )}
                                 </button>
                             </>
                         ) : (
