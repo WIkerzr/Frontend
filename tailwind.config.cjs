@@ -3,6 +3,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ['./src/**/*.{js,ts,jsx,tsx}'],
+    safelist: ['animate-spin', 'opacity-25', 'opacity-75'],
     darkMode: 'class',
     theme: {
         container: {
