@@ -11,7 +11,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 import React from 'react';
 import { Region } from '../../components/Utils/gets/getRegiones';
 import { Acciones, useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { ApiTarget, Fases } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
@@ -832,8 +832,8 @@ export const TablaIndicadores: React.FC = () => {
         indicadorSeleccionado,
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
-    //TODO borrar siguiente linea a partir de la fase 3
-    const esPaginaPorDefecto = location.pathname === '/' && Fases === 2;
+
+    const esPaginaPorDefecto = location.pathname === '/';
 
     const esADR = esPaginaPorDefecto || location.pathname.includes('ADR');
     const { regionSeleccionada } = useRegionContext();

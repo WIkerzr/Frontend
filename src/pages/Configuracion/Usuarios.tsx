@@ -12,7 +12,7 @@ import { UserID } from '../../types/users';
 import { PrintFecha } from '../../components/Utils/utils';
 
 const Index = () => {
-    const { users, setUsers, loading, error, llamadaBBDDUsers, fechaUltimoActualizadoBBDD } = useUsers();
+    const { users, setUsers, loading, llamadaBBDDUsers, fechaUltimoActualizadoBBDD, errorMessage, setErrorMessage } = useUsers();
     const { t } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
 
@@ -21,21 +21,16 @@ const Index = () => {
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus<UserID>>({ columnAccessor: 'id', direction: 'asc' });
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         llamadaBBDDUsers(true);
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('users', JSON.stringify(users));
+        if (users.length > 0) {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
     }, [users]);
-
-    useEffect(() => {
-        if (!errorMessage) return;
-        const timer = setTimeout(() => setErrorMessage(null), 5000);
-        return () => clearTimeout(timer);
-    }, [errorMessage]);
 
     const filteredUsers = useMemo(() => {
         if (!search) return users;
@@ -87,7 +82,7 @@ const Index = () => {
     };
 
     if (loading) return <Loading />;
-    if (error) return <ErrorMessage message={error} />;
+    if (errorMessage) return <ErrorMessage message={errorMessage} />;
     if (!users || users.length === 0) return <div>{t('noData')}</div>;
 
     return (

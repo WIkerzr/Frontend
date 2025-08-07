@@ -3,18 +3,19 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRegionContext } from './RegionContext';
 import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../components/Utils/gets/controlDev';
-import { actualizarFechaLLamada, FetchConRefreshRetry, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
+import { actualizarFechaLLamada, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, obtenerFechaLlamada } from '../components/Utils/utils';
 import { UserIDList, UserRegionId } from '../types/users';
 
 interface UsersContextType {
     users: UserIDList[];
     setUsers: React.Dispatch<React.SetStateAction<UserIDList[]>>;
     loading: boolean;
-    error: string | null;
     fechaUltimoActualizadoBBDD: Date;
     agregarUsuario: (nuevo: UserIDList) => void;
     listadoUsuarios: (dataArray: UserIDList[]) => void;
     actualizarUsuario: (usuarioActualizado: UserIDList) => void;
+    errorMessage: string | null;
+    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
     llamadaBBDDUsers: (primeraLLamada?: boolean) => void;
 }
 
@@ -22,16 +23,16 @@ const UsersContext = createContext<UsersContextType | undefined>(undefined);
 
 export const UsersProvider = ({ children }: { children: ReactNode }) => {
     const { regiones } = useRegionContext();
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('users');
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
     const [users, setUsers] = useState<UserIDList[]>([]);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         const saved = localStorage.getItem('users');
@@ -78,7 +79,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
         const storedUsers = localStorage.getItem('users');
 
         if (primeraLLamada) {
-            setError(null);
+            setErrorMessage(null);
         }
 
         if (!primeraLLamada || !storedUsers) {
@@ -93,7 +94,11 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                         },
                     });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || t('errorObtenerUsuarios') + `: ${data.Message}`);
+                    if (!res.ok) {
+                        const errorInfo = gestionarErrorServidor(res, data);
+                        setErrorMessage(errorInfo.mensaje);
+                        return;
+                    }
 
                     const usuariosConRegion = data.map((user: UserRegionId) => {
                         const region = regiones.find((r) => `${r.RegionId}` === `${user.RegionId}`.padStart(2, '0'));
@@ -109,11 +114,9 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                     listadoUsuarios(dataArray);
                     localStorage.setItem('users', JSON.stringify(dataArray));
                 } catch (err: unknown) {
-                    if (err instanceof Error) {
-                        setError(err.message);
-                    } else {
-                        console.error('Error desconocido', err);
-                    }
+                    const errorInfo = gestionarErrorServidor(err);
+                    setErrorMessage(errorInfo.mensaje);
+                    return;
                 } finally {
                     setLoading(false);
                 }
@@ -128,11 +131,12 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                 users,
                 setUsers,
                 loading,
-                error,
                 fechaUltimoActualizadoBBDD,
                 agregarUsuario,
                 listadoUsuarios,
                 actualizarUsuario,
+                errorMessage,
+                setErrorMessage,
                 llamadaBBDDUsers,
             }}
         >
