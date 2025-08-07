@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { IndicadorRealizacion, IndicadorResultado } from '../types/Indicadores';
+import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../types/Indicadores';
 import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
@@ -12,55 +12,62 @@ export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
 interface IndicadorSeleccionado {
     tipo: IndicadorTipo;
     ADR: boolean;
-    indicador: IndicadorRealizacion | IndicadorResultado | null;
+    indicador: IndicadorRealizacion | IndicadorResultado;
     accion: Acciones;
-    resultadosRelacionados?: IndicadorResultado[]; // solo si tipo === 'Realizacion'
+    resultadosListado?: IndicadorResultado[]; // solo si tipo === 'Realizacion'
 }
+
 const indicadorSeleccionadoInicial: IndicadorSeleccionado = {
     tipo: 'Resultado',
     ADR: false,
-    indicador: null,
+    indicador: indicadorInicial,
     accion: null,
 };
 
 type IndicadoresContextType = {
-    indicadoresRealizacion: IndicadorRealizacion[];
-    setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
-    indicadoresResultado: IndicadorResultado[];
-    setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
-    indicadoresRealizacionADR: IndicadorRealizacion[];
-    setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
-    indicadoresResultadoADR: IndicadorResultado[];
-    setIndicadoresResultadoADR: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
-
-    indicadorSeleccionado: IndicadorSeleccionado | null;
-    setIndicadorSeleccionado: React.Dispatch<React.SetStateAction<IndicadorSeleccionado | null>>;
-
-    loading: boolean;
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    ControlDeFallosIndicadorSeleccionado: () => IndicadorSeleccionado;
     fechaUltimoActualizadoBBDD: Date;
-    mensajeError: string;
+    indicadoresRealizacion: IndicadorRealizacion[];
+    indicadoresRealizacionADR: IndicadorRealizacion[];
+    indicadoresResultado: IndicadorResultado[];
+    indicadoresResultadoADR: IndicadorResultado[];
+    indicadorSeleccionado: IndicadorSeleccionado | null;
     llamarBBDD: () => void;
+    loading: boolean;
+    mensajeError: string;
+    ObtenerRealizacionPorRegion: () => Record<string | number, IndicadorRealizacion[]>;
+    ObtenerResultadosPorRegion: () => Record<string | number, IndicadorResultado[]>;
     PrimeraLlamada: () => void;
+    setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
+    setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
+    setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
+    setIndicadoresResultadoADR: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
+    setIndicadorSeleccionado: React.Dispatch<React.SetStateAction<IndicadorSeleccionado | null>>;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const IndicadorContext = createContext<IndicadoresContextType>({
-    indicadoresRealizacion: [],
-    setIndicadoresRealizacion: () => {},
-    indicadoresResultado: [],
-    setIndicadoresResultado: () => {},
-    indicadoresRealizacionADR: [],
-    setIndicadoresRealizacionADR: () => {},
-    indicadoresResultadoADR: [],
-    setIndicadoresResultadoADR: () => {},
-    indicadorSeleccionado: indicadorSeleccionadoInicial,
-    setIndicadorSeleccionado: () => {},
-    loading: true,
-    setLoading: () => {},
+    ControlDeFallosIndicadorSeleccionado: () => {
+        throw new Error('ControlDeFallos no inicializado');
+    },
     fechaUltimoActualizadoBBDD: new Date(),
-    mensajeError: '',
+    indicadoresRealizacion: [],
+    indicadoresRealizacionADR: [],
+    indicadoresResultado: [],
+    indicadoresResultadoADR: [],
+    indicadorSeleccionado: indicadorSeleccionadoInicial,
     llamarBBDD: () => {},
+    loading: true,
+    mensajeError: '',
+    ObtenerRealizacionPorRegion: () => ({}),
+    ObtenerResultadosPorRegion: () => ({}),
     PrimeraLlamada: () => {},
+    setIndicadoresRealizacion: () => {},
+    setIndicadoresRealizacionADR: () => {},
+    setIndicadoresResultado: () => {},
+    setIndicadoresResultadoADR: () => {},
+    setIndicadorSeleccionado: () => {},
+    setLoading: () => {},
 });
 
 export const useIndicadoresContext = () => useContext(IndicadorContext);
@@ -92,7 +99,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 return {
                     tipo: 'Resultado',
                     ADR: false,
-                    indicador: null,
+                    indicador: indicadorInicial,
                     accion: null,
                 };
             }
@@ -100,7 +107,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             return {
                 tipo: 'Resultado',
                 ADR: false,
-                indicador: null,
+                indicador: indicadorInicial,
                 accion: null,
             };
         }
@@ -197,6 +204,46 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
+    const ControlDeFallosIndicadorSeleccionado = (): IndicadorSeleccionado => {
+        if (!indicadorSeleccionado || !indicadorSeleccionado.indicador) {
+            console.log(indicadorSeleccionado);
+            const error = new Error('Se ha intentado acceder al indicador seleccionado sin haberlo definido correctamente.');
+            const stackLines = error.stack?.split('\n') || [];
+
+            // La línea 0 es el mensaje de error
+            // La línea 1 es la función actual (ControlDeFallosIndicadorSeleccionado)
+            // La línea 2 es quien llamó a esta función
+            const callerLine = stackLines[2]?.trim() || 'Información de llamada no disponible';
+
+            console.error(error.stack);
+
+            // Lanza el error con contexto de dónde fue llamada esta función
+            throw new Error(`${error.message} (Llamado desde: ${callerLine})`);
+        }
+
+        return indicadorSeleccionado as IndicadorSeleccionado;
+    };
+
+    const ObtenerRealizacionPorRegion = () => {
+        if (!indicadoresRealizacion || indicadoresRealizacion.length === 0) return {};
+        return indicadoresRealizacion.reduce<Record<string | number, (typeof indicadoresRealizacion)[0][]>>((acc, indicador) => {
+            const key = indicador.RegionsId ?? '0';
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(indicador);
+            return acc;
+        }, {});
+    };
+
+    const ObtenerResultadosPorRegion = () => {
+        if (!indicadoresResultado || indicadoresResultado.length === 0) return {};
+        return indicadoresResultado.reduce<Record<string | number, (typeof indicadoresResultado)[0][]>>((acc, indicador) => {
+            const key = indicador.RegionsId ?? '0';
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(indicador);
+            return acc;
+        }, {});
+    };
+
     useEffect(() => {
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
@@ -259,22 +306,25 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return (
         <IndicadorContext.Provider
             value={{
-                indicadoresRealizacion,
-                setIndicadoresRealizacion,
-                indicadoresResultado,
-                setIndicadoresResultado,
-                indicadoresRealizacionADR,
-                setIndicadoresRealizacionADR,
-                indicadoresResultadoADR,
-                setIndicadoresResultadoADR,
+                ControlDeFallosIndicadorSeleccionado,
                 fechaUltimoActualizadoBBDD,
-                mensajeError,
+                indicadoresRealizacion,
+                indicadoresRealizacionADR,
+                indicadoresResultado,
+                indicadoresResultadoADR,
                 indicadorSeleccionado,
-                setIndicadorSeleccionado,
-                loading,
-                setLoading,
                 llamarBBDD,
+                loading,
+                mensajeError,
+                ObtenerRealizacionPorRegion,
+                ObtenerResultadosPorRegion,
                 PrimeraLlamada,
+                setIndicadoresRealizacion,
+                setIndicadoresRealizacionADR,
+                setIndicadoresResultado,
+                setIndicadoresResultadoADR,
+                setIndicadorSeleccionado,
+                setLoading,
             }}
         >
             {children}

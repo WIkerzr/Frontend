@@ -7,6 +7,7 @@ import IconRefresh from '../../components/Icon/IconRefresh';
 import Tippy from '@tippyjs/react';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { PrintFecha } from '../../components/Utils/utils';
+import { indicadorInicial } from '../../types/Indicadores';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -42,7 +43,7 @@ const Index = () => {
                                 setIndicadorSeleccionado({
                                     tipo: 'Realizacion',
                                     ADR: false,
-                                    indicador: null,
+                                    indicador: indicadorInicial,
                                     accion: 'Crear',
                                 });
                             }}

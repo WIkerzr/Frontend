@@ -9,7 +9,8 @@ import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { PrintFecha } from '../../components/Utils/utils';
+import { formateaConCeroDelante, PrintFecha } from '../../components/Utils/utils';
+import { indicadorInicial } from '../../types/Indicadores';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -46,10 +47,11 @@ const Index = () => {
                                 <button
                                     onClick={() => {
                                         setModalNuevo(true);
+                                        const indicadorConRegion = { ...indicadorInicial, RegionsId: formateaConCeroDelante(`${regionSeleccionada}`) };
                                         setIndicadorSeleccionado({
                                             tipo: 'Realizacion',
                                             ADR: true,
-                                            indicador: null,
+                                            indicador: indicadorConRegion,
                                             accion: 'Crear',
                                         });
                                     }}

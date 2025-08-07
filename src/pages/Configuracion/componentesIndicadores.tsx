@@ -34,43 +34,63 @@ const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: Indicador
 
 export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal }) => {
     const { t, i18n } = useTranslation();
-    const { indicadoresRealizacion, indicadoresResultadoADR, indicadoresResultado, indicadorSeleccionado } = useIndicadoresContext();
+    const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado } = useIndicadoresContext();
+    const indicadorSeleccionadoSinFallo = ControlDeFallosIndicadorSeleccionado();
+    const [indicadorRealizacionDeterminado, setIndicadorRealizacionDeterminado] = useState<IndicadorResultado[]>([]);
+    const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
 
     const { regionSeleccionada, regiones } = useRegionContext();
 
+    useEffect(() => {
+        if (!indicadorSeleccionadoSinFallo.indicador.RegionsId) {
+            setIndicadorRealizacionDeterminado(ObtenerRealizacionPorRegion()[0]);
+            setIndicadorResultadoDeterminado(ObtenerResultadosPorRegion()[0]);
+        } else {
+            const regionID = Number(indicadorSeleccionadoSinFallo.indicador.RegionsId);
+            setIndicadorRealizacionDeterminado(ObtenerRealizacionPorRegion()[regionID]);
+            setIndicadorResultadoDeterminado(ObtenerResultadosPorRegion()[regionID]);
+        }
+    }, []);
+
     const SacarSiguienteEnumeracionIndicadores = (indicadorRealizacion: IndicadorRealizacion, tipoIndicador: TipoIndicador): string[] => {
+        const ultimoIndicadorRealizacion = indicadorRealizacionDeterminado[indicadorRealizacionDeterminado.length - 1];
+        const ultimoIndicadorResultado = indicadorResultadoDeterminado[indicadorResultadoDeterminado.length - 1];
+        if (!ultimoIndicadorRealizacion) {
+            return [];
+        }
+        if (!ultimoIndicadorResultado) {
+            return [];
+        }
+
         const nombre = indicadorRealizacion.NameEs;
         const inicializacionNombre = tipoIndicador === 'realizacion' ? 'RE' : 'RS';
-        const creacion = indicadorRealizacion.NameEs.length === 0;
-        const accion = indicadorSeleccionado?.accion;
-        const tipo = indicadorSeleccionado?.tipo;
-        const esADR = !!indicadorSeleccionado?.ADR;
+        const accion = indicadorSeleccionadoSinFallo.accion;
+        const tipo = indicadorSeleccionadoSinFallo.tipo;
+        const indicador = indicadorSeleccionadoSinFallo.indicador;
+        const esADR = indicador.RegionsId ? Number(indicador.RegionsId) > 0 : false;
+        let codRegion = '';
 
         const baseKey = `${accion}_${tipo}_${esADR ? 'ADR' : 'NoADR'}`;
 
         const key = editandoResultadoModal ? `${baseKey}_${editandoResultadoModal}` : baseKey;
 
+        if (esADR) {
+            codRegion = ultimoIndicadorRealizacion.NameEs.slice(4, 6);
+        }
+        const ultimoNumeroRealizacion = Number(ultimoIndicadorRealizacion.NameEs ? ultimoIndicadorRealizacion.NameEs.slice(2, 4) : '00') + 1;
+        const ultimoNumeroResultado = Number(ultimoIndicadorResultado.NameEs ? ultimoIndicadorResultado.NameEs.slice(2, 4) : '00') + 1;
+
         switch (key) {
             case 'Crear_Realizacion_NoADR': {
-                const storedRealiza: IndicadorResultado[] = indicadoresRealizacion.filter((re) => re.RegionsId === '0' || re.RegionsId === undefined || re.RegionsId === null);
-                const realizacion: IndicadorRealizacion = storedRealiza[storedRealiza.length - 1];
-                let numeroActual = Number(realizacion.NameEs.slice(2, 4));
-                numeroActual++;
-                const num = numeroActual ? numeroActual : 1;
-                const numeracion = formateaConCeroDelante(num);
+                const numeracion = formateaConCeroDelante(ultimoNumeroRealizacion);
                 return [`${inicializacionNombre}${numeracion}`];
             }
             case 'Crear_Realizacion_NoADR_CreandoResultado': {
-                const storedRealiza: IndicadorResultado[] = indicadoresResultado.filter((re) => re.RegionsId === '0' || re.RegionsId === undefined || re.RegionsId === null);
-                const realizacion: IndicadorRealizacion = storedRealiza[storedRealiza.length - 1];
-                let numeroActual = Number(realizacion.NameEs.slice(2, 4));
-
-                numeroActual++;
                 let suma = 0;
                 if (indicadorResultado) {
                     suma = indicadorResultado.filter((r) => r.Id === 0).length;
                 }
-                numeroActual = suma ? numeroActual + suma : numeroActual;
+                const numeroActual = suma ? ultimoNumeroRealizacion + suma : ultimoNumeroRealizacion;
                 const num = numeroActual ? numeroActual : 1;
                 const numeracion = formateaConCeroDelante(num);
                 return [`${inicializacionNombre}${numeracion}`];
@@ -82,103 +102,58 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 return rellenoIndicadorEdicion(nombre, indicadorRealizacion);
             }
             case 'Editar_Realizacion_NoADR_CreandoResultado': {
-                let ultimo = Number(indicadoresResultado[indicadoresResultado.length - 1].NameEs.slice(2, 4));
+                let numeroActual = 0;
+                numeroActual = ultimoNumeroResultado;
 
-                let existe = indicadorResultado?.some((ind) => ind.NameEs?.includes(`${inicializacionNombre}${ultimo}`)) ?? false;
+                let existe = indicadorResultado?.some((ind) => ind.NameEs?.includes(`${inicializacionNombre}${numeroActual}`)) ?? false;
 
                 while (existe) {
-                    ultimo++;
-                    existe = indicadorResultado?.some((ind) => ind.NameEs?.includes(`${inicializacionNombre}${ultimo}`)) ?? false;
+                    numeroActual++;
+                    existe = indicadorResultado?.some((ind) => ind.NameEs?.includes(`${inicializacionNombre}${numeroActual}`)) ?? false;
                 }
-                const num = ultimo ? ultimo : 1;
-                const numeracion = formateaConCeroDelante(Number(num) + (indicadorResultado ? indicadorResultado.length : 0));
+                const numeracion = formateaConCeroDelante(Number(numeroActual));
                 return [`${inicializacionNombre}${numeracion}`];
             }
             case 'Editar_Realizacion_NoADR_EditandoResultado': {
                 return rellenoIndicadorEdicion(nombre, indicadorRealizacion);
             }
-            case 'Editar_Realizacion_ADR_CreandoResultado': {
-                const posicionPunto = nombre.indexOf('.');
-                const indicadorRegion = posicionPunto > 0 && posicionPunto < 5;
-
-                if (creacion) {
-                    let suma = 0;
-                    if (indicadorRegion) {
-                        return [nombre.slice(0, 4), nombre.slice(5)];
-                    } else {
-                        const codRegion = indicadorSeleccionado!.indicador!.NameEs.slice(4, 6);
-                        if (indicadoresResultadoADR.length > 0) {
-                            suma = Number(indicadoresResultadoADR[indicadoresResultadoADR.length - 1].NameEs.slice(2, 4));
-                        } else {
-                            if (indicadorResultado && indicadorResultado.length > 0) {
-                                suma = Number(indicadorResultado[indicadorResultado.length - 1].NameEs.slice(2, 4));
-                            }
-                        }
-
-                        const numeroActual = suma ? 1 + suma : 1;
-
-                        const num = numeroActual ? numeroActual : 1;
-                        const numeracion = formateaConCeroDelante(num);
-                        return [`${inicializacionNombre}${numeracion}${codRegion}`];
-                    }
-                } else {
-                    return rellenoIndicadorEdicion(nombre, indicadorRealizacion);
-                }
-            }
             case 'Crear_Realizacion_ADR': {
                 const storedResultado = localStorage.getItem('indicadoresResultadoFiltrado');
-                let codRegion = '';
-                if (storedResultado && storedResultado !== '[]') {
-                    const indicadoresRealizacionADR: IndicadorResultado[] = JSON.parse(storedResultado);
-                    codRegion = indicadoresRealizacionADR[indicadoresRealizacionADR.length - 1].NameEs.slice(4, 6);
-                } else {
+                if (!(storedResultado && storedResultado !== '[]')) {
                     const regionString = formateaConCeroDelante(`${regionSeleccionada}`);
                     codRegion = regionSeleccionada ? generarCodigosRegiones(regiones)[regionString] : '';
                 }
 
-                const storedRealiza: IndicadorResultado[] = indicadoresRealizacion.filter((re) => `${re.RegionsId}` === `${regionSeleccionada}`);
-
-                let numeroActual = 0;
-                if (storedRealiza.length > 0) {
-                    const realizacion: IndicadorRealizacion = storedRealiza[storedRealiza.length - 1];
-                    numeroActual = Number(realizacion.NameEs.slice(2, 4));
-                }
-                numeroActual++;
-                const num = numeroActual ? numeroActual : 1;
-                const numeracion = formateaConCeroDelante(num);
+                const numeracion = formateaConCeroDelante(ultimoNumeroRealizacion);
                 return [`${inicializacionNombre}${numeracion}${codRegion}`];
             }
-
+            case 'Editar_Realizacion_ADR_CreandoResultado':
             case 'Crear_Realizacion_ADR_CreandoResultado': {
-                const storedResultado = localStorage.getItem('indicadoresResultadoFiltrado');
-                let codRegion = '';
-                if (storedResultado && storedResultado !== '[]') {
-                    const indicadoresRealizacion: IndicadorResultado[] = JSON.parse(storedResultado);
-                    codRegion = indicadoresRealizacion[indicadoresRealizacion.length - 1].NameEs.slice(4, 6);
-                } else {
-                    const regionString = formateaConCeroDelante(`${regionSeleccionada}`);
-                    codRegion = regionSeleccionada ? generarCodigosRegiones(regiones)[regionString] : '';
-                }
+                const numeroActual = ultimoNumeroResultado;
+                const num = numeroActual ?? 1;
+                let numeracion = formateaConCeroDelante(num);
 
-                const storedRealiza: IndicadorResultado[] = indicadoresRealizacion.filter((re) => re.RegionsId === `${regionSeleccionada}`);
-                const realizacion: IndicadorRealizacion = storedRealiza[storedRealiza.length - 1];
-                let numeroActual = 0;
-                if (realizacion && realizacion.Resultados!.length > 0) {
-                    numeroActual = realizacion.Resultados ? Number(realizacion.Resultados[realizacion.Resultados?.length - 1].NameEs.slice(2, 4)) : 0;
-                } else {
-                    if (indicadorResultado) {
-                        numeroActual += indicadorResultado.filter((r) => r.NameEs.includes(codRegion)).length;
+                let listadoResultadosModal: number[] = [];
+                if (indicadorSeleccionadoSinFallo.resultadosListado?.length) {
+                    listadoResultadosModal = indicadorSeleccionadoSinFallo.resultadosListado.map((resultado) => Number(resultado.NameEs.slice(2, 4)));
+
+                    const maxNumero = listadoResultadosModal.length > 0 ? Math.max(...listadoResultadosModal) : 0;
+                    const numeracionNum = Number(numeracion);
+
+                    if (numeracionNum <= maxNumero) {
+                        numeracion = formateaConCeroDelante(maxNumero + 1);
                     }
                 }
-                numeroActual = numeroActual ? 1 + numeroActual : 1;
-                const num = numeroActual ? numeroActual : 1;
-                const numeracion = formateaConCeroDelante(num);
+
                 return [`${inicializacionNombre}${numeracion}${codRegion}`];
             }
             case 'Crear_Realizacion_ADR_EditandoResultado':
             case 'Editar_Realizacion_ADR':
             case 'Editar_Realizacion_ADR_EditandoResultado':
             case 'Editar_Resultado_ADR': {
+                return [nombre.slice(0, 6), nombre.slice(7)];
+            }
+            case 'Editar_Resultado_NoADR': {
                 return [nombre.slice(0, 6), nombre.slice(7)];
             }
         }
@@ -210,7 +185,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador);
         setIndicador(indicadorN);
         setNombreIndicador(indicadorN[1] ?? '');
-    }, []);
+    }, [indicadorResultadoDeterminado]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -285,7 +260,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [modoCrear, setModoCrear] = useState(false);
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
-    const { indicadorSeleccionado } = useIndicadoresContext();
+    const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
 
     const [refrescarZona, setRefrescarZona] = useState(false);
 
@@ -323,6 +298,15 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             Id: id,
         };
 
+        setIndicadorSeleccionado((prev) => {
+            if (!prev) return null;
+            if (prev.tipo !== 'Realizacion') return prev;
+            return {
+                ...prev,
+                resultadosListado: [...(prev.resultadosListado ?? []), nuevoResultadoConId],
+            };
+        });
+
         setIndicadorRealizacion((prev) => ({
             ...prev,
             Resultados: [...(prev.Resultados || []), nuevoResultadoConId],
@@ -356,6 +340,14 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
 
     const eliminarIndicadorResultado = (selectedOp: IndicadorResultado) => {
         if (indicadorRealizacion.Resultados) {
+            setIndicadorSeleccionado((prev) => {
+                if (!prev) return null;
+                if (prev.tipo !== 'Realizacion') return prev;
+                return {
+                    ...prev,
+                    resultadosListado: (prev.resultadosListado ?? []).filter((resultado) => resultado.Id !== selectedOp.Id),
+                };
+            });
             setIndicadorRealizacion((prev) => ({
                 ...prev,
                 Resultados: prev.Resultados?.filter((resultado) => resultado.Id !== selectedOp.Id) || [],
@@ -365,13 +357,15 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     };
 
     const ZonaListadoResultados = () => {
-        const opcionesFiltradas = (
-            opciones.reduce<Record<string | number, (typeof opciones)[0][]>>((acc, indicador) => {
-                const key = indicador.RegionsId ?? '0';
-                (acc[key] ??= []).push(indicador);
-                return acc;
-            }, {})[indicadorRealizacion.RegionsId ?? 0] ?? []
-        ).filter((op) => indicadorSeleccionado && !(indicadorRealizacion.Resultados?.some((r) => r.Id === op.Id) ?? false));
+        const regionKey = indicadorRealizacion.RegionsId ?? 0;
+
+        const opcionesPorRegion = ObtenerResultadosPorRegion()[regionKey] ?? [];
+
+        const opcionesFiltradas = opcionesPorRegion.filter((op) => {
+            if (!indicadorSeleccionado) return false;
+            const yaAsignado = indicadorRealizacion.Resultados?.some((resultado) => resultado.Id === op.Id) ?? false;
+            return !yaAsignado;
+        });
 
         return (
             <>
@@ -518,7 +512,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const accion: Acciones = indicadorSeleccionado ? indicadorSeleccionado.accion : 'Editar';
-    const datosIndicador = indicadorSeleccionado ? indicadorSeleccionado.indicador : indicadorInicial;
+    const datosIndicador = indicadorSeleccionado ? indicadorSeleccionado.indicador : structuredClone(indicadorInicial);
     const esADR = location.pathname?.includes('ADR');
     const esNuevo = accion === 'Crear';
 
@@ -526,7 +520,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         ...indicadorInicial,
         RegionsId: datosIndicador && datosIndicador.RegionsId ? datosIndicador.RegionsId : `${regionSeleccionada}`,
     };
-    const indicadorInicializado = esADR ? indicadorInicialConRegionsId : indicadorInicial;
+    const indicadorInicializado = esADR ? indicadorInicialConRegionsId : structuredClone(indicadorInicial);
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(esNuevo ? indicadorInicializado : datosIndicador ?? indicadorInicializado);
     const [mensaje, setMensaje] = useState('');
     const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
@@ -926,11 +920,9 @@ export const TablaIndicadores: React.FC = () => {
         if (esADR) {
             setIndicadoresRealizacionADR((prev) => prev.map((ind) => (ind.RegionsId === `${regionSeleccionada}` && ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
         } else {
-            console.log('ANTES', indicadoresRealizacion);
             setIndicadoresRealizacion((prev) => {
                 const nuevoEstado = prev.map((ind) => {
                     if (ind.Id === indicadorActualizado.Id) {
-                        console.log('Actualizando indicador:', ind);
                         return indicadorActualizado;
                     }
                     return ind;
@@ -940,7 +932,6 @@ export const TablaIndicadores: React.FC = () => {
             });
         }
 
-        console.log('DESPUES', indicadoresRealizacion);
         for (const ind of indicadorActualizado.Resultados!) {
             editarIndicadorResultados(ind);
         }
@@ -1107,7 +1098,7 @@ export const TablaIndicadores: React.FC = () => {
                                                                         ADR: esADR,
                                                                         indicador: data,
                                                                         accion: 'Editar',
-                                                                        resultadosRelacionados: data.Resultados || [],
+                                                                        resultadosListado: data.Resultados ? data.Resultados : [],
                                                                     });
                                                                 }}
                                                             >
@@ -1272,8 +1263,6 @@ export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRe
                 Resultado: resultadosFiltrados[i]?.NameEs || '',
             });
         }
-
-        // console.table(tabla);
     } catch (e) {
         console.error('Error llamadaBBDDIndicadores', e);
     }
