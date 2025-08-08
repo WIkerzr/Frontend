@@ -237,7 +237,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const ObtenerResultadosPorRegion = () => {
-        if (!indicadoresResultado || indicadoresResultado.length === 0) return {};
+        if (!setIndicadoresResultado) return {};
         return indicadoresResultado.reduce<Record<string | number, (typeof indicadoresResultado)[0][]>>((acc, indicador) => {
             const key = indicador.RegionsId ?? '0';
             if (!acc[key]) acc[key] = [];

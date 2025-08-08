@@ -1,13 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getRegiones, Region } from '../components/Utils/gets/getRegiones';
+import { getRegiones, RegionInterface } from '../components/Utils/gets/getRegiones';
 import { useUser } from './UserContext';
 import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';
+import { GenerarCodigosRegiones } from '../pages/Configuracion/componentesIndicadores';
+
+interface CodRegiones {
+    [key: number]: string;
+}
 
 type RegionContextType = {
-    regiones: Region[];
-    regionActual?: Region;
+    regiones: RegionInterface[];
+    regionActual?: RegionInterface;
     regionData: InitialDataResponse | undefined;
+    codRegiones: CodRegiones;
     loading: boolean;
     error: Error | null;
     regionSeleccionada: string | null;
@@ -19,11 +25,12 @@ type RegionContextType = {
 const RegionContext = createContext<RegionContextType>({
     regiones: [],
     regionActual: {
-        RegionId: 0,
+        RegionId: '',
         NameEs: '',
         NameEu: '',
     },
     regionData: undefined,
+    codRegiones: {},
     loading: false,
     error: null,
     regionSeleccionada: null,
@@ -38,11 +45,12 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const { user } = useUser();
     const token = sessionStorage.getItem('access_token');
-    const [regionActual, setRegionActual] = useState<Region>();
-    const [regiones, setRegiones] = useState<Region[]>(() => {
+    const [regionActual, setRegionActual] = useState<RegionInterface>();
+    const [codRegiones, setCodRegiones] = useState<CodRegiones>({});
+    const [regiones, setRegiones] = useState<RegionInterface[]>(() => {
         const saved = sessionStorage.getItem('regiones');
         try {
-            return saved ? (JSON.parse(saved) as Region[]) : [];
+            return saved ? (JSON.parse(saved) as RegionInterface[]) : [];
         } catch {
             return [];
         }
@@ -68,6 +76,11 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setRegionData(datosRegion);
         }
     }, [regionSeleccionada]);
+
+    useEffect(() => {
+        const codiRegiones = GenerarCodigosRegiones(regiones);
+        setCodRegiones(codiRegiones);
+    }, [regiones]);
 
     useEffect(() => {
         if (!token) return;
@@ -106,6 +119,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 regiones,
                 regionActual,
                 regionData,
+                codRegiones,
                 loading,
                 error,
                 regionSeleccionada,

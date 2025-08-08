@@ -59,20 +59,24 @@ const Index = () => {
                                 >
                                     {t('NuevoIndicador')}
                                 </button>
-                                <ModalNuevoIndicador
-                                    isOpen={modalNuevo}
-                                    onClose={() => setModalNuevo(false)}
-                                    onSave={(nuevoIndicadorRealizacion) => {
-                                        setIndicadoresRealizacionADR((prev) => [...prev, nuevoIndicadorRealizacion]);
-                                        if (!nuevoIndicadorRealizacion.Resultados) {
-                                            return;
-                                        }
-                                        const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadoresResultadoADR.some((res) => res.Id === nuevoRes.Id));
-                                        if (nuevosResultados.length > 0) {
-                                            setIndicadoresResultadoADR((prev) => [...prev, ...nuevosResultados]);
-                                        }
-                                    }}
-                                />
+                                {modalNuevo ? (
+                                    <ModalNuevoIndicador
+                                        isOpen={modalNuevo}
+                                        onClose={() => setModalNuevo(false)}
+                                        onSave={(nuevoIndicadorRealizacion) => {
+                                            setIndicadoresRealizacionADR((prev) => [...prev, nuevoIndicadorRealizacion]);
+                                            if (!nuevoIndicadorRealizacion.Resultados) {
+                                                return;
+                                            }
+                                            const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadoresResultadoADR.some((res) => res.Id === nuevoRes.Id));
+                                            if (nuevosResultados.length > 0) {
+                                                setIndicadoresResultadoADR((prev) => [...prev, ...nuevosResultados]);
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <></>
+                                )}
                             </>
                         </div>
                     )}

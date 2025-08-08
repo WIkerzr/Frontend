@@ -1,4 +1,4 @@
-import { Region } from '../components/Utils/gets/getRegiones';
+import { RegionInterface } from '../components/Utils/gets/getRegiones';
 import { Comarcal, SupraComarcal } from './GeneralTypes';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 
@@ -56,8 +56,8 @@ export interface DatosMemoria {
 }
 
 export interface AccionCompartida {
-    regionLider: Region;
-    regiones: Region[];
+    regionLider: RegionInterface;
+    regiones: RegionInterface[];
 }
 export interface DatosAccion {
     id: string;

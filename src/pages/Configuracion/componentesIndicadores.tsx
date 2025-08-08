@@ -9,7 +9,7 @@ import Tippy from '@tippyjs/react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import React from 'react';
-import { Region } from '../../components/Utils/gets/getRegiones';
+import { RegionInterface } from '../../components/Utils/gets/getRegiones';
 import { Acciones, useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
 import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
@@ -39,7 +39,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     const [indicadorRealizacionDeterminado, setIndicadorRealizacionDeterminado] = useState<IndicadorResultado[]>([]);
     const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
 
-    const { regionSeleccionada, regiones } = useRegionContext();
+    const { regionSeleccionada, codRegiones } = useRegionContext();
 
     useEffect(() => {
         if (!indicadorSeleccionadoSinFallo.indicador.RegionsId) {
@@ -52,14 +52,20 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         }
     }, []);
 
-    const SacarSiguienteEnumeracionIndicadores = (indicadorRealizacion: IndicadorRealizacion, tipoIndicador: TipoIndicador): string[] => {
-        const ultimoIndicadorRealizacion = indicadorRealizacionDeterminado[indicadorRealizacionDeterminado.length - 1];
-        const ultimoIndicadorResultado = indicadorResultadoDeterminado[indicadorResultadoDeterminado.length - 1];
-        if (!ultimoIndicadorRealizacion) {
-            return [];
-        }
-        if (!ultimoIndicadorResultado) {
-            return [];
+    const SacarSiguienteEnumeracionIndicadores = (indicadorRealizacion: IndicadorRealizacion, tipoIndicador: TipoIndicador, vacio: boolean): string[] => {
+        let ultimoNumeroRealizacion = 1;
+        let ultimoNumeroResultado = 1;
+        if (!vacio) {
+            const ultimoIndicadorRealizacion = indicadorRealizacionDeterminado[indicadorRealizacionDeterminado.length - 1];
+            const ultimoIndicadorResultado = indicadorResultadoDeterminado[indicadorResultadoDeterminado.length - 1];
+            if (!ultimoIndicadorRealizacion) {
+                return [];
+            }
+            if (!ultimoIndicadorResultado) {
+                return [];
+            }
+            ultimoNumeroRealizacion = ultimoIndicadorRealizacion ? Number(ultimoIndicadorRealizacion.NameEs?.slice(2, 4) ?? '00') + 1 : 1;
+            ultimoNumeroResultado = ultimoIndicadorResultado ? Number(ultimoIndicadorResultado.NameEs?.slice(2, 4) ?? '00') + 1 : 1;
         }
 
         const nombre = indicadorRealizacion.NameEs;
@@ -68,17 +74,8 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         const tipo = indicadorSeleccionadoSinFallo.tipo;
         const indicador = indicadorSeleccionadoSinFallo.indicador;
         const esADR = indicador.RegionsId ? Number(indicador.RegionsId) > 0 : false;
-        let codRegion = '';
-
         const baseKey = `${accion}_${tipo}_${esADR ? 'ADR' : 'NoADR'}`;
-
         const key = editandoResultadoModal ? `${baseKey}_${editandoResultadoModal}` : baseKey;
-
-        if (esADR) {
-            codRegion = ultimoIndicadorRealizacion.NameEs.slice(4, 6);
-        }
-        const ultimoNumeroRealizacion = Number(ultimoIndicadorRealizacion.NameEs?.slice(2, 4) ?? '00') + 1;
-        const ultimoNumeroResultado = Number(ultimoIndicadorResultado.NameEs?.slice(2, 4) ?? '00') + 1;
 
         switch (key) {
             case 'Crear_Realizacion_NoADR': {
@@ -118,13 +115,8 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 return rellenoIndicadorEdicion(nombre, indicadorRealizacion);
             }
             case 'Crear_Realizacion_ADR': {
-                const storedResultado = localStorage.getItem('indicadoresResultadoFiltrado');
-                if (!(storedResultado && storedResultado !== '[]')) {
-                    codRegion = regionSeleccionada ? generarCodigosRegiones(regiones)[regionSeleccionada] : '';
-                }
-
                 const numeracion = formateaConCeroDelante(ultimoNumeroRealizacion);
-                return [`${inicializacionNombre}${numeracion}${codRegion}`];
+                return [`${inicializacionNombre}${numeracion}${codRegiones[Number(regionSeleccionada)]}`];
             }
             case 'Editar_Realizacion_ADR_CreandoResultado':
             case 'Crear_Realizacion_ADR_CreandoResultado': {
@@ -143,8 +135,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                         numeracion = formateaConCeroDelante(maxNumero + 1);
                     }
                 }
-
-                return [`${inicializacionNombre}${numeracion}${codRegion}`];
+                return [`${inicializacionNombre}${numeracion}${codRegiones[Number(regionSeleccionada)]}`];
             }
             case 'Crear_Realizacion_ADR_EditandoResultado':
             case 'Editar_Realizacion_ADR':
@@ -181,7 +172,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     }, [indicadorRealizacion]);
 
     useEffect(() => {
-        const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador);
+        const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, indicadorResultadoDeterminado === undefined);
         setIndicador(indicadorN);
         setNombreIndicador(indicadorN[1] ?? '');
     }, [indicadorResultadoDeterminado]);
@@ -504,6 +495,9 @@ type ModalNuevoIndicadorProps = {
 };
 
 export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen, onClose, onSave, tipoIndicador }) => {
+    if (!isOpen) {
+        return null;
+    }
     const { t, i18n } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
     const { indicadorSeleccionado } = useIndicadoresContext();
@@ -1120,7 +1114,7 @@ export const TablaIndicadores: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
-                    {modalEditarRealizacion && indicadorSeleccionado?.tipo === 'Realizacion' && (
+                    {modalEditarRealizacion && indicadorSeleccionado?.tipo === 'Realizacion' ? (
                         <ModalNuevoIndicador
                             isOpen={modalEditarRealizacion}
                             onClose={() => {
@@ -1132,6 +1126,8 @@ export const TablaIndicadores: React.FC = () => {
                                 actualizarIndicadorResultados(indicadorActualizado);
                             }}
                         />
+                    ) : (
+                        <></>
                     )}
                 </div>
             )}
@@ -1200,7 +1196,7 @@ export const TablaIndicadores: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
-                    {modalEditarResultado && indicadorSeleccionado?.tipo === 'Resultado' && (
+                    {modalEditarResultado && indicadorSeleccionado?.tipo === 'Resultado' ? (
                         <ModalNuevoIndicador
                             isOpen={modalEditarResultado}
                             onClose={() => {
@@ -1212,6 +1208,8 @@ export const TablaIndicadores: React.FC = () => {
                                 editarIndicadorResultados(indicadorActualizado);
                             }}
                         />
+                    ) : (
+                        <></>
                     )}
                 </div>
             )}
@@ -1311,11 +1309,11 @@ function generarCodigoRegion(name: string): string | null {
     return null;
 }
 
-function generarCodigosRegiones(regiones: Region | Region[]): Record<string, string> {
+export function GenerarCodigosRegiones(regiones: RegionInterface | RegionInterface[]): Record<string, string> {
     const codigos: Record<number, string> = {};
     const usados = new Set<string>();
 
-    const listaRegiones = Array.isArray(regiones) ? regiones : [regiones];
+    const listaRegiones: RegionInterface[] = Array.isArray(regiones) ? regiones : [regiones];
 
     listaRegiones.forEach(({ RegionId, NameEs }) => {
         const codigo = generarCodigoRegion(NameEs);
@@ -1331,9 +1329,9 @@ function generarCodigosRegiones(regiones: Region | Region[]): Record<string, str
 
         if (intento) {
             usados.add(intento);
-            codigos[RegionId] = intento;
+            codigos[Number(RegionId)] = intento;
         } else {
-            codigos[RegionId] = '??';
+            codigos[Number(RegionId)] = '??';
         }
     });
 

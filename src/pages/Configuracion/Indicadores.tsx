@@ -51,20 +51,24 @@ const Index = () => {
                         >
                             {t('NuevoIndicador')}
                         </button>
-                        <ModalNuevoIndicador
-                            isOpen={modalNuevo}
-                            onClose={() => setModalNuevo(false)}
-                            onSave={(nuevoIndicadorRealizacion) => {
-                                setIndicadoresRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
-                                if (!nuevoIndicadorRealizacion.Resultados) {
-                                    return;
-                                }
-                                const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadoresResultado.some((res) => res.Id === nuevoRes.Id));
-                                if (nuevosResultados.length > 0) {
-                                    setIndicadoresResultado((prev) => [...prev, ...nuevosResultados]);
-                                }
-                            }}
-                        />
+                        {modalNuevo ? (
+                            <ModalNuevoIndicador
+                                isOpen={modalNuevo}
+                                onClose={() => setModalNuevo(false)}
+                                onSave={(nuevoIndicadorRealizacion) => {
+                                    setIndicadoresRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
+                                    if (!nuevoIndicadorRealizacion.Resultados) {
+                                        return;
+                                    }
+                                    const nuevosResultados = nuevoIndicadorRealizacion.Resultados.filter((nuevoRes) => !indicadoresResultado.some((res) => res.Id === nuevoRes.Id));
+                                    if (nuevosResultados.length > 0) {
+                                        setIndicadoresResultado((prev) => [...prev, ...nuevosResultados]);
+                                    }
+                                }}
+                            />
+                        ) : (
+                            <></>
+                        )}
                     </div>
                     <div className="flex justify-between items-center mb-2">
                         <div>{mensajeError && <span className="text-red-500 hover:text-red-700">{mensajeError}</span>}</div>

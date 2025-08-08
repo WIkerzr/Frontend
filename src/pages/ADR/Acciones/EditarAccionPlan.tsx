@@ -8,7 +8,7 @@ import Multiselect from 'multiselect-react-dropdown';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@mantine/core';
-import { Region } from '../../../components/Utils/gets/getRegiones';
+import { RegionInterface } from '../../../components/Utils/gets/getRegiones';
 
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t, i18n } = useTranslation();
@@ -23,7 +23,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     }
 
     useEffect(() => {
-        if (datosEditandoAccion.accionCompartida && datosEditandoAccion.accionCompartida.regionLider && datosEditandoAccion.accionCompartida.regionLider.RegionId > 0) {
+        if (datosEditandoAccion.accionCompartida && datosEditandoAccion.accionCompartida.regionLider && Number(datosEditandoAccion.accionCompartida.regionLider.RegionId) > 0) {
             setRegionesSupracomarcal(true);
         }
         if (!editarPlan) {
@@ -67,7 +67,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
         setRegionesSupracomarcal(supracomarcal);
     };
 
-    const handleChangeRegionsSupracomarcal = (selected: Region[]) => {
+    const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
         if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
             alert(t('error:errorFaltaRegionLider'));
             return;
