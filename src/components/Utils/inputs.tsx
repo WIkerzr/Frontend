@@ -6,7 +6,7 @@ import { yearIniciado } from '../../types/tipadoPlan';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useYear } from '../../contexts/DatosAnualContext';
-import { formateaConCeroDelante } from './utils';
+
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
     required?: boolean;
@@ -119,7 +119,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
 
     useEffect(() => {
         if (regionSeleccionada !== null) {
-            sessionStorage.setItem('regionSeleccionada', formateaConCeroDelante(regionSeleccionada));
+            sessionStorage.setItem('regionSeleccionada', regionSeleccionada);
         }
         //TODO llamada YearData segun region
         setYearData(yearIniciado);
@@ -133,7 +133,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
             setRegionSeleccionada(Number(value));
         }
     };
-    const region = regiones.find((r) => r.RegionId === regionSeleccionada);
+    const region = regiones.find((r) => `${r.RegionId}` === (regionSeleccionada ?? ''));
 
     return (
         <div>
@@ -143,7 +143,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
                     disabled={disabled}
                     className="form-select min-w-max w-full"
                     style={{ minWidth: 'calc(100% + 10px)' }}
-                    value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : formateaConCeroDelante(regionSeleccionada)}
+                    value={regionSeleccionada === null || regionSeleccionada === undefined ? 'notSelect' : regionSeleccionada}
                     onChange={handleChange}
                 >
                     <option value="notSelect">{t('sinSeleccionar')}</option>

@@ -9,7 +9,7 @@ import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { formateaConCeroDelante, PrintFecha } from '../../components/Utils/utils';
+import { PrintFecha } from '../../components/Utils/utils';
 import { indicadorInicial } from '../../types/Indicadores';
 
 const Index = () => {
@@ -47,7 +47,7 @@ const Index = () => {
                                 <button
                                     onClick={() => {
                                         setModalNuevo(true);
-                                        const indicadorConRegion = { ...indicadorInicial, RegionsId: formateaConCeroDelante(`${regionSeleccionada}`) };
+                                        const indicadorConRegion = { ...indicadorInicial, RegionsId: regionSeleccionada ?? '' };
                                         setIndicadorSeleccionado({
                                             tipo: 'Realizacion',
                                             ADR: true,

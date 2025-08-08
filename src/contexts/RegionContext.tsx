@@ -10,7 +10,7 @@ type RegionContextType = {
     regionData: InitialDataResponse | undefined;
     loading: boolean;
     error: Error | null;
-    regionSeleccionada: number | null;
+    regionSeleccionada: string | null;
     // eslint-disable-next-line no-unused-vars
     setRegionSeleccionada: (id: number | null) => void;
     allYears: number[];
@@ -51,17 +51,16 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const [regionSeleccionada, setRegionSeleccionadaState] = useState<number | null>(() => {
+    const [regionSeleccionada, setRegionSeleccionadaState] = useState<string | null>(() => {
         const saved = sessionStorage.getItem('regionSeleccionada');
-        return saved !== null && !isNaN(Number(saved)) ? Number(saved) : null;
+        return saved !== null && !isNaN(Number(saved)) ? saved : null;
     });
 
     useEffect(() => {
-        if (regionSeleccionada !== null && !isNaN(regionSeleccionada)) {
-            const regionSeleccionadaCon0 = formateaConCeroDelante(regionSeleccionada);
-            sessionStorage.setItem('regionSeleccionada', regionSeleccionadaCon0);
+        if (regionSeleccionada !== null && regionSeleccionada != '') {
+            sessionStorage.setItem('regionSeleccionada', regionSeleccionada);
 
-            const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionadaCon0);
+            const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
             if (regionCompleta) {
                 setRegionActual(regionCompleta);
             }
@@ -87,8 +86,12 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [user]);
 
-    const setRegionSeleccionada = (id: number | null) => {
-        setRegionSeleccionadaState(id);
+    const setRegionSeleccionada = (id: number | string | null) => {
+        if (id === null) {
+            setRegionSeleccionadaState(null);
+        } else {
+            setRegionSeleccionadaState(formateaConCeroDelante(`${id}`));
+        }
     };
 
     const allYears = React.useMemo(() => {

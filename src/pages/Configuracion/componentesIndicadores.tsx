@@ -77,8 +77,8 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         if (esADR) {
             codRegion = ultimoIndicadorRealizacion.NameEs.slice(4, 6);
         }
-        const ultimoNumeroRealizacion = Number(ultimoIndicadorRealizacion.NameEs ? ultimoIndicadorRealizacion.NameEs.slice(2, 4) : '00') + 1;
-        const ultimoNumeroResultado = Number(ultimoIndicadorResultado.NameEs ? ultimoIndicadorResultado.NameEs.slice(2, 4) : '00') + 1;
+        const ultimoNumeroRealizacion = Number(ultimoIndicadorRealizacion.NameEs?.slice(2, 4) ?? '00') + 1;
+        const ultimoNumeroResultado = Number(ultimoIndicadorResultado.NameEs?.slice(2, 4) ?? '00') + 1;
 
         switch (key) {
             case 'Crear_Realizacion_NoADR': {
@@ -91,7 +91,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                     suma = indicadorResultado.filter((r) => r.Id === 0).length;
                 }
                 const numeroActual = suma ? ultimoNumeroRealizacion + suma : ultimoNumeroRealizacion;
-                const num = numeroActual ? numeroActual : 1;
+                const num = numeroActual ?? 1;
                 const numeracion = formateaConCeroDelante(num);
                 return [`${inicializacionNombre}${numeracion}`];
             }
@@ -120,8 +120,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             case 'Crear_Realizacion_ADR': {
                 const storedResultado = localStorage.getItem('indicadoresResultadoFiltrado');
                 if (!(storedResultado && storedResultado !== '[]')) {
-                    const regionString = formateaConCeroDelante(`${regionSeleccionada}`);
-                    codRegion = regionSeleccionada ? generarCodigosRegiones(regiones)[regionString] : '';
+                    codRegion = regionSeleccionada ? generarCodigosRegiones(regiones)[regionSeleccionada] : '';
                 }
 
                 const numeracion = formateaConCeroDelante(ultimoNumeroRealizacion);
@@ -212,35 +211,35 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 <label className="block font-medium ">{t('nombreIndicador')}</label>
                 <div className="flex border rounded bg-gray-200">
                     <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{<label>{indicador[0]}</label>}</div>
-                    <input type="text" name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'} className="flex-1 p-2 border" value={nombreIndicador} onChange={handleChangeNombre} />
+                    <input type="text" name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'} className="flex-1 p-2 border" value={nombreIndicador ?? ''} onChange={handleChangeNombre} />
                 </div>
             </div>
             <div>
                 <label className="block font-medium">{t('unitMed')}</label>
-                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange}>
+                {/* <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange}>
                     <option value="NUMERO">NUMERO</option>
                     <option value="OTRO">OTRO</option>
-                </select>
+                </select> */}
             </div>
 
             <div>
                 <label className="block font-medium">{t('ejesRelacionados')}</label>
-                <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes} onChange={handleChange} />
+                <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} />
             </div>
 
             <div>
                 <label className="block font-medium">{t('Definicion')}</label>
-                <input type="text" name="Description" className="w-full p-2 border rounded" value={formData.Description} onChange={handleChange} />
+                <input type="text" name="Description" className="w-full p-2 border rounded" value={formData.Description ?? ''} onChange={handleChange} />
             </div>
 
             <div>
                 <label className="block font-medium">{t('VariablesDesagregacion')}</label>
-                <input type="text" name="DisaggregationVariables" className="w-full p-2 border rounded" value={formData.DisaggregationVariables} onChange={handleChange} />
+                <input type="text" name="DisaggregationVariables" className="w-full p-2 border rounded" value={formData.DisaggregationVariables ?? ''} onChange={handleChange} />
             </div>
 
             <div>
                 <label className="block font-medium">{t('MTOCalculo')}</label>
-                <input type="text" name="CalculationMethodology" className="w-full p-2 border rounded" value={formData.CalculationMethodology} onChange={handleChange} />
+                <input type="text" name="CalculationMethodology" className="w-full p-2 border rounded" value={formData.CalculationMethodology ?? ''} onChange={handleChange} />
             </div>
         </div>
     );
@@ -518,7 +517,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 
     const indicadorInicialConRegionsId: IndicadorRealizacion = {
         ...indicadorInicial,
-        RegionsId: datosIndicador && datosIndicador.RegionsId ? datosIndicador.RegionsId : `${regionSeleccionada}`,
+        RegionsId: datosIndicador && datosIndicador.RegionsId ? datosIndicador.RegionsId : regionSeleccionada ?? '',
     };
     const indicadorInicializado = esADR ? indicadorInicialConRegionsId : structuredClone(indicadorInicial);
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(esNuevo ? indicadorInicializado : datosIndicador ?? indicadorInicializado);
@@ -557,7 +556,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             const indicador: IndicadorRealizacion = {
                 ...descripcionEditable,
                 Id: data.data.Id,
-                RegionsId: data.data.RegionsId ? `${data.data.RegionsId}` : regionSeleccionada ? `${regionSeleccionada}` : undefined,
+                RegionsId: data.data.RegionsId ? `${data.data.RegionsId}` : regionSeleccionada ?? undefined,
                 Resultados: data.data.Resultados,
             };
             setMensaje(t('correctoIndicadorGuardado'));
@@ -584,10 +583,10 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         const token = sessionStorage.getItem('access_token');
         const datosRealizacion: IndicadorRealizacion = {
             ...descripcionEditable,
-            RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
+            RegionsId: regionSeleccionada ?? undefined,
             Resultados: descripcionEditable.Resultados?.map((resultado) => ({
                 ...resultado,
-                RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
+                RegionsId: regionSeleccionada ?? undefined,
             })),
         };
         const response = await FetchConRefreshRetry(`${ApiTarget}/nuevoIndicadores`, {
@@ -615,7 +614,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             realizaciones.push({
                 ...descripcionEditable,
                 Id: indicadorNuevo.data.Id,
-                RegionsId: regionSeleccionada ? regionSeleccionada.toString() : undefined,
+                RegionsId: regionSeleccionada ?? undefined,
             });
 
             if (indicadorNuevo.data.Resultados && indicadorNuevo.data.Resultados.length > 0) {
@@ -839,8 +838,10 @@ export const TablaIndicadores: React.FC = () => {
     const setListaResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
 
     const { t, i18n } = useTranslation();
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessageRealizacion, setErrorMessageRealizacion] = useState<string | null>(null);
+    const [errorMessageResultado, setErrorMessageResultado] = useState<string | null>(null);
+    const [successMessageRealizacion, setSuccessMessageRealizacion] = useState<string | null>(null);
+    const [successMessageResultado, setSuccessMessageResultado] = useState<string | null>(null);
     const [fadeOut, setFadeOut] = useState<boolean>(false);
     const [modalEditarRealizacion, setModalEditarRealizacion] = useState(false);
     const [modalEditarResultado, setModalEditarResultado] = useState(false);
@@ -918,7 +919,7 @@ export const TablaIndicadores: React.FC = () => {
     const actualizarIndicadorResultados = (indicadorActualizado: IndicadorRealizacion) => {
         actualizarBorradoIndicadorRealizacion(indicadorActualizado);
         if (esADR) {
-            setIndicadoresRealizacionADR((prev) => prev.map((ind) => (ind.RegionsId === `${regionSeleccionada}` && ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
+            setIndicadoresRealizacionADR((prev) => prev.map((ind) => (ind.RegionsId === regionSeleccionada && ind.Id === indicadorActualizado.Id ? indicadorActualizado : ind)));
         } else {
             setIndicadoresRealizacion((prev) => {
                 const nuevoEstado = prev.map((ind) => {
@@ -964,8 +965,8 @@ export const TablaIndicadores: React.FC = () => {
     };
 
     const eliminarIndicadorRealizacion = async (indiRealizacionAEliminar: IndicadorRealizacion) => {
-        setErrorMessage(null);
-        setSuccessMessage(null);
+        setErrorMessageRealizacion(null);
+        setSuccessMessageRealizacion(null);
         const token = sessionStorage.getItem('access_token');
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiRealizacionAEliminar.NameEu : indiRealizacionAEliminar.NameEs }));
         if (!confirmDelete) return;
@@ -985,29 +986,29 @@ export const TablaIndicadores: React.FC = () => {
 
             if (response && !response.ok) {
                 const errorInfo = gestionarErrorServidor(response);
-                setErrorMessage(errorInfo.mensaje);
+                setErrorMessageRealizacion(errorInfo.mensaje);
                 return;
             }
 
             actualizarEliminarIndicadorRealizacion(indiRealizacionAEliminar);
-            setSuccessMessage(t('eliminacionExitosa'));
+            setSuccessMessageRealizacion(t('eliminacionExitosa'));
 
             setTimeout(() => {
                 setFadeOut(true);
                 setTimeout(() => {
-                    setSuccessMessage(null);
+                    setSuccessMessageRealizacion(null);
                     setFadeOut(false);
                 }, 1000);
             }, 5000);
         } catch (err: unknown) {
             const errorInfo = gestionarErrorServidor(err);
-            setErrorMessage(errorInfo.mensaje);
+            setErrorMessageRealizacion(errorInfo.mensaje);
         }
     };
 
     const eliminarIndicadorResultado = async (indiResultadoAEliminar: IndicadorResultado) => {
-        setErrorMessage(null);
-        setSuccessMessage(null);
+        setErrorMessageResultado(null);
+        setSuccessMessageResultado(null);
         const token = sessionStorage.getItem('access_token');
         const confirmDelete = window.confirm(t('confirmarEliminar', { nombre: i18n.language === 'eu' ? indiResultadoAEliminar.NameEu : indiResultadoAEliminar.NameEs }));
         if (!confirmDelete) return;
@@ -1027,14 +1028,14 @@ export const TablaIndicadores: React.FC = () => {
 
             if (response && !response.ok) {
                 const errorInfo = gestionarErrorServidor(response);
-                setErrorMessage(errorInfo.mensaje);
+                setErrorMessageResultado(errorInfo.mensaje);
                 return;
             }
-            setSuccessMessage(t('eliminacionExitosa'));
+            setSuccessMessageResultado(t('eliminacionExitosa'));
             setTimeout(() => {
                 setFadeOut(true);
                 setTimeout(() => {
-                    setSuccessMessage(null);
+                    setSuccessMessageResultado(null);
                     setFadeOut(false);
                 }, 1000);
             }, 5000);
@@ -1051,7 +1052,7 @@ export const TablaIndicadores: React.FC = () => {
             });
         } catch (err: unknown) {
             const errorInfo = gestionarErrorServidor(err);
-            setErrorMessage(errorInfo.mensaje);
+            setErrorMessageResultado(errorInfo.mensaje);
         }
     };
 
@@ -1059,12 +1060,13 @@ export const TablaIndicadores: React.FC = () => {
         <>
             {listaRealizacion && listaRealizacion.length > 0 && (
                 <div className={`h-full panel w-1/2}`}>
-                    {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" icon={false} />}
-                    {successMessage && (
+                    {indicadorSeleccionado?.tipo === 'Realizacion' && errorMessageRealizacion && <Aviso textoAviso={errorMessageRealizacion} tipoAviso="error" icon={false} />}
+                    {indicadorSeleccionado?.tipo === 'Realizacion' && successMessageRealizacion && (
                         <div className={`mt-4 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
-                            <p className="text-green-500">{successMessage}</p>
+                            <p className="text-green-500">{successMessageRealizacion}</p>
                         </div>
                     )}
+
                     <div className="table-responsive mb-5">
                         <table>
                             <thead>
@@ -1136,10 +1138,10 @@ export const TablaIndicadores: React.FC = () => {
 
             {listaResultado && listaResultado.length > 0 && (
                 <div className={`h-full panel w-1/2}`}>
-                    {errorMessage && <span className="text-red-500 text-sm mt-2">{errorMessage}</span>}
-                    {successMessage && (
+                    {indicadorSeleccionado?.tipo === 'Resultado' && errorMessageResultado && <Aviso textoAviso={errorMessageResultado} tipoAviso="error" icon={false} />}
+                    {indicadorSeleccionado?.tipo === 'Resultado' && successMessageResultado && (
                         <div className={`mt-4 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
-                            <p className="text-green-500">{successMessage}</p>
+                            <p className="text-green-500">{successMessageResultado}</p>
                         </div>
                     )}
 
@@ -1156,7 +1158,7 @@ export const TablaIndicadores: React.FC = () => {
                                     .slice()
                                     .reverse()
                                     .map((data) => {
-                                        if (esADR && formateaConCeroDelante(`${data.RegionsId}`) !== formateaConCeroDelante(`${regionSeleccionada}`)) {
+                                        if (esADR && formateaConCeroDelante(`${data.RegionsId}`) !== regionSeleccionada) {
                                             return;
                                         }
                                         return (
@@ -1337,60 +1339,3 @@ function generarCodigosRegiones(regiones: Region | Region[]): Record<string, str
 
     return codigos;
 }
-
-export function ComodinFormatearCoincidenciasParaTabla(coincidencias: IndicadorRealizacion[]): Record<string, string | number>[] {
-    const tablaIndicador = coincidencias
-        .slice()
-        .reverse()
-        .map((indicador, index) => {
-            const fila: Record<string, string | number> = {
-                Índice: index,
-                Id: indicador.Id,
-                NameEs: indicador.NameEs,
-                RegionsId: indicador.RegionsId ?? '',
-            };
-
-            if (Array.isArray(indicador.Resultados)) {
-                indicador.Resultados.reverse().forEach((resultado, i) => {
-                    fila[`Resultado[${i}].NameEs`] = resultado?.NameEs ?? '';
-                });
-            }
-
-            return fila;
-        });
-
-    localStorage.setItem('COMODIN', JSON.stringify(tablaIndicador));
-    return tablaIndicador;
-}
-
-export function compararFilasDeTabla(tablaA: Record<string, string | number>[], tablaB: Record<string, string | number>[]): void {
-    const longitudMax = Math.max(tablaA.length, tablaB.length);
-
-    for (let i = 0; i < longitudMax; i++) {
-        const filaA = tablaA[i];
-        const filaB = tablaB[i];
-
-        if (!filaA || !filaB) {
-            console.warn(`⚠️ Fila ${i} está ausente en una de las tablas.`);
-            continue;
-        }
-
-        const claves = new Set([...Object.keys(filaA), ...Object.keys(filaB)]);
-
-        claves.forEach((clave) => {
-            const valorA = filaA[clave];
-            const valorB = filaB[clave];
-
-            if (valorA !== valorB) {
-                console.log(`⚠️ Diferencia en fila ${i}, campo "${clave}":\n\t🅰️ "${valorA}"\n\t🅱️ "${valorB}"`);
-            }
-        });
-    }
-}
-
-export const FiltrarPorAdr = (indicadores: IndicadorRealizacion[], regionSeleccionada: number | null): IndicadorRealizacion[] => {
-    if (regionSeleccionada) {
-        return indicadores.filter((indicador) => String(indicador.RegionsId) === String(regionSeleccionada));
-    }
-    return [];
-};

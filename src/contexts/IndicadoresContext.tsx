@@ -168,15 +168,17 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 setIndicadoresRealizacionADR([]);
                 localStorage.setItem('indicadoresRealizacionFiltrado', '[]');
             } else {
-                setIndicadoresRealizacionADR(realizacionADR[regionSeleccionada] ? realizacionADR[regionSeleccionada] : []);
-                localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(realizacionADR[regionSeleccionada] ? realizacionADR[regionSeleccionada] : []));
+                const realizacionRegionSelec = realizacionADR[Number(regionSeleccionada)];
+                setIndicadoresRealizacionADR(realizacionRegionSelec ?? []);
+                localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(realizacionRegionSelec ?? []));
             }
             if (!regionSeleccionada) {
                 setIndicadoresResultadoADR([]);
                 localStorage.setItem('indicadoresResultadoFiltrado', '[]');
             } else {
-                localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(resultadoADR[regionSeleccionada] ? resultadoADR[regionSeleccionada] : []));
-                setIndicadoresResultadoADR(resultadoADR[regionSeleccionada] ? resultadoADR[regionSeleccionada] : []);
+                const resultadoRegionSelec = resultadoADR[Number(regionSeleccionada)];
+                localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(resultadoRegionSelec ?? []));
+                setIndicadoresResultadoADR(resultadoRegionSelec ?? []);
             }
             setLoading(false);
         }

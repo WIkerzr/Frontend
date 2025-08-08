@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
-import { NewModal } from '../../components/Utils/utils';
+import { formateaConCeroDelante, NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
 import { DatosAccion } from '../../types/TipadoAccion';
 import { useYear } from '../../contexts/DatosAnualContext';
@@ -333,12 +333,12 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     let editable = editarPlan || editarMemoria;
                     let colorAccion = 'bg-white';
                     if (accion.accionCompartida && Array.isArray(accion.accionCompartida.regiones)) {
-                        const regionLider = accion.accionCompartida.regionLider.RegionId === regionSeleccionada;
+                        const regionLider = formateaConCeroDelante(`${accion.accionCompartida.regionLider.RegionId}`) === regionSeleccionada;
                         if (regionLider) {
                             colorAccion = 'bg-teal-100';
                             editable = true;
                         }
-                        const regionCooperando = accion.accionCompartida.regiones.find((r) => r.RegionId === regionSeleccionada);
+                        const regionCooperando = accion.accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === regionSeleccionada);
                         if (regionCooperando) {
                             colorAccion = 'bg-gray-300';
                             editable = false;

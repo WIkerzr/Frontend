@@ -5,13 +5,13 @@ import { Ejes } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { ApiTarget } from '../../components/Utils/gets/controlDev';
-import { FetchConRefreshRetry, formateaConCeroDelante } from '../../components/Utils/utils';
+import { FetchConRefreshRetry } from '../../components/Utils/utils';
 import { useRegionContext } from '../../contexts/RegionContext';
 
-const llamadaBBDDEjes = (regionSeleccionada: number | null) => {
+const llamadaBBDDEjes = (regionSeleccionada: string | null) => {
     const handleEditarIndicadorResultado = async () => {
         const token = sessionStorage.getItem('access_token');
-        const response = await FetchConRefreshRetry(`${ApiTarget}/ejes/${formateaConCeroDelante(`${regionSeleccionada}`)}`, {
+        const response = await FetchConRefreshRetry(`${ApiTarget}/ejes/${regionSeleccionada}`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,

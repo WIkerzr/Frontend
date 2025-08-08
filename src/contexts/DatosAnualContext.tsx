@@ -5,6 +5,7 @@ import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { useRegionContext } from './RegionContext';
 import { Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
+import { formateaConCeroDelante } from '../components/Utils/utils';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -59,7 +60,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         setDatosEditandoAccion(accionSeleccionado[0]);
 
         if (accionSeleccionado[0].accionCompartida && Array.isArray(accionSeleccionado[0].accionCompartida.regiones)) {
-            const regionCompleta = accionSeleccionado[0].accionCompartida.regiones.find((r) => r.RegionId === regionSeleccionada);
+            const regionCompleta = accionSeleccionado[0].accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === (regionSeleccionada ?? ''));
             if (regionCompleta) {
                 setBlock(true);
             }
