@@ -98,10 +98,6 @@ const Index = () => {
         setYearData(ejesPrioritarios);
     };
 
-    useEffect(() => {
-        console.log(locked);
-    }, [locked]);
-
     if (loading) return <Loading />;
     return (
         <div className="panel">
