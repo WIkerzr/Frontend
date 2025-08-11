@@ -55,7 +55,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
         setIdEjeEditado(idEjePrioritario);
-        const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.id));
+        const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.EjeId));
         const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
         setDatosEditandoAccion(accionSeleccionado[0]);
 
@@ -125,7 +125,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const SeleccionEditarGuardar = () => {
         const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) => {
-            if (eje.id !== idEjeEditado) {
+            if (eje.EjeId !== idEjeEditado) {
                 return eje;
             }
 
@@ -187,21 +187,21 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
         const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
-        const ejeSeleccionado = fuenteEjes.find((eje) => eje.id === idEje);
+        const ejeSeleccionado = fuenteEjes.find((eje) => eje.EjeId === idEje);
         if (!ejeSeleccionado) return;
 
         const datos = {
             ...datosInicializadosAccion,
             accion: nuevaAccion,
-            ejeEs: ejeSeleccionado.nameEs,
-            ejeEu: ejeSeleccionado.nameEu,
+            ejeEs: ejeSeleccionado.NameEs,
+            ejeEu: ejeSeleccionado.NameEu,
             lineaActuaccion: nuevaLineaActuaccion,
             plurianual,
         };
 
         if (tipo === 'Acciones') {
             const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) =>
-                eje.id === idEje
+                eje.EjeId === idEje
                     ? {
                           ...eje,
                           acciones: [...eje.acciones, datos],

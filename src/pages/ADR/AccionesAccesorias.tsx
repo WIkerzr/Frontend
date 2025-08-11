@@ -64,7 +64,7 @@ const Index: React.FC = () => {
                             return (
                                 <div key={accion.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
-                                        {t('Eje')}: {yearData.plan.ejes.find((item) => item.id === accion.ejeId)?.nameEs}
+                                        {t('Eje')}: {yearData.plan.ejes.find((item) => item.EjeId === accion.ejeId)?.NameEs}
                                     </span>
                                     <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">

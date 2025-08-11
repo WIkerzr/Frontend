@@ -20,7 +20,7 @@ export const ModalAccion = () => {
 
     // const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(yearData.plan.ejesPrioritarios[0].acciones);
 
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].id);
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].EjeId);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [plurianual, setNuevaPlurianual] = useState(false);
@@ -38,7 +38,7 @@ export const ModalAccion = () => {
 
     useEffect(() => {
         if (idEjeSeleccionado === '') {
-            setIdEjeSeleccionado(yearData.plan.ejesPrioritarios[0].id);
+            setIdEjeSeleccionado(yearData.plan.ejesPrioritarios[0].EjeId);
         }
     }, [idEjeSeleccionado, showModal]);
 
@@ -75,14 +75,14 @@ export const ModalAccion = () => {
         if (yearData.plan.ejesPrioritarios.length === 1) {
             return;
         }
-        const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.id === idEjeSeleccionado);
+        const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.EjeId === idEjeSeleccionado);
         const { disabled } = validarEstadoEje(index, accionesTotales);
 
         if (disabled) {
             const nuevoId = yearData.plan.ejesPrioritarios.find((_, i) => {
                 const { disabled } = validarEstadoEje(i, accionesTotales);
                 return !disabled;
-            })?.id;
+            })?.EjeId;
 
             if (nuevoId && nuevoId !== idEjeSeleccionado) {
                 setIdEjeSeleccionado(nuevoId);
@@ -124,9 +124,9 @@ export const ModalAccion = () => {
                         <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
                             {yearData.plan.ejesPrioritarios.map((eje, index) => {
                                 const { maxAccion, limitarEje, disabled } = validarEstadoEje(index, accionesTotales);
-                                const label = `${i18n.language === 'es' ? eje.nameEs : eje.nameEu}${maxAccion ? ` (${t('limiteAlcanzado')})` : limitarEje ? ` (${t('completaEjeVacio')})` : ''}`;
+                                const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}${maxAccion ? ` (${t('limiteAlcanzado')})` : limitarEje ? ` (${t('completaEjeVacio')})` : ''}`;
                                 return (
-                                    <option key={eje.id} value={eje.id} disabled={disabled}>
+                                    <option key={eje.EjeId} value={eje.EjeId} disabled={disabled}>
                                         {label}
                                     </option>
                                 );
@@ -184,9 +184,9 @@ export const ModalAccionAccesorias = () => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
-    const listadoEjesFiltrado = yearData.plan.ejes.filter((eje) => !yearData.plan.ejesPrioritarios.some((prioritario) => prioritario.id === eje.id));
+    const listadoEjesFiltrado = yearData.plan.ejes.filter((eje) => !yearData.plan.ejesPrioritarios.some((prioritario) => prioritario.EjeId === eje.EjeId));
 
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState<string>(listadoEjesFiltrado[0].id);
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState<string>(listadoEjesFiltrado[0].EjeId);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [plurianual, setNuevaPlurianual] = useState(false);
@@ -227,9 +227,9 @@ export const ModalAccionAccesorias = () => {
                         <label className="block font-medium mb-1">{t('Ejes')}</label>
                         <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
                             {listadoEjesFiltrado.map((eje) => {
-                                const label = `${i18n.language === 'es' ? eje.nameEs : eje.nameEu}`;
+                                const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}`;
                                 return (
-                                    <option key={eje.id} value={eje.id}>
+                                    <option key={eje.EjeId} value={eje.EjeId}>
                                         {label}
                                     </option>
                                 );

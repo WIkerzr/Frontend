@@ -1,27 +1,21 @@
 {
-        "errorFaltaRegionLider": "Falta seleccionar la región líder",
-        
-        "errorNoOpciones": "No hay opciones disponibles",
-
-
-
-        "errorFaltEjesPrioritarios":"Faltan por seleccionar los ejes prioritarios, redirigiendo...",
-        "localStorageNotFound":"Error al leer usuario de localStorage",
-
-        "errorPeticionIncorrecta": "Petición incorrecta. Revisa los datos enviados.",
-        "errorNoAutorizado": "No autorizado. Tu sesión ha expirado o no tienes permisos. Por favor, inicia sesión de nuevo.",
         "errorAccesoDenegado": "Acceso denegado. No tienes permisos para esta acción.",
-        "errorNoEncontrado": "Recurso no encontrado.",
+        "errorActivoUsuarioNoValido": "El usuario esta deshabilitado",
         "errorConflicto": "Conflicto. Es posible que ya exista un dato similar.",
+        "errorContrasenaUsuarioNoValido": "La contraseña introducida no es válida, por favor reescriba la contraseña",
+        "errorCorreoUsuarioNoValido": "El correo introducido no es válido, por favor revíselo",
         "errorDatosInvalidos": "Datos no válidos. Revisa los campos del formulario.",
-        "errorInternoServidor": "Error interno del servidor. Intenta más tarde.",
         "errorDesconocidoConCodigo": "Error desconocido ({{codigo}}).",
-        "errorNoSePudoConectarServidor": "No se pudo conectar con el servidor. Inténtelo más tarde.",
+        "errorFaltanDatosEjes": "Faltan datos por completar en la fase 1 del proyecto. Por favor, introduzca los ejes en la fase 1 y vuelva a intentarlo más tarde. Gracias.",
+        "errorFaltaRegionLider": "Falta seleccionar la región líder",
+        "errorFaltEjesPrioritarios": "Faltan por seleccionar los ejes prioritarios, redirigiendo...",
         "errorGenerico": "Ocurrió un error inesperado.",
         "errorGenericoConMensaje": "Error: {{mensaje}}",
-
-        
-        "errorCorreoUsuarioNoValido": "El correo introducido no es válido, por favor revíselo",
-        "errorContrasenaUsuarioNoValido": "La contraseña introducida no es válida, por favor reescriba la contraseña",
-        "errorActivoUsuarioNoValido": "El usuario esta deshabilitado"
+        "errorInternoServidor": "Error interno del servidor. Intenta más tarde.",
+        "errorNoAutorizado": "No autorizado. Tu sesión ha expirado o no tienes permisos. Por favor, inicia sesión de nuevo.",
+        "errorNoEncontrado": "Recurso no encontrado.",
+        "errorNoOpciones": "No hay opciones disponibles",
+        "errorNoSePudoConectarServidor": "No se pudo conectar con el servidor. Inténtelo más tarde.",
+        "errorPeticionIncorrecta": "Petición incorrecta. Revisa los datos enviados.",
+        "localStorageNotFound": "Error al leer usuario de localStorage"
 }

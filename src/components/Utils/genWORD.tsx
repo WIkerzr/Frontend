@@ -245,15 +245,15 @@ export const generarDocumentoWord = (datos: YearData, pantalla: 'Plan' | 'Memori
         }),
         new Paragraph({
             spacing: { before: 200 },
-            children: [new TextRun({ text: plan.ejesPrioritarios[0].nameEs, size: sizeTexto })],
+            children: [new TextRun({ text: plan.ejesPrioritarios[0].NameEs, size: sizeTexto })],
         }),
         new Paragraph({
             spacing: { before: 200 },
-            children: [new TextRun({ text: plan.ejesPrioritarios[1].nameEs, size: sizeTexto })],
+            children: [new TextRun({ text: plan.ejesPrioritarios[1].NameEs, size: sizeTexto })],
         }),
         new Paragraph({
             spacing: { before: 200 },
-            children: [new TextRun({ text: plan.ejesPrioritarios[2].nameEs, size: sizeTexto })],
+            children: [new TextRun({ text: plan.ejesPrioritarios[2].NameEs, size: sizeTexto })],
         }),
         new Paragraph({
             spacing: { before: 400 },

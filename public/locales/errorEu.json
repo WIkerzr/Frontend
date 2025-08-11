@@ -1,27 +1,21 @@
 {
-        "errorFaltaRegionLider": "Falta seleccionar la región líder",
-        
-        "errorNoOpciones": "No hay opciones disponibles",
-
-
-
-        "errorFaltEjesPrioritarios":"Faltan por seleccionar los ejes prioritarios, redirigiendo...",
-        "localStorageNotFound":"Error al leer usuario de localStorage",
-
-        "errorPeticionIncorrecta": "Eskaera okerra. Berrikusi bidalitako datuak.",
-        "errorNoAutorizado": "Baimenik ez. Saioa amaitu da edo ez duzu baimenik. Mesedez, hasi saioa berriro.",
-        "errorAccesoDenegado": "Sarbidea ukatua. Ez duzu ekintza hau egiteko baimenik.",
-        "errorNoEncontrado": "Ez da baliabidea aurkitu.",
-        "errorConflicto": "Gatazka. Antzeko datu bat existitzen da agian.",
-        "errorDatosInvalidos": "Baliogabeko datuak. Berrikusi formularioaren eremuak.",
-        "errorInternoServidor": "Zerbitzariaren barne-akatsa. Saiatu berriro geroago.",
-        "errorDesconocidoConCodigo": "Errore ezezaguna ({{codigo}}).",
-        "errorNoSePudoConectarServidor": "Ezin izan da zerbitzarira konektatu. Saiatu berriro geroago.",
-        "errorGenerico": "Ustekabeko errorea gertatu da.",
-        "errorGenericoConMensaje": "Errorea: {{mensaje}}",
-
-        
- "errorCorreoUsuarioNoValido": "Sartutako posta elektronikoa ez da baliogarria, mesedez egiaztatu.",
+  "errorAccesoDenegado": "Sarbidea ukatua. Ez duzu ekintza hau egiteko baimenik.",
+  "errorActivoUsuarioNoValido": "Erabiltzailea desgaituta dago.",
+  "errorConflicto": "Gatazka. Antzeko datu bat existitzen da agian.",
   "errorContrasenaUsuarioNoValido": "Sartutako pasahitza ez da baliogarria, mesedez berridatzi pasahitza.",
-  "errorActivoUsuarioNoValido": "Erabiltzailea desgaituta dago."
+  "errorCorreoUsuarioNoValido": "Sartutako posta elektronikoa ez da baliogarria, mesedez egiaztatu.",
+  "errorDatosInvalidos": "Baliogabeko datuak. Berrikusi formularioaren eremuak.",
+  "errorDesconocidoConCodigo": "Errore ezezaguna ({{codigo}}).",
+  "errorFaltanDatosEjesP1": "1. faseko proiektuan datuak falta dira osatzeko. Mesedez, sartu ardatzak 1. fasean eta saiatu berriro geroago. Eskerrik asko.",
+  "errorFaltaRegionLider": "Falta seleccionar la región líder",
+  "errorFaltEjesPrioritarios": "Faltan por seleccionar los ejes prioritarios, redirigiendo...",
+  "errorGenerico": "Ustekabeko errorea gertatu da.",
+  "errorGenericoConMensaje": "Errorea: {{mensaje}}",
+  "errorInternoServidor": "Zerbitzariaren barne-akatsa. Saiatu berriro geroago.",
+  "errorNoAutorizado": "Baimenik ez. Saioa amaitu da edo ez duzu baimenik. Mesedez, hasi saioa berriro.",
+  "errorNoEncontrado": "Ez da baliabidea aurkitu.",
+  "errorNoOpciones": "No hay opciones disponibles",
+  "errorNoSePudoConectarServidor": "Ezin izan da zerbitzarira konektatu. Saiatu berriro geroago.",
+  "errorPeticionIncorrecta": "Eskaera okerra. Berrikusi bidalitako datuak.",
+  "localStorageNotFound": "Error al leer usuario de localStorage"
 }

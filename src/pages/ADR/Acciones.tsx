@@ -69,8 +69,8 @@ const Index: React.FC = () => {
                 <div className="flex items-start w-full h-100%">
                     {ejesSeleccionados.map((eje, index) => {
                         return (
-                            <div key={eje.id} className="flex flex-col flex-1 items-center justify-center p-1">
-                                <ListadoAcciones eje={i18n.language === 'es' ? eje.nameEs : eje.nameEu} idEje={eje.id} number={index} />
+                            <div key={eje.EjeId} className="flex flex-col flex-1 items-center justify-center p-1">
+                                <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.EjeId} number={index} />
                             </div>
                         );
                     })}

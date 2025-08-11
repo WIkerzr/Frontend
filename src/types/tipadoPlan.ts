@@ -21,9 +21,9 @@ export interface OperationalIndicators {
     valueAchieved: string;
 }
 export interface Ejes {
-    id: string;
-    nameEs: string;
-    nameEu: string;
+    EjeId: string;
+    NameEs: string;
+    NameEu: string;
     IsActive: boolean;
     acciones: DatosAccion[];
 }
@@ -59,28 +59,28 @@ export interface InitialDataResponse {
 }
 
 export const ejesIniado: Ejes[] = [
-    { id: '1', nameEs: 'Abastecimiento de agua y Saneamiento', nameEu: 'Ura hornitzea eta saneamendua', IsActive: true, acciones: [] },
+    { EjeId: '1', NameEs: 'Abastecimiento de agua y Saneamiento', NameEu: 'Ura hornitzea eta saneamendua', IsActive: true, acciones: [] },
     {
-        id: '2',
-        nameEs: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles',
-        nameEu: 'Energia hornidura (elektrikoa, gasa...) eta energia berriztagarri eta jasangarriak',
+        EjeId: '2',
+        NameEs: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles',
+        NameEu: 'Energia hornidura (elektrikoa, gasa...) eta energia berriztagarri eta jasangarriak',
         IsActive: true,
         acciones: [],
     },
-    { id: '3', nameEs: 'Telecomunicaciones', nameEu: 'Telekomunikazioak', IsActive: true, acciones: [] },
+    { EjeId: '3', NameEs: 'Telecomunicaciones', NameEu: 'Telekomunikazioak', IsActive: true, acciones: [] },
     // { id: '4', nameEs: 'Red viaria y caminos', nameEu: 'Errepide sarea eta bideak', IsActive: true, acciones: [] },
     // { id: '5', nameEs: 'Accesibilidad', nameEu: 'Irisgarritasuna', IsActive: true, acciones: [] },
     // { id: '6', nameEs: 'Transporte y movilidad', nameEu: 'Garraioa eta mugikortasuna', IsActive: true, acciones: [] },
-    { id: '7', nameEs: 'Educación infantil', nameEu: 'Haur hezkuntza', IsActive: true, acciones: [] },
-    { id: '8', nameEs: 'Educación obligatoria', nameEu: 'Derrigorrezko hezkuntza', IsActive: true, acciones: [] },
-    { id: '9', nameEs: 'Educación superior no obligatoria', nameEu: 'Derrigorrezkoa ez den goi-mailako hezkuntza', IsActive: true, acciones: [] },
+    { EjeId: '7', NameEs: 'Educación infantil', NameEu: 'Haur hezkuntza', IsActive: true, acciones: [] },
+    { EjeId: '8', NameEs: 'Educación obligatoria', NameEu: 'Derrigorrezko hezkuntza', IsActive: true, acciones: [] },
+    { EjeId: '9', NameEs: 'Educación superior no obligatoria', NameEu: 'Derrigorrezkoa ez den goi-mailako hezkuntza', IsActive: true, acciones: [] },
     // { id: '10', nameEs: 'Atención sanitaria primaria', nameEu: 'Lehen mailako osasun arreta', IsActive: true, acciones: [] },
-    { id: '11', nameEs: 'Atención sanitaria especializada', nameEu: 'Espezializatutako osasun arreta', IsActive: true, acciones: [] },
-    { id: '12', nameEs: 'Atención farmacéutica', nameEu: 'Farmazia arreta', IsActive: true, acciones: [] },
-    { id: '13', nameEs: 'Atención social', nameEu: 'Gizarte arreta', IsActive: true, acciones: [] },
-    { id: '14', nameEs: 'Cultura', nameEu: 'Kultura', IsActive: true, acciones: [] },
-    { id: '15', nameEs: 'Deporte', nameEu: 'Kirola', IsActive: true, acciones: [] },
-    { id: '16', nameEs: 'Ocio', nameEu: 'Aisia', IsActive: true, acciones: [] },
+    { EjeId: '11', NameEs: 'Atención sanitaria especializada', NameEu: 'Espezializatutako osasun arreta', IsActive: true, acciones: [] },
+    { EjeId: '12', NameEs: 'Atención farmacéutica', NameEu: 'Farmazia arreta', IsActive: true, acciones: [] },
+    { EjeId: '13', NameEs: 'Atención social', NameEu: 'Gizarte arreta', IsActive: true, acciones: [] },
+    { EjeId: '14', NameEs: 'Cultura', NameEu: 'Kultura', IsActive: true, acciones: [] },
+    { EjeId: '15', NameEs: 'Deporte', NameEu: 'Kirola', IsActive: true, acciones: [] },
+    { EjeId: '16', NameEs: 'Ocio', NameEu: 'Aisia', IsActive: true, acciones: [] },
     // { id: '17', nameEs: 'Innovación social', nameEu: 'Gizarte berrikuntza', IsActive: true, acciones: [] },
     // { id: '18', nameEs: 'Capacitación en innovación', nameEu: 'Berrikuntzan gaitzea', IsActive: true, acciones: [] },
     // { id: '19', nameEs: 'Investigación', nameEu: 'Ikerketa', IsActive: true, acciones: [] },
@@ -146,9 +146,9 @@ export const ejesIniado: Ejes[] = [
 
 export const ejesPrioritariosIniado: Ejes[] = [
     {
-        id: '3',
-        nameEs: 'Telecomunicaciones',
-        nameEu: 'Telekomunikazioak',
+        EjeId: '3',
+        NameEs: 'Telecomunicaciones',
+        NameEu: 'Telekomunikazioak',
         IsActive: true,
         acciones: [
             {
@@ -266,78 +266,78 @@ Helburu zehatzak / Objetivos específicos:`,
                 plurianual: false,
                 accionCompartida: {
                     regionLider: {
-                        RegionId: 10,
+                        RegionId: '10',
                         NameEs: 'Durangaldea',
                         NameEu: 'Durangaldea',
                     },
                     regiones: [
                         {
-                            RegionId: 2,
+                            RegionId: '2',
                             NameEs: 'Arabako Lautada / Llanada Alavesa',
                             NameEu: 'Arabako Lautada',
                         },
                         {
-                            RegionId: 3,
+                            RegionId: '3',
                             NameEs: 'Montaña Alavesa / Arabako Mendialdea',
                             NameEu: 'Montaña Alavesa / Arabako Mendialdea',
                         },
                         {
-                            RegionId: 5,
+                            RegionId: '5',
                             NameEs: 'Estribaciones del Gorbea / Gorbeia Inguruak',
                             NameEu: 'Estribaciones del Gorbea / Gorbeia Inguruak',
                         },
                         {
-                            RegionId: 6,
+                            RegionId: '6',
                             NameEs: 'Tolosaldea',
                             NameEu: 'Tolosaldea',
                         },
                         {
-                            RegionId: 7,
+                            RegionId: '7',
                             NameEs: 'Urola Kosta',
                             NameEu: 'Urola Kosta',
                         },
                         {
-                            RegionId: 8,
+                            RegionId: '8',
                             NameEs: 'Debabarrena',
                             NameEu: 'Debabarrena',
                         },
                         {
-                            RegionId: 9,
+                            RegionId: '9',
                             NameEs: 'Debagoiena',
                             NameEu: 'Debagoiena',
                         },
                         {
-                            RegionId: 11,
+                            RegionId: '11',
                             NameEs: 'Goierri',
                             NameEu: 'Goierri',
                         },
                         {
-                            RegionId: 13,
+                            RegionId: '13',
                             NameEs: 'Busturialdea',
                             NameEu: 'Busturialdea',
                         },
                         {
-                            RegionId: 14,
+                            RegionId: '14',
                             NameEs: 'Vitoria-Gasteiz',
                             NameEu: 'Vitoria-Gasteiz',
                         },
                         {
-                            RegionId: 15,
+                            RegionId: '15',
                             NameEs: 'Arratia-Nerbioi',
                             NameEu: 'Arratia-Nerbioi',
                         },
                         {
-                            RegionId: 16,
+                            RegionId: '16',
                             NameEs: 'Donostialdea-Bidasoa',
                             NameEu: 'Donostialdea-Bidasoa',
                         },
                         {
-                            RegionId: 18,
+                            RegionId: '18',
                             NameEs: 'Lea-Artibai',
                             NameEu: 'Lea-Artibai',
                         },
                         {
-                            RegionId: 19,
+                            RegionId: '19',
                             NameEs: 'Uribe',
                             NameEu: 'Uribe',
                         },
@@ -447,9 +447,9 @@ Helburu zehatzak / Objetivos específicos:`,
         ],
     },
     {
-        id: '7',
-        nameEs: 'Educación infantil',
-        nameEu: 'Haur hezkuntza',
+        EjeId: '7',
+        NameEs: 'Educación infantil',
+        NameEu: 'Haur hezkuntza',
         IsActive: true,
         acciones: [
             {
@@ -553,33 +553,33 @@ Helburu zehatzak / Objetivos específicos:`,
                 plurianual: true,
                 accionCompartida: {
                     regionLider: {
-                        RegionId: 11,
+                        RegionId: '11',
                         NameEs: 'Goierri',
                         NameEu: 'Goierri',
                     },
                     regiones: [
                         {
-                            RegionId: 1,
+                            RegionId: '1',
                             NameEs: 'Añana',
                             NameEu: 'Añana',
                         },
                         {
-                            RegionId: 4,
+                            RegionId: '4',
                             NameEs: 'Rioja Alavesa / Arabako Errioxa',
                             NameEu: 'Rioja Alavesa / Arabako Errioxa',
                         },
                         {
-                            RegionId: 10,
+                            RegionId: '10',
                             NameEs: 'Durangaldea',
                             NameEu: 'Durangaldea',
                         },
                         {
-                            RegionId: 12,
+                            RegionId: '12',
                             NameEs: 'Aiaraldea',
                             NameEu: 'Aiaraldea',
                         },
                         {
-                            RegionId: 17,
+                            RegionId: '17',
                             NameEs: 'Enkarterri-Ezkerraldea',
                             NameEu: 'Enkarterri-Ezkerraldea',
                         },
@@ -589,9 +589,9 @@ Helburu zehatzak / Objetivos específicos:`,
         ],
     },
     {
-        id: '16',
-        nameEs: 'Ocio',
-        nameEu: 'Aisia',
+        EjeId: '16',
+        NameEs: 'Ocio',
+        NameEu: 'Aisia',
         IsActive: true,
         acciones: [],
     },
@@ -1704,9 +1704,9 @@ export const datosRegion: InitialDataResponse = {
                 ejes: ejesIniado,
                 ejesPrioritarios: [
                     {
-                        id: '3',
-                        nameEs: 'Telecomunicaciones',
-                        nameEu: 'Telekomunikazioak',
+                        EjeId: '3',
+                        NameEs: 'Telecomunicaciones',
+                        NameEu: 'Telekomunikazioak',
                         IsActive: true,
                         acciones: [
                             {
