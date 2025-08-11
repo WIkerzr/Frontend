@@ -3,7 +3,7 @@ import 'tippy.js/dist/tippy.css';
 import { useState } from 'react';
 import UserDataForm from './userDateForm';
 import { UserID } from '../../types/users';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 
 const UserDateFormLogic: React.FC = () => {

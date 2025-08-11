@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
 import NotFound from './NotFound';
-import { Fases } from '../components/Utils/gets/controlDev';
+import { Fases } from '../components/Utils/data/controlDev';
 const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
 const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));

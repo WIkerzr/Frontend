@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getRegiones, RegionInterface } from '../components/Utils/gets/getRegiones';
+import { getRegiones, RegionInterface } from '../components/Utils/data/getRegiones';
 import { useUser } from './UserContext';
 import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';

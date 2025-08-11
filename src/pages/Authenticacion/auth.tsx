@@ -1,4 +1,4 @@
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 
 type LoginData = {
     userName: string;

@@ -6,7 +6,7 @@ import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { UserID, UserRole } from '../../types/users';
-import { ApiTargetToken } from '../../components/Utils/gets/controlDev';
+import { ApiTargetToken } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 

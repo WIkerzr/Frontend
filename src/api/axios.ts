@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ApiTarget } from '../components/Utils/gets/controlDev';
+import { ApiTarget } from '../components/Utils/data/controlDev';
 
 const api = axios.create({
     baseURL: ApiTarget,

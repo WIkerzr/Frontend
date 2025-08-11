@@ -4,7 +4,7 @@ import { ZonaTitulo } from '../Configuracion/componentes';
 import { Ejes } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry } from '../../components/Utils/utils';
 import { useRegionContext } from '../../contexts/RegionContext';
 

@@ -12,7 +12,7 @@ import LogoutItem from '../../pages/Authenticacion/logout';
 import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
-import { Fases } from '../Utils/gets/controlDev';
+import { Fases } from '../Utils/data/controlDev';
 
 const Header = () => {
     const { setRegionSeleccionada } = useRegionContext();

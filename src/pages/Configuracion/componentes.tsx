@@ -10,7 +10,7 @@ import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 import { useUsers } from '../../contexts/UsersContext';
 export const newUser: UserID = {

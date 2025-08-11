@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useUser } from '../../contexts/UserContext';
 

@@ -24,7 +24,7 @@ import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
-import { Fases } from '../Utils/gets/controlDev';
+import { Fases } from '../Utils/data/controlDev';
 
 const Sidebar = () => {
     const { anio, setEstados, setAnio } = useEstadosPorAnio();

@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRegionContext } from './RegionContext';
 import { useTranslation } from 'react-i18next';
-import { ApiTarget } from '../components/Utils/gets/controlDev';
+import { ApiTarget } from '../components/Utils/data/controlDev';
 import { actualizarFechaLLamada, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, obtenerFechaLlamada } from '../components/Utils/utils';
 import { UserIDList, UserRegionId } from '../types/users';
 

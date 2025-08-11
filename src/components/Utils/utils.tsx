@@ -9,7 +9,7 @@ import { t } from 'i18next';
 import IconInfoTriangle from '../Icon/IconInfoTriangle';
 import IconXCircle from '../Icon/IconXCircle';
 import IconThumbUp from '../Icon/IconThumbUp';
-import { ApiTargetToken } from './gets/controlDev';
+import { ApiTargetToken } from './data/controlDev';
 
 interface ModalProps {
     open: boolean;

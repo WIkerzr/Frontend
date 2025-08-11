@@ -9,10 +9,11 @@ import Tippy from '@tippyjs/react';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import React from 'react';
-import { RegionInterface } from '../../components/Utils/gets/getRegiones';
+import { RegionInterface } from '../../components/Utils/data/getRegiones';
 import { Acciones, useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
+import { editIndicadorRealizacionBack, editIndicadorResultadoBack } from '../../components/Utils/data/dataIndicadores';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -251,6 +252,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
     const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
+    const { regionSeleccionada } = useRegionContext();
 
     const [refrescarZona, setRefrescarZona] = useState(false);
 
@@ -282,24 +284,18 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     };
 
     const nuevoIndicadorResultado = () => {
-        const id = Date.now();
-        const nuevoResultadoConId = {
-            ...descripcionEditable,
-            Id: id,
-        };
-
         setIndicadorSeleccionado((prev) => {
             if (!prev) return null;
             if (prev.tipo !== 'Realizacion') return prev;
             return {
                 ...prev,
-                resultadosListado: [...(prev.resultadosListado ?? []), nuevoResultadoConId],
+                resultadosListado: [...(prev.resultadosListado ?? []), descripcionEditable],
             };
         });
 
         setIndicadorRealizacion((prev) => ({
             ...prev,
-            Resultados: [...(prev.Resultados || []), nuevoResultadoConId],
+            Resultados: [...(prev.Resultados || []), descripcionEditable],
         }));
         setModoCrear(false);
         setDescripcionEditable(indicadorResultadoinicial);
@@ -333,23 +329,27 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             setIndicadorSeleccionado((prev) => {
                 if (!prev) return null;
                 if (prev.tipo !== 'Realizacion') return prev;
+                (prev.resultadosListado ?? []).filter((resultado) => {
+                    const resSlice = resultado.NameEs?.slice(0, 4) ?? '';
+                    const selSlice = selectedOp?.NameEs?.slice(0, 4) ?? '';
+                    return resSlice !== selSlice;
+                });
                 return {
                     ...prev,
-                    resultadosListado: (prev.resultadosListado ?? []).filter((resultado) => resultado.Id !== selectedOp.Id),
+                    resultadosListado: (prev.resultadosListado ?? []).filter((resultado) => resultado.NameEs.slice(0, 4) !== selectedOp.NameEs.slice(0, 4)),
                 };
             });
             setIndicadorRealizacion((prev) => ({
                 ...prev,
-                Resultados: prev.Resultados?.filter((resultado) => resultado.Id !== selectedOp.Id) || [],
+                Resultados: prev.Resultados?.filter((resultado) => resultado.NameEs.slice(0, 4) !== selectedOp.NameEs.slice(0, 4)) || [],
             }));
         }
         setRefrescarZona((prev) => !prev);
     };
 
     const ZonaListadoResultados = () => {
-        const regionKey = indicadorRealizacion.RegionsId ?? 0;
-
-        const opcionesPorRegion = ObtenerResultadosPorRegion()[regionKey] ?? [];
+        const regiones = ObtenerResultadosPorRegion();
+        const opcionesPorRegion = regiones[Number(regionSeleccionada ?? 0)] ?? [];
 
         const opcionesFiltradas = opcionesPorRegion.filter((op) => {
             if (!indicadorSeleccionado) return false;
@@ -530,19 +530,26 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     }, []);
 
     const alctualizarEstadoNuevo = async (indicador: IndicadorRealizacion | IndicadorRealizacion) => {
-        if (accion === 'Crear') {
-            const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
-            const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
-            const resultadosActuales = esADR ? indicadoresResultadoADR : indicadoresResultado;
+        const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
+        const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
+        const resultadosActuales = esADR ? indicadoresResultadoADR : indicadoresResultado;
 
-            setRealizacion((prev) => [...prev, indicador]);
+        setRealizacion((prev) => [...prev, indicador]);
 
-            const nuevosResultados = indicador.Resultados?.filter((nuevoRes) => !resultadosActuales.some((res) => res.Id === nuevoRes.Id));
+        const nuevosResultados = indicador.Resultados?.filter((nuevoRes) => !resultadosActuales.some((res) => res.Id === nuevoRes.Id));
 
-            if (nuevosResultados?.length) {
-                setResultado((prev) => [...prev, ...nuevosResultados]);
-            }
+        if (nuevosResultados?.length) {
+            setResultado((prev) => [...prev, ...nuevosResultados]);
         }
+    };
+
+    const finalizadaLlamadaBBDD = async () => {
+        setTimeout(() => {
+            setDescripcionEditable(indicadorInicial);
+            setMostrarResultadoRelacionado(false);
+            setMensaje('');
+            onClose();
+        }, 1000);
     };
 
     const validadorRespuestasBBDD = async (response: any, data: any) => {
@@ -554,8 +561,9 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 Resultados: data.data.Resultados,
             };
             setMensaje(t('correctoIndicadorGuardado'));
-            alctualizarEstadoNuevo(indicador);
-            if (accion === 'Editar') {
+            if (accion === 'Crear') {
+                alctualizarEstadoNuevo(indicador);
+            } else if (accion === 'Editar') {
                 setTimeout(() => {
                     if (onSave) {
                         onSave(indicador);
@@ -637,49 +645,21 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         }
     };
 
-    const handleEditarIndicadorRealizacion = async () => {
-        const token = sessionStorage.getItem('access_token');
-        const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorRealizacion`, {
-            method: 'PUT',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(descripcionEditable),
-        });
-        if (response && !response.ok) {
-            const errorInfo = gestionarErrorServidor(response);
-            setErrorMessage(errorInfo.mensaje);
-            return;
-        }
-        if (response.ok) {
-            const indicadoreditado = await response.json();
-            validadorRespuestasBBDD(response, indicadoreditado);
-        }
-    };
-
-    const handleEditarIndicadorResultado = async () => {
-        const token = sessionStorage.getItem('access_token');
-        const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorResultado`, {
-            method: 'PUT',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(descripcionEditable),
-        });
-
-        if (response && !response.ok) {
-            const errorInfo = gestionarErrorServidor(response);
-            setErrorMessage(errorInfo.mensaje);
-            return;
-        }
-
-        if (response.ok) {
-            const indicadoreditado = await response.json();
-            validadorRespuestasBBDD(response, indicadoreditado);
+    const handleEditarIndicador = async () => {
+        try {
+            if (tipoIndicador === 'realizacion') {
+                const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
+                const indicadorRE = await editIndicadorRealizacionBack(descripcionEditable);
+                setRealizacion((prev) => [...prev, indicadorRE]);
+            } else if (tipoIndicador === 'resultado') {
+                const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
+                const indicadorRS = await editIndicadorResultadoBack(descripcionEditable);
+                setResultado((prev) => [...prev, indicadorRS]);
+            }
+            finalizadaLlamadaBBDD();
+        } catch (error) {
+            const err = gestionarErrorServidor(error);
+            setErrorMessage(err.mensaje);
         }
     };
 
@@ -763,10 +743,8 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                                 try {
                                     if (esNuevo) {
                                         handleGuardarNuevoRealizacion();
-                                    } else if (tipoIndicador === 'realizacion') {
-                                        handleEditarIndicadorRealizacion();
-                                    } else if (tipoIndicador === 'resultado') {
-                                        handleEditarIndicadorResultado();
+                                    } else {
+                                        handleEditarIndicador();
                                     }
                                 } catch (error) {
                                     const errorInfo = gestionarErrorServidor(error);

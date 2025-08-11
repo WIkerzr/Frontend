@@ -1,4 +1,4 @@
-import { RegionInterface } from '../components/Utils/gets/getRegiones';
+import { RegionInterface } from '../components/Utils/data/getRegiones';
 import { Comarcal, SupraComarcal } from './GeneralTypes';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 

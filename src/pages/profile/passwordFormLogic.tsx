@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import PasswordForm from './passwordForm';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { Aviso, gestionarErrorServidor } from '../../components/Utils/utils';
 
 interface LoginProps {

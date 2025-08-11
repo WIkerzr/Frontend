@@ -2,7 +2,7 @@ import { forwardRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
-import { ApiTarget } from '../../components/Utils/gets/controlDev';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, gestionarErrorServidor, NewModal } from '../../components/Utils/utils';
 import { UserID } from '../../types/users';
 import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
