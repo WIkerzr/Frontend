@@ -61,7 +61,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const [regionSeleccionada, setRegionSeleccionadaState] = useState<string | null>(() => {
         const saved = sessionStorage.getItem('regionSeleccionada');
-        return saved !== null && !isNaN(Number(saved)) ? saved : null;
+        return saved !== null ? saved : null;
     });
 
     useEffect(() => {
@@ -100,6 +100,9 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [user]);
 
     const setRegionSeleccionada = (id: number | string | null) => {
+        if (Number.isNaN(id)) {
+            return;
+        }
         if (id === null) {
             setRegionSeleccionadaState(null);
         } else {

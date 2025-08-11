@@ -233,6 +233,8 @@
     "sActual": "Egungo egoera",
     "secondSurname": "Bigarren abizena",
     "seguridad": "Segurtasuna",
+       "seleccionaAnio": "Hautatu urtea",
+    "seleccionaRegion": "Hautatu eskualdea",
     "seleccionaEjePrioritario": "Hautatu lehentasunezko ardatza",
     "seleccionaElIndicador": "{{tipo}} adierazlea hautatu",
     "seleccionaIndicador": "Hautatu adierazle bat...",

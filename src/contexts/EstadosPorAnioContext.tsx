@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { useYear } from './DatosAnualContext';
 import { datosRegion } from '../types/tipadoPlan';
 import { Estado } from '../types/GeneralTypes';
+import { useRegionContext } from './RegionContext';
 
 export const StatusColorsFonds: Record<Estado, string> = {
     proceso: 'bg-info',
@@ -18,8 +19,8 @@ export const StatusColors: Record<Estado, string> = {
 };
 
 type EstadoPorAnio = {
-    plan: Estado;
-    memoria: Estado;
+    plan: Estado | null;
+    memoria: Estado | null;
 };
 
 type EstadosPorAnio = {
@@ -27,30 +28,45 @@ type EstadosPorAnio = {
 };
 
 interface EstadosPorAnioContextType {
-    anio: number;
+    anio: number | null;
     setAnio: (a: number) => void;
     estados: EstadosPorAnio;
     setEstados: React.Dispatch<React.SetStateAction<EstadosPorAnio>>;
     cambiarEstadoPlan: (nuevoEstado: Estado) => void;
     cambiarEstadoMemoria: (nuevoEstado: Estado) => void;
-    planState: Estado;
-    memoriaState: Estado;
+    planState: Estado | null;
+    memoriaState: Estado | null;
 }
 
 const EstadosPorAnioContext = createContext<EstadosPorAnioContextType | undefined>(undefined);
 
 export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) => {
-    const { setYearData, yearData } = useYear();
+    const { yearData, setYearData } = useYear();
+    const { regionSeleccionada } = useRegionContext();
 
     const anioActual = new Date().getFullYear();
-    const [anio, setAnio] = useState<number>(anioActual ? anioActual : yearData.year);
+    const [anio, setAnio] = useState<number | null>(null);
     const [estados, setEstados] = useState<EstadosPorAnio>({
         [anioActual]: { plan: yearData.plan.status, memoria: yearData.memoria.status },
     });
-    const [planState] = useState<Estado>(estados[anio].plan);
-    const [memoriaState] = useState<Estado>(estados[anio].memoria);
+    const [planState, setPlanState] = useState<Estado | null>(null);
+    const [memoriaState, setMemoriaState] = useState<Estado | null>(null);
+
+    useEffect(() => {
+        if (regionSeleccionada && Number(regionSeleccionada) > 0) {
+            const newAnio = new Date().getFullYear();
+            setAnio(newAnio);
+            setPlanState(estados[newAnio]?.plan);
+            setMemoriaState(estados[newAnio]?.memoria);
+        } else {
+            setAnio(null);
+        }
+    }, [regionSeleccionada]);
 
     const cambiarEstadoPlan = (nuevoEstado: Estado) => {
+        if (!anio) {
+            return;
+        }
         setEstados((estadosPrev) => ({
             ...estadosPrev,
             [anio]: {
@@ -61,6 +77,9 @@ export const EstadosPorAnioProvider = ({ children }: { children: ReactNode }) =>
     };
 
     const cambiarEstadoMemoria = (nuevoEstado: Estado) => {
+        if (!anio) {
+            return;
+        }
         setEstados((estadosPrev) => ({
             ...estadosPrev,
             [anio]: {

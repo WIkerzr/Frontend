@@ -112,7 +112,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
 
     useEffect(() => {
         const savedRegion = sessionStorage.getItem('regionSeleccionada');
-        if (savedRegion !== null && !isNaN(Number(savedRegion))) {
+        if (savedRegion !== null) {
             setRegionSeleccionada(Number(savedRegion));
         }
     }, []);

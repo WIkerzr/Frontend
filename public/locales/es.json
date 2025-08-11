@@ -233,6 +233,8 @@
     "sActual": "Situación actual",
     "secondSurname": "Segundo apellido",
     "seguridad": "Seguridad",
+    "seleccionaAnio": "Seleccione año",
+    "seleccionaRegion": "Seleccione región",
     "seleccionaEjePrioritario": "Selecciona eje prioritario",
     "seleccionaElIndicador": "Selecciona el indicador {{tipo}}",
     "seleccionaIndicador": "Selecciona un indicador...",
