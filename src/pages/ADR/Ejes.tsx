@@ -6,9 +6,11 @@ import { Ejes } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { ApiTarget } from '../../components/Utils/data/controlDev';
-import { FetchConRefreshRetry, gestionarErrorServidor } from '../../components/Utils/utils';
+import { FetchConRefreshRetry, gestionarErrorServidor, obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
+import Tippy from '@tippyjs/react';
+import IconRefresh from '../../components/Icon/IconRefresh';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -23,6 +25,10 @@ const Index = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     // const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
+        const fechaStr = obtenerFechaLlamada('ejes');
+        return fechaStr ? new Date(fechaStr) : new Date();
+    });
 
     const llamadaBBDDEjes = (regionSeleccionada: string | null) => {
         setLoading(true);
@@ -50,6 +56,8 @@ const Index = () => {
                     i18n.language === 'es' ? (a?.NameEs ?? '').localeCompare(b.NameEs) : (a?.NameEu ?? '').localeCompare(b.NameEu)
                 );
                 setEjes(datosOrdenados);
+                localStorage.setItem('ejesPrioritarios', JSON.stringify(datosOrdenados));
+                setFechaUltimoActualizadoBBDD(new Date());
                 setLoading(false);
                 if (data.data.length === 0) {
                     setErrorMessage(t('error:errorFaltanDatosEjes'));
@@ -70,23 +78,19 @@ const Index = () => {
         }
     };
 
-    // useEffect(() => {
-    //     setEjes(yearData.plan.ejes);
-    //     setSelected(yearData.plan.ejesPrioritarios.map((eje) => eje.EjeId));
-    //     if (yearData.plan.ejesPrioritarios.length > 1) {
-    //         setLocked(true);
-    //     }
-    // }, []);
-
     useEffect(() => {
-        llamadaBBDDEjes(regionSeleccionada);
+        //TODO modificar cuando se cree DataYear
+        const ejesPrioritarios = localStorage.getItem('ejesPrioritarios');
+        if (ejesPrioritarios && ejesPrioritarios.length > 1) {
+            setEjes(JSON.parse(ejesPrioritarios));
+            setLocked(true);
+            setLoading(false);
+        } else {
+            llamadaBBDDEjes(regionSeleccionada);
+        }
     }, [regionSeleccionada]);
 
-    useEffect(() => {
-        if (yearData.plan.ejesPrioritarios.length > 1) {
-            setLocked(true);
-        }
-    }, [ejes]);
+    useEffect(() => {}, [ejes]);
 
     const handleSave = () => {
         setLocked(true);
@@ -121,8 +125,17 @@ const Index = () => {
                         )
                     }
                 />
-                {errorMessage && <ErrorMessage message={errorMessage} />}
-
+                <div className="flex justify-between items-center mb-2">
+                    <div>{errorMessage && <ErrorMessage message={errorMessage} />}</div>
+                    <div className="flex items-center space-x-2">
+                        <PrintFecha date={fechaUltimoActualizadoBBDD} />
+                        <Tippy content={t('Actualizar')}>
+                            <button type="button" onClick={() => llamadaBBDDEjes(regionSeleccionada)}>
+                                <IconRefresh />
+                            </button>
+                        </Tippy>
+                    </div>
+                </div>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-2 w-full">
                     {ejes &&
                         ejes.map((eje) => (

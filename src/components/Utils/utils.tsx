@@ -206,7 +206,7 @@ export function Boton({ tipo, disabled = false, textoBoton = '', onClick }: Boto
         </button>
     );
 }
-type ClaveFecha = 'indicadores' | 'users' | 'acciones';
+type ClaveFecha = 'indicadores' | 'users' | 'acciones' | 'ejes';
 export function actualizarFechaLLamada(clave: ClaveFecha, fecha: Date = new Date()) {
     const keyStorage = 'fechasUltimaLlamada';
     const fechasRaw = localStorage.getItem(keyStorage);
