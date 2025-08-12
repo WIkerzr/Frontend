@@ -706,3 +706,21 @@ table.dataTable-table tbody tr td {
 table.dataTable-table tbody tr:last-child td {
     @apply border-b-0;
 }
+
+.tabla-usuarios table th:last-child,
+.tabla-usuarios table td:last-child {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 2;
+}
+.tabla-usuarios table th:last-child {
+    background: #f0f2f7 !important;
+    z-index: 3;
+}
+
+.tabla-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0;
+}

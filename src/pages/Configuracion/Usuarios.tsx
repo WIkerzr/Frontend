@@ -129,7 +129,7 @@ const Index = () => {
                                         sortStatus={sortStatus}
                                         onSortStatusChange={setSortStatus}
                                         highlightOnHover
-                                        className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'}`}
+                                        className={`${isRtl ? 'whitespace-nowrap table-hover' : 'whitespace-nowrap table-hover'} tabla-usuarios tabla-wrapper`}
                                         columns={[
                                             {
                                                 accessor: 'status',
@@ -156,7 +156,7 @@ const Index = () => {
                                             { accessor: 'RegionName', title: t('ambit'), sortable: true },
                                             {
                                                 accessor: 'acciones',
-                                                title: '',
+                                                title: t('Acciones'),
                                                 render: (row) => (
                                                     <div className="flex justify-end space-x-3">
                                                         <Tippy content={t('editar')}>
@@ -167,6 +167,7 @@ const Index = () => {
                                                         </Tippy>
                                                     </div>
                                                 ),
+                                                width: 90,
                                             },
                                         ]}
                                         minHeight={200}
