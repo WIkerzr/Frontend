@@ -26,7 +26,7 @@ import { Fases } from '../Utils/data/controlDev';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const Sidebar = () => {
-    const { regionSeleccionada, regionData, anio, anios, setEstados, setAnio } = useRegionEstadosContext();
+    const { regionSeleccionada, regionData, anioSeleccionada, anios, setEstados, setAnio } = useRegionEstadosContext();
     const { yearData, setYearData } = useYear();
     const navigate = useNavigate();
     const { user } = useUser();
@@ -143,13 +143,13 @@ const Sidebar = () => {
         return (
             <h2 className="py-3  flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1 justify-center">
                 <select
-                    value={anio || ''}
-                    className={`py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent ${!regionSeleccionada ? 'appearance-none' : ''}`}
+                    value={anioSeleccionada || ''}
+                    className={`py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent ${!regionSeleccionada || anioSeleccionada === null ? 'appearance-none' : ''}`}
                     onChange={handleChange}
                     disabled={(anios && anios.length === 0) || !regionSeleccionada}
                 >
                     <option value="" disabled>
-                        {anio ? t('seleccionaAnio') : regionSeleccionada ? t('sinAnosSelect') : t('seleccionaRegion')}
+                        {anioSeleccionada ? t('seleccionaAnio') : regionSeleccionada ? t('sinAnosSelect') : t('seleccionaRegion')}
                     </option>
                     {anios.length > 0
                         ? anios.map((a) => (
@@ -167,10 +167,10 @@ const Sidebar = () => {
         return (
             <div
                 style={{
-                    opacity: anio ? 1 : 0.5,
-                    pointerEvents: anio ? 'auto' : 'none',
-                    filter: anio ? 'none' : 'grayscale(0.5)',
-                    userSelect: anio ? 'auto' : 'none',
+                    opacity: anioSeleccionada ? 1 : 0.5,
+                    pointerEvents: anioSeleccionada ? 'auto' : 'none',
+                    filter: anioSeleccionada ? 'none' : 'grayscale(0.5)',
+                    userSelect: anioSeleccionada ? 'auto' : 'none',
                 }}
             >
                 <li className="nav-item">
@@ -187,7 +187,7 @@ const Sidebar = () => {
                         )}
                         {Fases >= 4 && (
                             <>
-                                <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} />
+                                <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} disabled={yearData.plan.ejes.length === 0} />
                                 <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
                             </>
                         )}

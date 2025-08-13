@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getRegiones, RegionInterface } from '../components/Utils/data/getRegiones';
 import { useUser } from './UserContext';
-import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
+import { InitialDataResponse, yearIniciadoVacio } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';
 import { GenerarCodigosRegiones } from '../pages/Configuracion/componentesIndicadores';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,7 @@ type RegionEstadosContextType = {
     setRegionSeleccionada: (id: number | null) => void;
 
     // Estados por año
-    anio: number | null;
+    anioSeleccionada: number | null;
     anios: number[];
     setAnio: (a: number) => void;
     estados: EstadosPorAnio;
@@ -75,7 +75,7 @@ const RegionEstadosContext = createContext<RegionEstadosContextType>({
     nombreRegionSeleccionada: null,
     setRegionSeleccionada: () => {},
     // Estados por año
-    anio: null,
+    anioSeleccionada: null,
     anios: [],
     setAnio: () => {},
     estados: {},
@@ -123,7 +123,10 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
                 setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
                 setRegionActual(regionCompleta);
             }
-            setRegionData(datosRegion);
+            setRegionData({
+                data: [yearIniciadoVacio],
+                idRegion: regionSeleccionada ?? '',
+            });
         }
     }, [regionSeleccionada, regiones, i18n.language, nombreRegionSeleccionada]);
 
@@ -167,7 +170,7 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
     const { login } = useAuth();
 
     const anioActual = new Date().getFullYear();
-    const [anio, setAnio] = useState<number | null>(null);
+    const [anioSeleccionada, setAnio] = useState<number | null>(null);
     const [anios, setAnios] = useState<number[]>([]);
     const [estados, setEstados] = useState<EstadosPorAnio>({
         [anioActual]: { plan: yearData.plan.status, memoria: yearData.memoria.status },
@@ -202,7 +205,7 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
 
     useEffect(() => {
         if (anios && anios.length > 0) {
-            const newAnio = anios.at(-1) ?? null;
+            const newAnio = Math.max(...anios) ?? null;
             setAnio(newAnio);
             if (newAnio !== null && estados[newAnio]) {
                 setPlanState(estados[newAnio].plan);
@@ -219,36 +222,36 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
     }, [anios, estados]);
 
     const cambiarEstadoPlan = (nuevoEstado: Estado) => {
-        if (!anio) {
+        if (!anioSeleccionada) {
             return;
         }
         setEstados((estadosPrev) => ({
             ...estadosPrev,
-            [anio]: {
-                ...estadosPrev[anio],
+            [anioSeleccionada]: {
+                ...estadosPrev[anioSeleccionada],
                 plan: nuevoEstado,
             },
         }));
     };
 
     const cambiarEstadoMemoria = (nuevoEstado: Estado) => {
-        if (!anio) {
+        if (!anioSeleccionada) {
             return;
         }
         setEstados((estadosPrev) => ({
             ...estadosPrev,
-            [anio]: {
-                ...estadosPrev[anio],
+            [anioSeleccionada]: {
+                ...estadosPrev[anioSeleccionada],
                 memoria: nuevoEstado,
             },
         }));
     };
 
     useEffect(() => {
-        if (anio !== null) {
-            llamadaBBDDYearData(anio);
+        if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
+            llamadaBBDDYearData(anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada);
         }
-    }, [anio, llamadaBBDDYearData]);
+    }, [anioSeleccionada, nombreRegionSeleccionada]);
 
     const llamadaAniosXCambioRegionADR = () => {
         const fetchYears = async () => {
@@ -321,7 +324,7 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
                 regionSeleccionada,
                 nombreRegionSeleccionada,
                 setRegionSeleccionada,
-                anio,
+                anioSeleccionada,
                 anios,
                 setAnio,
                 estados,

@@ -15,7 +15,7 @@ const Index = () => {
     const { t, i18n } = useTranslation();
     const { yearData, setYearData } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada, anioSeleccionada } = useRegionEstadosContext();
 
     const [selected, setSelected] = useState<string[]>([]);
     const [locked, setLocked] = useState(false);
@@ -30,9 +30,9 @@ const Index = () => {
     });
 
     const llamadaBBDDEjes = (regionSeleccionada: string | null) => {
+        const token = sessionStorage.getItem('access_token');
         setLoading(true);
         const primeraLlamadaBBDDEjes = async () => {
-            const token = sessionStorage.getItem('access_token');
             const response = await FetchConRefreshRetry(`${ApiTarget}/ejes/${regionSeleccionada}`, {
                 method: 'GET',
                 headers: {
@@ -92,10 +92,34 @@ const Index = () => {
     useEffect(() => {}, [ejes]);
 
     const handleSave = () => {
+        const fetchAxes = async () => {
+            const token = sessionStorage.getItem('access_token');
+            try {
+                const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${anioSeleccionada}/axes`, {
+                    headers: {
+                        method: 'POST',
+                        Authorization: `Bearer ` + token,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    const errorInfo = gestionarErrorServidor(res, data);
+                    console.log(errorInfo.mensaje);
+                    return;
+                }
+                console.log(`Ejes prioritarios guardados: ${JSON.stringify(selected)}`);
+            } catch (err: unknown) {
+                const errorInfo = gestionarErrorServidor(err);
+                console.log(errorInfo.mensaje);
+                return;
+            }
+        };
+        fetchAxes();
+
         setLocked(true);
-        //TODO llamada a back para guardar los ejes prioritarios
         const ejesPrioritarios = { ...yearData };
-        const ejesSeleccionados = yearData.plan.ejes.filter((eje) => selected.includes(eje.EjeId));
+        const ejesSeleccionados = yearData.plan.ejes.filter((eje) => selected.includes(eje.Id));
 
         ejesPrioritarios.plan.ejesPrioritarios = ejesSeleccionados;
         setYearData(ejesPrioritarios);
@@ -138,16 +162,16 @@ const Index = () => {
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-2 w-full">
                     {ejes &&
                         ejes.map((eje) => (
-                            <li key={eje.EjeId} className={`flex items-center p-2 rounded transition ${selected.includes(eje.EjeId) ? 'bg-green-100' : ''}`}>
+                            <li key={eje.Id} className={`flex items-center p-2 rounded transition ${selected.includes(eje.Id) ? 'bg-green-100' : ''}`}>
                                 <input
                                     type="checkbox"
                                     className="form-checkbox h-5 w-5 text-green-600 accent-green-600"
-                                    checked={selected.includes(eje.EjeId)}
-                                    onChange={() => handleCheck(eje.EjeId)}
+                                    checked={selected.includes(eje.Id)}
+                                    onChange={() => handleCheck(eje.Id)}
                                     disabled={locked}
-                                    id={`checkbox-${eje.EjeId}`}
+                                    id={`checkbox-${eje.Id}`}
                                 />
-                                <label htmlFor={`checkbox-${eje.EjeId}`} className={`ml-3 cursor-pointer w-full ${selected.includes(eje.EjeId) ? 'text-green-700 font-semibold' : ''}`}>
+                                <label htmlFor={`checkbox-${eje.Id}`} className={`ml-3 cursor-pointer w-full ${selected.includes(eje.Id) ? 'text-green-700 font-semibold' : ''}`}>
                                     {i18n.language === 'es' ? eje.NameEs : eje.NameEu}
                                 </label>
                             </li>

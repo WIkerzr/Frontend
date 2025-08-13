@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Ejes, EjesResponse, servicioIniciadoVacio, YearData, yearIniciado } from '../types/tipadoPlan';
+import { Ejes, EjesResponse, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
-import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../components/Utils/utils';
+import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, obtenerFechaLlamada } from '../components/Utils/utils';
 import { ApiTarget } from '../components/Utils/data/controlDev';
 import { useRegionEstadosContext } from './RegionEstadosContext';
 
@@ -13,6 +13,7 @@ interface YearContextType {
     yearData: YearData;
     block: boolean;
     setYearData: (data: YearData) => void;
+    fechaUltimoActualizadoBBDDYearData: Date;
     datosEditandoAccion: DatosAccion;
     setDatosEditandoAccion: React.Dispatch<React.SetStateAction<DatosAccion>>;
     datosEditandoServicio: Servicios | null;
@@ -23,7 +24,8 @@ interface YearContextType {
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
-    llamadaBBDDYearData: (anio: number) => void;
+    llamadaBBDDYearData: (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string) => void;
+    loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
     AgregarServicio: () => void;
@@ -32,12 +34,12 @@ interface YearContextType {
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionEstadosContext();
 
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearDataState] = useState<YearData>(() => {
         const stored = localStorage.getItem('datosAno');
-        return stored ? JSON.parse(stored) : yearIniciado;
+        return stored ? JSON.parse(stored) : yearIniciadoVacio;
     });
     const setYearData = (data: YearData) => {
         setYearDataState(data);
@@ -47,6 +49,12 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const stored = localStorage.getItem('datosAccionModificado');
         return JSON.parse(stored!);
     });
+
+    const [fechaUltimoActualizadoBBDDYearData, setFechaUltimoActualizadoBBDDYearData] = useState<Date>(() => {
+        const fechaStr = obtenerFechaLlamada('YearData');
+        return fechaStr ? new Date(fechaStr) : new Date();
+    });
+    const [loadingYearData, setLoadingYearData] = useState<boolean>(false);
 
     useEffect(() => {
         localStorage.setItem('datosAno', JSON.stringify(yearData));
@@ -58,7 +66,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
         setIdEjeEditado(idEjePrioritario);
-        const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.EjeId));
+        const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.Id));
         const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
         setDatosEditandoAccion(accionSeleccionado[0]);
 
@@ -128,7 +136,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const SeleccionEditarGuardar = () => {
         const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) => {
-            if (eje.EjeId !== idEjeEditado) {
+            if (eje.Id !== idEjeEditado) {
                 return eje;
             }
 
@@ -190,7 +198,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
         const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
-        const ejeSeleccionado = fuenteEjes.find((eje) => eje.EjeId === idEje);
+        const ejeSeleccionado = fuenteEjes.find((eje) => eje.Id === idEje);
         if (!ejeSeleccionado) return;
 
         const datos = {
@@ -204,7 +212,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
         if (tipo === 'Acciones') {
             const nuevosEjes = yearData.plan.ejesPrioritarios.map((eje) =>
-                eje.EjeId === idEje
+                eje.Id === idEje
                     ? {
                           ...eje,
                           acciones: [...eje.acciones, datos],
@@ -239,19 +247,20 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
-    const llamadaBBDDYearData = (anio: number) => {
+    const llamadaBBDDYearData = (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string) => {
         const stored = localStorage.getItem('datosAno');
         if (stored) {
             const data: YearData = JSON.parse(stored);
-            if (data.year === anio && data.nombreRegion === nombreRegionSeleccionada) {
+            if (data.year === anioSeleccionada && data.nombreRegion === nombreRegionSeleccionada) {
                 setYearData(data);
                 return;
             }
         }
+        setLoadingYearData(true);
         const fetchYearData = async () => {
             const token = sessionStorage.getItem('access_token');
             try {
-                const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${Number(anio)}`, {
+                const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${Number(anioSeleccionada)}`, {
                     headers: {
                         method: 'GET',
                         Authorization: `Bearer ` + token,
@@ -266,15 +275,14 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
                     return;
                 }
-                console.log(`Datos de año ${anio} para región ${regionSeleccionada} obtenidos correctamente.`);
-                const status: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador'; // o lo que quieras por defecto
+                const status: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
 
                 const ejesPrioritarios: Ejes[] = [];
                 const ejes: Ejes[] = [];
 
                 data.data.Plan.Ejes.forEach((eje: EjesResponse) => {
                     const item = {
-                        EjeId: `${eje.EjeId}`,
+                        Id: `${eje.Id}`,
                         NameEs: `${eje.NameEs}`,
                         NameEu: `${eje.NameEu}`,
                         IsActive: eje.IsActive,
@@ -303,13 +311,14 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         valFinal: data.data.Memoria.ValFinal,
                     },
                 });
+                setFechaUltimoActualizadoBBDDYearData(new Date());
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);
                 // setErrorMessage(errorInfo.mensaje);
                 console.log(errorInfo.mensaje);
                 return;
             } finally {
-                // setLoading(false);
+                setLoadingYearData(false);
             }
         };
         fetchYearData();
@@ -321,6 +330,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 block,
                 setYearData,
                 datosEditandoAccion,
+                fechaUltimoActualizadoBBDDYearData,
                 setDatosEditandoAccion,
                 AgregarAccion,
                 AgregarServicio,
@@ -332,6 +342,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 SeleccionEditarServicio,
                 llamadaBBDDYearData,
                 datosEditandoServicio,
+                loadingYearData,
                 setDatosEditandoServicio,
                 GuardarEdicionServicio,
             }}
