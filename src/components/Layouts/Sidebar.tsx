@@ -19,26 +19,23 @@ import IconPlan from '../Icon/Menu/IconPlan.svg';
 import IconMemoria from '../Icon/Menu/IconMemoria.svg';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/data/controlDev';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const Sidebar = () => {
-    const { anio, setEstados, setAnio } = useEstadosPorAnio();
+    const { regionSeleccionada, regionData, anio, anios, setEstados, setAnio } = useRegionEstadosContext();
     const { yearData, setYearData } = useYear();
     const navigate = useNavigate();
     const { user } = useUser();
-    const { regionSeleccionada, regionData } = useRegionContext();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
     const dispatch = useDispatch();
-    const anios = regionData?.data.map((item) => item.year) ?? [];
     const { t } = useTranslation();
     const toggleMenu = (value: string) => {
         setCurrentMenu((oldValue) => {
@@ -149,22 +146,18 @@ const Sidebar = () => {
                     value={anio || ''}
                     className={`py-3  pr-4 w-[80%] uppercase font-extrabold bg-transparent ${!regionSeleccionada ? 'appearance-none' : ''}`}
                     onChange={handleChange}
-                    disabled={anios.length === 0 || !regionSeleccionada}
+                    disabled={(anios && anios.length === 0) || !regionSeleccionada}
                 >
                     <option value="" disabled>
-                        {anio ? t('seleccionaAnio') : regionSeleccionada ?? t('seleccionaRegion')}
+                        {anio ? t('seleccionaAnio') : regionSeleccionada ? t('sinAnosSelect') : t('seleccionaRegion')}
                     </option>
-                    {anios.length > 0 ? (
-                        anios.map((a) => (
-                            <option key={a} value={a}>
-                                {a}
-                            </option>
-                        ))
-                    ) : (
-                        <option value={new Date().getFullYear()} disabled>
-                            {new Date().getFullYear()}
-                        </option>
-                    )}
+                    {anios.length > 0
+                        ? anios.map((a) => (
+                              <option key={a} value={a}>
+                                  {a}
+                              </option>
+                          ))
+                        : null}
                 </select>
             </h2>
         );
@@ -174,10 +167,10 @@ const Sidebar = () => {
         return (
             <div
                 style={{
-                    opacity: regionSeleccionada ? 1 : 0.5,
-                    pointerEvents: regionSeleccionada ? 'auto' : 'none',
-                    filter: regionSeleccionada ? 'none' : 'grayscale(0.5)',
-                    userSelect: regionSeleccionada ? 'auto' : 'none',
+                    opacity: anio ? 1 : 0.5,
+                    pointerEvents: anio ? 'auto' : 'none',
+                    filter: anio ? 'none' : 'grayscale(0.5)',
+                    userSelect: anio ? 'auto' : 'none',
                 }}
             >
                 <li className="nav-item">

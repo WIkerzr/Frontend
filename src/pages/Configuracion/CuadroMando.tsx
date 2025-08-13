@@ -5,7 +5,7 @@ import { DataTableSortStatus, DataTableColumnTextAlign, DataTable } from 'mantin
 import { forwardRef, useState, useEffect } from 'react';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { visualColumnByPath } from '../ADR/Acciones/Columnas';
-import { useRegionContext } from '../../contexts/RegionContext';
+import { useEstadosPorAnio, useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 interface tablaIndicadoresProps {
     indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[];
@@ -84,12 +84,19 @@ const actions = ['Todos', 'Acciones', 'Acciones y Proyectos', 'Servicios'];
 
 const Index = () => {
     const { t } = useTranslation();
-    const { allYears, regionData } = useRegionContext();
-    const opcionesYear = ['Todos', ...allYears.map(String)];
+    const { regionData } = useRegionEstadosContext();
+    const { anios } = useEstadosPorAnio();
 
-    const [yearFilter, setYearFilter] = useState<string>(opcionesYear[0]);
+    const [years, setYears] = useState<string[]>(['Todos', ...anios.map(String)]);
+    const [yearFilter, setYearFilter] = useState<string>('Todos');
 
     const [tipeAction, setTipeAction] = useState<string>('Todos');
+
+    useEffect(() => {
+        const newYears = ['Todos', ...anios.map(String)];
+        setYears(newYears);
+        setYearFilter('Todos');
+    }, [anios]);
 
     return (
         <div className="panel">
@@ -100,6 +107,7 @@ const Index = () => {
                     </div>
                 }
             />
+
             <div className="p-5 flex flex-col gap-4 w-full paneln0">
                 <div className="flex-1 flex justify-end gap-4">
                     <div className="w-[200px] ">
@@ -131,7 +139,7 @@ const Index = () => {
                                 }
                             }}
                         >
-                            {opcionesYear.map((anios) => (
+                            {years.map((anios) => (
                                 <option key={anios} value={anios}>
                                     {anios}
                                 </option>

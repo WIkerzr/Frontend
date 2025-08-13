@@ -4,6 +4,7 @@ import { useUser } from './UserContext';
 import { datosRegion, InitialDataResponse } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';
 import { GenerarCodigosRegiones } from '../pages/Configuracion/componentesIndicadores';
+import { useTranslation } from 'react-i18next';
 
 interface CodRegiones {
     [key: number]: string;
@@ -17,9 +18,9 @@ type RegionContextType = {
     loading: boolean;
     error: Error | null;
     regionSeleccionada: string | null;
+    nombreRegionSeleccionada: string | null;
     // eslint-disable-next-line no-unused-vars
     setRegionSeleccionada: (id: number | null) => void;
-    allYears: number[];
 };
 
 const RegionContext = createContext<RegionContextType>({
@@ -34,15 +35,15 @@ const RegionContext = createContext<RegionContextType>({
     loading: false,
     error: null,
     regionSeleccionada: null,
+    nombreRegionSeleccionada: null,
     setRegionSeleccionada: () => {},
-    allYears: [],
 });
 
 export const useRegionContext = () => useContext(RegionContext);
 
 export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [regionData, setRegionData] = useState<InitialDataResponse>();
-
+    const { i18n } = useTranslation();
     const { user } = useUser();
     const token = sessionStorage.getItem('access_token');
     const [regionActual, setRegionActual] = useState<RegionInterface>();
@@ -59,20 +60,21 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const [regionSeleccionada, setRegionSeleccionadaState] = useState<string | null>(() => {
-        const saved = sessionStorage.getItem('regionSeleccionada');
-        return saved !== null ? saved : null;
-    });
+    const savedRegion = sessionStorage.getItem('regionSeleccionada');
+    const parsedRegion = savedRegion ? JSON.parse(savedRegion) : null;
+
+    const [regionSeleccionada, setRegionSeleccionadaState] = useState<string | null>(parsedRegion?.id ?? null);
+    const [nombreRegionSeleccionada, setNombreRegionSeleccionada] = useState<string | null>(parsedRegion?.nombre ?? null);
 
     useEffect(() => {
         if (regionSeleccionada !== null && regionSeleccionada != '') {
-            sessionStorage.setItem('regionSeleccionada', regionSeleccionada);
-
+            sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: regionSeleccionada, nombre: nombreRegionSeleccionada }));
             const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
+
             if (regionCompleta) {
+                setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
                 setRegionActual(regionCompleta);
             }
-
             setRegionData(datosRegion);
         }
     }, [regionSeleccionada]);
@@ -110,12 +112,6 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     };
 
-    const allYears = React.useMemo(() => {
-        if (!regionData?.data) return [];
-        const years = regionData.data.map((item) => item.year);
-        return Array.from(new Set(years)).sort();
-    }, [regionData]);
-
     return (
         <RegionContext.Provider
             value={{
@@ -126,8 +122,8 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 loading,
                 error,
                 regionSeleccionada,
+                nombreRegionSeleccionada,
                 setRegionSeleccionada,
-                allYears,
             }}
         >
             {children}

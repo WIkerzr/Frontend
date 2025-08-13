@@ -27,6 +27,9 @@ export interface Ejes {
     IsActive: boolean;
     acciones: DatosAccion[];
 }
+export interface EjesResponse extends Ejes {
+    IsPrioritarios: boolean;
+}
 
 export interface Plan {
     id: string;

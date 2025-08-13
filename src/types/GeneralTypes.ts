@@ -1,4 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';
+const validEstados = ['borrador', 'proceso', 'cerrado', 'aceptado'] as const;
+
+export function isEstado(value: any): value is Estado {
+    return validEstados.includes(value);
+}
 
 export type EstadosLoading = 'idle' | 'loading' | 'success' | 'error';
 

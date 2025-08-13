@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { servicioIniciadoVacio, YearData, yearIniciado } from '../types/tipadoPlan';
+import { Ejes, EjesResponse, servicioIniciadoVacio, YearData, yearIniciado } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
-import { useRegionContext } from './RegionContext';
-import { Servicios } from '../types/GeneralTypes';
+import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
-import { formateaConCeroDelante } from '../components/Utils/utils';
+import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../components/Utils/utils';
+import { ApiTarget } from '../components/Utils/data/controlDev';
+import { useRegionEstadosContext } from './RegionEstadosContext';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -22,6 +23,7 @@ interface YearContextType {
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
+    llamadaBBDDYearData: (anio: number) => void;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
     AgregarServicio: () => void;
@@ -30,7 +32,8 @@ interface YearContextType {
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionEstadosContext();
+
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearDataState] = useState<YearData>(() => {
         const stored = localStorage.getItem('datosAno');
@@ -236,6 +239,81 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
+    const llamadaBBDDYearData = (anio: number) => {
+        const stored = localStorage.getItem('datosAno');
+        if (stored) {
+            const data: YearData = JSON.parse(stored);
+            if (data.year === anio && data.nombreRegion === nombreRegionSeleccionada) {
+                setYearData(data);
+                return;
+            }
+        }
+        const fetchYearData = async () => {
+            const token = sessionStorage.getItem('access_token');
+            try {
+                const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${Number(anio)}`, {
+                    headers: {
+                        method: 'GET',
+                        Authorization: `Bearer ` + token,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    const errorInfo = gestionarErrorServidor(res, data);
+                    //setErrorMessage(errorInfo.mensaje);
+                    console.log(errorInfo.mensaje);
+
+                    return;
+                }
+                console.log(`Datos de año ${anio} para región ${regionSeleccionada} obtenidos correctamente.`);
+                const status: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador'; // o lo que quieras por defecto
+
+                const ejesPrioritarios: Ejes[] = [];
+                const ejes: Ejes[] = [];
+
+                data.data.Plan.Ejes.forEach((eje: EjesResponse) => {
+                    const item = {
+                        EjeId: `${eje.EjeId}`,
+                        NameEs: `${eje.NameEs}`,
+                        NameEu: `${eje.NameEu}`,
+                        IsActive: eje.IsActive,
+                        acciones: [],
+                    };
+
+                    if (eje.IsPrioritarios) {
+                        ejesPrioritarios.push(item);
+                    } else {
+                        ejes.push(item);
+                    }
+                });
+                setYearData({
+                    nombreRegion: nombreRegionSeleccionada ? nombreRegionSeleccionada : '',
+                    year: data.data.Year,
+                    plan: {
+                        ...yearData.plan,
+                        ejesPrioritarios: ejesPrioritarios,
+                        ejes: ejes,
+                    },
+                    memoria: {
+                        ...yearData.memoria,
+                        id: `${data.data.Memoria.Id}`,
+                        status: status,
+                        dSeguimiento: data.data.Memoria.DSeguimiento,
+                        valFinal: data.data.Memoria.ValFinal,
+                    },
+                });
+            } catch (err: unknown) {
+                const errorInfo = gestionarErrorServidor(err);
+                // setErrorMessage(errorInfo.mensaje);
+                console.log(errorInfo.mensaje);
+                return;
+            } finally {
+                // setLoading(false);
+            }
+        };
+        fetchYearData();
+    };
     return (
         <YearContext.Provider
             value={{
@@ -252,6 +330,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 SeleccionEditarGuardar,
                 SeleccionEditarGuardarAccesoria,
                 SeleccionEditarServicio,
+                llamadaBBDDYearData,
                 datosEditandoServicio,
                 setDatosEditandoServicio,
                 GuardarEdicionServicio,

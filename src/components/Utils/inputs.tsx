@@ -1,11 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { useEffect, useRef } from 'react';
-import { yearIniciado } from '../../types/tipadoPlan';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { useYear } from '../../contexts/DatosAnualContext';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
@@ -105,25 +103,17 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
     const { i18n, t } = useTranslation();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
-    const { setYearData } = useYear();
-    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
+    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionEstadosContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
 
     useEffect(() => {
         const savedRegion = sessionStorage.getItem('regionSeleccionada');
-        if (savedRegion !== null) {
-            setRegionSeleccionada(Number(savedRegion));
+        const parsedRegion = savedRegion ? JSON.parse(savedRegion) : null;
+        if (parsedRegion !== null) {
+            setRegionSeleccionada(Number(parsedRegion.id));
         }
     }, []);
-
-    useEffect(() => {
-        if (regionSeleccionada !== null) {
-            sessionStorage.setItem('regionSeleccionada', regionSeleccionada);
-        }
-        //TODO llamada YearData segun region
-        setYearData(yearIniciado);
-    }, [regionSeleccionada]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
