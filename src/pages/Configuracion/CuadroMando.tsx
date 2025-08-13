@@ -157,7 +157,7 @@ const Index = () => {
                                         year.plan.ejesPrioritarios.map(
                                             (ejes, ejesIdx) =>
                                                 ejes.acciones.length > 0 && (
-                                                    <div key={ejes.EjeId || ejesIdx}>
+                                                    <div key={ejes.Id || ejesIdx}>
                                                         {ejes.acciones.map((acciones, accionesIdx) => (
                                                             <div key={acciones.id || accionesIdx} className="panel mt-6">
                                                                 <span>

@@ -13,7 +13,7 @@ import { servicioIniciadoVacio } from '../../types/tipadoPlan';
 import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
 
 const Index: React.FC = () => {
-    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const { yearData, setYearData, setDatosEditandoServicio, SeleccionVaciarEditarAccion } = useYear();
     const [serviciosGrup, setServiciosGrup] = useState<Servicios[][]>([]);
@@ -51,7 +51,7 @@ const Index: React.FC = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('listadoAcciones')} {anio}
+                            {t('listadoAcciones')} {anioSeleccionada}
                         </span>
                     </h2>
                 }

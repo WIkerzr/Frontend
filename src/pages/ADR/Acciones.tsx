@@ -31,7 +31,7 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { yearData, SeleccionVaciarEditarAccion } = useYear();
-    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const navigate = useNavigate();
     const ejesPrioritarios = yearData.plan.ejesPrioritarios;
@@ -51,7 +51,7 @@ const Index: React.FC = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('listadoAcciones')} {anio}
+                            {t('listadoAcciones')} {anioSeleccionada}
                         </span>
                     </h2>
                 }
@@ -66,11 +66,11 @@ const Index: React.FC = () => {
                 }
             />
             <div className="w-full mx-auto mt-1 px-2">
-                <div className="flex items-start w-full h-100%">
+                <div className="flex items-start  w-full h-100%">
                     {ejesSeleccionados.map((eje, index) => {
                         return (
-                            <div key={eje.EjeId} className="flex flex-col flex-1 items-center justify-center p-1">
-                                <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.EjeId} number={index} />
+                            <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
+                                <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} number={index} />
                             </div>
                         );
                     })}

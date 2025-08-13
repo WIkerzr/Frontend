@@ -12,7 +12,7 @@ import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
 const Index: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
     const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData } = useYear();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -122,7 +122,7 @@ const Index: React.FC = () => {
                     titulo={
                         <h2 className="text-xl font-bold flex items-center space-x-2">
                             <span>
-                                {t('servicioTituloEditado')} {anio}
+                                {t('servicioTituloEditado')} {anioSeleccionada}
                             </span>
                         </h2>
                     }

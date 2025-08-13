@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { lazy } from 'react';
 import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
 import NotFound from './NotFound';
@@ -20,7 +21,7 @@ const Profile = lazy(() => import('../pages/profile/profile'));
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Usuarios'));
 
-const paginaPorDefectoPorFases = {
+const paginaPorDefectoPorFases: { [key: string]: JSX.Element } = {
     1: <Usuarios />,
     2: <IndicadoresADR />,
     3: <Acciones />,
@@ -28,7 +29,7 @@ const paginaPorDefectoPorFases = {
     5: <PlanesGestion />,
     6: <IndicadoresInpacto />,
 };
-const HomeComponent = paginaPorDefectoPorFases[Fases] || <CuadroMando />;
+const HomeComponent = paginaPorDefectoPorFases[String(Fases)] || <CuadroMando />;
 
 const fase1 = [
     {

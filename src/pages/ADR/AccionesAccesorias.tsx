@@ -11,7 +11,7 @@ import { DatosAccion } from '../../types/TipadoAccion';
 import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
 
 const Index: React.FC = () => {
-    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const { yearData, setYearData, SeleccionEditarAccionAccesoria, SeleccionVaciarEditarAccion } = useYear();
     const [accionesGrup, setAccionesGrup] = useState<DatosAccion[][]>([]);
@@ -49,7 +49,7 @@ const Index: React.FC = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('listadoAcciones')} {anio}
+                            {t('listadoAcciones')} {anioSeleccionada}
                         </span>
                     </h2>
                 }
@@ -64,7 +64,7 @@ const Index: React.FC = () => {
                             return (
                                 <div key={accion.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
-                                        {t('Eje')}: {yearData.plan.ejes.find((item) => item.EjeId === accion.ejeId)?.NameEs}
+                                        {t('Eje')}: {yearData.plan.ejes.find((item) => item.Id === accion.ejeId)?.NameEs}
                                     </span>
                                     <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">

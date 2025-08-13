@@ -75,7 +75,6 @@ export const useIndicadoresContext = () => useContext(IndicadorContext);
 export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { t } = useTranslation();
     const { user } = useUser();
-    const token = sessionStorage.getItem('access_token');
     const { regionSeleccionada } = useRegionEstadosContext();
     const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);
@@ -185,6 +184,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const PrimeraLlamada = () => {
+        const token = sessionStorage.getItem('access_token');
         setMensajeError('');
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
@@ -247,6 +247,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     useEffect(() => {
+        const token = sessionStorage.getItem('access_token');
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
             if (indicadoresResultado.length > 0) {

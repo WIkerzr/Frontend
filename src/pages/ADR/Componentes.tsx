@@ -19,7 +19,7 @@ export const ModalAccion = () => {
 
     // const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(yearData.plan.ejesPrioritarios[0].acciones);
 
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].EjeId);
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].Id);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [plurianual, setNuevaPlurianual] = useState(false);
@@ -37,7 +37,7 @@ export const ModalAccion = () => {
 
     useEffect(() => {
         if (idEjeSeleccionado === '') {
-            setIdEjeSeleccionado(yearData.plan.ejesPrioritarios[0].EjeId);
+            setIdEjeSeleccionado(yearData.plan.ejesPrioritarios[0].Id);
         }
     }, [idEjeSeleccionado, showModal]);
 
@@ -74,14 +74,14 @@ export const ModalAccion = () => {
         if (yearData.plan.ejesPrioritarios.length === 1) {
             return;
         }
-        const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.EjeId === idEjeSeleccionado);
+        const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.Id === idEjeSeleccionado);
         const { disabled } = validarEstadoEje(index, accionesTotales);
 
         if (disabled) {
             const nuevoId = yearData.plan.ejesPrioritarios.find((_, i) => {
                 const { disabled } = validarEstadoEje(i, accionesTotales);
                 return !disabled;
-            })?.EjeId;
+            })?.Id;
 
             if (nuevoId && nuevoId !== idEjeSeleccionado) {
                 setIdEjeSeleccionado(nuevoId);
@@ -125,7 +125,7 @@ export const ModalAccion = () => {
                                 const { maxAccion, limitarEje, disabled } = validarEstadoEje(index, accionesTotales);
                                 const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}${maxAccion ? ` (${t('limiteAlcanzado')})` : limitarEje ? ` (${t('completaEjeVacio')})` : ''}`;
                                 return (
-                                    <option key={eje.EjeId} value={eje.EjeId} disabled={disabled}>
+                                    <option key={eje.Id} value={eje.Id} disabled={disabled}>
                                         {label}
                                     </option>
                                 );
@@ -183,9 +183,9 @@ export const ModalAccionAccesorias = () => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
-    const listadoEjesFiltrado = yearData.plan.ejes.filter((eje) => !yearData.plan.ejesPrioritarios.some((prioritario) => prioritario.EjeId === eje.EjeId));
+    const listadoEjesFiltrado = yearData.plan.ejes.filter((eje) => !yearData.plan.ejesPrioritarios.some((prioritario) => prioritario.Id === eje.Id));
 
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState<string>(listadoEjesFiltrado[0].EjeId);
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState<string>(listadoEjesFiltrado[0].Id);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [plurianual, setNuevaPlurianual] = useState(false);
@@ -228,7 +228,7 @@ export const ModalAccionAccesorias = () => {
                             {listadoEjesFiltrado.map((eje) => {
                                 const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}`;
                                 return (
-                                    <option key={eje.EjeId} value={eje.EjeId}>
+                                    <option key={eje.Id} value={eje.Id}>
                                         {label}
                                     </option>
                                 );
@@ -325,7 +325,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 
     return (
         <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
-            <span className="text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
+            <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
 
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => {

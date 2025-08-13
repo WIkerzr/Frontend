@@ -8,7 +8,7 @@ import { Aviso, Boton, ModalSave } from '../../../components/Utils/utils';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
 
 const Index = () => {
-    const { anio, editarPlan } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
 
     const { t } = useTranslation();
     const { yearData, setYearData } = useYear();
@@ -60,7 +60,7 @@ const Index = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {pantalla === 'Plan' ? t('planTitulo') : t('memoriaTitulo')} {anio}
+                            {pantalla === 'Plan' ? t('planTitulo') : t('memoriaTitulo')} {anioSeleccionada}
                         </span>
                         <span className={pantalla === 'Plan' ? `${StatusColors[yearData.plan.status]}` : `${StatusColors[yearData.memoria.status]}`}>
                             {pantalla === 'Plan' ? t(yearData.plan.status) : t(yearData.memoria.status)}

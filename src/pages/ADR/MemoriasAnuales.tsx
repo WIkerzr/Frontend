@@ -23,7 +23,7 @@ const archivos: Archivo[] = [
 ];
 
 const Index = () => {
-    const { anio, editarMemoria } = useEstadosPorAnio();
+    const { anioSeleccionada, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const { yearData } = useYear();
@@ -34,7 +34,7 @@ const Index = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('memoriaTitulo')} {anio}
+                            {t('memoriaTitulo')} {anioSeleccionada}
                         </span>
                         <span className={`${StatusColors[yearData.memoria.status]}`}>{t(yearData.memoria.status)}</span>
                     </h2>

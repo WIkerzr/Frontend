@@ -40,7 +40,7 @@ const Index: React.FC = () => {
         datosEditandoServicio,
         setDatosEditandoServicio,
     } = useYear();
-    const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [mostrandoModal, setMostrandoModal] = useState(false);
 
@@ -88,7 +88,7 @@ const Index: React.FC = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {titulo} {anio}
+                            {titulo} {anioSeleccionada}
                         </span>
                     </h2>
                 }

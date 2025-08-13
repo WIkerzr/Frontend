@@ -22,7 +22,7 @@ const archivos: Archivo[] = [
 ];
 
 const Index = () => {
-    const { anio, editarPlan } = useEstadosPorAnio();
+    const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
     const { yearData } = useYear();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
@@ -86,7 +86,7 @@ const Index = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('planTitulo')} {anio}
+                            {t('planTitulo')} {anioSeleccionada}
                         </span>
                         <span className={`${StatusColors[yearData.plan.status]}`}>{t(yearData.plan.status)}</span>
                     </h2>
