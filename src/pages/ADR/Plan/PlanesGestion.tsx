@@ -3,13 +3,13 @@ import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { ZonaTitulo } from '../../Configuracion/componentes';
-import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
 import { validarCamposObligatoriosAccion } from '../Componentes';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
+import { StatusColors, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
 interface Archivo {
     nombre: string;
     url: string;

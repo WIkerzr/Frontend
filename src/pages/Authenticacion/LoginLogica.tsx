@@ -4,14 +4,14 @@ import { useDispatch } from 'react-redux';
 import { setAuthUser } from '../../store/authSlice';
 import { useUser } from '../../contexts/UserContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { UserID, UserRole } from '../../types/users';
 import { ApiTargetToken } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const useLogin = () => {
-    const { setRegionSeleccionada } = useRegionContext();
+    const { setRegionSeleccionada } = useRegionEstadosContext();
     const { t } = useTranslation();
 
     const { login } = useAuth();

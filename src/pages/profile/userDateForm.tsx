@@ -4,11 +4,11 @@ import { Input } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { User, UserID } from '../../types/users';
 import { useEffect, useState } from 'react';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { newUser } from '../Configuracion/componentes';
 import { formateaConCeroDelante } from '../../components/Utils/utils';
 import { useUser } from '../../contexts/UserContext';
 import { useUsers } from '../../contexts/UsersContext';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
@@ -25,7 +25,7 @@ interface UserDataFormProps {
 
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, setErrorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser, title = true }) => {
     const { t, i18n } = useTranslation();
-    const { regiones } = useRegionContext();
+    const { regiones } = useRegionEstadosContext();
     const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(`${userData.ambit}`)) || null);
     const [conditional, setConditional] = useState<boolean>(false);
     const [datosUsuario, setDatosUsuario] = useState(userData);

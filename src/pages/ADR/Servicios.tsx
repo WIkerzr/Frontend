@@ -6,11 +6,12 @@ import IconPencil from '../../components/Icon/IconPencil';
 import IconEye from '../../components/Icon/IconEye';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useTranslation } from 'react-i18next';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { Servicios } from '../../types/GeneralTypes';
 import { MostrarAvisoCamposServicios } from './Componentes';
 import { Boton } from '../../components/Utils/utils';
 import { servicioIniciadoVacio } from '../../types/tipadoPlan';
+import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+
 const Index: React.FC = () => {
     const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();

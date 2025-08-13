@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './Componentes';
 import { ZonaTitulo } from '../Configuracion/componentes';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
@@ -9,6 +8,7 @@ import IconEye from '../../components/Icon/IconEye';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { DatosAccion } from '../../types/TipadoAccion';
+import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
 
 const Index: React.FC = () => {
     const { anio, editarPlan, editarMemoria } = useEstadosPorAnio();

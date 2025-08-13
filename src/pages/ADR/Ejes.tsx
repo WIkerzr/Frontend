@@ -4,19 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { Ejes } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, gestionarErrorServidor, obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
+import { useRegionEstadosContext, useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
     const { yearData, setYearData } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada } = useRegionEstadosContext();
 
     const [selected, setSelected] = useState<string[]>([]);
     const [locked, setLocked] = useState(false);

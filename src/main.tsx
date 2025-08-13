@@ -18,13 +18,12 @@ import router from './router/index';
 // Redux
 import { Provider } from 'react-redux';
 import store from './store/index';
-import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/AuthContext';
 import TableMantineProvider from './contexts/TableMantineContext';
-import { EstadosPorAnioProvider } from './contexts/EstadosPorAnioContext';
 import { RegionDataProvider } from './contexts/DatosAnualContext';
 import { IndicadoresProvider } from './contexts/IndicadoresContext';
 import { UsersProvider } from './contexts/UsersContext';
+import { RegionEstadosProvider } from './contexts/RegionEstadosContext';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
@@ -33,19 +32,17 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                 <UserProvider>
                     <AuthProvider>
                         <MantineProvider>
-                            <RegionProvider>
-                                <UsersProvider>
-                                    <RegionDataProvider>
-                                        <IndicadoresProvider>
-                                            <TableMantineProvider>
-                                                <EstadosPorAnioProvider>
-                                                    <RouterProvider router={router} />
-                                                </EstadosPorAnioProvider>
-                                            </TableMantineProvider>
-                                        </IndicadoresProvider>
-                                    </RegionDataProvider>
-                                </UsersProvider>
-                            </RegionProvider>
+                            <UsersProvider>
+                                <RegionDataProvider>
+                                    <IndicadoresProvider>
+                                        <TableMantineProvider>
+                                            <RegionEstadosProvider>
+                                                <RouterProvider router={router} />
+                                            </RegionEstadosProvider>
+                                        </TableMantineProvider>
+                                    </IndicadoresProvider>
+                                </RegionDataProvider>
+                            </UsersProvider>
                         </MantineProvider>
                     </AuthProvider>
                 </UserProvider>

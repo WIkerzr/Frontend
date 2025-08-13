@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRegionContext } from './RegionContext';
 import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../components/Utils/data/controlDev';
 import { actualizarFechaLLamada, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, obtenerFechaLlamada } from '../components/Utils/utils';
 import { UserIDList, UserRegionId } from '../types/users';
+import { useRegionEstadosContext } from './RegionEstadosContext';
 
 interface UsersContextType {
     users: UserIDList[];
@@ -22,7 +22,7 @@ interface UsersContextType {
 const UsersContext = createContext<UsersContextType | undefined>(undefined);
 
 export const UsersProvider = ({ children }: { children: ReactNode }) => {
-    const { regiones } = useRegionContext();
+    const { regiones } = useRegionEstadosContext();
     const { i18n } = useTranslation();
 
     const [loading, setLoading] = useState(false);

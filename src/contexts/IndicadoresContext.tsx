@@ -3,8 +3,8 @@ import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../t
 import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
-import { useRegionContext } from './RegionContext';
 import { useUser } from './UserContext';
+import { useRegionEstadosContext } from './RegionEstadosContext';
 
 type IndicadorTipo = 'Realizacion' | 'Resultado';
 export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
@@ -76,7 +76,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const { t } = useTranslation();
     const { user } = useUser();
     const token = sessionStorage.getItem('access_token');
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada } = useRegionEstadosContext();
     const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);
     const [indicadoresRealizacionADR, setIndicadoresRealizacionADR] = useState<IndicadorRealizacion[]>([]);

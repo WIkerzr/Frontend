@@ -11,11 +11,11 @@ import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
 import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { Fases } from '../Utils/data/controlDev';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const Header = () => {
-    const { setRegionSeleccionada } = useRegionContext();
+    const { setRegionSeleccionada } = useRegionEstadosContext();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
     const nombreUsuario = user?.name;

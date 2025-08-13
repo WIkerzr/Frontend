@@ -12,8 +12,8 @@ import { IRootState } from '../../../store';
 import { Input } from '../../../components/Utils/inputs';
 import { nanoid } from '@reduxjs/toolkit';
 import { t } from 'i18next';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useUser } from '../../../contexts/UserContext';
+import { useRegionEstadosContext } from '../../../contexts/RegionEstadosContext';
 
 interface CamposProps {
     campo?: {
@@ -351,7 +351,7 @@ const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaP
 });
 
 export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
-    const { anio } = useEstadosPorAnio();
+    const { anio } = useRegionEstadosContext();
     const { yearData, setYearData } = useYear();
     const { user } = useUser();
 
@@ -420,7 +420,7 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
 });
 
 export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
-    const { anio } = useEstadosPorAnio();
+    const { anio } = useRegionEstadosContext();
     const { yearData, setYearData } = useYear();
 
     const { user } = useUser();

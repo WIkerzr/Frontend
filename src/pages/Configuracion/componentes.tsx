@@ -8,11 +8,11 @@ import { User } from '../../types/users';
 import UserDataForm from '../profile/userDateForm';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { EstadosLoading } from '../../types/GeneralTypes';
 import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
 import { useUsers } from '../../contexts/UsersContext';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 export const newUser: UserID = {
     name: '',
     lastName: '',
@@ -123,7 +123,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
         };
     };
     const { agregarUsuario, actualizarUsuario } = useUsers();
-    const { regiones } = useRegionContext();
+    const { regiones } = useRegionEstadosContext();
 
     const initialData = accion === 'editar' ? getInitialUserData() : { ...newUser };
     const [UserData, setUserData] = useState(initialData);

@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
-import { StatusColors, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './Plan/PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
@@ -8,6 +7,7 @@ import IconEnviar from '../../components/Icon/IconEnviar.svg';
 import { useState } from 'react';
 import { generarDocumentoWord } from '../../components/Utils/genWORD';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { useEstadosPorAnio, StatusColors } from '../../contexts/RegionEstadosContext';
 
 interface Archivo {
     nombre: string;

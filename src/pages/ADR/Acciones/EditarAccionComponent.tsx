@@ -5,12 +5,12 @@ import { EstadoLabel } from '../../../types/TipadoAccion';
 import { ModalNuevoIndicadorAccion } from './EditarAccionIndicadores';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
+import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
 
 interface TabCardProps {
     icon: string;

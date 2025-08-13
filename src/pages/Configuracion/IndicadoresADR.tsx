@@ -6,11 +6,11 @@ import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores'
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { useRegionContext } from '../../contexts/RegionContext';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { PrintFecha } from '../../components/Utils/utils';
 import { indicadorInicial } from '../../types/Indicadores';
+import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -27,7 +27,7 @@ const Index = () => {
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
     const [modalNuevo, setModalNuevo] = useState(false);
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada } = useRegionEstadosContext();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
 

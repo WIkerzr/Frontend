@@ -1,18 +1,17 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosPlan } from '../../../types/TipadoAccion';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { InputField, SimpleDropdown, TextArea } from '../../../components/Utils/inputs';
 import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../types/GeneralTypes';
 import Multiselect from 'multiselect-react-dropdown';
-import { useRegionContext } from '../../../contexts/RegionContext';
 import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@mantine/core';
 import { RegionInterface } from '../../../components/Utils/data/getRegiones';
+import { useEstadosPorAnio, useRegionEstadosContext } from '../../../contexts/RegionEstadosContext';
 
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t, i18n } = useTranslation();
-    const { regiones, regionActual } = useRegionContext();
+    const { regiones, regionActual } = useRegionEstadosContext();
     const { editarPlan } = useEstadosPorAnio();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [bloqueo, setBloqueo] = useState<boolean>(block);

@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../../components/Utils/utils';
 import { TablaIndicadorAccion } from './EditarAccionComponent';
 import React from 'react';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
+import { useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();

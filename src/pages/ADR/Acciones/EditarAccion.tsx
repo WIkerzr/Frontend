@@ -8,7 +8,6 @@ import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
@@ -16,6 +15,7 @@ import { ErrorFullScreen } from '../Componentes';
 import { Boton, ModalSave } from '../../../components/Utils/utils';
 import { TextArea } from '../../../components/Utils/inputs';
 import { Servicios } from '../../../types/GeneralTypes';
+import { useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
