@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
-import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, obtenerFechaLlamada } from '../components/Utils/utils';
-import { ApiTarget } from '../components/Utils/data/controlDev';
+import { formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useRegionEstadosContext } from './RegionEstadosContext';
+import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -256,27 +257,13 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 return;
             }
         }
-        setLoadingYearData(true);
-        const fetchYearData = async () => {
-            const token = sessionStorage.getItem('access_token');
-            try {
-                const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${Number(anioSeleccionada)}`, {
-                    headers: {
-                        method: 'GET',
-                        Authorization: `Bearer ` + token,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    const errorInfo = gestionarErrorServidor(res, data);
-                    //setErrorMessage(errorInfo.mensaje);
-                    console.log(errorInfo.mensaje);
-
-                    return;
-                }
+        LlamadasBBDD({
+            method: 'GET',
+            url: `yearData/${Number(regionSeleccionada)}/${Number(anioSeleccionada)}`,
+            setLoading: setLoadingYearData,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+            onSuccess: (data: any) => {
                 const status: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
-
                 const ejesPrioritarios: Ejes[] = [];
                 const ejes: Ejes[] = [];
 
@@ -312,17 +299,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         valFinal: data.data.Memoria.ValFinal,
                     },
                 });
-                setFechaUltimoActualizadoBBDDYearData(new Date());
-            } catch (err: unknown) {
-                const errorInfo = gestionarErrorServidor(err);
-                // setErrorMessage(errorInfo.mensaje);
-                console.log(errorInfo.mensaje);
-                return;
-            } finally {
-                setLoadingYearData(false);
-            }
-        };
-        fetchYearData();
+            },
+        });
     };
     return (
         <YearContext.Provider

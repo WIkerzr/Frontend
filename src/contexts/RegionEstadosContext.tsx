@@ -271,7 +271,6 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
                     setAnios([]);
                     return;
                 }
-                console.log(`Los años para región ${regionSeleccionada} obtenidos correctamente.`);
                 setAnios(data.data);
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);
@@ -300,7 +299,6 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
                     console.log(errorInfo.mensaje);
                     return;
                 }
-                console.log(`Los años para todas las regiones obtenidos correctamente.`);
                 sessionStorage.setItem('aniosRegion', JSON.stringify(data.data));
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);

@@ -10,6 +10,7 @@ import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import { useRegionEstadosContext, useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -49,27 +50,12 @@ const Index = () => {
     }, [yearData]);
 
     const llamadaBBDDEjes = (regionSeleccionada: string | null) => {
-        const token = sessionStorage.getItem('access_token');
-        setLoading(true);
-        const primeraLlamadaBBDDEjes = async () => {
-            const response = await FetchConRefreshRetry(`${ApiTarget}/ejes/${regionSeleccionada}`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response && !response.ok) {
-                const errorInfo = gestionarErrorServidor(response);
-                setErrorMessage(errorInfo.mensaje);
-                setLoading(false);
-                return;
-            }
-            if (response.ok) {
-                setErrorMessage(null);
-                const data = await response.json();
+        LlamadasBBDD({
+            method: 'GET',
+            url: `/ejes/${regionSeleccionada}`,
+            setLoading: setLoading,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDD,
+            onSuccess: (data: any) => {
                 const arrayMapeado = data.data.map((ejes: EjesBBDD) => ({
                     ...ejes,
                     Id: ejes.EjeId,
@@ -87,9 +73,8 @@ const Index = () => {
                 if (data.data.length === 0) {
                     setErrorMessage(t('error:errorFaltanDatosEjes'));
                 }
-            }
-        };
-        primeraLlamadaBBDDEjes();
+            },
+        });
     };
 
     const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
