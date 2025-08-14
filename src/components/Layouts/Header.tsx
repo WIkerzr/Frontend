@@ -13,6 +13,7 @@ import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
 import { Fases } from '../Utils/data/controlDev';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { LogoIZ_SUP } from './LayoutsComponents';
 
 const Header = () => {
     const { setRegionSeleccionada } = useRegionEstadosContext();
@@ -35,9 +36,7 @@ const Header = () => {
             <div className="shadow-sm">
                 <div className="relative bg-white w-full items-center px-5 py-2.5 dark:bg-black flex gap-4">
                     <div className="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
-                        <Link to="/" className="main-logo flex items-center shrink-0">
-                            <img className="w-20 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/logo.svg" alt="logo" />
-                        </Link>
+                        <LogoIZ_SUP />
                         <button
                             type="button"
                             className="collapse-icon flex-none dark:text-[#d0d2d6] hover:text-primary dark:hover:text-primary flex lg:hidden ltr:ml-2 rtl:mr-2 p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:bg-white-light/90 dark:hover:bg-dark/60"

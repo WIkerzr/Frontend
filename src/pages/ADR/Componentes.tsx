@@ -97,8 +97,6 @@ export const ModalAccion = () => {
 
         AgregarAccion('Acciones', idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
 
-        //TODO LLamada al servidor con la nueva accion
-
         setIdEjeSeleccionado('');
         setNuevaAccion('');
         setNuevaLineaActuaccion('');

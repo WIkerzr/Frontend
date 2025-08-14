@@ -24,6 +24,7 @@ import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/data/controlDev';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { LogoIZ_SUP } from './LayoutsComponents';
 
 const Sidebar = () => {
     const { regionSeleccionada, regionData, anioSeleccionada, anios, setEstados, setAnio } = useRegionEstadosContext();
@@ -232,9 +233,7 @@ const Sidebar = () => {
             >
                 <div className="bg-white dark:bg-black h-full">
                     <div className="flex justify-between items-center px-4 py-3">
-                        <NavLink to="/" className="main-logo flex items-center shrink-0">
-                            <img className="w-20 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/logo.svg" alt="logo" />
-                        </NavLink>
+                        <LogoIZ_SUP />
 
                         <button
                             type="button"
