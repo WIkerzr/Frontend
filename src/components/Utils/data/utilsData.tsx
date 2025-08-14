@@ -3,8 +3,18 @@
 import { Dispatch, SetStateAction } from 'react';
 import { FetchConRefreshRetry, gestionarErrorServidor } from '../utils';
 import { ApiTarget } from './controlDev';
+export type ApiSuccess<T> = {
+    success: boolean;
+    message: string;
+    data: T;
+};
+export type ApiError = {
+    success: boolean;
+    message: string;
+    error: any;
+};
 
-type LlamadaBBDDParams = {
+type LlamadaBBDDParams<T = any> = {
     setLoading: (a: boolean) => void;
     setErrorMessage?: (a: string) => void;
     setSuccessMessage?: (a: string) => void;
@@ -12,7 +22,7 @@ type LlamadaBBDDParams = {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
     body?: any;
     url: string;
-    onSuccess?: (data: any) => void;
+    onSuccess?: (data: ApiSuccess<T>) => void;
     onError?: (error: any) => void;
     onFinally?: () => void;
 };
@@ -23,8 +33,8 @@ export const LlamadasBBDD = async ({ method, body, url, setLoading, setErrorMess
         const token = sessionStorage.getItem('access_token');
         try {
             const res = await FetchConRefreshRetry(`${ApiTarget}/${url}`, {
+                method: method,
                 headers: {
-                    method: method,
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },

@@ -12,7 +12,7 @@ import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionEstadosContext();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const { login } = useAuth();
     const { setUser, recordarSesion } = useUser();
@@ -34,6 +34,7 @@ const useLogin = () => {
                     username: email,
                     password: password,
                     client_id: 'webApp',
+                    idioma: i18n.language,
                 }).toString(),
             });
 

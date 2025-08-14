@@ -286,7 +286,7 @@ interface ListadoAccionesProps {
     idEje: string;
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
-    const { yearData, setYearData, SeleccionEditarAccion } = useYear();
+    const { yearData, EliminarAccion, SeleccionEditarAccion } = useYear();
     const { regionSeleccionada } = useRegionEstadosContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
 
@@ -299,23 +299,9 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     const { t } = useTranslation();
 
     const handleDelete = (id: string) => {
-        const updatedYearData = {
-            ...yearData,
-            plan: {
-                ...yearData.plan,
-                ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje, index) => {
-                    if (index === number) {
-                        return {
-                            ...eje,
-                            acciones: eje.acciones.filter((accion) => accion.id !== id),
-                        };
-                    }
-                    return eje;
-                }),
-            },
-        };
-        setYearData(updatedYearData);
-        setAcciones((prev) => prev.filter((a) => a.id !== id));
+        const confirmar = window.confirm(t('confirmacionEliminarAccion'));
+        if (!confirmar) return;
+        EliminarAccion('Acciones', idEje, id);
     };
 
     const mostrarInput = acciones.length < 5;

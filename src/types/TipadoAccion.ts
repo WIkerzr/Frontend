@@ -74,6 +74,7 @@ export interface DatosAccion {
     };
     plurianual: boolean;
     accionCompartida?: AccionCompartida;
+    accionCompartidaid?: number;
 }
 
 export const datosInicializadosAccion: DatosAccion = {

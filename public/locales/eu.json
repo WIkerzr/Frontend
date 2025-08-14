@@ -55,6 +55,7 @@
     "confirmacionAceptar": "Ziur zaude {{zona}} {{fecha}} ONARTU nahi duzula?",
     "confirmacionEliminarUsuario": "Ziur zaude erabiltzaile hau ezabatu nahi duzula?",
     "confirmacionEliminateUsuario": "Ziur zaude zure erabiltzailea ezabatu nahi duzula?",
+    "confirmacionEliminarAccion": "Ziur zaude ekintza hau ezabatu nahi duzula?",
     "confirmacionReabrir": "Ziur zaude {{zona}} {{fecha}} BERRIREKI nahi duzula?",
     "confirmacionRechazar": "Ziur zaude {{zona}} {{fecha}} BAZTERTU nahi duzula?",
     "confirmarEliminar": "Ziur zaude {{nombre}} ezabatu nahi duzula?",

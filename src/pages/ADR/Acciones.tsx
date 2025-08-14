@@ -30,7 +30,7 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { yearData, SeleccionVaciarEditarAccion } = useYear();
+    const { yearData, errorMessage, successMessage, selectedId, SeleccionVaciarEditarAccion } = useYear();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const navigate = useNavigate();
@@ -65,11 +65,26 @@ const Index: React.FC = () => {
                     )
                 }
             />
+
             <div className="w-full mx-auto mt-1 px-2">
                 <div className="flex items-start  w-full h-100%">
                     {ejesSeleccionados.map((eje, index) => {
                         return (
                             <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
+                                {selectedId === eje.Id && (
+                                    <>
+                                        {successMessage && (
+                                            <div className={`mt-4 transition-opacity duration-1000 opacity-100}`}>
+                                                <p className="text-green-500">{successMessage}</p>
+                                            </div>
+                                        )}
+                                        {errorMessage && (
+                                            <div>
+                                                <span className="text-red-500 hover:text-red-700">{errorMessage}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                                 <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} number={index} />
                             </div>
                         );

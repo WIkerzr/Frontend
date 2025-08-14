@@ -9,3 +9,5 @@ if (!ModoDev) {
     //Modificar el siguiente a la fase actual si no esta en desarrollo
     Fases = 1;
 }
+
+//npx eslint .

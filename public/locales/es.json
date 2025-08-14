@@ -55,6 +55,7 @@
     "confirmacionAceptar": "¿Estás seguro que deseas ACEPTAR {{zona}} {{fecha}}?",
     "confirmacionEliminarUsuario": "¿Estás seguro de que deseas eliminar este usuario?",
     "confirmacionEliminateUsuario": "¿Estas seguro que deseas eliminar tu usuario?",
+    "confirmacionEliminarAccion": "¿Estas seguro que deseas eliminar la acción?",
     "confirmacionReabrir": "¿Estás seguro que deseas REABRIR {{zona}} {{fecha}}?",
     "confirmacionRechazar": "¿Estás seguro que deseas RECHAZAR {{zona}} {{fecha}}?",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
