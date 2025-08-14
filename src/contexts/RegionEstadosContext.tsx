@@ -249,7 +249,7 @@ export const RegionEstadosProvider = ({ children }: { children: ReactNode }) => 
 
     useEffect(() => {
         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-            llamadaBBDDYearData(anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada);
+            llamadaBBDDYearData(anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada, false);
         }
     }, [anioSeleccionada, nombreRegionSeleccionada]);
 

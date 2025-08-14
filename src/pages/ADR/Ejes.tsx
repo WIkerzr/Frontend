@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
-import { Ejes } from '../../types/tipadoPlan';
+import { EjesBBDD } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, gestionarErrorServidor, obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
@@ -13,21 +13,40 @@ import { useRegionEstadosContext, useEstadosPorAnio } from '../../contexts/Regio
 
 const Index = () => {
     const { t, i18n } = useTranslation();
-    const { yearData, setYearData } = useYear();
+    const { yearData, llamadaBBDDYearData } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { regionSeleccionada, anioSeleccionada } = useRegionEstadosContext();
 
-    const [selected, setSelected] = useState<string[]>([]);
     const [locked, setLocked] = useState(false);
-    const [ejes, setEjes] = useState<Ejes[]>();
+    const [ejes, setEjes] = useState<EjesBBDD[]>();
 
     const [loading, setLoading] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    // const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('ejes');
         return fechaStr ? new Date(fechaStr) : new Date();
     });
+
+    useEffect(() => {
+        if (yearData) {
+            setLocked(true);
+            const planes = yearData.plan.ejes;
+            const planesPrioritarios = yearData.plan.ejes;
+            const combinados = [...planes, ...planesPrioritarios];
+            const ordenados = combinados
+                .sort((a, b) => Number(a.Id) - Number(b.Id))
+                .map((eje) => ({
+                    EjeId: eje.Id,
+                    NameEs: eje.NameEs,
+                    NameEu: eje.NameEu,
+                    IsActive: eje.IsActive,
+                    IsPrioritarios: eje.IsPrioritarios,
+                    PlanId: yearData.plan.id,
+                    acciones: [],
+                }));
+            setEjes(ordenados);
+        }
+    }, [yearData]);
 
     const llamadaBBDDEjes = (regionSeleccionada: string | null) => {
         const token = sessionStorage.getItem('access_token');
@@ -51,11 +70,18 @@ const Index = () => {
             if (response.ok) {
                 setErrorMessage(null);
                 const data = await response.json();
-                const datosOrdenados = data.data.sort((a: { NameEs: any; NameEu: any }, b: { NameEs: any; NameEu: any }) =>
+                const arrayMapeado = data.data.map((ejes: EjesBBDD) => ({
+                    ...ejes,
+                    Id: ejes.EjeId,
+                    NameEs: ejes.NameEs || '',
+                    NameEu: ejes.NameEu || '',
+                    IsActive: ejes.IsActive || false,
+                    IsPrioritarios: ejes.IsPrioritarios || false,
+                }));
+                const datosOrdenados = arrayMapeado.sort((a: { NameEs: any; NameEu: any }, b: { NameEs: any; NameEu: any }) =>
                     i18n.language === 'es' ? (a?.NameEs ?? '').localeCompare(b.NameEs) : (a?.NameEu ?? '').localeCompare(b.NameEu)
                 );
                 setEjes(datosOrdenados);
-                localStorage.setItem('ejesPrioritarios', JSON.stringify(datosOrdenados));
                 setFechaUltimoActualizadoBBDD(new Date());
                 setLoading(false);
                 if (data.data.length === 0) {
@@ -66,41 +92,47 @@ const Index = () => {
         primeraLlamadaBBDDEjes();
     };
 
-    const handleCheck = (id: string) => {
+    const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
         if (locked) return;
-        if (selected.includes(id)) {
-            setSelected((prev) => prev.filter((i) => i !== id));
-            setEjes((prev) => prev!.filter((i) => i));
-        } else if (selected.length < 3) {
-            setSelected((prev) => [...prev, id]);
-            setEjes((prev) => prev!.filter((i) => i));
-        }
+        const checked = e.target.checked;
+
+        setEjes((prev) => prev!.map((i) => (i.EjeId === id ? { ...i, IsPrioritarios: checked } : i)));
     };
 
     useEffect(() => {
-        //TODO modificar cuando se cree DataYear
-        const ejesPrioritarios = localStorage.getItem('ejesPrioritarios');
-        if (ejesPrioritarios && ejesPrioritarios.length > 1) {
-            setEjes(JSON.parse(ejesPrioritarios));
+        if (yearData && yearData.plan.ejesPrioritarios.length >= 1) {
             setLocked(true);
             setLoading(false);
+            const combinados = [...yearData.plan.ejesPrioritarios, ...yearData.plan.ejes];
+            const ordenados: EjesBBDD[] = combinados
+                .sort((a, b) => Number(a.Id) - Number(b.Id))
+                .map((eje) => ({
+                    EjeId: eje.Id,
+                    NameEs: eje.NameEs,
+                    NameEu: eje.NameEu,
+                    IsActive: eje.IsActive,
+                    IsPrioritarios: eje.IsPrioritarios,
+                    acciones: eje.acciones,
+                }));
+
+            setEjes(ordenados);
         } else {
+            setLocked(false);
             llamadaBBDDEjes(regionSeleccionada);
         }
     }, [regionSeleccionada]);
-
-    useEffect(() => {}, [ejes]);
 
     const handleSave = () => {
         const fetchAxes = async () => {
             const token = sessionStorage.getItem('access_token');
             try {
                 const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${anioSeleccionada}/axes`, {
+                    method: 'POST',
                     headers: {
-                        method: 'POST',
                         Authorization: `Bearer ` + token,
                         'Content-Type': 'application/json',
                     },
+                    body: JSON.stringify(ejes),
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -108,7 +140,7 @@ const Index = () => {
                     console.log(errorInfo.mensaje);
                     return;
                 }
-                console.log(`Ejes prioritarios guardados: ${JSON.stringify(selected)}`);
+                llamadaBBDDYearData(anioSeleccionada!, regionSeleccionada!, '', true);
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);
                 console.log(errorInfo.mensaje);
@@ -116,13 +148,7 @@ const Index = () => {
             }
         };
         fetchAxes();
-
         setLocked(true);
-        const ejesPrioritarios = { ...yearData };
-        const ejesSeleccionados = yearData.plan.ejes.filter((eje) => selected.includes(eje.Id));
-
-        ejesPrioritarios.plan.ejesPrioritarios = ejesSeleccionados;
-        setYearData(ejesPrioritarios);
     };
 
     if (loading) return <Loading />;
@@ -150,28 +176,30 @@ const Index = () => {
                 />
                 <div className="flex justify-between items-center mb-2">
                     <div>{errorMessage && <ErrorMessage message={errorMessage} />}</div>
-                    <div className="flex items-center space-x-2">
-                        <PrintFecha date={fechaUltimoActualizadoBBDD} />
-                        <Tippy content={t('Actualizar')}>
-                            <button type="button" onClick={() => llamadaBBDDEjes(regionSeleccionada)}>
-                                <IconRefresh />
-                            </button>
-                        </Tippy>
-                    </div>
+                    {!locked && (
+                        <div className="flex items-center space-x-2">
+                            <PrintFecha date={fechaUltimoActualizadoBBDD} />
+                            <Tippy content={t('Actualizar')}>
+                                <button type="button" onClick={() => llamadaBBDDEjes(regionSeleccionada)}>
+                                    <IconRefresh />
+                                </button>
+                            </Tippy>
+                        </div>
+                    )}
                 </div>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-2 w-full">
                     {ejes &&
                         ejes.map((eje) => (
-                            <li key={eje.Id} className={`flex items-center p-2 rounded transition ${selected.includes(eje.Id) ? 'bg-green-100' : ''}`}>
+                            <li key={eje.EjeId} className={`flex items-center p-2 rounded transition ${eje.IsPrioritarios ? 'bg-green-100' : ''}`}>
                                 <input
                                     type="checkbox"
                                     className="form-checkbox h-5 w-5 text-green-600 accent-green-600"
-                                    checked={selected.includes(eje.Id)}
-                                    onChange={() => handleCheck(eje.Id)}
+                                    checked={eje.IsPrioritarios}
+                                    onChange={(e) => handleCheck(e, eje.EjeId)}
                                     disabled={locked}
-                                    id={`checkbox-${eje.Id}`}
+                                    id={`checkbox-${eje.EjeId}`}
                                 />
-                                <label htmlFor={`checkbox-${eje.Id}`} className={`ml-3 cursor-pointer w-full ${selected.includes(eje.Id) ? 'text-green-700 font-semibold' : ''}`}>
+                                <label htmlFor={`checkbox-${eje.EjeId}`} className={`ml-3 cursor-pointer w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''}`}>
                                     {i18n.language === 'es' ? eje.NameEs : eje.NameEu}
                                 </label>
                             </li>

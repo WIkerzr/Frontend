@@ -1,5 +1,4 @@
 import { Estado, Servicios } from './GeneralTypes';
-import { datosPruebaIndicadoreResultado } from './Indicadores';
 import { DatosAccion } from './TipadoAccion';
 
 export type Year = number;
@@ -22,10 +21,17 @@ export interface Ejes {
     NameEs: string;
     NameEu: string;
     IsActive: boolean;
+    IsPrioritarios: boolean;
     acciones: DatosAccion[];
 }
-export interface EjesResponse extends Ejes {
+
+export interface EjesBBDD {
+    EjeId: string;
+    NameEs: string;
+    NameEu: string;
+    IsActive: boolean;
     IsPrioritarios: boolean;
+    acciones: DatosAccion[];
 }
 
 export interface Plan {
@@ -58,544 +64,544 @@ export interface InitialDataResponse {
     idRegion: string;
 }
 
-export const ejesIniado: Ejes[] = [
-    { Id: '1', NameEs: 'Abastecimiento de agua y Saneamiento', NameEu: 'Ura hornitzea eta saneamendua', IsActive: true, acciones: [] },
-    {
-        Id: '2',
-        NameEs: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles',
-        NameEu: 'Energia hornidura (elektrikoa, gasa...) eta energia berriztagarri eta jasangarriak',
-        IsActive: true,
-        acciones: [],
-    },
-    { Id: '3', NameEs: 'Telecomunicaciones', NameEu: 'Telekomunikazioak', IsActive: true, acciones: [] },
-    // { id: '4', nameEs: 'Red viaria y caminos', nameEu: 'Errepide sarea eta bideak', IsActive: true, acciones: [] },
-    // { id: '5', nameEs: 'Accesibilidad', nameEu: 'Irisgarritasuna', IsActive: true, acciones: [] },
-    // { id: '6', nameEs: 'Transporte y movilidad', nameEu: 'Garraioa eta mugikortasuna', IsActive: true, acciones: [] },
-    { Id: '7', NameEs: 'Educación infantil', NameEu: 'Haur hezkuntza', IsActive: true, acciones: [] },
-    { Id: '8', NameEs: 'Educación obligatoria', NameEu: 'Derrigorrezko hezkuntza', IsActive: true, acciones: [] },
-    { Id: '9', NameEs: 'Educación superior no obligatoria', NameEu: 'Derrigorrezkoa ez den goi-mailako hezkuntza', IsActive: true, acciones: [] },
-    // { id: '10', nameEs: 'Atención sanitaria primaria', nameEu: 'Lehen mailako osasun arreta', IsActive: true, acciones: [] },
-    { Id: '11', NameEs: 'Atención sanitaria especializada', NameEu: 'Espezializatutako osasun arreta', IsActive: true, acciones: [] },
-    { Id: '12', NameEs: 'Atención farmacéutica', NameEu: 'Farmazia arreta', IsActive: true, acciones: [] },
-    { Id: '13', NameEs: 'Atención social', NameEu: 'Gizarte arreta', IsActive: true, acciones: [] },
-    { Id: '14', NameEs: 'Cultura', NameEu: 'Kultura', IsActive: true, acciones: [] },
-    { Id: '15', NameEs: 'Deporte', NameEu: 'Kirola', IsActive: true, acciones: [] },
-    { Id: '16', NameEs: 'Ocio', NameEu: 'Aisia', IsActive: true, acciones: [] },
-    // { id: '17', nameEs: 'Innovación social', nameEu: 'Gizarte berrikuntza', IsActive: true, acciones: [] },
-    // { id: '18', nameEs: 'Capacitación en innovación', nameEu: 'Berrikuntzan gaitzea', IsActive: true, acciones: [] },
-    // { id: '19', nameEs: 'Investigación', nameEu: 'Ikerketa', IsActive: true, acciones: [] },
-    // { id: '20', nameEs: 'Transformación Digital', nameEu: 'Eraldaketa digitala', IsActive: true, acciones: [] },
-    // { id: '21', nameEs: 'Conservación del patrimonio cultural', nameEu: 'Ondare kulturalaren kontserbazioa', IsActive: true, acciones: [] },
-    // { id: '22', nameEs: 'Divulgación del patrimonio cultural', nameEu: 'Ondare kulturalaren dibulgazioa', IsActive: true, acciones: [] },
-    // { id: '23', nameEs: 'Promoción del Euskera', nameEu: 'Euskara sustapena', IsActive: true, acciones: [] },
-    // { id: '24', nameEs: 'Instrumentos de Ordenación del Territorio', nameEu: 'Lurralde antolamendurako tresnak', IsActive: true, acciones: [] },
-    // { id: '25', nameEs: 'Oferta de vivienda', nameEu: 'Etxebizitza eskaintza', IsActive: true, acciones: [] },
-    // { id: '26', nameEs: 'Rehabilitación patrimonio inmobiliario', nameEu: 'Ondare higiezinen birgaitzea', IsActive: true, acciones: [] },
-    // { id: '27', nameEs: 'Reto demográfico', nameEu: 'Erronka demografikoa', IsActive: true, acciones: [] },
-    // { id: '28', nameEs: 'Participación y atención comunitaria', nameEu: 'Parte-hartzea eta komunitate arreta', IsActive: true, acciones: [] },
-    // { id: '29', nameEs: 'Igualdad de género', nameEu: 'Genero berdintasuna', IsActive: true, acciones: [] },
-    // { id: '30', nameEs: 'Juventud', nameEu: 'Gazteria', IsActive: true, acciones: [] },
-    // { id: '31', nameEs: 'Emprendimiento', nameEu: 'Ekintzailetza', IsActive: true, acciones: [] },
-    // { id: '32', nameEs: 'Mejorar la competitividad del tejido actual', nameEu: 'Egungo ehunaren lehiakortasuna hobetzea', IsActive: true, acciones: [] },
-    // { id: '33', nameEs: 'Empleo y Formación', nameEu: 'Enplegua eta prestakuntza', IsActive: true, acciones: [] },
-    // {
-    //     id: '34',
-    //     nameEs: 'Sectores prioritarios - Cadena de Valor de la Alimentación',
-    //     nameEu: 'Lehentasunezko sektoreak - Elikaduraren balio-katea',
-    //     IsActive: true,
-    //     acciones: [],
-    // },
-    // {
-    //     id: '35',
-    //     nameEs: 'Sectores prioritarios - Cadena de Valor de la Madera',
-    //     nameEu: 'Lehentasunezko sektoreak - Egurraren balio-katea',
-    //     IsActive: true,
-    //     acciones: [],
-    // },
-    // {
-    //     id: '36',
-    //     nameEs: 'Sectores prioritarios - Turismo, comercio y actividades relacionadas',
-    //     nameEu: 'Lehentasunezko sektoreak - Turismoa, merkataritza eta erlazionatutako jarduerak',
-    //     IsActive: true,
-    //     acciones: [],
-    // },
-    // {
-    //     id: '37',
-    //     nameEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
-    //     nameEu: 'Lehentasunezko sektoreak - Energia, bioekonomia eta ekosistemak',
-    //     IsActive: true,
-    //     acciones: [],
-    // },
-    // { id: '38', nameEs: 'Sectores prioritarios - Salud y bienestar', nameEu: 'Lehentasunezko sektoreak - Osasuna eta ongizatea', IsActive: true, acciones: [] },
-    // {
-    //     id: '39',
-    //     nameEs: 'Infraestructura verde y Espacios Protegidos del Patrimonio Natural',
-    //     nameEu: 'Azpiegitura berdea eta natura ondarearen babestutako guneak',
-    //     IsActive: true,
-    //     acciones: [],
-    // },
-    // { id: '40', nameEs: 'Conservación y puesta en valor del patrimonio natural', nameEu: 'Natura ondarearen kontserbazioa eta balioestea', IsActive: true, acciones: [] },
-    // {
-    //     id: '41',
-    //     nameEs: 'Protección mantenimiento y restauración del suelo agrario y del hábitat rural',
-    //     nameEu: 'Lurzoru agrarioaren eta landa-habitataren babesa, mantentzea eta zaharberritzea',
-    //     IsActive: true,
-    //     acciones: [],
-    // },
-];
+// export const ejesIniado: Ejes[] = [
+//     { Id: '1', NameEs: 'Abastecimiento de agua y Saneamiento', NameEu: 'Ura hornitzea eta saneamendua', IsActive: true, acciones: [] },
+//     {
+//         Id: '2',
+//         NameEs: 'Suministro de energía (eléctrico, gas…) y energías renovables y sostenibles',
+//         NameEu: 'Energia hornidura (elektrikoa, gasa...) eta energia berriztagarri eta jasangarriak',
+//         IsActive: true,
+//         acciones: [],
+//     },
+//     { Id: '3', NameEs: 'Telecomunicaciones', NameEu: 'Telekomunikazioak', IsActive: true, acciones: [] },
+//     // { id: '4', nameEs: 'Red viaria y caminos', nameEu: 'Errepide sarea eta bideak', IsActive: true, acciones: [] },
+//     // { id: '5', nameEs: 'Accesibilidad', nameEu: 'Irisgarritasuna', IsActive: true, acciones: [] },
+//     // { id: '6', nameEs: 'Transporte y movilidad', nameEu: 'Garraioa eta mugikortasuna', IsActive: true, acciones: [] },
+//     { Id: '7', NameEs: 'Educación infantil', NameEu: 'Haur hezkuntza', IsActive: true, acciones: [] },
+//     { Id: '8', NameEs: 'Educación obligatoria', NameEu: 'Derrigorrezko hezkuntza', IsActive: true, acciones: [] },
+//     { Id: '9', NameEs: 'Educación superior no obligatoria', NameEu: 'Derrigorrezkoa ez den goi-mailako hezkuntza', IsActive: true, acciones: [] },
+//     // { id: '10', nameEs: 'Atención sanitaria primaria', nameEu: 'Lehen mailako osasun arreta', IsActive: true, acciones: [] },
+//     { Id: '11', NameEs: 'Atención sanitaria especializada', NameEu: 'Espezializatutako osasun arreta', IsActive: true, acciones: [] },
+//     { Id: '12', NameEs: 'Atención farmacéutica', NameEu: 'Farmazia arreta', IsActive: true, acciones: [] },
+//     { Id: '13', NameEs: 'Atención social', NameEu: 'Gizarte arreta', IsActive: true, acciones: [] },
+//     { Id: '14', NameEs: 'Cultura', NameEu: 'Kultura', IsActive: true, acciones: [] },
+//     { Id: '15', NameEs: 'Deporte', NameEu: 'Kirola', IsActive: true, acciones: [] },
+//     { Id: '16', NameEs: 'Ocio', NameEu: 'Aisia', IsActive: true, acciones: [] },
+//     // { id: '17', nameEs: 'Innovación social', nameEu: 'Gizarte berrikuntza', IsActive: true, acciones: [] },
+//     // { id: '18', nameEs: 'Capacitación en innovación', nameEu: 'Berrikuntzan gaitzea', IsActive: true, acciones: [] },
+//     // { id: '19', nameEs: 'Investigación', nameEu: 'Ikerketa', IsActive: true, acciones: [] },
+//     // { id: '20', nameEs: 'Transformación Digital', nameEu: 'Eraldaketa digitala', IsActive: true, acciones: [] },
+//     // { id: '21', nameEs: 'Conservación del patrimonio cultural', nameEu: 'Ondare kulturalaren kontserbazioa', IsActive: true, acciones: [] },
+//     // { id: '22', nameEs: 'Divulgación del patrimonio cultural', nameEu: 'Ondare kulturalaren dibulgazioa', IsActive: true, acciones: [] },
+//     // { id: '23', nameEs: 'Promoción del Euskera', nameEu: 'Euskara sustapena', IsActive: true, acciones: [] },
+//     // { id: '24', nameEs: 'Instrumentos de Ordenación del Territorio', nameEu: 'Lurralde antolamendurako tresnak', IsActive: true, acciones: [] },
+//     // { id: '25', nameEs: 'Oferta de vivienda', nameEu: 'Etxebizitza eskaintza', IsActive: true, acciones: [] },
+//     // { id: '26', nameEs: 'Rehabilitación patrimonio inmobiliario', nameEu: 'Ondare higiezinen birgaitzea', IsActive: true, acciones: [] },
+//     // { id: '27', nameEs: 'Reto demográfico', nameEu: 'Erronka demografikoa', IsActive: true, acciones: [] },
+//     // { id: '28', nameEs: 'Participación y atención comunitaria', nameEu: 'Parte-hartzea eta komunitate arreta', IsActive: true, acciones: [] },
+//     // { id: '29', nameEs: 'Igualdad de género', nameEu: 'Genero berdintasuna', IsActive: true, acciones: [] },
+//     // { id: '30', nameEs: 'Juventud', nameEu: 'Gazteria', IsActive: true, acciones: [] },
+//     // { id: '31', nameEs: 'Emprendimiento', nameEu: 'Ekintzailetza', IsActive: true, acciones: [] },
+//     // { id: '32', nameEs: 'Mejorar la competitividad del tejido actual', nameEu: 'Egungo ehunaren lehiakortasuna hobetzea', IsActive: true, acciones: [] },
+//     // { id: '33', nameEs: 'Empleo y Formación', nameEu: 'Enplegua eta prestakuntza', IsActive: true, acciones: [] },
+//     // {
+//     //     id: '34',
+//     //     nameEs: 'Sectores prioritarios - Cadena de Valor de la Alimentación',
+//     //     nameEu: 'Lehentasunezko sektoreak - Elikaduraren balio-katea',
+//     //     IsActive: true,
+//     //     acciones: [],
+//     // },
+//     // {
+//     //     id: '35',
+//     //     nameEs: 'Sectores prioritarios - Cadena de Valor de la Madera',
+//     //     nameEu: 'Lehentasunezko sektoreak - Egurraren balio-katea',
+//     //     IsActive: true,
+//     //     acciones: [],
+//     // },
+//     // {
+//     //     id: '36',
+//     //     nameEs: 'Sectores prioritarios - Turismo, comercio y actividades relacionadas',
+//     //     nameEu: 'Lehentasunezko sektoreak - Turismoa, merkataritza eta erlazionatutako jarduerak',
+//     //     IsActive: true,
+//     //     acciones: [],
+//     // },
+//     // {
+//     //     id: '37',
+//     //     nameEs: 'Sectores prioritarios - Energía, bioeconomía y ecosistemas',
+//     //     nameEu: 'Lehentasunezko sektoreak - Energia, bioekonomia eta ekosistemak',
+//     //     IsActive: true,
+//     //     acciones: [],
+//     // },
+//     // { id: '38', nameEs: 'Sectores prioritarios - Salud y bienestar', nameEu: 'Lehentasunezko sektoreak - Osasuna eta ongizatea', IsActive: true, acciones: [] },
+//     // {
+//     //     id: '39',
+//     //     nameEs: 'Infraestructura verde y Espacios Protegidos del Patrimonio Natural',
+//     //     nameEu: 'Azpiegitura berdea eta natura ondarearen babestutako guneak',
+//     //     IsActive: true,
+//     //     acciones: [],
+//     // },
+//     // { id: '40', nameEs: 'Conservación y puesta en valor del patrimonio natural', nameEu: 'Natura ondarearen kontserbazioa eta balioestea', IsActive: true, acciones: [] },
+//     // {
+//     //     id: '41',
+//     //     nameEs: 'Protección mantenimiento y restauración del suelo agrario y del hábitat rural',
+//     //     nameEu: 'Lurzoru agrarioaren eta landa-habitataren babesa, mantentzea eta zaharberritzea',
+//     //     IsActive: true,
+//     //     acciones: [],
+//     // },
+// ];
 
-export const ejesPrioritariosIniado: Ejes[] = [
-    {
-        Id: '3',
-        NameEs: 'Telecomunicaciones',
-        NameEu: 'Telekomunikazioak',
-        IsActive: true,
-        acciones: [
-            {
-                id: '1',
-                accion: 'Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
-                lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
-                ejeEs: 'Telecomunicaciones',
-                ejeEu: 'Telekomunikazioak',
-                datosPlan: {
-                    ejecutora: 'Durangaldea',
-                    implicadas: 'Durangaldea',
-                    comarcal: 'Municipios con todas las zonas rurales',
-                    supracomarcal: 'Euskadi',
-                    rangoAnios: '',
-                    oAccion: `Objetivos generales: fomentar el dinamismo social y sentimiento de pertenencia a la comarca.
-Objetivos específicos: mejorar la comunicación y conexión intracomarcal.`,
-                    ods: 'Ninguno',
-                    dAccion: `- Se mantiene la X Semana de Desarrollo Rural con el formato de 4 actividades compaginando las culturales-recreativas y las concernientes a temas de interés socio-económico.
-- La semana de Desarrollo Rural se organiza por una comisión abierta a la participación de quien desee, habitualmente toman parte representantes del Ayuntamiento de celebración y del concejo en su caso, las personas técnicas de cultura, la técnica de turismo y la de ACICSA.
-- La semana se iniciará con el encuentro de igualdad de la comarca.
-- Se mantiene el carácter rotatorio del lugar de celebración y la fecha de celebración del X Lautada Eguna el último domingo de octubre, este año se celebrará en Barrundia el 27 de octubre.
-- Acordar la financiación de Lautada Astea y Eguna con la Cuadrilla de la Llanada.
-- Búsqueda de ayudas para ello: Fundación Vital, Eventos,`,
-                    presupuesto: `El presupuesto es de 6.000€ más las actuaciones que se gestionan mediante Hazi Fundazioa,Turismo y ACICSA.
-Se trabajará la financiación 2023 para Lautada Eguna y Lautada Astea conjuntamente para que sea:
-33% 2.000€ Fundación Vital, 33% 2.000€ Cuadrilla de la Llanada Alavesa y 2.000€ Subvención de Eventos de G.Vasco solicitado por la Cuadrilla.`,
-                    iMujHom: '',
-                    uEuskera: '',
-                    sostenibilidad: '',
-                    dInteligent: '',
-                    observaciones: '',
-                },
-                datosMemoria: {
-                    ejecutora: '1',
-                    implicadas: '2',
-                    comarcal: '3',
-                    supracomarcal: '4',
-                    rangoAnios: '5',
-                    sActual: 'Actuación en espera',
-                    oAccion: `-Mantener y rejuvenecer la población del medio rural.
--Aumentar la rentabilidad de las explotaciones.
--Incrementar el número de personas formadas y motivación a la formación.
-Helburu zehatzak / Objetivos específicos:`,
-                    ods: 'Ninguno',
-                    dAccionAvances: `-Diversificar el sector impulsando nuevos productos y la transformación agroalimentaria.
--Favorecer nuevas incorporaciones y rejuvenecer el sector primario.
--Facilitar la formación y el acceso a infraestructuras y equipos productivos compartidos/colectivos.`,
-                    presupuestoEjecutado: {
-                        cuantia: '20',
-                        fuenteDeFinanciacion: ['Administraciones locales'],
-                        observaciones: 'observacion 1',
-                    },
-                    ejecucionPresupuestaria: {
-                        previsto: '15',
-                        ejecutado: '16',
-                        porcentaje: '17',
-                    },
-                    iMujHom: '18',
-                    uEuskera: '19',
-                    sostenibilidad: '20',
-                    dInteligent: '21',
-                    observaciones: '22',
-                    dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
-29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
-                    valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
-                },
-                indicadorAccion: {
-                    indicadoreRealizacion: [
-                        {
-                            id: 4,
-                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
-                            metaAnual: {
-                                hombres: 10,
-                                mujeres: 10,
-                                total: 20,
-                            },
-                            ejecutado: {
-                                hombres: 5,
-                                mujeres: 10,
-                                total: 15,
-                            },
-                            metaFinal: {
-                                hombres: 20,
-                                mujeres: 20,
-                                total: 40,
-                            },
-                            hipotesis: 'Se espera un ligero aumento.',
-                            idsResultados: [4],
-                        },
-                        {
-                            id: 5,
-                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
-                            metaAnual: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 100,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 300,
-                            },
-                            idsResultados: [5],
-                        },
-                    ],
-                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
-                    // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
-                    // indicadoreResultado: datosPruebaIndicadoreResultado,
-                },
-                plurianual: false,
-                accionCompartida: {
-                    regionLider: {
-                        RegionId: '10',
-                        NameEs: 'Durangaldea',
-                        NameEu: 'Durangaldea',
-                    },
-                    regiones: [
-                        {
-                            RegionId: '2',
-                            NameEs: 'Arabako Lautada / Llanada Alavesa',
-                            NameEu: 'Arabako Lautada',
-                        },
-                        {
-                            RegionId: '3',
-                            NameEs: 'Montaña Alavesa / Arabako Mendialdea',
-                            NameEu: 'Montaña Alavesa / Arabako Mendialdea',
-                        },
-                        {
-                            RegionId: '5',
-                            NameEs: 'Estribaciones del Gorbea / Gorbeia Inguruak',
-                            NameEu: 'Estribaciones del Gorbea / Gorbeia Inguruak',
-                        },
-                        {
-                            RegionId: '6',
-                            NameEs: 'Tolosaldea',
-                            NameEu: 'Tolosaldea',
-                        },
-                        {
-                            RegionId: '7',
-                            NameEs: 'Urola Kosta',
-                            NameEu: 'Urola Kosta',
-                        },
-                        {
-                            RegionId: '8',
-                            NameEs: 'Debabarrena',
-                            NameEu: 'Debabarrena',
-                        },
-                        {
-                            RegionId: '9',
-                            NameEs: 'Debagoiena',
-                            NameEu: 'Debagoiena',
-                        },
-                        {
-                            RegionId: '11',
-                            NameEs: 'Goierri',
-                            NameEu: 'Goierri',
-                        },
-                        {
-                            RegionId: '13',
-                            NameEs: 'Busturialdea',
-                            NameEu: 'Busturialdea',
-                        },
-                        {
-                            RegionId: '14',
-                            NameEs: 'Vitoria-Gasteiz',
-                            NameEu: 'Vitoria-Gasteiz',
-                        },
-                        {
-                            RegionId: '15',
-                            NameEs: 'Arratia-Nerbioi',
-                            NameEu: 'Arratia-Nerbioi',
-                        },
-                        {
-                            RegionId: '16',
-                            NameEs: 'Donostialdea-Bidasoa',
-                            NameEu: 'Donostialdea-Bidasoa',
-                        },
-                        {
-                            RegionId: '18',
-                            NameEs: 'Lea-Artibai',
-                            NameEu: 'Lea-Artibai',
-                        },
-                        {
-                            RegionId: '19',
-                            NameEs: 'Uribe',
-                            NameEu: 'Uribe',
-                        },
-                    ],
-                },
-            },
-            {
-                id: '2',
-                accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
-                lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
-                ejeEs: 'Telecomunicaciones',
-                ejeEu: 'Telekomunikazioak',
-                datosPlan: {
-                    ejecutora: '1',
-                    implicadas: '2',
-                    comarcal: 'Todas las entidades rurales de la comarca',
-                    supracomarcal: 'No',
-                    rangoAnios: '5',
-                    oAccion: '6',
-                    ods: '7',
-                    dAccion: '8',
-                    presupuesto: '9',
-                    iMujHom: '10',
-                    uEuskera: '11',
-                    sostenibilidad: '12',
-                    dInteligent: '13',
-                    observaciones: '14',
-                },
-                datosMemoria: {
-                    ejecutora: '1',
-                    implicadas: '2',
-                    comarcal: '3',
-                    supracomarcal: '4',
-                    rangoAnios: '5',
-                    sActual: 'Actuación en espera',
-                    oAccion: '7',
-                    ods: '8',
-                    dAccionAvances: '9',
-                    presupuestoEjecutado: {
-                        cuantia: '20',
-                        fuenteDeFinanciacion: ['Administraciones locales'],
-                        observaciones: 'observacion 1',
-                    },
-                    ejecucionPresupuestaria: {
-                        previsto: '15',
-                        ejecutado: '16',
-                        porcentaje: '17',
-                    },
-                    iMujHom: '18',
-                    uEuskera: '19',
-                    sostenibilidad: '20',
-                    dInteligent: '21',
-                    observaciones: '22',
-                    dSeguimiento: '23',
-                    valFinal: '24',
-                },
-                indicadorAccion: {
-                    indicadoreRealizacion: [
-                        {
-                            id: 4,
-                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
-                            metaAnual: {
-                                hombres: 10,
-                                mujeres: 10,
-                                total: 20,
-                            },
-                            ejecutado: {
-                                hombres: 5,
-                                mujeres: 10,
-                                total: 15,
-                            },
-                            metaFinal: {
-                                hombres: 20,
-                                mujeres: 20,
-                                total: 40,
-                            },
-                            hipotesis: 'Se espera un ligero aumento.',
-                            idsResultados: [4],
-                        },
-                        {
-                            id: 5,
-                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
-                            metaAnual: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 100,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 300,
-                            },
-                            idsResultados: [5],
-                        },
-                    ],
-                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
-                    // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
-                    // indicadoreResultado: datosPruebaIndicadoreResultado,
-                },
-                plurianual: false,
-            },
-        ],
-    },
-    {
-        Id: '7',
-        NameEs: 'Educación infantil',
-        NameEu: 'Haur hezkuntza',
-        IsActive: true,
-        acciones: [
-            {
-                id: '1',
-                accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
-                lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
-                ejeEs: 'Telecomunicaciones',
-                ejeEu: 'Telekomunikazioak',
-                datosPlan: {
-                    ejecutora: '1',
-                    implicadas: '2',
-                    comarcal: 'Zonas de especial atención',
-                    supracomarcal: 'Euskadi',
-                    rangoAnios: '5',
-                    oAccion: '6',
-                    ods: '7',
-                    dAccion: '8',
-                    presupuesto: '9',
-                    iMujHom: '10',
-                    uEuskera: '11',
-                    sostenibilidad: '12',
-                    dInteligent: '13',
-                    observaciones: '14',
-                },
-                datosMemoria: {
-                    ejecutora: '1',
-                    implicadas: '2',
-                    comarcal: '3',
-                    supracomarcal: '4',
-                    rangoAnios: '5',
-                    sActual: 'Actuación en espera',
-                    oAccion: '7',
-                    ods: '8',
-                    dAccionAvances: '9',
-                    presupuestoEjecutado: {
-                        cuantia: '20',
-                        fuenteDeFinanciacion: ['Administraciones locales'],
-                        observaciones: 'observacion 1',
-                    },
-                    ejecucionPresupuestaria: {
-                        previsto: '15',
-                        ejecutado: '16',
-                        porcentaje: '17',
-                    },
-                    iMujHom: '18',
-                    uEuskera: '19',
-                    sostenibilidad: '20',
-                    dInteligent: '21',
-                    observaciones: '22',
-                    dSeguimiento: '23',
-                    valFinal: '24',
-                },
-                indicadorAccion: {
-                    indicadoreRealizacion: [
-                        {
-                            id: 4,
-                            descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
-                            metaAnual: {
-                                hombres: 10,
-                                mujeres: 10,
-                                total: 20,
-                            },
-                            ejecutado: {
-                                hombres: 5,
-                                mujeres: 10,
-                                total: 15,
-                            },
-                            metaFinal: {
-                                hombres: 20,
-                                mujeres: 20,
-                                total: 40,
-                            },
-                            hipotesis: 'Se espera un ligero aumento.',
-                            idsResultados: [4],
-                        },
-                        {
-                            id: 5,
-                            descripcion: 'RE05. Número de personas emprendedoras apoyadas',
-                            metaAnual: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 100,
-                            },
-                            ejecutado: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 0,
-                            },
-                            metaFinal: {
-                                hombres: 0,
-                                mujeres: 0,
-                                total: 300,
-                            },
-                            idsResultados: [5],
-                        },
-                    ],
-                    indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
-                    // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
-                    // indicadoreResultado: datosPruebaIndicadoreResultado,
-                },
-                plurianual: true,
-                accionCompartida: {
-                    regionLider: {
-                        RegionId: '11',
-                        NameEs: 'Goierri',
-                        NameEu: 'Goierri',
-                    },
-                    regiones: [
-                        {
-                            RegionId: '1',
-                            NameEs: 'Añana',
-                            NameEu: 'Añana',
-                        },
-                        {
-                            RegionId: '4',
-                            NameEs: 'Rioja Alavesa / Arabako Errioxa',
-                            NameEu: 'Rioja Alavesa / Arabako Errioxa',
-                        },
-                        {
-                            RegionId: '10',
-                            NameEs: 'Durangaldea',
-                            NameEu: 'Durangaldea',
-                        },
-                        {
-                            RegionId: '12',
-                            NameEs: 'Aiaraldea',
-                            NameEu: 'Aiaraldea',
-                        },
-                        {
-                            RegionId: '17',
-                            NameEs: 'Enkarterri-Ezkerraldea',
-                            NameEu: 'Enkarterri-Ezkerraldea',
-                        },
-                    ],
-                },
-            },
-        ],
-    },
-    {
-        Id: '16',
-        NameEs: 'Ocio',
-        NameEu: 'Aisia',
-        IsActive: true,
-        acciones: [],
-    },
-];
+// export const ejesPrioritariosIniado: Ejes[] = [
+//     {
+//         Id: '3',
+//         NameEs: 'Telecomunicaciones',
+//         NameEu: 'Telekomunikazioak',
+//         IsActive: true,
+//         acciones: [
+//             {
+//                 id: '1',
+//                 accion: 'Organización del X Lautada Eguna, VII Semana del desarrollo rural y apoyo/difusión de otras actividades culturales',
+//                 lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
+//                 ejeEs: 'Telecomunicaciones',
+//                 ejeEu: 'Telekomunikazioak',
+//                 datosPlan: {
+//                     ejecutora: 'Durangaldea',
+//                     implicadas: 'Durangaldea',
+//                     comarcal: 'Municipios con todas las zonas rurales',
+//                     supracomarcal: 'Euskadi',
+//                     rangoAnios: '',
+//                     oAccion: `Objetivos generales: fomentar el dinamismo social y sentimiento de pertenencia a la comarca.
+// Objetivos específicos: mejorar la comunicación y conexión intracomarcal.`,
+//                     ods: 'Ninguno',
+//                     dAccion: `- Se mantiene la X Semana de Desarrollo Rural con el formato de 4 actividades compaginando las culturales-recreativas y las concernientes a temas de interés socio-económico.
+// - La semana de Desarrollo Rural se organiza por una comisión abierta a la participación de quien desee, habitualmente toman parte representantes del Ayuntamiento de celebración y del concejo en su caso, las personas técnicas de cultura, la técnica de turismo y la de ACICSA.
+// - La semana se iniciará con el encuentro de igualdad de la comarca.
+// - Se mantiene el carácter rotatorio del lugar de celebración y la fecha de celebración del X Lautada Eguna el último domingo de octubre, este año se celebrará en Barrundia el 27 de octubre.
+// - Acordar la financiación de Lautada Astea y Eguna con la Cuadrilla de la Llanada.
+// - Búsqueda de ayudas para ello: Fundación Vital, Eventos,`,
+//                     presupuesto: `El presupuesto es de 6.000€ más las actuaciones que se gestionan mediante Hazi Fundazioa,Turismo y ACICSA.
+// Se trabajará la financiación 2023 para Lautada Eguna y Lautada Astea conjuntamente para que sea:
+// 33% 2.000€ Fundación Vital, 33% 2.000€ Cuadrilla de la Llanada Alavesa y 2.000€ Subvención de Eventos de G.Vasco solicitado por la Cuadrilla.`,
+//                     iMujHom: '',
+//                     uEuskera: '',
+//                     sostenibilidad: '',
+//                     dInteligent: '',
+//                     observaciones: '',
+//                 },
+//                 datosMemoria: {
+//                     ejecutora: '1',
+//                     implicadas: '2',
+//                     comarcal: '3',
+//                     supracomarcal: '4',
+//                     rangoAnios: '5',
+//                     sActual: 'Actuación en espera',
+//                     oAccion: `-Mantener y rejuvenecer la población del medio rural.
+// -Aumentar la rentabilidad de las explotaciones.
+// -Incrementar el número de personas formadas y motivación a la formación.
+// Helburu zehatzak / Objetivos específicos:`,
+//                     ods: 'Ninguno',
+//                     dAccionAvances: `-Diversificar el sector impulsando nuevos productos y la transformación agroalimentaria.
+// -Favorecer nuevas incorporaciones y rejuvenecer el sector primario.
+// -Facilitar la formación y el acceso a infraestructuras y equipos productivos compartidos/colectivos.`,
+//                     presupuestoEjecutado: {
+//                         cuantia: '20',
+//                         fuenteDeFinanciacion: ['Administraciones locales'],
+//                         observaciones: 'observacion 1',
+//                     },
+//                     ejecucionPresupuestaria: {
+//                         previsto: '15',
+//                         ejecutado: '16',
+//                         porcentaje: '17',
+//                     },
+//                     iMujHom: '18',
+//                     uEuskera: '19',
+//                     sostenibilidad: '20',
+//                     dInteligent: '21',
+//                     observaciones: '22',
+//                     dSeguimiento: `10/11/2023 Visita técnica a Pedroso (Puesta en valor de la nuez y Denominación de Origen)
+// 29/11/2023 Visita a secadero de frutos secos de Rivabellosa con personas interesadas`,
+//                     valFinal: `En 2023 no se han realizado sesiones formativas relacionadas con este ámbito.`,
+//                 },
+//                 indicadorAccion: {
+//                     indicadoreRealizacion: [
+//                         {
+//                             id: 4,
+//                             descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+//                             metaAnual: {
+//                                 hombres: 10,
+//                                 mujeres: 10,
+//                                 total: 20,
+//                             },
+//                             ejecutado: {
+//                                 hombres: 5,
+//                                 mujeres: 10,
+//                                 total: 15,
+//                             },
+//                             metaFinal: {
+//                                 hombres: 20,
+//                                 mujeres: 20,
+//                                 total: 40,
+//                             },
+//                             hipotesis: 'Se espera un ligero aumento.',
+//                             idsResultados: [4],
+//                         },
+//                         {
+//                             id: 5,
+//                             descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+//                             metaAnual: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 100,
+//                             },
+//                             ejecutado: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 0,
+//                             },
+//                             metaFinal: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 300,
+//                             },
+//                             idsResultados: [5],
+//                         },
+//                     ],
+//                     indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
+//                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
+//                     // indicadoreResultado: datosPruebaIndicadoreResultado,
+//                 },
+//                 plurianual: false,
+//                 accionCompartida: {
+//                     regionLider: {
+//                         RegionId: '10',
+//                         NameEs: 'Durangaldea',
+//                         NameEu: 'Durangaldea',
+//                     },
+//                     regiones: [
+//                         {
+//                             RegionId: '2',
+//                             NameEs: 'Arabako Lautada / Llanada Alavesa',
+//                             NameEu: 'Arabako Lautada',
+//                         },
+//                         {
+//                             RegionId: '3',
+//                             NameEs: 'Montaña Alavesa / Arabako Mendialdea',
+//                             NameEu: 'Montaña Alavesa / Arabako Mendialdea',
+//                         },
+//                         {
+//                             RegionId: '5',
+//                             NameEs: 'Estribaciones del Gorbea / Gorbeia Inguruak',
+//                             NameEu: 'Estribaciones del Gorbea / Gorbeia Inguruak',
+//                         },
+//                         {
+//                             RegionId: '6',
+//                             NameEs: 'Tolosaldea',
+//                             NameEu: 'Tolosaldea',
+//                         },
+//                         {
+//                             RegionId: '7',
+//                             NameEs: 'Urola Kosta',
+//                             NameEu: 'Urola Kosta',
+//                         },
+//                         {
+//                             RegionId: '8',
+//                             NameEs: 'Debabarrena',
+//                             NameEu: 'Debabarrena',
+//                         },
+//                         {
+//                             RegionId: '9',
+//                             NameEs: 'Debagoiena',
+//                             NameEu: 'Debagoiena',
+//                         },
+//                         {
+//                             RegionId: '11',
+//                             NameEs: 'Goierri',
+//                             NameEu: 'Goierri',
+//                         },
+//                         {
+//                             RegionId: '13',
+//                             NameEs: 'Busturialdea',
+//                             NameEu: 'Busturialdea',
+//                         },
+//                         {
+//                             RegionId: '14',
+//                             NameEs: 'Vitoria-Gasteiz',
+//                             NameEu: 'Vitoria-Gasteiz',
+//                         },
+//                         {
+//                             RegionId: '15',
+//                             NameEs: 'Arratia-Nerbioi',
+//                             NameEu: 'Arratia-Nerbioi',
+//                         },
+//                         {
+//                             RegionId: '16',
+//                             NameEs: 'Donostialdea-Bidasoa',
+//                             NameEu: 'Donostialdea-Bidasoa',
+//                         },
+//                         {
+//                             RegionId: '18',
+//                             NameEs: 'Lea-Artibai',
+//                             NameEu: 'Lea-Artibai',
+//                         },
+//                         {
+//                             RegionId: '19',
+//                             NameEs: 'Uribe',
+//                             NameEu: 'Uribe',
+//                         },
+//                     ],
+//                 },
+//             },
+//             {
+//                 id: '2',
+//                 accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
+//                 lineaActuaccion: 'Fomento de un sistema comercialización en circuito corto de producto local y fomento del comercio comarcal a través de diferentes actividades',
+//                 ejeEs: 'Telecomunicaciones',
+//                 ejeEu: 'Telekomunikazioak',
+//                 datosPlan: {
+//                     ejecutora: '1',
+//                     implicadas: '2',
+//                     comarcal: 'Todas las entidades rurales de la comarca',
+//                     supracomarcal: 'No',
+//                     rangoAnios: '5',
+//                     oAccion: '6',
+//                     ods: '7',
+//                     dAccion: '8',
+//                     presupuesto: '9',
+//                     iMujHom: '10',
+//                     uEuskera: '11',
+//                     sostenibilidad: '12',
+//                     dInteligent: '13',
+//                     observaciones: '14',
+//                 },
+//                 datosMemoria: {
+//                     ejecutora: '1',
+//                     implicadas: '2',
+//                     comarcal: '3',
+//                     supracomarcal: '4',
+//                     rangoAnios: '5',
+//                     sActual: 'Actuación en espera',
+//                     oAccion: '7',
+//                     ods: '8',
+//                     dAccionAvances: '9',
+//                     presupuestoEjecutado: {
+//                         cuantia: '20',
+//                         fuenteDeFinanciacion: ['Administraciones locales'],
+//                         observaciones: 'observacion 1',
+//                     },
+//                     ejecucionPresupuestaria: {
+//                         previsto: '15',
+//                         ejecutado: '16',
+//                         porcentaje: '17',
+//                     },
+//                     iMujHom: '18',
+//                     uEuskera: '19',
+//                     sostenibilidad: '20',
+//                     dInteligent: '21',
+//                     observaciones: '22',
+//                     dSeguimiento: '23',
+//                     valFinal: '24',
+//                 },
+//                 indicadorAccion: {
+//                     indicadoreRealizacion: [
+//                         {
+//                             id: 4,
+//                             descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+//                             metaAnual: {
+//                                 hombres: 10,
+//                                 mujeres: 10,
+//                                 total: 20,
+//                             },
+//                             ejecutado: {
+//                                 hombres: 5,
+//                                 mujeres: 10,
+//                                 total: 15,
+//                             },
+//                             metaFinal: {
+//                                 hombres: 20,
+//                                 mujeres: 20,
+//                                 total: 40,
+//                             },
+//                             hipotesis: 'Se espera un ligero aumento.',
+//                             idsResultados: [4],
+//                         },
+//                         {
+//                             id: 5,
+//                             descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+//                             metaAnual: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 100,
+//                             },
+//                             ejecutado: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 0,
+//                             },
+//                             metaFinal: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 300,
+//                             },
+//                             idsResultados: [5],
+//                         },
+//                     ],
+//                     indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
+//                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
+//                     // indicadoreResultado: datosPruebaIndicadoreResultado,
+//                 },
+//                 plurianual: false,
+//             },
+//         ],
+//     },
+//     {
+//         Id: '7',
+//         NameEs: 'Educación infantil',
+//         NameEu: 'Haur hezkuntza',
+//         IsActive: true,
+//         acciones: [
+//             {
+//                 id: '1',
+//                 accion: 'Apoyo a la comercialización del producto local en circuitos cortos',
+//                 lineaActuaccion: 'Conocimiento de la Lautada por los propios habitantes',
+//                 ejeEs: 'Telecomunicaciones',
+//                 ejeEu: 'Telekomunikazioak',
+//                 datosPlan: {
+//                     ejecutora: '1',
+//                     implicadas: '2',
+//                     comarcal: 'Zonas de especial atención',
+//                     supracomarcal: 'Euskadi',
+//                     rangoAnios: '5',
+//                     oAccion: '6',
+//                     ods: '7',
+//                     dAccion: '8',
+//                     presupuesto: '9',
+//                     iMujHom: '10',
+//                     uEuskera: '11',
+//                     sostenibilidad: '12',
+//                     dInteligent: '13',
+//                     observaciones: '14',
+//                 },
+//                 datosMemoria: {
+//                     ejecutora: '1',
+//                     implicadas: '2',
+//                     comarcal: '3',
+//                     supracomarcal: '4',
+//                     rangoAnios: '5',
+//                     sActual: 'Actuación en espera',
+//                     oAccion: '7',
+//                     ods: '8',
+//                     dAccionAvances: '9',
+//                     presupuestoEjecutado: {
+//                         cuantia: '20',
+//                         fuenteDeFinanciacion: ['Administraciones locales'],
+//                         observaciones: 'observacion 1',
+//                     },
+//                     ejecucionPresupuestaria: {
+//                         previsto: '15',
+//                         ejecutado: '16',
+//                         porcentaje: '17',
+//                     },
+//                     iMujHom: '18',
+//                     uEuskera: '19',
+//                     sostenibilidad: '20',
+//                     dInteligent: '21',
+//                     observaciones: '22',
+//                     dSeguimiento: '23',
+//                     valFinal: '24',
+//                 },
+//                 indicadorAccion: {
+//                     indicadoreRealizacion: [
+//                         {
+//                             id: 4,
+//                             descripcion: 'RE04. Número de infraestructuras y/o servicios mejorados',
+//                             metaAnual: {
+//                                 hombres: 10,
+//                                 mujeres: 10,
+//                                 total: 20,
+//                             },
+//                             ejecutado: {
+//                                 hombres: 5,
+//                                 mujeres: 10,
+//                                 total: 15,
+//                             },
+//                             metaFinal: {
+//                                 hombres: 20,
+//                                 mujeres: 20,
+//                                 total: 40,
+//                             },
+//                             hipotesis: 'Se espera un ligero aumento.',
+//                             idsResultados: [4],
+//                         },
+//                         {
+//                             id: 5,
+//                             descripcion: 'RE05. Número de personas emprendedoras apoyadas',
+//                             metaAnual: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 100,
+//                             },
+//                             ejecutado: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 0,
+//                             },
+//                             metaFinal: {
+//                                 hombres: 0,
+//                                 mujeres: 0,
+//                                 total: 300,
+//                             },
+//                             idsResultados: [5],
+//                         },
+//                     ],
+//                     indicadoreResultado: datosPruebaIndicadoreResultado.map((item) => ({ ...item })),
+//                     // indicadoreRealizacion: datosPruebaIndicadoreRealizacion,
+//                     // indicadoreResultado: datosPruebaIndicadoreResultado,
+//                 },
+//                 plurianual: true,
+//                 accionCompartida: {
+//                     regionLider: {
+//                         RegionId: '11',
+//                         NameEs: 'Goierri',
+//                         NameEu: 'Goierri',
+//                     },
+//                     regiones: [
+//                         {
+//                             RegionId: '1',
+//                             NameEs: 'Añana',
+//                             NameEu: 'Añana',
+//                         },
+//                         {
+//                             RegionId: '4',
+//                             NameEs: 'Rioja Alavesa / Arabako Errioxa',
+//                             NameEu: 'Rioja Alavesa / Arabako Errioxa',
+//                         },
+//                         {
+//                             RegionId: '10',
+//                             NameEs: 'Durangaldea',
+//                             NameEu: 'Durangaldea',
+//                         },
+//                         {
+//                             RegionId: '12',
+//                             NameEs: 'Aiaraldea',
+//                             NameEu: 'Aiaraldea',
+//                         },
+//                         {
+//                             RegionId: '17',
+//                             NameEs: 'Enkarterri-Ezkerraldea',
+//                             NameEu: 'Enkarterri-Ezkerraldea',
+//                         },
+//                     ],
+//                 },
+//             },
+//         ],
+//     },
+//     {
+//         Id: '16',
+//         NameEs: 'Ocio',
+//         NameEu: 'Aisia',
+//         IsActive: true,
+//         acciones: [],
+//     },
+// ];
 
 // export const yearIniciado: YearData = {
 //     year: 2025,

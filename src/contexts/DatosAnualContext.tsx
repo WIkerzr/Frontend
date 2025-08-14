@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Ejes, EjesResponse, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import { DatosAccion, datosInicializadosAccion } from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
@@ -24,7 +24,7 @@ interface YearContextType {
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
-    llamadaBBDDYearData: (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string) => void;
+    llamadaBBDDYearData: (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string, ignorarStorage: boolean) => void;
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
@@ -247,9 +247,9 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
-    const llamadaBBDDYearData = (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string) => {
+    const llamadaBBDDYearData = (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string, ignorarStorage: boolean) => {
         const stored = localStorage.getItem('datosAno');
-        if (stored) {
+        if (stored && !ignorarStorage) {
             const data: YearData = JSON.parse(stored);
             if (data.year === anioSeleccionada && data.nombreRegion === nombreRegionSeleccionada) {
                 setYearData(data);
@@ -280,12 +280,13 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 const ejesPrioritarios: Ejes[] = [];
                 const ejes: Ejes[] = [];
 
-                data.data.Plan.Ejes.forEach((eje: EjesResponse) => {
+                data.data.Plan.Ejes.forEach((eje: Ejes) => {
                     const item = {
                         Id: `${eje.Id}`,
                         NameEs: `${eje.NameEs}`,
                         NameEu: `${eje.NameEu}`,
                         IsActive: eje.IsActive,
+                        IsPrioritarios: eje.IsPrioritarios,
                         acciones: [],
                     };
 
