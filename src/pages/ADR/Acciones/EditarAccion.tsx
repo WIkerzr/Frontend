@@ -54,10 +54,6 @@ const Index: React.FC = () => {
         }
     }, []);
 
-    useEffect(() => {
-        console.log(datosEditandoServicio);
-    }, [datosEditandoServicio]);
-
     if (!datosEditandoAccion) {
         if (!servicio) {
             return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;

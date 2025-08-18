@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { EjeBBDD, Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import { DatosAccion } from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
@@ -87,7 +87,48 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [successMessage]);
 
+    const LlamarVerAccion = (idAccion: string) => {
+        LlamadasBBDD({
+            method: 'POST',
+            url: `actionData/${idAccion}`,
+            setLoading: setLoadingYearData,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+            setErrorMessage,
+            setSuccessMessage,
+            onSuccess: (response) => {
+                // setYearData({
+                //     ...yearData,
+                //     plan: {
+                //         ...yearData.plan,
+                //         ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
+                //             eje.Id === ejeSeleccionado.Id
+                //                 ? {
+                //                       ...eje,
+                //                       acciones: [
+                //                           ...eje.acciones,
+                //                           {
+                //                               id: response.data.Id,
+                //                               accion: nuevaAccion,
+                //                               ejeEs: ejeSeleccionado.NameEs,
+                //                               ejeEu: ejeSeleccionado.NameEu,
+                //                               lineaActuaccion: nuevaLineaActuaccion,
+                //                               plurianual: plurianual,
+                //                           },
+                //                       ],
+                //                   }
+                //                 : eje
+                //         ),
+                //     },
+                // });
+
+                console.log('Acción agregada:', response);
+            },
+        });
+    };
+
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
+        LlamarVerAccion(idAccion);
+
         setIdEjeEditado(idEjePrioritario);
         const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.Id));
         const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
@@ -352,14 +393,21 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 const ejesPrioritarios: Ejes[] = [];
                 const ejes: Ejes[] = [];
 
-                data.data.Plan.Ejes.forEach((eje: Ejes) => {
+                data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
                     const item = {
                         Id: `${eje.Id}`,
                         NameEs: `${eje.NameEs}`,
                         NameEu: `${eje.NameEu}`,
                         IsActive: eje.IsActive,
                         IsPrioritarios: eje.IsPrioritarios,
-                        acciones: [],
+                        acciones: eje.Acciones.map((accion: any) => ({
+                            id: `${accion.Id}`,
+                            accion: accion.Nombre,
+                            ejeEs: eje.NameEs,
+                            ejeEu: eje.NameEu,
+                            lineaActuaccion: accion.LineaActuaccion,
+                            plurianual: accion.Plurianual,
+                        })),
                     };
 
                     if (eje.IsPrioritarios) {

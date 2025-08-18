@@ -336,7 +336,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                             </span>
                             <div className="flex gap-2 justify-end mt-2">
                                 <NavLink to="/adr/acciones/editando" className="group">
-                                    <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => SeleccionEditarAccion(idEje, accion.id)}>
+                                    <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => SeleccionEditarAccion(idEje, `${accion.id}`)}>
                                         {editable ? <IconPencil /> : <IconEye />}
                                     </button>
                                 </NavLink>
