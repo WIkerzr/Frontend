@@ -41,6 +41,11 @@ export interface EjeBBDD {
     IsPrioritarios: boolean;
     Acciones: DatosAccion[];
 }
+export interface EjeIndicadorBBDD {
+    EjeId: string;
+    NameEs: string;
+    NameEu: string;
+}
 
 export interface Plan {
     id: string;

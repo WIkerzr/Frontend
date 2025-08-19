@@ -11,9 +11,10 @@ import React from 'react';
 import { RegionInterface } from '../../components/Utils/data/getRegiones';
 import { Acciones, useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../components/Utils/data/controlDev';
-import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
-import { editIndicadorRealizacionBack, editIndicadorResultadoBack } from '../../components/Utils/data/dataIndicadores';
+import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, MultiSelectDOM } from '../../components/Utils/utils';
+import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../components/Utils/data/dataIndicadores';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -35,10 +36,11 @@ const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: Indicador
 
 export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal }) => {
     const { t, i18n } = useTranslation();
-    const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado } = useIndicadoresContext();
+    const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado, ejesIndicador } = useIndicadoresContext();
     const indicadorSeleccionadoSinFallo = ControlDeFallosIndicadorSeleccionado();
     const [indicadorRealizacionDeterminado, setIndicadorRealizacionDeterminado] = useState<IndicadorResultado[]>([]);
     const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
+    const [optionsSelect, setOptionsSelect] = useState<EjeIndicadorBBDD[]>([]);
 
     const { regionSeleccionada, codRegiones } = useRegionEstadosContext();
 
@@ -155,7 +157,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     const [formData, setFormData] = useState<IndicadorRealizacion>({
         ...indicadorRealizacion,
         Description: indicadorRealizacion.Description ?? '',
-        RelatedAxes: indicadorRealizacion.RelatedAxes ?? '',
+        RelatedAxes: indicadorRealizacion.RelatedAxes ?? [],
         DisaggregationVariables: indicadorRealizacion.DisaggregationVariables ?? '',
         CalculationMethodology: indicadorRealizacion.CalculationMethodology ?? '',
     });
@@ -166,7 +168,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         setFormData({
             ...indicadorRealizacion,
             Description: indicadorRealizacion.Description ?? '',
-            RelatedAxes: indicadorRealizacion.RelatedAxes ?? '',
+            RelatedAxes: indicadorRealizacion.RelatedAxes ?? [],
             DisaggregationVariables: indicadorRealizacion.DisaggregationVariables ?? '',
             CalculationMethodology: indicadorRealizacion.CalculationMethodology ?? '',
         });
@@ -193,9 +195,24 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         onChange(updatedData);
     };
 
+    const handleChangeRelatedAxes = (ejes: EjeIndicadorBBDD[]) => {
+        const updatedData = { ...formData, RelatedAxes: ejes };
+        setFormData(updatedData);
+        onChange(updatedData);
+    };
+
     useEffect(() => {
         setFormData(indicadorRealizacion);
     }, []);
+
+    useEffect(() => {
+        const optionsSelect: EjeIndicadorBBDD[] = ejesIndicador.map((eje) => ({
+            EjeId: eje.EjeId,
+            NameEs: eje.NameEs,
+            NameEu: eje.NameEu,
+        }));
+        setOptionsSelect(optionsSelect);
+    }, [ejesIndicador]);
 
     return (
         <div className="space-y-4">
@@ -208,15 +225,23 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             </div>
             <div>
                 <label className="block font-medium">{t('unitMed')}</label>
-                {/* <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange}>
+                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange}>
                     <option value="NUMERO">NUMERO</option>
                     <option value="OTRO">OTRO</option>
-                </select> */}
+                </select>
             </div>
 
             <div>
                 <label className="block font-medium">{t('ejesRelacionados')}</label>
-                <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} />
+                {/* <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} /> */}
+
+                <div className="w-[400px]">
+                    <MultiSelectDOM
+                        objeto={[...optionsSelect]}
+                        preSelected={ejesIndicador.filter((eje) => formData.RelatedAxes?.map((eje) => eje.EjeId).includes(eje.EjeId))}
+                        onChange={handleChangeRelatedAxes}
+                    />
+                </div>
             </div>
 
             <div>
@@ -582,67 +607,8 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     };
 
     const handleGuardarNuevoRealizacion = async () => {
-        const token = sessionStorage.getItem('access_token');
-        const datosRealizacion: IndicadorRealizacion = {
-            ...descripcionEditable,
-            RegionsId: regionSeleccionada ?? undefined,
-            Resultados: descripcionEditable.Resultados?.map((resultado) => ({
-                ...resultado,
-                RegionsId: regionSeleccionada ?? undefined,
-            })),
-        };
-        const response = await FetchConRefreshRetry(`${ApiTarget}/nuevoIndicadores`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(esADR ? datosRealizacion : descripcionEditable),
-        });
-        if (response && !response.ok) {
-            const errorInfo = gestionarErrorServidor(response);
-            setErrorMessage(errorInfo.mensaje);
-            return;
-        }
-        if (response.ok) {
-            const indicadorNuevo = await response.json();
-
-            let realizaciones: IndicadorRealizacion[] = [];
-            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-            if (storedRealizacion) {
-                realizaciones = JSON.parse(storedRealizacion);
-            }
-            realizaciones.push({
-                ...descripcionEditable,
-                Id: indicadorNuevo.data.Id,
-                RegionsId: regionSeleccionada ?? undefined,
-            });
-
-            if (indicadorNuevo.data.Resultados && indicadorNuevo.data.Resultados.length > 0) {
-                let resultados: IndicadorRealizacion[] = [];
-                const storedResultado = localStorage.getItem('indicadoresResultado');
-                if (storedResultado) {
-                    resultados = JSON.parse(storedResultado);
-                }
-                const idsEnresultados = new Set(resultados.map((obj) => obj.Id));
-                indicadorNuevo.data.Resultados.forEach((obj: IndicadorRealizacion) => {
-                    if (!idsEnresultados.has(obj.Id)) {
-                        resultados.push({
-                            Id: obj.Id,
-                            NameEs: obj.NameEs,
-                            CalculationMethodology: obj.CalculationMethodology,
-                            Description: obj.Description,
-                            NameEu: obj.NameEu,
-                            RegionsId: obj.RegionsId,
-                            RelatedAxes: obj.RelatedAxes,
-                            Resultados: obj.Resultados,
-                        });
-                    }
-                });
-            }
-            validadorRespuestasBBDD(response, indicadorNuevo);
-        }
+        const { indicadorNuevo, response } = await guardarNuevoRealizacionBack(esADR, descripcionEditable, regionSeleccionada);
+        validadorRespuestasBBDD(response, indicadorNuevo);
     };
 
     const handleEditarIndicador = async () => {
@@ -650,11 +616,18 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             if (tipoIndicador === 'realizacion') {
                 const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
                 const indicadorRE = await editIndicadorRealizacionBack(descripcionEditable);
-                setRealizacion((prev) => [...prev, indicadorRE]);
+                setRealizacion((prev) => {
+                    const updated = prev.map((el) => (el.Id === indicadorRE.Id ? indicadorRE : el));
+                    return updated;
+                });
             } else if (tipoIndicador === 'resultado') {
                 const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
                 const indicadorRS = await editIndicadorResultadoBack(descripcionEditable);
                 setResultado((prev) => [...prev, indicadorRS]);
+                setResultado((prev) => {
+                    const updated = prev.map((el) => (el.Id === indicadorRS.Id ? indicadorRS : el));
+                    return updated;
+                });
             }
             finalizadaLlamadaBBDD();
         } catch (error) {
@@ -1213,7 +1186,10 @@ export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRe
         });
 
         const data = await res.json();
-        const datosIndicador: IndicadorRealizacion[] = data.data;
+
+        // const datosIndicador: IndicadorRealizacion[] = data.data;
+        const datosIndicador: IndicadorRealizacion[] = data.data.map(transformarIndicador);
+
         if (!res.ok) {
             setMensajeError(data.Message || t('errorObtenerIndicadores'));
             throw new Error(data.Message || t('errorObtenerIndicadores'));

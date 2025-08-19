@@ -134,7 +134,7 @@ export const datosInicializadosAccion: DatosAccion = {
     plurianual: false,
 };
 
-export const datosPlan: DatosPlan = {
+export const datosPlanInicializada: DatosPlan = {
     ejecutora: '',
     implicadas: '',
     comarcal: 'No',
@@ -151,7 +151,7 @@ export const datosPlan: DatosPlan = {
     observaciones: '',
 };
 
-export const datosMemoria: DatosMemoria = {
+export const datosMemoriaInicializada: DatosMemoria = {
     ejecutora: '',
     implicadas: '',
     comarcal: '',

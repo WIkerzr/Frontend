@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../types/Indicadores';
 import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndicadores';
@@ -5,6 +6,8 @@ import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils
 import { useTranslation } from 'react-i18next';
 import { useUser } from './UserContext';
 import { useRegionEstadosContext } from './RegionEstadosContext';
+import { EjeIndicadorBBDD } from '../types/tipadoPlan';
+import { ApiSuccess, LlamadasBBDD } from '../components/Utils/data/utilsData';
 
 type IndicadorTipo = 'Realizacion' | 'Resultado';
 export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
@@ -30,6 +33,7 @@ type IndicadoresContextType = {
     indicadoresRealizacion: IndicadorRealizacion[];
     indicadoresRealizacionADR: IndicadorRealizacion[];
     indicadoresResultado: IndicadorResultado[];
+    ejesIndicador: EjeIndicadorBBDD[];
     indicadoresResultadoADR: IndicadorResultado[];
     indicadorSeleccionado: IndicadorSeleccionado | null;
     llamarBBDD: () => void;
@@ -37,7 +41,7 @@ type IndicadoresContextType = {
     mensajeError: string;
     ObtenerRealizacionPorRegion: () => Record<string | number, IndicadorRealizacion[]>;
     ObtenerResultadosPorRegion: () => Record<string | number, IndicadorResultado[]>;
-    PrimeraLlamada: () => void;
+    PrimeraLlamada: (regionSeleccionada: string | null) => void;
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
@@ -54,6 +58,7 @@ const IndicadorContext = createContext<IndicadoresContextType>({
     indicadoresRealizacion: [],
     indicadoresRealizacionADR: [],
     indicadoresResultado: [],
+    ejesIndicador: [],
     indicadoresResultadoADR: [],
     indicadorSeleccionado: indicadorSeleccionadoInicial,
     llamarBBDD: () => {},
@@ -76,6 +81,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const { t } = useTranslation();
     const { user } = useUser();
     const { regionSeleccionada } = useRegionEstadosContext();
+    const [ejesIndicador, setEjesIndicador] = useState<EjeIndicadorBBDD[]>([]);
     const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);
     const [indicadoresRealizacionADR, setIndicadoresRealizacionADR] = useState<IndicadorRealizacion[]>([]);
@@ -183,7 +189,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
-    const PrimeraLlamada = () => {
+    const PrimeraLlamada = (regionSeleccionada: string | null) => {
         const token = sessionStorage.getItem('access_token');
         setMensajeError('');
         if (!token) return;
@@ -197,15 +203,46 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
                 setIndicadoresResultado(indicadoresResultado);
                 actualizarIndicadoresADR();
+                SegundaLlamadaEjes(regionSeleccionada);
                 setLoading(false);
                 return;
             } else {
                 llamarBBDD();
+                SegundaLlamadaEjes(regionSeleccionada);
                 setLoading(false);
             }
         }
     };
 
+    const SegundaLlamadaEjes = (regionSeleccionada: string | null) => {
+        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
+        if (ejes) {
+            setEjesIndicador(JSON.parse(ejes));
+            return;
+        }
+        const url = regionSeleccionada ? `ejes/${regionSeleccionada}` : `/ejes`;
+        LlamadasBBDD({
+            method: 'GET',
+            url: url,
+            setLoading: setLoading,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDD,
+            onSuccess: (response: ApiSuccess<EjeIndicadorBBDD[]>) => {
+                const arrayMapeado = response.data.map((ejes: EjeIndicadorBBDD) => ({
+                    EjeId: ejes.EjeId,
+                    NameEs: ejes.NameEs || '',
+                    NameEu: ejes.NameEu || '',
+                }));
+                setEjesIndicador(arrayMapeado);
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('EjesIndicador_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                localStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
+            },
+        });
+    };
     const ControlDeFallosIndicadorSeleccionado = (): IndicadorSeleccionado => {
         if (!indicadorSeleccionado || !indicadorSeleccionado.indicador) {
             console.log(indicadorSeleccionado);
@@ -314,6 +351,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 indicadoresRealizacion,
                 indicadoresRealizacionADR,
                 indicadoresResultado,
+                ejesIndicador,
                 indicadoresResultadoADR,
                 indicadorSeleccionado,
                 llamarBBDD,

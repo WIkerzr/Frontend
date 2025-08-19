@@ -49,7 +49,7 @@ const Index = () => {
         }
     }, [yearData]);
 
-    const llamadaBBDDEjes = (regionSeleccionada: string | null) => {
+    const llamadaBBDDEjesRegion = (regionSeleccionada: string | null) => {
         LlamadasBBDD({
             method: 'GET',
             url: `/ejes/${regionSeleccionada}`,
@@ -103,7 +103,7 @@ const Index = () => {
             setEjes(ordenados);
         } else {
             setLocked(false);
-            llamadaBBDDEjes(regionSeleccionada);
+            llamadaBBDDEjesRegion(regionSeleccionada);
         }
     }, [regionSeleccionada]);
 
@@ -165,7 +165,7 @@ const Index = () => {
                         <div className="flex items-center space-x-2">
                             <PrintFecha date={fechaUltimoActualizadoBBDD} />
                             <Tippy content={t('Actualizar')}>
-                                <button type="button" onClick={() => llamadaBBDDEjes(regionSeleccionada)}>
+                                <button type="button" onClick={() => llamadaBBDDEjesRegion(regionSeleccionada)}>
                                     <IconRefresh />
                                 </button>
                             </Tippy>

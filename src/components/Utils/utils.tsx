@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, ReactNode, useEffect, useState } from 'react';
+import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { UserRole } from '../../types/users';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +11,7 @@ import IconInfoTriangle from '../Icon/IconInfoTriangle';
 import IconXCircle from '../Icon/IconXCircle';
 import IconThumbUp from '../Icon/IconThumbUp';
 import { ApiTargetToken } from './data/controlDev';
+import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
 
 interface ModalProps {
     open: boolean;
@@ -380,3 +382,93 @@ export function PrintFecha({ date }: FechaProps) {
 
     return <div>{locale === 'eu' ? formatFechaEu(fechaObj) : formatter.format(fechaObj)}</div>;
 }
+
+interface PropsMultiSelectDOM {
+    objeto: EjeIndicadorBBDD[];
+    preSelected: EjeIndicadorBBDD[];
+    onChange: (selected: EjeIndicadorBBDD[]) => void;
+}
+
+export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelected, onChange }) => {
+    const [drop, setDrop] = useState<EjeIndicadorBBDD[]>([]);
+    const [selected, setSelected] = useState<EjeIndicadorBBDD[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const { i18n } = useTranslation();
+    const prevIsOpen = useRef(isOpen);
+    const [mostrarTodos, setMostrarTodos] = useState(false);
+
+    useEffect(() => {
+        setSelected((prev) => (JSON.stringify(prev) === JSON.stringify(preSelected) ? prev : preSelected));
+    }, [preSelected]);
+
+    useEffect(() => {
+        setDrop((objeto as EjeIndicadorBBDD[]).filter((eje) => !selected.some((s) => s.EjeId === eje.EjeId)));
+        if (selected.length === objeto.length) {
+            setMostrarTodos(true);
+        } else {
+            setMostrarTodos(false);
+        }
+    }, [objeto, selected]);
+
+    useEffect(() => {
+        if (prevIsOpen.current && !isOpen) {
+            onChange(selected);
+        }
+        prevIsOpen.current = isOpen;
+    }, [isOpen, selected]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggleOption = (eje: EjeIndicadorBBDD) => {
+        setSelected((prev) => (prev.some((s) => s.EjeId === eje.EjeId) ? prev.filter((s) => s.EjeId !== eje.EjeId) : [...prev, eje]));
+    };
+
+    const toggleSelectAll = () => {
+        if (selected.length === objeto.length) setSelected([]);
+        else setSelected([...objeto]);
+    };
+
+    return (
+        <div className="relative w-[400px]" ref={containerRef}>
+            <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1 mb-1 p-1 border rounded bg-gray-100">
+                {mostrarTodos ? (
+                    <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded cursor-pointer" onClick={() => setMostrarTodos(false)}>
+                        TODOS ×
+                    </span>
+                ) : (
+                    selected.map((eje) => (
+                        <span key={eje.EjeId} className="bg-blue-200 text-blue-800 px-2 py-1 rounded cursor-pointer" onClick={() => toggleOption(eje)}>
+                            {i18n.language === 'eu' ? eje.NameEu : eje.NameEs} ×
+                        </span>
+                    ))
+                )}
+            </div>
+
+            <div className="border rounded p-2 cursor-pointer bg-white" onClick={() => setIsOpen((prev) => !prev)}>
+                {selected.length === 0 ? 'Selecciona opciones...' : `${selected.length} seleccionados`}
+            </div>
+
+            {isOpen && (
+                <div className="absolute w-full max-h-60 overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
+                    <div className="p-2 border-b cursor-pointer hover:bg-gray-200 font-semibold" onClick={toggleSelectAll}>
+                        {selected.length === objeto.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                    </div>
+                    {drop.map((eje) => (
+                        <div key={eje.EjeId} className={`p-2 cursor-pointer hover:bg-gray-200 ${selected.some((s) => s.EjeId === eje.EjeId) ? 'bg-gray-100' : ''}`} onClick={() => toggleOption(eje)}>
+                            {i18n.language === 'eu' ? eje.NameEu : eje.NameEs}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};

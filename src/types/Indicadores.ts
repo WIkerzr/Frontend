@@ -1,3 +1,5 @@
+import { EjeIndicadorBBDD } from './tipadoPlan';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Indicador {
     id: number;
@@ -39,9 +41,8 @@ export interface IndicadorResultado {
     Description?: string;
     DisaggregationVariables?: any;
     CalculationMethodology?: any;
-    RelatedAxes?: any;
+    RelatedAxes?: EjeIndicadorBBDD[];
 }
-
 export interface IndicadorRealizacion extends IndicadorResultado {
     Resultados?: IndicadorResultado[];
 }
@@ -53,7 +54,7 @@ export const indicadorResultadoinicial: IndicadorResultado = {
     Description: '',
     DisaggregationVariables: '',
     CalculationMethodology: '',
-    RelatedAxes: '',
+    RelatedAxes: [],
 };
 
 export const indicadorInicial: IndicadorRealizacion = {
@@ -63,7 +64,7 @@ export const indicadorInicial: IndicadorRealizacion = {
     Description: '',
     DisaggregationVariables: '',
     CalculationMethodology: '',
-    RelatedAxes: '',
+    RelatedAxes: [],
     Resultados: [],
 };
 export const indicadorInicialResultado: IndicadorResultado = {
@@ -73,7 +74,7 @@ export const indicadorInicialResultado: IndicadorResultado = {
     Description: '',
     DisaggregationVariables: '',
     CalculationMethodology: '',
-    RelatedAxes: '',
+    RelatedAxes: [],
 };
 
 export const datosPruebaIndicadoreRealizacion: IndicadorRealizacionAccion[] = [
