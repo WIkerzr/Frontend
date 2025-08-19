@@ -8,6 +8,7 @@ import Tippy from '@tippyjs/react';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { PrintFecha } from '../../components/Utils/utils';
 import { indicadorInicial } from '../../types/Indicadores';
+import { useLocation } from 'react-router-dom';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -23,12 +24,15 @@ const Index = () => {
         setLoading,
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
+    const location = useLocation();
 
     const [modalNuevo, setModalNuevo] = useState(false);
 
     useEffect(() => {
-        PrimeraLlamada();
-    }, []);
+        if (location.pathname === '/configuracion/indicadores') {
+            PrimeraLlamada(null);
+        }
+    }, [location.pathname]);
 
     return (
         <div className="flex w-full gap-5">

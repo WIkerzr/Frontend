@@ -32,8 +32,13 @@ const Index = () => {
     const role: UserRole = user!.role as UserRole;
 
     useEffect(() => {
-        PrimeraLlamada();
-    }, []);
+        if (location.pathname === '/configuracion/indicadoresADR' && regionSeleccionada) {
+            PrimeraLlamada(regionSeleccionada);
+        }
+        if (!regionSeleccionada) {
+            setLoading(false);
+        }
+    }, [location.pathname, regionSeleccionada]);
 
     return (
         <div className="flex w-full gap-5">
@@ -83,20 +88,22 @@ const Index = () => {
                     <div className="flex justify-between items-center mb-2">
                         <div>{mensajeError && <span className="text-red-500 hover:text-red-700">{mensajeError}</span>}</div>
 
-                        <div className="flex items-center space-x-2">
-                            <PrintFecha date={fechaUltimoActualizadoBBDD} />
-                            <Tippy content={t('Actualizar')}>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        llamarBBDD();
-                                        setLoading(false);
-                                    }}
-                                >
-                                    <IconRefresh />
-                                </button>
-                            </Tippy>
-                        </div>
+                        {regionSeleccionada && (
+                            <div className="flex items-center space-x-2">
+                                <PrintFecha date={fechaUltimoActualizadoBBDD} />
+                                <Tippy content={t('Actualizar')}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            llamarBBDD();
+                                            setLoading(false);
+                                        }}
+                                    >
+                                        <IconRefresh />
+                                    </button>
+                                </Tippy>
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-row justify-center mb-5 gap-5">
                         <TablaIndicadores />
