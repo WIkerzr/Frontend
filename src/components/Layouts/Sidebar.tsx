@@ -111,19 +111,23 @@ const Sidebar = () => {
                     <ul className="sub-menu text-gray-500 text">
                         {role === 'HAZI' && (
                             <>
+                                <li>
+                                    <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
+                                </li>
                                 {Fases >= 2 && (
                                     <li>
                                         <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
                                     </li>
                                 )}
-                                <li>
-                                    <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
-                                </li>
                             </>
                         )}
                         {Fases >= 5 && <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />}
                         {Fases >= 6 && <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />}
-                        {Fases >= 2 && <SideBarList texto={t('indicadores') + ' ADR'} link="/configuracion/indicadoresADR" src={IconMenuConfiguracion} role={role} />}
+                        {Fases >= 2 && (
+                            <li>
+                                <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ADR'}</NavLink>
+                            </li>
+                        )}
                         {Fases >= 6 && (
                             <>
                                 <li>
