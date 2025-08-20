@@ -291,7 +291,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [modoCrear, setModoCrear] = useState(false);
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
-    const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion, indicadoresResultado } = useIndicadoresContext();
+    const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
     const { regionSeleccionada } = useRegionEstadosContext();
 
     const [refrescarZona, setRefrescarZona] = useState(0);
@@ -403,80 +403,81 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             return !yaAsignado;
         });
 
-        const prime: string[] = [];
-        const primeID: number[] = [];
-        for (let index = 0; index < indicadorRealizacion.Resultados!.length; index++) {
-            const nameEs = indicadorRealizacion.Resultados![index].NameEs.split(' ')[0];
+        //SUB INDICES
+        // const prime: string[] = [];
+        // const primeID: number[] = [];
+        // for (let index = 0; index < indicadorRealizacion.Resultados!.length; index++) {
+        //     const nameEs = indicadorRealizacion.Resultados![index].NameEs.split(' ')[0];
 
-            const [prefix, subIndexStr] = nameEs.split('.');
-            const subIndex = Number(subIndexStr);
+        //     const [prefix, subIndexStr] = nameEs.split('.');
+        //     const subIndex = Number(subIndexStr);
 
-            const existingIndex: number = prime.findIndex((p) => p.startsWith(prefix + '.'));
+        //     const existingIndex: number = prime.findIndex((p) => p.startsWith(prefix + '.'));
 
-            if (existingIndex !== -1) {
-                const existingSubIndex = Number(prime[existingIndex].split('.')[1]);
-                if (subIndex > existingSubIndex) {
-                    prime[existingIndex] = nameEs;
-                    primeID[existingIndex] = indicadorRealizacion.Resultados![index].Id;
-                }
-            } else {
-                prime.push(nameEs);
-                primeID.push(indicadorRealizacion.Resultados![index].Id);
-            }
-        }
-        const primeIncremented = prime.map((item) => {
-            const parts = item.split('.');
+        //     if (existingIndex !== -1) {
+        //         const existingSubIndex = Number(prime[existingIndex].split('.')[1]);
+        //         if (subIndex > existingSubIndex) {
+        //             prime[existingIndex] = nameEs;
+        //             primeID[existingIndex] = indicadorRealizacion.Resultados![index].Id;
+        //         }
+        //     } else {
+        //         prime.push(nameEs);
+        //         primeID.push(indicadorRealizacion.Resultados![index].Id);
+        //     }
+        // }
+        // const primeIncremented = prime.map((item) => {
+        //     const parts = item.split('.');
 
-            if (parts.length < 3 || parts[1] === '') {
-                parts.splice(1, 0, '1');
-            } else {
-                const num = Number(parts[1]) || 0;
-                parts[1] = String(num + 1);
-            }
+        //     if (parts.length < 3 || parts[1] === '') {
+        //         parts.splice(1, 0, '1');
+        //     } else {
+        //         const num = Number(parts[1]) || 0;
+        //         parts[1] = String(num + 1);
+        //     }
 
-            return parts.join('.') + ' ';
-        });
+        //     return parts.join('.') + ' ';
+        // });
 
-        interface BtnAgregarSubIndiceProps {
-            data: IndicadorResultado;
-        }
-        const BtnAgregarSubIndice: React.FC<BtnAgregarSubIndiceProps> = ({ data }) => {
-            if (data.Id !== 0 && primeID.includes(data.Id)) {
-                for (let index = 0; index < indicadoresResultado.length; index++) {
-                    const nameEs = indicadoresResultado[index].NameEs.split(' ')[0];
-                    if (primeIncremented.includes(nameEs)) {
-                        const indexIncludes = primeIncremented.indexOf(nameEs);
-                        const parts = primeIncremented[indexIncludes].split('.');
+        // interface BtnAgregarSubIndiceProps {
+        //     data: IndicadorResultado;
+        // }
+        // const BtnAgregarSubIndice: React.FC<BtnAgregarSubIndiceProps> = ({ data }) => {
+        //     if (data.Id !== 0 && primeID.includes(data.Id)) {
+        //         for (let index = 0; index < indicadoresResultado.length; index++) {
+        //             const nameEs = indicadoresResultado[index].NameEs.split(' ')[0];
+        //             if (primeIncremented.includes(nameEs)) {
+        //                 const indexIncludes = primeIncremented.indexOf(nameEs);
+        //                 const parts = primeIncremented[indexIncludes].split('.');
 
-                        if (parts.length < 3 || parts[1] === '') {
-                            parts.splice(1, 0, '1');
-                        } else {
-                            const num = Number(parts[1]) || 0;
-                            parts[1] = String(num + 1);
-                        }
-                        primeIncremented[indexIncludes] = parts.join('.') + ' ';
-                    }
-                }
-                return (
-                    <div className="p-2">
-                        <button
-                            className="bg-blue-500 text-white px-3 rounded"
-                            onClick={() => {
-                                setDescripcionEditable({
-                                    ...indicadorInicial,
-                                    NameEs: primeIncremented[primeID.indexOf(data.Id)],
-                                });
-                                setModoCrear(true);
-                            }}
-                        >
-                            {`+ ${primeIncremented[primeID.indexOf(data.Id)]}`}
-                        </button>
-                    </div>
-                );
-            } else {
-                <></>;
-            }
-        };
+        //                 if (parts.length < 3 || parts[1] === '') {
+        //                     parts.splice(1, 0, '1');
+        //                 } else {
+        //                     const num = Number(parts[1]) || 0;
+        //                     parts[1] = String(num + 1);
+        //                 }
+        //                 primeIncremented[indexIncludes] = parts.join('.') + ' ';
+        //             }
+        //         }
+        //         return (
+        //             <div className="p-2">
+        //                 <button
+        //                     className="bg-blue-500 text-white px-3 rounded"
+        //                     onClick={() => {
+        //                         setDescripcionEditable({
+        //                             ...indicadorInicial,
+        //                             NameEs: primeIncremented[primeID.indexOf(data.Id)],
+        //                         });
+        //                         setModoCrear(true);
+        //                     }}
+        //                 >
+        //                     {`+ ${primeIncremented[primeID.indexOf(data.Id)]}`}
+        //                 </button>
+        //             </div>
+        //         );
+        //     } else {
+        //         <></>;
+        //     }
+        // };
 
         return (
             <>
@@ -553,7 +554,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                                     <div className="flex-1 break-words overflow-hidden">
                                         {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
                                     </div>
-                                    <BtnAgregarSubIndice data={data} />
+                                    {/* <BtnAgregarSubIndice data={data} /> */}
                                 </div>
                             ))}
                         </div>
