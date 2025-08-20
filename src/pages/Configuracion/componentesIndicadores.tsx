@@ -395,8 +395,12 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             return nameA.localeCompare(nameB);
         });
         const regiones = ObtenerResultadosPorRegion();
-        const opcionesPorRegion = regiones[Number(regionSeleccionada ?? 0)] ?? [];
-
+        let opcionesPorRegion = [];
+        if (location.pathname.endsWith('ADR')) {
+            opcionesPorRegion = regiones[Number(regionSeleccionada ?? 0)] ?? [];
+        } else {
+            opcionesPorRegion = regiones[0] ?? [];
+        }
         const opcionesFiltradas = opcionesPorRegion.filter((op) => {
             if (!indicadorSeleccionado) return false;
             const yaAsignado = indicadorRealizacion.Resultados?.some((resultado) => resultado.Id === op.Id) ?? false;
