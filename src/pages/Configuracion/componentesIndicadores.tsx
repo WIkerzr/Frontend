@@ -80,6 +80,14 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         const baseKey = `${accion}_${tipo}_${esADR ? 'ADR' : 'NoADR'}`;
         const key = editandoResultadoModal ? `${baseKey}_${editandoResultadoModal}` : baseKey;
 
+        if (indicadorRealizacion.NameEs.length > 0) {
+            const nameEsPart = indicadorRealizacion.NameEs.split(' ');
+            if (key.endsWith('CreandoResultado')) {
+                return [nameEsPart[0] + ' '];
+            } else if (key.endsWith('EditandoResultado')) {
+                return [nameEsPart[0] + ' ', nameEsPart[1]];
+            }
+        }
         switch (key) {
             case 'Crear_Realizacion_NoADR': {
                 const numeracion = formateaConCeroDelante(ultimoNumeroRealizacion);
@@ -190,7 +198,14 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     const handleChangeNombre = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setNombreIndicador(value);
-        const updatedData = { ...formData, [name]: `${indicador[0]}.${value}` };
+        let nameText = `${indicador[0]}.${value}`;
+        if (indicador[0].endsWith(' ')) {
+            nameText = `${indicador[0]}${value}`;
+        } else {
+            nameText = `${indicador[0]}.${value}`;
+        }
+
+        const updatedData = { ...formData, [name]: nameText };
         setFormData(updatedData);
         onChange(updatedData);
     };
@@ -276,10 +291,10 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [modoCrear, setModoCrear] = useState(false);
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
-    const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
+    const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion, indicadoresResultado } = useIndicadoresContext();
     const { regionSeleccionada } = useRegionEstadosContext();
 
-    const [refrescarZona, setRefrescarZona] = useState(false);
+    const [refrescarZona, setRefrescarZona] = useState(0);
 
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorResultado>(indicadorResultadoinicial);
 
@@ -324,6 +339,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
         }));
         setModoCrear(false);
         setDescripcionEditable(indicadorResultadoinicial);
+        setRefrescarZona((prev) => prev + 1);
     };
 
     const modificarIndicadorResultadoExistente = (data: IndicadorResultado) => {
@@ -346,7 +362,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             ...prev,
             Resultados: [...(prev.Resultados || []), selectedOp],
         }));
-        setRefrescarZona((prev) => !prev);
+        setRefrescarZona((prev) => prev + 1);
     };
 
     const eliminarIndicadorResultado = (selectedOp: IndicadorResultado) => {
@@ -366,13 +382,18 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             });
             setIndicadorRealizacion((prev) => ({
                 ...prev,
-                Resultados: prev.Resultados?.filter((resultado) => resultado.NameEs.slice(0, 4) !== selectedOp.NameEs.slice(0, 4)) || [],
+                Resultados: prev.Resultados?.filter((resultado) => resultado.NameEs.slice(0, 6) !== selectedOp.NameEs.slice(0, 6)) || [],
             }));
         }
-        setRefrescarZona((prev) => !prev);
+        setRefrescarZona((prev) => prev + 1);
     };
 
     const ZonaListadoResultados = () => {
+        const indicadoresResultadosOrdenadosES = indicadorRealizacion.Resultados!.sort((a, b) => {
+            const nameA = a.NameEs?.toLowerCase() || '';
+            const nameB = b.NameEs?.toLowerCase() || '';
+            return nameA.localeCompare(nameB);
+        });
         const regiones = ObtenerResultadosPorRegion();
         const opcionesPorRegion = regiones[Number(regionSeleccionada ?? 0)] ?? [];
 
@@ -381,6 +402,81 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             const yaAsignado = indicadorRealizacion.Resultados?.some((resultado) => resultado.Id === op.Id) ?? false;
             return !yaAsignado;
         });
+
+        const prime: string[] = [];
+        const primeID: number[] = [];
+        for (let index = 0; index < indicadorRealizacion.Resultados!.length; index++) {
+            const nameEs = indicadorRealizacion.Resultados![index].NameEs.split(' ')[0];
+
+            const [prefix, subIndexStr] = nameEs.split('.');
+            const subIndex = Number(subIndexStr);
+
+            const existingIndex: number = prime.findIndex((p) => p.startsWith(prefix + '.'));
+
+            if (existingIndex !== -1) {
+                const existingSubIndex = Number(prime[existingIndex].split('.')[1]);
+                if (subIndex > existingSubIndex) {
+                    prime[existingIndex] = nameEs;
+                    primeID[existingIndex] = indicadorRealizacion.Resultados![index].Id;
+                }
+            } else {
+                prime.push(nameEs);
+                primeID.push(indicadorRealizacion.Resultados![index].Id);
+            }
+        }
+        const primeIncremented = prime.map((item) => {
+            const parts = item.split('.');
+
+            if (parts.length < 3 || parts[1] === '') {
+                parts.splice(1, 0, '1');
+            } else {
+                const num = Number(parts[1]) || 0;
+                parts[1] = String(num + 1);
+            }
+
+            return parts.join('.') + ' ';
+        });
+
+        interface BtnAgregarSubIndiceProps {
+            data: IndicadorResultado;
+        }
+        const BtnAgregarSubIndice: React.FC<BtnAgregarSubIndiceProps> = ({ data }) => {
+            if (data.Id !== 0 && primeID.includes(data.Id)) {
+                for (let index = 0; index < indicadoresResultado.length; index++) {
+                    const nameEs = indicadoresResultado[index].NameEs.split(' ')[0];
+                    if (primeIncremented.includes(nameEs)) {
+                        const indexIncludes = primeIncremented.indexOf(nameEs);
+                        const parts = primeIncremented[indexIncludes].split('.');
+
+                        if (parts.length < 3 || parts[1] === '') {
+                            parts.splice(1, 0, '1');
+                        } else {
+                            const num = Number(parts[1]) || 0;
+                            parts[1] = String(num + 1);
+                        }
+                        primeIncremented[indexIncludes] = parts.join('.') + ' ';
+                    }
+                }
+                return (
+                    <div className="p-2">
+                        <button
+                            className="bg-blue-500 text-white px-3 rounded"
+                            onClick={() => {
+                                setDescripcionEditable({
+                                    ...indicadorInicial,
+                                    NameEs: primeIncremented[primeID.indexOf(data.Id)],
+                                });
+                                setModoCrear(true);
+                            }}
+                        >
+                            {`+ ${primeIncremented[primeID.indexOf(data.Id)]}`}
+                        </button>
+                    </div>
+                );
+            } else {
+                <></>;
+            }
+        };
 
         return (
             <>
@@ -428,7 +524,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                                 <div className="flex-1">{t('Realizacion')}</div>
                             </div>
 
-                            {indicadorRealizacion.Resultados!.slice().map((data, index) => (
+                            {indicadoresResultadosOrdenadosES.slice().map((data, index) => (
                                 <div key={data.Id + index} className="flex items-center border-b py-3">
                                     <div className="w-[60px] !px-0  flex-shrink-0">
                                         <div className="flex space-x-[5px]">
@@ -457,6 +553,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                                     <div className="flex-1 break-words overflow-hidden">
                                         {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
                                     </div>
+                                    <BtnAgregarSubIndice data={data} />
                                 </div>
                             ))}
                         </div>
