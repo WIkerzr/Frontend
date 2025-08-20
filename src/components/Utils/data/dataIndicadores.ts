@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
+import { EjeIndicadorBBDD } from '../../../types/tipadoPlan';
 import { FetchConRefreshRetry, gestionarErrorServidor } from '../utils';
 import { ApiTarget } from './controlDev';
 
@@ -19,23 +20,63 @@ export function transformarIndicador(indicador: IndicadorRealizacion & { Related
               .map((s) => ({ EjeId: Number(s) }))
         : [];
 
+    const resultadosTransformados: IndicadorResultado[] | undefined = indicador.Resultados?.map((resultado) => ({
+        ...resultado,
+        RelatedAxes: resultado.RelatedAxes
+            ? (resultado.RelatedAxes as unknown as string)
+                  .split(',')
+                  .map((s) => s.replace(/'/g, '').trim())
+                  .filter((s) => s.length > 0)
+                  .map((id) => ({ EjeId: id, NameEs: '', NameEu: '' }))
+            : [],
+    }));
+
     return {
         ...indicador,
         RelatedAxes: relatedAxesArray,
+        ...(resultadosTransformados ? { Resultados: resultadosTransformados } : {}),
     };
 }
-const transformarBORRARIndicador = (indicador: IndicadorRealizacion): any => {
+
+export function transformarIndicadorStringAArray(indicador: IndicadorRealizacion, ejesIndicador: EjeIndicadorBBDD[]): IndicadorRealizacion {
+    //TODO borrar cuando se implemente el backend
+
+    const indicadorFinal: IndicadorRealizacion = {
+        ...indicador,
+        RelatedAxes:
+            typeof indicador.RelatedAxes === 'string'
+                ? (indicador.RelatedAxes as string)
+                      .split(',') // separar por comas
+                      .map((idStr) => idStr.replace(/'/g, '').trim())
+                      .map((id) => ejesIndicador.find((e) => `${e.EjeId}` === id))
+                      .filter((e): e is EjeIndicadorBBDD => e !== undefined)
+                : indicador.RelatedAxes,
+    };
+
+    return indicadorFinal;
+}
+const transformarBORRARIndicadorArrayAString = (indicador: IndicadorRealizacion | IndicadorResultado): any => {
     //TODO borrar cuando se implemente el backend
     const idsString = indicador.RelatedAxes ? indicador.RelatedAxes.map((eje) => `'${eje.EjeId}'`).join(',') : '';
+
+    const resultadosTransformados =
+        'Resultados' in indicador && Array.isArray(indicador.Resultados)
+            ? indicador.Resultados.map((resultado) => ({
+                  ...resultado,
+                  RelatedAxes: resultado.RelatedAxes ? resultado.RelatedAxes.map((eje) => `'${eje.EjeId}'`).join(',') : '',
+              }))
+            : undefined;
+
     return {
         ...indicador,
-        RelatedAxes: idsString ?? '',
+        RelatedAxes: idsString,
+        ...(resultadosTransformados ? { Resultados: resultadosTransformados } : {}),
     };
 };
 
-export async function editIndicadorRealizacionBack(indicadorModificado: IndicadorRealizacion): Promise<IndicadorRealizacion> {
+export async function editIndicadorRealizacionBack(indicadorModificado: IndicadorRealizacion, ejesIndicador: EjeIndicadorBBDD[]): Promise<IndicadorRealizacion> {
     const token = sessionStorage.getItem('access_token');
-    const borrar = transformarBORRARIndicador(indicadorModificado);
+    const borrar = transformarBORRARIndicadorArrayAString(indicadorModificado);
 
     const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorRealizacion`, {
         method: 'PUT',
@@ -58,17 +99,18 @@ export async function editIndicadorRealizacionBack(indicadorModificado: Indicado
         throw new Error('Error al editar indicador: ' + json.message);
     }
 
-    const indicadorFinal: IndicadorRealizacion = {
+    const indicadorPreFinal: IndicadorRealizacion = {
         ...indicadorModificado,
         ...json.data,
     };
-
+    const indicadorFinal = transformarIndicadorStringAArray(indicadorPreFinal, ejesIndicador);
     return indicadorFinal;
 }
 
-export async function editIndicadorResultadoBack(indicadorModificado: IndicadorResultado): Promise<IndicadorResultado> {
+export async function editIndicadorResultadoBack(indicadorModificado: IndicadorResultado, ejesIndicador: EjeIndicadorBBDD[]): Promise<IndicadorResultado> {
     const token = sessionStorage.getItem('access_token');
-    const borrar = transformarBORRARIndicador(indicadorModificado);
+    const borrar = transformarBORRARIndicadorArrayAString(indicadorModificado);
+
     const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorResultado`, {
         method: 'PUT',
         headers: {
@@ -76,7 +118,6 @@ export async function editIndicadorResultadoBack(indicadorModificado: IndicadorR
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        // body: JSON.stringify(indicadorModificado),
         body: JSON.stringify(borrar),
     });
 
@@ -88,14 +129,14 @@ export async function editIndicadorResultadoBack(indicadorModificado: IndicadorR
     const json: IndicadoresResponse<IndicadorResultado> = await response.json();
 
     if (!json.success) {
-        throw new Error('Error al editar indicador resultado: ' + json.message);
+        throw new Error('Error al editar indicador: ' + json.message);
     }
 
-    const indicadorFinal: IndicadorResultado = {
+    const indicadorPreFinal: IndicadorResultado = {
         ...indicadorModificado,
         ...json.data,
     };
-
+    const indicadorFinal = transformarIndicadorStringAArray(indicadorPreFinal, ejesIndicador);
     return indicadorFinal;
 }
 

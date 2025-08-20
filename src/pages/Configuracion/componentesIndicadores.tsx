@@ -238,7 +238,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 <div className="w-[400px]">
                     <MultiSelectDOM
                         objeto={[...optionsSelect]}
-                        preSelected={ejesIndicador.filter((eje) => formData.RelatedAxes?.map((eje) => eje.EjeId).includes(eje.EjeId))}
+                        preSelected={formData.RelatedAxes ? ejesIndicador.filter((eje) => formData.RelatedAxes?.map((r) => r.EjeId).includes(eje.EjeId)) : []}
                         onChange={handleChangeRelatedAxes}
                     />
                 </div>
@@ -544,7 +544,8 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
     const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(esNuevo ? false : hayResultados);
 
-    const { setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, setIndicadoresRealizacionADR, indicadoresResultadoADR, setIndicadoresResultadoADR } = useIndicadoresContext();
+    const { setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, setIndicadoresRealizacionADR, indicadoresResultadoADR, setIndicadoresResultadoADR, ejesIndicador } =
+        useIndicadoresContext();
     useEffect(() => {
         if (accion === 'Crear') {
             setDescripcionEditable((prev) => ({
@@ -615,15 +616,16 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         try {
             if (tipoIndicador === 'realizacion') {
                 const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
-                const indicadorRE = await editIndicadorRealizacionBack(descripcionEditable);
+                const indicadorRE = await editIndicadorRealizacionBack(descripcionEditable, ejesIndicador);
+
                 setRealizacion((prev) => {
                     const updated = prev.map((el) => (el.Id === indicadorRE.Id ? indicadorRE : el));
                     return updated;
                 });
             } else if (tipoIndicador === 'resultado') {
                 const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
-                const indicadorRS = await editIndicadorResultadoBack(descripcionEditable);
-                setResultado((prev) => [...prev, indicadorRS]);
+                const indicadorRS = await editIndicadorResultadoBack(descripcionEditable, ejesIndicador);
+
                 setResultado((prev) => {
                     const updated = prev.map((el) => (el.Id === indicadorRS.Id ? indicadorRS : el));
                     return updated;
