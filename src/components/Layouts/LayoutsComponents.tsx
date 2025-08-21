@@ -4,23 +4,25 @@ import { toggleSidebar } from '../../store/themeConfigSlice';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 
 const logosToComarcas: Record<string, string> = {
-    1: 'AÑANA HORIZONTAL EUSKERA', // seguro
-    2: 'LAUTADA HORIZONTAL EUSKERA', // seguro
-    3: 'MAIRUELEGORRETA HORIZONTAL EUSKERA', // probable
-    4: 'ARABAKO ERRIOXA HORIZONTAL EUSKERA', // seguro
-    5: 'GORBEIALDE HORIZONTAL EUSKERA', // seguro
-    6: 'TOLOMENDI HORIZONTAL EUSKERA', // seguro
-    7: 'URREMENDI HORIZONTAL EUSKERA', // probable
-    8: 'DEBEMEN HORIZONTAL EUSKERA', // probable (Bajo Deba)
-    9: 'DEBA GARAIA HORIZONTAL EUSKERA', // probable (Alto Deba)
-    10: 'URKIOLA HORIZONTAL EUSKERA', // probable
-    11: 'GOIMEN HORIZONTAL EUSKERA', // probable
-    12: 'BEHEMENDI HORIZONTAL EUSKERA', // dudoso
-    13: 'VITORIA-GASTEIZ HORIZONTAL EUSKERA', // seguro
-    14: 'URKOME HORIZONTAL EUSKERA', // probable
-    15: 'ENKARTERRIALDE HORIZONTAL EUSKERA', // seguro
-    16: 'LEA ARTIBAI HORIZONTAL EUSKERA', // seguro
-    17: 'JATA-ONDO HORIZONTAL EUSKERA', // probable
+    1: 'AÑANA HORIZONTAL EUSKERA',
+    2: 'LAUTADA HORIZONTAL EUSKERA',
+    3: 'IZKI HORIZONTAL EUSKERA',
+    4: 'ARABAKO ERRIOXA HORIZONTAL EUSKERA',
+    5: 'MAIRUELEGORRETA HORIZONTAL EUSKERA',
+    6: 'TOLOMENDI HORIZONTAL EUSKERA',
+    7: 'URKOME HORIZONTAL EUSKERA',
+    8: 'DEBEMEN HORIZONTAL EUSKERA',
+    9: 'DEBA GARAIA HORIZONTAL EUSKERA',
+    10: 'URKIOLA HORIZONTAL EUSKERA',
+    11: 'GOIMEN HORIZONTAL EUSKERA',
+    12: 'ZABAIA HORIZONTAL EUSKERA',
+    13: 'URREMENDI HORIZONTAL EUSKERA',
+    14: 'VITORIA-GASTEIZ HORIZONTAL EUSKERA',
+    15: 'GORBEIALDE HORIZONTAL EUSKERA',
+    16: 'BEHEMENDI HORIZONTAL EUSKERA',
+    17: 'ENKARTERRIALDE HORIZONTAL EUSKERA',
+    18: 'LEA ARTIBAI HORIZONTAL EUSKERA',
+    19: 'JATA-ONDO HORIZONTAL EUSKERA',
 };
 
 export const LogoIZ_SUP = () => {
@@ -30,12 +32,12 @@ export const LogoIZ_SUP = () => {
         return (
             <NavLink
                 to="/"
-                className="main-logo flex items-center shrink-0"
+                className="main-logo flex items-center shrink-0 w-fit"
                 onClick={() => {
                     dispatch(toggleSidebar());
                 }}
             >
-                <img className="w-30 h-20" src={`/assets/images/ADR/${logosToComarcas[Number(regionSeleccionada)]}.jpg`} alt="logo" />
+                <img className="max-w-[200px] max-h-[50px] h-auto w-full object-contain" src={`/assets/images/ADR/${logosToComarcas[Number(regionSeleccionada)]}.jpg`} alt="logo" />{' '}
             </NavLink>
         );
     } else {

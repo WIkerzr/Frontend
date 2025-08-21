@@ -50,6 +50,7 @@ const Index = () => {
     }, [yearData]);
 
     const llamadaBBDDEjesRegion = (regionSeleccionada: string | null) => {
+        setErrorMessage('');
         LlamadasBBDD({
             method: 'GET',
             url: `/ejes/${regionSeleccionada}`,

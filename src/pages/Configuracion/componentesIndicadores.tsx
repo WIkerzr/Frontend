@@ -230,7 +230,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     }, [ejesIndicador]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 mx-auto w-[350px]">
             <div>
                 <label className="block font-medium ">{t('nombreIndicador')}</label>
                 <div className="flex border rounded bg-gray-200">
@@ -250,7 +250,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 <label className="block font-medium">{t('ejesRelacionados')}</label>
                 {/* <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} /> */}
 
-                <div className="w-[400px]">
+                <div>
                     <MultiSelectDOM
                         objeto={[...optionsSelect]}
                         preSelected={formData.RelatedAxes ? ejesIndicador.filter((eje) => formData.RelatedAxes?.map((r) => r.EjeId).includes(eje.EjeId)) : []}
@@ -569,7 +569,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     };
 
     return (
-        <div className="max-w-md mx-auto p-4 rounded space-y-4">
+        <div className="max-w-md mx-auto pl-4 rounded space-y-4">
             {!modoCrear && !modoEditar ? (
                 <div key={+refrescarZona}>
                     <ZonaListadoResultados />

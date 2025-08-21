@@ -438,7 +438,7 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
     };
 
     return (
-        <div className="relative w-[400px]" ref={containerRef}>
+        <div className="relative" ref={containerRef}>
             <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1 mb-1 p-1 border rounded bg-gray-100">
                 {mostrarTodos ? (
                     <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded cursor-pointer" onClick={() => setMostrarTodos(false)}>
