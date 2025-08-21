@@ -33,7 +33,7 @@ const Index = () => {
 
     useEffect(() => {
         if (location.pathname === '/configuracion/indicadoresADR' && regionSeleccionada) {
-            PrimeraLlamada(regionSeleccionada);
+            PrimeraLlamada();
         }
         if (!regionSeleccionada) {
             setLoading(false);

@@ -41,7 +41,7 @@ type IndicadoresContextType = {
     mensajeError: string;
     ObtenerRealizacionPorRegion: () => Record<string | number, IndicadorRealizacion[]>;
     ObtenerResultadosPorRegion: () => Record<string | number, IndicadorResultado[]>;
-    PrimeraLlamada: (regionSeleccionada: string | null) => void;
+    PrimeraLlamada: () => void;
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
@@ -87,6 +87,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [indicadoresRealizacionADR, setIndicadoresRealizacionADR] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultadoADR, setIndicadoresResultadoADR] = useState<IndicadorResultado[]>([]);
     const [loading, setLoading] = useState(true);
+    const [regionSeleccionadaIndicadores, setRegionSeleccionadaIndicadores] = useState<string | null>('0');
 
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('indicadores');
@@ -169,19 +170,19 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             const realizacionADR = transformarRealizacionPorRegion(indicadoresRealizacionPreFiltrado);
             const indicadoresResultadoPreFiltrado: IndicadorRealizacion[] = JSON.parse(storedResultado);
             const resultadoADR = transformarResultadoPorRegion(indicadoresResultadoPreFiltrado);
-            if (!regionSeleccionada) {
+            if (!regionSeleccionadaIndicadores) {
                 setIndicadoresRealizacionADR([]);
                 localStorage.setItem('indicadoresRealizacionFiltrado', '[]');
             } else {
-                const realizacionRegionSelec = realizacionADR[Number(regionSeleccionada)];
+                const realizacionRegionSelec = realizacionADR[Number(regionSeleccionadaIndicadores)];
                 setIndicadoresRealizacionADR(realizacionRegionSelec ?? []);
                 localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(realizacionRegionSelec ?? []));
             }
-            if (!regionSeleccionada) {
+            if (!regionSeleccionadaIndicadores) {
                 setIndicadoresResultadoADR([]);
                 localStorage.setItem('indicadoresResultadoFiltrado', '[]');
             } else {
-                const resultadoRegionSelec = resultadoADR[Number(regionSeleccionada)];
+                const resultadoRegionSelec = resultadoADR[Number(regionSeleccionadaIndicadores)];
                 localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(resultadoRegionSelec ?? []));
                 setIndicadoresResultadoADR(resultadoRegionSelec ?? []);
             }
@@ -189,7 +190,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
-    const PrimeraLlamada = (regionSeleccionada: string | null) => {
+    const PrimeraLlamada = () => {
         const token = sessionStorage.getItem('access_token');
         setMensajeError('');
         if (!token) return;
@@ -203,24 +204,39 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
                 setIndicadoresResultado(indicadoresResultado);
                 actualizarIndicadoresADR();
-                SegundaLlamadaEjes(regionSeleccionada);
+                SegundaLlamadaEjes();
                 setLoading(false);
                 return;
             } else {
                 llamarBBDD();
-                SegundaLlamadaEjes(regionSeleccionada);
+                SegundaLlamadaEjes();
                 setLoading(false);
             }
         }
     };
 
-    const SegundaLlamadaEjes = (regionSeleccionada: string | null) => {
-        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
+    useEffect(() => {
+        if (!regionSeleccionada || regionSeleccionada === '0') {
+            const region = sessionStorage.getItem(`regionSeleccionada`);
+            if (region) {
+                const regionId = region ? JSON.parse(region).id : null;
+                setRegionSeleccionadaIndicadores(regionId);
+            } else {
+                setRegionSeleccionadaIndicadores(null);
+            }
+        } else {
+            setRegionSeleccionadaIndicadores(null);
+        }
+    }, [regionSeleccionada, PrimeraLlamada]);
+
+    const SegundaLlamadaEjes = () => {
+        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionadaIndicadores}`);
         if (ejes) {
             setEjesIndicador(JSON.parse(ejes));
             return;
         }
-        const url = regionSeleccionada ? `ejes/${regionSeleccionada}` : `/ejes`;
+
+        const url = regionSeleccionadaIndicadores ? `ejes/${regionSeleccionadaIndicadores}` : `/ejes`;
         LlamadasBBDD({
             method: 'GET',
             url: url,
@@ -239,7 +255,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                         localStorage.removeItem(key);
                     }
                 }
-                localStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
+                localStorage.setItem(`EjesIndicador_${regionSeleccionadaIndicadores}`, JSON.stringify(arrayMapeado));
             },
         });
     };

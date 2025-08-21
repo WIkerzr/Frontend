@@ -404,7 +404,7 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
 
     useEffect(() => {
         setDrop((objeto as EjeIndicadorBBDD[]).filter((eje) => !selected.some((s) => s.EjeId === eje.EjeId)));
-        if (selected.length === objeto.length) {
+        if (selected.length > 0 && selected.length === objeto.length) {
             setMostrarTodos(true);
         } else {
             setMostrarTodos(false);
@@ -433,7 +433,7 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
     };
 
     const toggleSelectAll = () => {
-        if (selected.length === objeto.length) setSelected([]);
+        if (selected.length > 0 && selected.length === objeto.length) setSelected([]);
         else setSelected([...objeto]);
     };
 
@@ -460,7 +460,7 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
             {isOpen && (
                 <div className="absolute w-full max-h-60 overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
                     <div className="p-2 border-b cursor-pointer hover:bg-gray-200 font-semibold" onClick={toggleSelectAll}>
-                        {selected.length === objeto.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                        {selected.length > 0 && selected.length === objeto.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
                     </div>
                     {drop.map((eje) => (
                         <div key={eje.EjeId} className={`p-2 cursor-pointer hover:bg-gray-200 ${selected.some((s) => s.EjeId === eje.EjeId) ? 'bg-gray-100' : ''}`} onClick={() => toggleOption(eje)}>
