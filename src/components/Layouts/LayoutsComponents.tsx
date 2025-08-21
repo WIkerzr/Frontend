@@ -2,6 +2,7 @@ import { useDispatch } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import { toggleSidebar } from '../../store/themeConfigSlice';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { UserRole } from '../../types/users';
 
 const logosToComarcas: Record<string, string> = {
     1: 'AÑANA HORIZONTAL EUSKERA',
@@ -24,11 +25,15 @@ const logosToComarcas: Record<string, string> = {
     18: 'LEA ARTIBAI HORIZONTAL EUSKERA',
     19: 'JATA-ONDO HORIZONTAL EUSKERA',
 };
+type LogoProps = {
+    role: UserRole;
+};
 
-export const LogoIZ_SUP = () => {
+export const LogoIZ_SUP: React.FC<LogoProps> = ({ role }) => {
     const dispatch = useDispatch();
     const { regionSeleccionada } = useRegionEstadosContext();
-    if (regionSeleccionada) {
+
+    if (role === 'ADR') {
         return (
             <NavLink
                 to="/"
@@ -44,7 +49,7 @@ export const LogoIZ_SUP = () => {
         return (
             <NavLink
                 to="/"
-                className="main-logo flex items-center shrink-0"
+                className="main-logo flex items-center shrink-0 w-fit"
                 onClick={() => {
                     dispatch(toggleSidebar());
                 }}

@@ -237,7 +237,7 @@ const Sidebar = () => {
             >
                 <div className="bg-white dark:bg-black h-full">
                     <div className="flex justify-between items-center px-4 py-3">
-                        <LogoIZ_SUP />
+                        <LogoIZ_SUP role={role!} />
 
                         <button
                             type="button"
