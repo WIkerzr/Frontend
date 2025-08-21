@@ -1,4 +1,4 @@
-export const ModoDev = true;
+export const ModoDev = false;
 export const ApiTarget = ModoDev
     ? 'https://localhost:44300/api' // API local
     : 'https://api.hazi.grupo-campus.com/api'; // API real
@@ -7,7 +7,7 @@ export let Fases = 8;
 
 if (!ModoDev) {
     //Modificar el siguiente a la fase actual si no esta en desarrollo
-    Fases = 1;
+    Fases = 2;
 }
 
 //npx eslint .
