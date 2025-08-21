@@ -167,7 +167,12 @@ export async function guardarNuevoRealizacionBack(
         RelatedAxes: idsStringEditable ?? '',
     };
     //TODO: Borrar
-
+    const indicadorIntermedio = esADR ? datosBorrar : datosBorrarIndicador;
+    if (indicadorIntermedio.Resultados) {
+        indicadorIntermedio.Resultados.forEach((resultado, i, arr) => {
+            arr[i] = transformarBORRARIndicadorArrayAString(resultado);
+        });
+    }
     const response = await FetchConRefreshRetry(`${ApiTarget}/nuevoIndicadores`, {
         method: 'POST',
         headers: {
@@ -176,7 +181,7 @@ export async function guardarNuevoRealizacionBack(
             'Content-Type': 'application/json',
         },
         // body: JSON.stringify(esADR ? datosRealizacion : indicador),
-        body: JSON.stringify(esADR ? datosBorrar : datosBorrarIndicador),
+        body: JSON.stringify(indicadorIntermedio),
     });
     if (response && !response.ok) {
         const errorInfo = gestionarErrorServidor(response);
