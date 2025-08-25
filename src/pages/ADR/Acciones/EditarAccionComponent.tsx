@@ -206,7 +206,8 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
                                           } else {
                                               errorAlert = t('alertTotalesMemoriaActivo');
                                           }
-                                      } else if (editarPlan) {
+                                      }
+                                      if (editarPlan) {
                                           if (metaAnualOk && metaFinalOk) {
                                               valido = true;
                                           } else {

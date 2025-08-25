@@ -7,7 +7,7 @@ import IconEye from '../../components/Icon/IconEye';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useTranslation } from 'react-i18next';
 import { Servicios } from '../../types/GeneralTypes';
-import { MostrarAvisoCamposServicios } from './Componentes';
+import { MostrarAvisoCamposServicios } from './ComponentesAccionesServicios';
 import { Boton } from '../../components/Utils/utils';
 import { servicioIniciadoVacio } from '../../types/tipadoPlan';
 import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';

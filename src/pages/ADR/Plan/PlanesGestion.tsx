@@ -7,7 +7,7 @@ import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from '.
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
-import { validarCamposObligatoriosAccion } from '../Componentes';
+import { validarCamposObligatoriosAccion } from '../ComponentesAccionesServicios';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
 interface Archivo {

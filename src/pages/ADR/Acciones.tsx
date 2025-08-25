@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ListadoAcciones, ModalAccion } from './Componentes';
+import { ListadoAcciones, ModalAccion } from './ComponentesAccionesServicios';
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useYear } from '../../contexts/DatosAnualContext';

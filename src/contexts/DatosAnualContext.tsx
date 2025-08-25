@@ -87,7 +87,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [successMessage]);
 
-    const LlamarVerAccion = (idAccion: string) => {
+    const LlamarVerAccion = (idAccion: string, idEjePrioritario: string) => {
         LlamadasBBDD({
             method: 'POST',
             url: `actionData/${idAccion}`,
@@ -96,12 +96,22 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage,
             setSuccessMessage,
             onSuccess: (response) => {
+                const dataAccion: DatosAccion = {
+                    id: response.data.Id,
+                    accion: response.data.Nombre,
+                    lineaActuaccion: response.data.LineaActuaccion,
+                    plurianual: response.data.Plurianual,
+                    indicadorAccion: response.data.Indicadores ?? { indicadoreRealizacion: [], indicadoreResultado: [] },
+                    accionCompartida: response.data.AccionCompartida,
+                    datosMemoria: response.data.DatosMemoria,
+                    datosPlan: response.data.DatosPlan,
+                };
                 // setYearData({
                 //     ...yearData,
                 //     plan: {
                 //         ...yearData.plan,
                 //         ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                //             eje.Id === ejeSeleccionado.Id
+                //             eje.Id === idEjePrioritario
                 //                 ? {
                 //                       ...eje,
                 //                       acciones: [
@@ -120,28 +130,33 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 //         ),
                 //     },
                 // });
+                setIdEjeEditado(idEjePrioritario);
 
-                console.log('Acción agregada:', response);
+                setYearData({
+                    ...yearData,
+                    plan: {
+                        ...yearData.plan,
+                        ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
+                            eje.Id === idEjePrioritario ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === idAccion ? { ...accion, ...dataAccion } : accion)) } : eje
+                        ),
+                    },
+                });
+
+                setDatosEditandoAccion(dataAccion);
+                if (dataAccion.accionCompartida && Array.isArray(dataAccion.accionCompartida.regiones)) {
+                    const regionCompleta = dataAccion.accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === (regionSeleccionada ?? ''));
+                    if (regionCompleta) {
+                        setBlock(true);
+                    }
+                } else {
+                    setBlock(false);
+                }
             },
         });
     };
 
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
-        LlamarVerAccion(idAccion);
-
-        setIdEjeEditado(idEjePrioritario);
-        const ejeSeleccionado = yearData.plan.ejesPrioritarios.filter((eje) => idEjePrioritario.includes(eje.Id));
-        const accionSeleccionado = ejeSeleccionado[0].acciones.filter((accion) => idAccion.includes(accion.id));
-        setDatosEditandoAccion(accionSeleccionado[0]);
-
-        if (accionSeleccionado[0].accionCompartida && Array.isArray(accionSeleccionado[0].accionCompartida.regiones)) {
-            const regionCompleta = accionSeleccionado[0].accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === (regionSeleccionada ?? ''));
-            if (regionCompleta) {
-                setBlock(true);
-            }
-        } else {
-            setBlock(false);
-        }
+        LlamarVerAccion(idAccion, idEjePrioritario);
     };
 
     const SeleccionVaciarEditarAccion = () => {

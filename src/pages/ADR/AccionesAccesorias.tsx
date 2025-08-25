@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './Componentes';
+import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useTranslation } from 'react-i18next';

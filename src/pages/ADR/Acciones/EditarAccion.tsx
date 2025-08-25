@@ -11,7 +11,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionIndicadores';
 import { ZonaTitulo } from '../../Configuracion/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { ErrorFullScreen } from '../Componentes';
+import { ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { Boton, ModalSave } from '../../../components/Utils/utils';
 import { TextArea } from '../../../components/Utils/inputs';
 import { Servicios } from '../../../types/GeneralTypes';
