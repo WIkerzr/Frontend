@@ -26,10 +26,13 @@ const logosToComarcas: Record<string, string> = {
     19: 'JATA-ONDO HORIZONTAL EUSKERA',
 };
 type LogoProps = {
-    role: UserRole;
+    role?: UserRole;
 };
 
 export const LogoIZ_SUP: React.FC<LogoProps> = ({ role }) => {
+    if (!role) {
+        return <></>;
+    }
     const dispatch = useDispatch();
     const { regionSeleccionada } = useRegionEstadosContext();
 

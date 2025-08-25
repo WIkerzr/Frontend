@@ -30,7 +30,7 @@ const Index = () => {
 
     useEffect(() => {
         if (location.pathname === '/configuracion/indicadores') {
-            PrimeraLlamada();
+            PrimeraLlamada(null);
         }
     }, [location.pathname]);
 

@@ -27,18 +27,27 @@ const Index = () => {
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
     const [modalNuevo, setModalNuevo] = useState(false);
+    const [refres, setRefres] = useState(false);
     const { regionSeleccionada } = useRegionEstadosContext();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
 
     useEffect(() => {
         if (location.pathname === '/configuracion/indicadoresADR' && regionSeleccionada) {
-            PrimeraLlamada();
+            PrimeraLlamada(regionSeleccionada);
+            setRefres(true);
         }
         if (!regionSeleccionada) {
             setLoading(false);
         }
     }, [location.pathname, regionSeleccionada]);
+
+    useEffect(() => {
+        if (refres) {
+            llamarBBDD();
+        }
+        setRefres(false);
+    }, [refres]);
 
     return (
         <div className="flex w-full gap-5">

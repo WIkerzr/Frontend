@@ -41,7 +41,7 @@ type IndicadoresContextType = {
     mensajeError: string;
     ObtenerRealizacionPorRegion: () => Record<string | number, IndicadorRealizacion[]>;
     ObtenerResultadosPorRegion: () => Record<string | number, IndicadorResultado[]>;
-    PrimeraLlamada: () => void;
+    PrimeraLlamada: (regionSeleccionada: string | null) => void;
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultado[]>>;
@@ -190,7 +190,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
-    const PrimeraLlamada = () => {
+    const PrimeraLlamada = (regionSeleccionada: string | null) => {
         const token = sessionStorage.getItem('access_token');
         setMensajeError('');
         if (!token) return;
@@ -198,7 +198,9 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setLoading(true);
             const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
             const storedResultado = localStorage.getItem('indicadoresResultado');
-            if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]') {
+
+            if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]' && regionSeleccionadaIndicadores === regionSeleccionada) {
+                setRegionSeleccionadaIndicadores(regionSeleccionada ?? '0');
                 const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
                 setIndicadoresRealizacion(indicadoresRealizacion);
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
@@ -208,26 +210,27 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 setLoading(false);
                 return;
             } else {
-                llamarBBDD();
+                setRegionSeleccionadaIndicadores(regionSeleccionada ?? '0');
+
                 SegundaLlamadaEjes();
                 setLoading(false);
             }
         }
     };
 
-    useEffect(() => {
-        if (!regionSeleccionada || regionSeleccionada === '0') {
-            const region = sessionStorage.getItem(`regionSeleccionada`);
-            if (region) {
-                const regionId = region ? JSON.parse(region).id : null;
-                setRegionSeleccionadaIndicadores(regionId);
-            } else {
-                setRegionSeleccionadaIndicadores(null);
-            }
-        } else {
-            setRegionSeleccionadaIndicadores(null);
-        }
-    }, [regionSeleccionada, PrimeraLlamada]);
+    // useEffect(() => {
+    //     if (!regionSeleccionada || regionSeleccionada === '0') {
+    //         const region = sessionStorage.getItem(`regionSeleccionada`);
+    //         if (region) {
+    //             const regionId = region ? JSON.parse(region).id : null;
+    //             setRegionSeleccionadaIndicadores(regionId);
+    //         } else {
+    //             setRegionSeleccionadaIndicadores(null);
+    //         }
+    //     } else {
+    //         setRegionSeleccionadaIndicadores(null);
+    //     }
+    // }, [regionSeleccionada, PrimeraLlamada]);
 
     const SegundaLlamadaEjes = () => {
         const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionadaIndicadores}`);
@@ -259,6 +262,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             },
         });
     };
+
     const ControlDeFallosIndicadorSeleccionado = (): IndicadorSeleccionado => {
         if (!indicadorSeleccionado || !indicadorSeleccionado.indicador) {
             console.log(indicadorSeleccionado);
