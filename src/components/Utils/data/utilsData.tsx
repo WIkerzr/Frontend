@@ -7,6 +7,7 @@ export type ApiSuccess<T> = {
     success: boolean;
     message: string;
     data: T;
+    CamposFaltantes?: string;
 };
 export type ApiError = {
     success: boolean;

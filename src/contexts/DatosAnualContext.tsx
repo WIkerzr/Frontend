@@ -419,8 +419,17 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 IndicadorAccion: datosEditandoAccion.indicadorAccion ?? { indicadoreRealizacion: indicadoreRealizacionEdit, indicadoreResultado: indicadoreResultadoEdit },
             },
             onSuccess: (response) => {
-                console.log('Respuesta del servidor:');
-                console.log(response.data);
+                setYearData({
+                    ...yearData,
+                    plan: {
+                        ...yearData.plan,
+                        ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
+                            eje.Id === idEjeEditado
+                                ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)) }
+                                : eje
+                        ),
+                    },
+                });
             },
         });
     };
@@ -510,6 +519,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                             ejeEu: eje.NameEu,
                             lineaActuaccion: accion.LineaActuaccion,
                             plurianual: accion.Plurianual,
+                            camposFaltantes: accion.CamposFaltantes,
                         })),
                     };
 

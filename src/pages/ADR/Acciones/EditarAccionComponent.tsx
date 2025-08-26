@@ -385,7 +385,11 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     return (
         <div ref={ref}>
             <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
-                <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
+                {!indicadorReturn ? (
+                    <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
+                ) : (
+                    <div></div>
+                )}
                 {creaccion && !block && editarPlan && (
                     <>
                         <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>

@@ -440,19 +440,27 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
             </div>
         );
     }
+    if (!datos.camposFaltantes) {
+        return <></>;
+    }
 
-    const { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosAccion(datos);
+    const elementos = datos.camposFaltantes.split(',');
+
+    const faltanCamposPlan = elementos.some((e) => e.startsWith('P'));
+    const faltanCamposMemoria = elementos.some((e) => e.startsWith('M'));
+
+    const faltanIndicadores = elementos.some((e) => e.startsWith('Indicadores'));
 
     if (!texto) {
         return null;
     }
 
     if (editarPlan) {
-        if (!faltanCamposPlan && !faltanIndicadoresPlan) {
+        if (!faltanCamposPlan && !faltanIndicadores) {
             return null;
         }
     } else {
-        if (!faltanCamposMemoria && !faltanIndicadoresMemoria) {
+        if (!faltanCamposMemoria && !faltanIndicadores) {
             return null;
         }
     }
@@ -471,7 +479,7 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
                     <>
                         <IconInfoTriangle />
                         <span>
-                            <strong>{t('aviso')}:</strong> {t('indicadoresOgligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
+                            <strong>{t('aviso')}:</strong> {t('indicadoresOgligatorios')}.
                         </span>
                     </>
                 )}

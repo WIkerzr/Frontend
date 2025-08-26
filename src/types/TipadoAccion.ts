@@ -79,6 +79,7 @@ export interface DatosAccion {
     plurianual: boolean;
     accionCompartida?: AccionCompartida;
     accionCompartidaid?: number;
+    camposFaltantes?: string;
 }
 
 export const datosInicializadosAccion: DatosAccion = {

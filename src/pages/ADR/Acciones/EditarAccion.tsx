@@ -44,7 +44,7 @@ const Index: React.FC = () => {
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
-    const [mostrandoModal, setMostrandoModal] = useState(false);
+    const [mostrandoAccionConcreta, setMostrandoAccionConcreta] = useState(false);
 
     useEffect(() => {
         if (!editarPlan && !editarMemoria) {
@@ -78,7 +78,7 @@ const Index: React.FC = () => {
 
     const handleSave = () => {
         EditarAccion();
-        setMostrandoModal(true);
+        setMostrandoAccionConcreta(true);
     };
 
     return (
@@ -143,8 +143,8 @@ const Index: React.FC = () => {
                     </div>
                 }
             />
-            {mostrandoModal && (
-                <ModalSave onClose={() => setMostrandoModal(false)} nav={rutaAnterior}>
+            {mostrandoAccionConcreta && (
+                <ModalSave onClose={() => setMostrandoAccionConcreta(false)} nav={rutaAnterior}>
                     {async () => {
                         if (accionAccesoria) {
                             await SeleccionEditarGuardarAccesoria();
