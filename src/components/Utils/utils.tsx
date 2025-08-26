@@ -472,3 +472,8 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
         </div>
     );
 };
+
+export function convertirArrayACadena<T>(valores: T[]): string {
+    if (!valores || valores.length === 0) return '';
+    return valores.map((v) => String(v)).join(',');
+}

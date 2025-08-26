@@ -144,7 +144,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     disabled={bloqueo}
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="cuantia"
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado?.cuantia}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -164,9 +164,9 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                             <td className="px-5 py-2">
                                 <textarea
                                     className="w-full border rounded px-2 py-1 h-[38px] align-middle"
-                                    name="origenPublica"
+                                    name="observaciones"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones}
+                                    value={datosEditandoAccion.datosMemoria.presupuestoEjecutado?.observaciones}
                                     onChange={handlePresupuestoChange}
                                 />
                             </td>
@@ -195,7 +195,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="previsto"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.previsto}
+                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria?.previsto}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -205,7 +205,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="ejecutado"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.ejecutado}
+                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria?.ejecutado}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -215,7 +215,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="porcentaje"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.porcentaje}
+                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria?.porcentaje}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>

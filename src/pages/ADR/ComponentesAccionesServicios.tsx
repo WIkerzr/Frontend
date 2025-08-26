@@ -389,7 +389,6 @@ export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoVa
 
     const faltanCamposMemoria =
         !datos.datosMemoria?.sActual ||
-        !datos.datosMemoria?.oAccion ||
         !datos.datosMemoria?.dAccionAvances ||
         !datos.datosMemoria?.presupuestoEjecutado?.cuantia ||
         datos.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion.length === 0 ||

@@ -39,7 +39,9 @@ const Index: React.FC = () => {
         block,
         datosEditandoServicio,
         setDatosEditandoServicio,
+        EditarAccion,
     } = useYear();
+
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [mostrandoModal, setMostrandoModal] = useState(false);
@@ -75,6 +77,7 @@ const Index: React.FC = () => {
     };
 
     const handleSave = () => {
+        EditarAccion();
         setMostrandoModal(true);
     };
 

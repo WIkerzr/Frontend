@@ -2,12 +2,13 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { EjeBBDD, Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
-import { DatosAccion } from '../types/TipadoAccion';
+import { DatosAccion, DatosMemoriaBack, DatosMemoriaBackF, DatosPlan, DatosPlanBack, FuenteFinanciacion } from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
-import { formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
+import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useRegionEstadosContext } from './RegionEstadosContext';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -29,6 +30,7 @@ interface YearContextType {
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
+    EditarAccion: () => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
     errorMessage: string | null;
@@ -87,7 +89,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [successMessage]);
 
-    const LlamarVerAccion = (idAccion: string, idEjePrioritario: string) => {
+    const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
         LlamadasBBDD({
             method: 'POST',
             url: `actionData/${idAccion}`,
@@ -96,40 +98,65 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage,
             setSuccessMessage,
             onSuccess: (response) => {
-                const dataAccion: DatosAccion = {
-                    id: response.data.Id,
-                    accion: response.data.Nombre,
-                    lineaActuaccion: response.data.LineaActuaccion,
-                    plurianual: response.data.Plurianual,
-                    indicadorAccion: response.data.Indicadores ?? { indicadoreRealizacion: [], indicadoreResultado: [] },
-                    accionCompartida: response.data.AccionCompartida,
-                    datosMemoria: response.data.DatosMemoria,
-                    datosPlan: response.data.DatosPlan,
+                const responseDataPlan: DatosPlanBack = response.data.DatosPlan;
+                const responseDataMemoria: DatosMemoriaBack = response.data.DatosMemoria;
+                const checkData = (value: any, name: string, defaultValue = '') => {
+                    if (value === null || value === undefined) {
+                        console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
+                        return defaultValue;
+                    }
+                    return value;
                 };
-                // setYearData({
-                //     ...yearData,
-                //     plan: {
-                //         ...yearData.plan,
-                //         ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                //             eje.Id === idEjePrioritario
-                //                 ? {
-                //                       ...eje,
-                //                       acciones: [
-                //                           ...eje.acciones,
-                //                           {
-                //                               id: response.data.Id,
-                //                               accion: nuevaAccion,
-                //                               ejeEs: ejeSeleccionado.NameEs,
-                //                               ejeEu: ejeSeleccionado.NameEu,
-                //                               lineaActuaccion: nuevaLineaActuaccion,
-                //                               plurianual: plurianual,
-                //                           },
-                //                       ],
-                //                   }
-                //                 : eje
-                //         ),
-                //     },
-                // });
+
+                const dataPlan: DatosPlan = {
+                    id: checkData(responseDataPlan?.Id, 'Id', '0'),
+                    ejecutora: checkData(responseDataPlan?.Ejecutora, 'Ejecutora'),
+                    implicadas: checkData(responseDataPlan?.Implicadas, 'Implicadas'),
+                    comarcal: checkData(responseDataPlan?.Comarcal, 'Comarcal'),
+                    supracomarcal: checkData(responseDataPlan?.Supracomarcal, 'Supracomarcal'),
+                    rangoAnios: checkData(responseDataPlan?.RangoAnios, 'RangoAnios'),
+                    oAccion: checkData(responseDataPlan?.OAccion, 'OAccion'),
+                    ods: checkData(responseDataPlan?.Ods, 'Ods'),
+                    dAccion: checkData(responseDataPlan?.DAccion, 'DAccion'),
+                    presupuesto: checkData(responseDataPlan?.Presupuesto, 'Presupuesto'),
+                    iMujHom: checkData(responseDataPlan?.IMujHom, 'IMujHom'),
+                    uEuskera: checkData(responseDataPlan?.UEuskera, 'UEuskera'),
+                    sostenibilidad: checkData(responseDataPlan?.Sostenibilidad, 'Sostenibilidad'),
+                    dInteligent: checkData(responseDataPlan?.DInteligent, 'DInteligent'),
+                    observaciones: checkData(responseDataPlan?.Observaciones, 'Observaciones'),
+                };
+                const dataMemoria: DatosMemoriaBackF = {
+                    id: checkData(responseDataMemoria?.Id, 'Id', '0'),
+                    dAccionAvances: checkData(responseDataMemoria?.DAccionAvances, 'DAccionAvances'),
+                    presupuestoEjecutado: {
+                        fuenteDeFinanciacion: checkData(responseDataMemoria?.PresupuestoEjecutado_fuenteDeFinanciacion, 'PresupuestoEjecutado_fuenteDeFinanciacion', '')
+                            .split(',')
+                            .map((f: string) => f.trim() as FuenteFinanciacion),
+                        cuantia: checkData(responseDataMemoria?.PresupuestoEjecutado_cuantia, 'PresupuestoEjecutado_cuantia'),
+                        observaciones: checkData(responseDataMemoria?.PresupuestoEjecutado_observaciones, 'PresupuestoEjecutado_observaciones'),
+                    },
+                    ejecucionPresupuestaria: {
+                        previsto: checkData(responseDataMemoria?.EjecucionPresupuestaria_previsto, 'EjecucionPresupuestaria_previsto'),
+                        ejecutado: checkData(responseDataMemoria?.EjecucionPresupuestaria_ejecutado, 'EjecucionPresupuestaria_ejecutado'),
+                        porcentaje: checkData(responseDataMemoria?.EjecucionPresupuestaria_porcentaje, 'EjecucionPresupuestaria_porcentaje'),
+                    },
+                    observaciones: checkData(responseDataMemoria?.Observaciones, 'Observaciones'),
+                    valFinal: checkData(responseDataMemoria?.ValFinal, 'ValFinal'),
+                    dSeguimiento: checkData(responseDataMemoria?.DSeguimiento, 'DSeguimiento'),
+                    sActual: checkData(responseDataMemoria?.SActual, 'SActual'),
+                };
+
+                const dataAccion: DatosAccion = {
+                    id: checkData(response.data?.Id, 'Id', '0'),
+                    accion: checkData(response.data?.Nombre, 'Nombre'),
+                    lineaActuaccion: checkData(response.data?.LineaActuaccion, 'LineaActuaccion'),
+                    plurianual: checkData(response.data?.Plurianual, 'Plurianual', 'false'),
+                    indicadorAccion: response.data?.Indicadores ?? { indicadoreRealizacion: [], indicadoreResultado: [] },
+                    accionCompartida: response.data?.AccionCompartida ?? null,
+                    datosPlan: dataPlan,
+                    datosMemoria: dataMemoria,
+                };
+
                 setIdEjeEditado(idEjePrioritario);
 
                 setYearData({
@@ -155,10 +182,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
-        LlamarVerAccion(idAccion, idEjePrioritario);
-    };
-
     const SeleccionVaciarEditarAccion = () => {
         localStorage.removeItem('datosAccionModificado');
         setDatosEditandoAccion({
@@ -169,6 +192,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             lineaActuaccion: '',
             plurianual: false,
             datosPlan: {
+                id: '0',
                 ejecutora: '',
                 implicadas: '',
                 comarcal: 'Sin tratamiento territorial comarcal',
@@ -337,6 +361,70 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const EditarAccion = () => {
+        // const accionEnviar = convertirDatosAccionADatosAccionBackend(datosEditandoAccion);
+        const indicadoreRealizacionEdit: IndicadorRealizacionAccion[] = datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? [];
+        const indicadoreResultadoEdit: IndicadorResultadoAccion[] = datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? [];
+        if (!datosEditandoAccion) return;
+        if (!datosEditandoAccion.datosPlan) return;
+        if (!datosEditandoAccion.datosMemoria) return;
+        const DatosPlan: DatosPlanBack = {
+            Id: datosEditandoAccion.datosPlan.id,
+            Ejecutora: datosEditandoAccion.datosPlan.ejecutora,
+            Implicadas: datosEditandoAccion.datosPlan.implicadas,
+            Comarcal: datosEditandoAccion.datosPlan.comarcal,
+            Supracomarcal: datosEditandoAccion.datosPlan.supracomarcal,
+            RangoAnios: datosEditandoAccion.datosPlan.rangoAnios,
+            OAccion: datosEditandoAccion.datosPlan.oAccion,
+            Ods: datosEditandoAccion.datosPlan.ods,
+            DAccion: datosEditandoAccion.datosPlan.dAccion,
+            Presupuesto: datosEditandoAccion.datosPlan.presupuesto,
+            IMujHom: datosEditandoAccion.datosPlan.iMujHom,
+            UEuskera: datosEditandoAccion.datosPlan.uEuskera,
+            Sostenibilidad: datosEditandoAccion.datosPlan.sostenibilidad,
+            DInteligent: datosEditandoAccion.datosPlan.dInteligent,
+            Observaciones: datosEditandoAccion.datosPlan.observaciones,
+        };
+
+        const DatosMemoria: DatosMemoriaBack = {
+            Id: datosEditandoAccion.datosMemoria.id,
+            SActual: datosEditandoAccion.datosMemoria.sActual,
+            DAccionAvances: datosEditandoAccion.datosMemoria.dAccionAvances,
+            PresupuestoEjecutado_cuantia: datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia,
+            PresupuestoEjecutado_fuenteDeFinanciacion: convertirArrayACadena(datosEditandoAccion.datosMemoria.presupuestoEjecutado.fuenteDeFinanciacion),
+            PresupuestoEjecutado_observaciones: datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones,
+            EjecucionPresupuestaria_previsto: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.previsto,
+            EjecucionPresupuestaria_ejecutado: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.ejecutado,
+            EjecucionPresupuestaria_porcentaje: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.porcentaje,
+            Observaciones: datosEditandoAccion.datosMemoria.observaciones,
+            DSeguimiento: datosEditandoAccion.datosMemoria.dSeguimiento,
+            ValFinal: datosEditandoAccion.datosMemoria.valFinal,
+        };
+
+        LlamadasBBDD({
+            method: 'POST',
+            url: `actionData/editAction/${datosEditandoAccion.id}`,
+            setLoading: setLoadingYearData,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+            setErrorMessage,
+            setSuccessMessage,
+            body: {
+                Id: datosEditandoAccion.id,
+                Nombre: datosEditandoAccion.accion,
+                LineaActuaccion: datosEditandoAccion.lineaActuaccion,
+                Plurianual: datosEditandoAccion.plurianual,
+                DatosPlan: DatosPlan,
+                DatosMemoria: DatosMemoria,
+                AccionCompartidaId: datosEditandoAccion.accionCompartidaid ?? null,
+                IndicadorAccion: datosEditandoAccion.indicadorAccion ?? { indicadoreRealizacion: indicadoreRealizacionEdit, indicadoreResultado: indicadoreResultadoEdit },
+            },
+            onSuccess: (response) => {
+                console.log('Respuesta del servidor:');
+                console.log(response.data);
+            },
+        });
+    };
+
     const EliminarAccion = (tipo: TiposAccion, idEje: string, idAccion: string) => {
         const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
         const ejeSeleccionado = fuenteEjes.find((eje) => eje.Id === idEje);
@@ -453,6 +541,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             },
         });
     };
+
     return (
         <YearContext.Provider
             value={{
@@ -463,6 +552,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 fechaUltimoActualizadoBBDDYearData,
                 setDatosEditandoAccion,
                 AgregarAccion,
+                EditarAccion,
                 EliminarAccion,
                 AgregarServicio,
                 SeleccionEditarAccion,

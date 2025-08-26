@@ -18,6 +18,7 @@ export interface EjecucionPresupuestaria {
 }
 
 export interface DatosPlan {
+    id: string;
     ejecutora: string;
     implicadas: string;
     comarcal: Comarcal | string;
@@ -35,6 +36,7 @@ export interface DatosPlan {
 }
 
 export interface DatosMemoria {
+    id: string;
     ejecutora: string;
     implicadas: string;
     comarcal: string;
@@ -65,9 +67,11 @@ export interface DatosAccion {
     ejeEs?: string;
     ejeEu?: string;
     ejeId?: string;
+    DatosPlanId?: string;
+    DatosMemoriaId?: string;
     lineaActuaccion: string;
     datosPlan?: DatosPlan;
-    datosMemoria?: DatosMemoria;
+    datosMemoria?: DatosMemoria | DatosMemoriaBackF;
     indicadorAccion?: {
         indicadoreRealizacion: IndicadorRealizacionAccion[];
         indicadoreResultado: IndicadorResultadoAccion[];
@@ -84,6 +88,7 @@ export const datosInicializadosAccion: DatosAccion = {
     ejeEu: '',
     lineaActuaccion: '',
     datosPlan: {
+        id: '0',
         ejecutora: '',
         implicadas: '',
         comarcal: 'No',
@@ -100,6 +105,7 @@ export const datosInicializadosAccion: DatosAccion = {
         observaciones: '',
     },
     datosMemoria: {
+        id: '0',
         ejecutora: '',
         implicadas: '',
         comarcal: '',
@@ -135,6 +141,7 @@ export const datosInicializadosAccion: DatosAccion = {
 };
 
 export const datosPlanInicializada: DatosPlan = {
+    id: '0',
     ejecutora: '',
     implicadas: '',
     comarcal: 'No',
@@ -152,6 +159,7 @@ export const datosPlanInicializada: DatosPlan = {
 };
 
 export const datosMemoriaInicializada: DatosMemoria = {
+    id: '0',
     ejecutora: '',
     implicadas: '',
     comarcal: '',
@@ -179,3 +187,46 @@ export const datosMemoriaInicializada: DatosMemoria = {
     dSeguimiento: '',
     valFinal: '',
 };
+
+export interface DatosPlanBack {
+    Id: string;
+    Ejecutora: string;
+    Implicadas: string;
+    Comarcal: Comarcal | string;
+    Supracomarcal: SupraComarcal | string;
+    RangoAnios: string;
+    OAccion: string;
+    Ods: string;
+    DAccion: string;
+    Presupuesto: string;
+    IMujHom: string;
+    UEuskera: string;
+    Sostenibilidad: string;
+    DInteligent: string;
+    Observaciones: string;
+}
+
+export interface DatosMemoriaBackF {
+    id: string;
+    sActual: EstadoLabel;
+    dAccionAvances: string;
+    presupuestoEjecutado: PresupuestoEjecutado;
+    ejecucionPresupuestaria: EjecucionPresupuestaria;
+    observaciones: string;
+    dSeguimiento: string;
+    valFinal: string;
+}
+export interface DatosMemoriaBack {
+    Id: string;
+    SActual: EstadoLabel;
+    DAccionAvances: string;
+    PresupuestoEjecutado_cuantia: string;
+    PresupuestoEjecutado_fuenteDeFinanciacion: string;
+    PresupuestoEjecutado_observaciones: string;
+    EjecucionPresupuestaria_previsto: string;
+    EjecucionPresupuestaria_ejecutado: string;
+    EjecucionPresupuestaria_porcentaje: string;
+    Observaciones: string;
+    DSeguimiento: string;
+    ValFinal: string;
+}
