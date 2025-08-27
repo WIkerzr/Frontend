@@ -10,7 +10,7 @@ export const useBrowserWarning = () => {
     useEffect(() => {
         const ua = window.navigator.userAgent;
         const isIE = /MSIE |Trident\//.test(ua);
-        setIsIncompatible(true);
+
         if (isIE) {
             setIsIncompatible(true);
         }
