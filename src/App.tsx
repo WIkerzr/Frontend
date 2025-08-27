@@ -45,7 +45,7 @@ function App({ children }: PropsWithChildren) {
         dispatch(toggleSemidark(localStorage.getItem('semidark') || themeConfig.semidark));
     }, [dispatch, themeConfig.theme, themeConfig.menu, themeConfig.layout, themeConfig.rtlClass, themeConfig.animation, themeConfig.navbar, themeConfig.locale, themeConfig.semidark]);
 
-    const espaciado = (isBrowserIncompatible ? 5 : 0) + (ModoDev ? 5 : 0);
+    // const espaciado = (isBrowserIncompatible ? 5 : 0) + (ModoDev ? 5 : 0);
 
     return (
         <div
@@ -58,7 +58,7 @@ function App({ children }: PropsWithChildren) {
                 {ModoDev && <ModoDevWarning />}
             </div>
 
-            <div className={`pt-${espaciado}`}>{children}</div>
+            <div className={`pt-5`}>{children}</div>
         </div>
     );
 }
