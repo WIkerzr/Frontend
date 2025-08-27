@@ -35,6 +35,8 @@
     "aviso": "Oharra",
     "borrador": "Zirriborroa",
     "borrar": "Ezabatu",
+    "browserWarningMessage": "Esperientzia hobea izateko, erabili Chrome, Firefox, Edge edo Safari eguneratua.\nHala ere jarraitu nahi duzu?",
+    "browserWarningTitle": "⚠️ Nabigatzaile ez-kointzatua",
     "buscarUsuario": "Erabiltzailea bilatu...",
     "cambiarEstado": "Egoera aldatu",
     "CambioContrasena": "Pasahitza aldatzea",
