@@ -1,6 +1,3 @@
-import { useDispatch } from 'react-redux';
-import { NavLink } from 'react-router-dom';
-import { toggleSidebar } from '../../store/themeConfigSlice';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 import { UserRole } from '../../types/users';
 
@@ -29,36 +26,16 @@ type LogoProps = {
     role?: UserRole;
 };
 
-export const LogoIZ_SUP: React.FC<LogoProps> = ({ role }) => {
+export const LogoRegion_SUP: React.FC<LogoProps> = ({ role }) => {
     if (!role) {
         return <></>;
     }
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const { regionSeleccionada } = useRegionEstadosContext();
 
     if (role === 'ADR') {
-        return (
-            <NavLink
-                to="/"
-                className="main-logo flex items-center shrink-0 w-fit"
-                onClick={() => {
-                    dispatch(toggleSidebar());
-                }}
-            >
-                <img className="max-w-[200px] max-h-[50px] h-auto w-full object-contain" src={`/assets/images/ADR/${logosToComarcas[Number(regionSeleccionada)]}.jpg`} alt="logo" />{' '}
-            </NavLink>
-        );
+        return <img className="mr-5 max-h-[40px] w-auto" src={`/assets/images/ADR/${logosToComarcas[Number(regionSeleccionada)]}.jpg`} alt="logo" />;
     } else {
-        return (
-            <NavLink
-                to="/"
-                className="main-logo flex items-center shrink-0 w-fit"
-                onClick={() => {
-                    dispatch(toggleSidebar());
-                }}
-            >
-                <img className="w-32" src="/assets/images/meneko.png" alt="logo" />
-            </NavLink>
-        );
+        return <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/menekoSort.png" alt="logo" />;
     }
 };

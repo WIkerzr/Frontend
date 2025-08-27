@@ -4,6 +4,33 @@ import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useUser } from '../../contexts/UserContext';
 
+export const useBrowserWarning = () => {
+    const [isIncompatible, setIsIncompatible] = useState(false);
+
+    useEffect(() => {
+        const ua = window.navigator.userAgent;
+        const isIE = /MSIE |Trident\//.test(ua);
+        if (isIE) {
+            setIsIncompatible(true);
+        }
+    }, []);
+
+    return isIncompatible;
+};
+
+const BrowserWarning = () => {
+    const isIncompatible = useBrowserWarning();
+
+    if (!isIncompatible) return null;
+
+    return (
+        <div className="fixed top-0 left-0 w-full h-screen bg-red-500/80 text-white flex flex-col items-center justify-center z-50 p-4 text-center">
+            <h1 className="text-2xl font-bold mb-4">Navegador no compatible</h1>
+            <p>Por favor, utiliza Chrome, Firefox, Edge o Safari actualizado a la última versión.</p>
+        </div>
+    );
+};
+
 interface LoginFormProps {
     email: string;
     setEmail: React.Dispatch<React.SetStateAction<string>>;
@@ -23,6 +50,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const isBrowserIncompatible = useBrowserWarning();
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -74,6 +102,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
         recordarPassword();
     }, [recordarSegundoPaso]);
 
+    if (isBrowserIncompatible) return <BrowserWarning />;
     return (
         <div className="relative flex flex-col items-center justify-center">
             <div className="h-[400px] w-[440px]">
@@ -178,7 +207,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
                 )}
             </div>
             <div className={`flex justify-between w-[60%] mx-auto ${error ? 'mt-14' : 'mt-8'}`}>
-                <img className="max-h-[40px] w-auto" src="/assets/images/meneko.png" alt="logo" />
+                <img className="max-h-[40px] w-auto" src="/assets/images/menekoSort.png" alt="logo" />
                 <img className="max-h-[40px] w-auto" src="/assets/images/logo.svg" alt="logo" />
                 <img className="max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
             </div>

@@ -24,7 +24,6 @@ import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/data/controlDev';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
-import { LogoIZ_SUP } from './LayoutsComponents';
 
 const Sidebar = () => {
     const { regionSeleccionada, regionData, anioSeleccionada, anios, setEstados, setAnio } = useRegionEstadosContext();
@@ -236,12 +235,10 @@ const Sidebar = () => {
                 className={`sidebar fixed min-h-screen h-full top-0 bottom-0 w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] z-50 transition-all duration-300 ${semidark ? 'text-white-dark' : ''}`}
             >
                 <div className="bg-white dark:bg-black h-full">
-                    <div className="flex justify-between items-center px-4 py-3">
-                        <LogoIZ_SUP role={role!} />
-
+                    <div className="flex items-center px-4 py-3">
                         <button
                             type="button"
-                            className="collapse-icon w-8 h-8 rounded-full flex items-center hover:bg-gray-500/10 dark:hover:bg-dark-light/10 dark:text-white-light transition duration-300 rtl:rotate-180"
+                            className="ml-auto collapse-icon w-8 h-8 rounded-full flex items-center hover:bg-gray-500/10 dark:hover:bg-dark-light/10 dark:text-white-light transition duration-300 rtl:rotate-180"
                             onClick={() => dispatch(toggleSidebar())}
                         >
                             <IconCaretsDown className="m-auto rotate-90" />

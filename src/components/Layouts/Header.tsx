@@ -13,7 +13,7 @@ import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
 import { Fases } from '../Utils/data/controlDev';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
-import { LogoIZ_SUP } from './LayoutsComponents';
+import { LogoRegion_SUP } from './LayoutsComponents';
 
 const Header = () => {
     const { setRegionSeleccionada } = useRegionEstadosContext();
@@ -36,7 +36,7 @@ const Header = () => {
             <div className="shadow-sm">
                 <div className="relative bg-white w-full items-center px-5 py-2.5 dark:bg-black flex gap-4">
                     <div className="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
-                        <LogoIZ_SUP />
+                        <LogoRegion_SUP />
                         <button
                             type="button"
                             className="collapse-icon flex-none dark:text-[#d0d2d6] hover:text-primary dark:hover:text-primary flex lg:hidden ltr:ml-2 rtl:mr-2 p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:bg-white-light/90 dark:hover:bg-dark/60"
@@ -65,6 +65,7 @@ const Header = () => {
 
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <div className="flex justify-end w-full overflow-hidden">
+                            <LogoRegion_SUP role={role!} />
                             <img className="mr-5 w-20 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/logo.svg" alt="logo" />
                             <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/GobiernoVasco.svg" alt="logo" />
                         </div>

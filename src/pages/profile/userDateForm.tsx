@@ -65,6 +65,9 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
 
     useEffect(() => {
         const todosLosCamposRellenosUserModal = Object.entries(datosUsuario).every(([key, value]) => {
+            if (key === 'lastName' || key === 'secondSurname') {
+                return true;
+            }
             if (key === 'ambit' || key === 'RegionName') {
                 if (datosUsuario.role !== 'ADR') {
                     return true;
