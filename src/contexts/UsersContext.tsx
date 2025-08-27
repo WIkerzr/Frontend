@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ApiTarget } from '../components/Utils/data/controlDev';
 import { actualizarFechaLLamada, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, obtenerFechaLlamada } from '../components/Utils/utils';
 import { UserIDList, UserRegionId } from '../types/users';
-import { useRegionEstadosContext } from './RegionEstadosContext';
+import { RegionInterface } from '../components/Utils/data/getRegiones';
 
 interface UsersContextType {
     users: UserIDList[];
@@ -22,9 +22,17 @@ interface UsersContextType {
 const UsersContext = createContext<UsersContextType | undefined>(undefined);
 
 export const UsersProvider = ({ children }: { children: ReactNode }) => {
-    const { regiones } = useRegionEstadosContext();
     const { i18n } = useTranslation();
-
+    const regiones: RegionInterface[] = (() => {
+        const item = sessionStorage.getItem('regiones');
+        if (!item) return [];
+        try {
+            return JSON.parse(item);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            return [];
+        }
+    })();
     const [loading, setLoading] = useState(false);
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('users');
