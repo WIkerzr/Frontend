@@ -15,6 +15,7 @@ import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServ
 import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../components/Utils/data/dataIndicadores';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
+import { ErrorMessage } from '../../components/Utils/animations';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -251,11 +252,17 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 {/* <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} /> */}
 
                 <div>
-                    <MultiSelectDOM
-                        objeto={[...optionsSelect]}
-                        preSelected={formData.RelatedAxes ? ejesIndicador.filter((eje) => formData.RelatedAxes?.map((r) => r.EjeId).includes(eje.EjeId)) : []}
-                        onChange={handleChangeRelatedAxes}
-                    />
+                    {formData.RelatedAxes && formData.RelatedAxes?.length > 0 ? (
+                        <MultiSelectDOM
+                            objeto={[...optionsSelect]}
+                            preSelected={formData.RelatedAxes ? ejesIndicador.filter((eje) => formData.RelatedAxes?.map((r) => r.EjeId).includes(eje.EjeId)) : []}
+                            onChange={handleChangeRelatedAxes}
+                        />
+                    ) : (
+                        <div>
+                            <ErrorMessage message={t('error:errorFaltanDatosEjes')} />
+                        </div>
+                    )}
                 </div>
             </div>
 
