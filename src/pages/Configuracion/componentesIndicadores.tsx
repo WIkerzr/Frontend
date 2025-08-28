@@ -252,7 +252,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 {/* <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} /> */}
 
                 <div>
-                    {formData.RelatedAxes && formData.RelatedAxes?.length > 0 ? (
+                    {ejesIndicador && ejesIndicador?.length > 0 ? (
                         <MultiSelectDOM
                             objeto={[...optionsSelect]}
                             preSelected={formData.RelatedAxes ? ejesIndicador.filter((eje) => formData.RelatedAxes?.map((r) => r.EjeId).includes(eje.EjeId)) : []}
