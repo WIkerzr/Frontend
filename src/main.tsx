@@ -1,4 +1,4 @@
-import React, { Suspense, useContext, useEffect } from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { UserProvider } from './contexts/UserContext';
 import { MantineProvider } from '@mantine/core';
@@ -12,7 +12,7 @@ import './tailwind.css';
 import './i18n';
 
 // Router
-import { RouterProvider, useLocation } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import router from './router/index';
 
 // Redux
