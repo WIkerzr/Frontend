@@ -10,7 +10,7 @@ import { Servicios } from '../../types/GeneralTypes';
 import { MostrarAvisoCamposServicios } from './ComponentesAccionesServicios';
 import { Boton } from '../../components/Utils/utils';
 import { servicioIniciadoVacio } from '../../types/tipadoPlan';
-import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();

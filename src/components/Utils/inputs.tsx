@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
@@ -103,7 +103,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
     const { i18n, t } = useTranslation();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
-    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionEstadosContext();
+    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
 

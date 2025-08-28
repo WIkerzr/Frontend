@@ -1,4 +1,4 @@
-import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { useRegionContext } from '../../contexts/RegionContext';
 import { UserRole } from '../../types/users';
 
 const logosToComarcas: Record<string, string> = {
@@ -31,7 +31,7 @@ export const LogoRegion_SUP: React.FC<LogoProps> = ({ role }) => {
         return <></>;
     }
     // const dispatch = useDispatch();
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
 
     if (role === 'ADR') {
         return <img className="mr-5 max-h-[40px] w-auto" src={`/assets/images/ADR/${logosToComarcas[Number(regionSeleccionada)]}.jpg`} alt="logo" />;

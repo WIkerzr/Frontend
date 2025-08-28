@@ -7,11 +7,12 @@ import Multiselect from 'multiselect-react-dropdown';
 import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@mantine/core';
 import { RegionInterface } from '../../../components/Utils/data/getRegiones';
-import { useEstadosPorAnio, useRegionEstadosContext } from '../../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
 
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t, i18n } = useTranslation();
-    const { regiones, regionActual } = useRegionEstadosContext();
+    const { regiones, regionActual } = useRegionContext();
     const { editarPlan } = useEstadosPorAnio();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [bloqueo, setBloqueo] = useState<boolean>(block);

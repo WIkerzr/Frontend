@@ -8,7 +8,7 @@ import IconEye from '../../components/Icon/IconEye';
 import IconPencil from '../../components/Icon/IconPencil';
 import IconTrash from '../../components/Icon/IconTrash';
 import { DatosAccion } from '../../types/TipadoAccion';
-import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();

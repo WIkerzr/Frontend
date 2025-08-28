@@ -10,7 +10,7 @@ import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
-import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
+import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import React from 'react';
 
 interface TabCardProps {

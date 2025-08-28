@@ -23,7 +23,8 @@ import TableMantineProvider from './contexts/TableMantineContext';
 import { RegionDataProvider } from './contexts/DatosAnualContext';
 import { IndicadoresProvider } from './contexts/IndicadoresContext';
 import { UsersProvider } from './contexts/UsersContext';
-import { RegionEstadosProvider } from './contexts/RegionEstadosContext';
+import { EstadosProvider } from './contexts/EstadosPorAnioContext';
+import { RegionProvider } from './contexts/RegionContext';
 
 export const RootContext = React.createContext<{ handleLogout?: () => void }>({});
 // ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
@@ -59,13 +60,15 @@ function AppProviders({ children }: { children: React.ReactNode }) {
                 <AuthProvider>
                     <MantineProvider>
                         <UsersProvider>
-                            <RegionDataProvider>
-                                <IndicadoresProvider>
-                                    <TableMantineProvider>
-                                        <RegionEstadosProvider>{children}</RegionEstadosProvider>
-                                    </TableMantineProvider>
-                                </IndicadoresProvider>
-                            </RegionDataProvider>
+                            <RegionProvider>
+                                <RegionDataProvider>
+                                    <IndicadoresProvider>
+                                        <TableMantineProvider>
+                                            <EstadosProvider>{children}</EstadosProvider>
+                                        </TableMantineProvider>
+                                    </IndicadoresProvider>
+                                </RegionDataProvider>
+                            </RegionProvider>
                         </UsersProvider>
                     </MantineProvider>
                 </AuthProvider>

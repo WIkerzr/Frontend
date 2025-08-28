@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/componentes';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { useNavigate } from 'react-router-dom';
-import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 interface ModalAvisoProps {
     isOpen: boolean;

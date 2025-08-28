@@ -5,7 +5,8 @@ import { DataTableSortStatus, DataTableColumnTextAlign, DataTable } from 'mantin
 import { forwardRef, useState, useEffect } from 'react';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { visualColumnByPath } from '../ADR/Acciones/Columnas';
-import { useEstadosPorAnio, useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 interface tablaIndicadoresProps {
     indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[];
@@ -84,7 +85,7 @@ const actions = ['Todos', 'Acciones', 'Acciones y Proyectos', 'Servicios'];
 
 const Index = () => {
     const { t } = useTranslation();
-    const { regionData } = useRegionEstadosContext();
+    const { regionData } = useRegionContext();
     const { anios } = useEstadosPorAnio();
 
     const [years, setYears] = useState<string[]>(['Todos', ...anios.map(String)]);

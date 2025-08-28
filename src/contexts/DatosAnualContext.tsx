@@ -18,10 +18,10 @@ import {
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
 import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
-import { useRegionEstadosContext } from './RegionEstadosContext';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 import { useIndicadoresContext } from './IndicadoresContext';
+import { useRegionContext } from './RegionContext';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -54,7 +54,7 @@ interface YearContextType {
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);

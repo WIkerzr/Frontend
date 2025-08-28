@@ -9,7 +9,7 @@ import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
 import { validarCamposObligatoriosAccion } from '../ComponentesAccionesServicios';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
-import { StatusColors, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
+import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 interface Archivo {
     nombre: string;
     url: string;

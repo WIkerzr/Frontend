@@ -13,9 +13,9 @@ import { Acciones, useIndicadoresContext } from '../../contexts/IndicadoresConte
 import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, MultiSelectDOM } from '../../components/Utils/utils';
 import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../components/Utils/data/dataIndicadores';
-import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
 import { ErrorMessage } from '../../components/Utils/animations';
+import { useRegionContext } from '../../contexts/RegionContext';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -43,7 +43,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
     const [optionsSelect, setOptionsSelect] = useState<EjeIndicadorBBDD[]>([]);
 
-    const { regionSeleccionada, codRegiones } = useRegionEstadosContext();
+    const { regionSeleccionada, codRegiones } = useRegionContext();
 
     useEffect(() => {
         if (!indicadorSeleccionadoSinFallo.indicador.RegionsId) {
@@ -299,7 +299,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
     const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
 
     const [refrescarZona, setRefrescarZona] = useState(0);
 
@@ -633,7 +633,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         return null;
     }
     const { t, i18n } = useTranslation();
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
     const { indicadorSeleccionado } = useIndicadoresContext();
     const location = useLocation();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -885,7 +885,7 @@ export const TablaIndicadores: React.FC = () => {
     const esPaginaPorDefecto = location.pathname === '/';
 
     const esADR = esPaginaPorDefecto || location.pathname.includes('ADR');
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
 
     const listaRealizacion = esADR ? indicadoresRealizacionADR : indicadoresRealizacion;
     const setListaRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;

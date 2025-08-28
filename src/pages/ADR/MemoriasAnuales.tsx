@@ -7,7 +7,7 @@ import IconEnviar from '../../components/Icon/IconEnviar.svg';
 import { useState } from 'react';
 import { generarDocumentoWord } from '../../components/Utils/genWORD';
 import { useYear } from '../../contexts/DatosAnualContext';
-import { useEstadosPorAnio, StatusColors } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio, StatusColors } from '../../contexts/EstadosPorAnioContext';
 
 interface Archivo {
     nombre: string;

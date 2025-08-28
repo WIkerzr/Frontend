@@ -15,7 +15,7 @@ import { ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { Boton, ModalSave } from '../../../components/Utils/utils';
 import { TextArea } from '../../../components/Utils/inputs';
 import { Servicios } from '../../../types/GeneralTypes';
-import { useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();

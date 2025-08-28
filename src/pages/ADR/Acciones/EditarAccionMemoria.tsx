@@ -5,7 +5,7 @@ import { DatosMemoria, EstadoLabel, FuenteFinanciacion } from '../../../types/Ti
 import { useYear } from '../../../contexts/DatosAnualContext';
 import Select, { MultiValue } from 'react-select';
 import { TextArea } from '../../../components/Utils/inputs';
-import { useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();

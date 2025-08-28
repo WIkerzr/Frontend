@@ -9,14 +9,16 @@ import { FetchConRefreshRetry, gestionarErrorServidor, obtenerFechaLlamada, Prin
 import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
-import { useRegionEstadosContext, useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnioContext, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
     const { yearData, llamadaBBDDYearData } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { regionSeleccionada, anioSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
+    const { anioSeleccionada } = useEstadosPorAnioContext();
 
     const [locked, setLocked] = useState(false);
     const [ejes, setEjes] = useState<EjesBBDD[]>();

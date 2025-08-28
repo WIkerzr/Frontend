@@ -6,7 +6,7 @@ import { TextArea } from '../../components/Utils/inputs';
 import { useRef, useState } from 'react';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { Servicios } from '../../types/GeneralTypes';
-import { useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 //TODO borrar si no se aprobecha
 const Index: React.FC = () => {

@@ -23,10 +23,12 @@ import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/data/controlDev';
-import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { useEstadosPorAnioContext } from '../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Sidebar = () => {
-    const { regionSeleccionada, regionData, anioSeleccionada, anios, setEstados, setAnio } = useRegionEstadosContext();
+    const { regionSeleccionada, regionData } = useRegionContext();
+    const { anioSeleccionada, anios, setEstados, setAnio } = useEstadosPorAnioContext();
     const { yearData, setYearData } = useYear();
     const navigate = useNavigate();
     const { user } = useUser();

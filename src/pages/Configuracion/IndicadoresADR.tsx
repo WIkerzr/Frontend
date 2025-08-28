@@ -10,7 +10,7 @@ import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { PrintFecha } from '../../components/Utils/utils';
 import { indicadorInicial } from '../../types/Indicadores';
-import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -28,7 +28,7 @@ const Index = () => {
     } = useIndicadoresContext();
     const [modalNuevo, setModalNuevo] = useState(false);
     const [refres, setRefres] = useState(false);
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
 

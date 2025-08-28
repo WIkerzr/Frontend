@@ -5,9 +5,9 @@ import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndica
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 import { useUser } from './UserContext';
-import { useRegionEstadosContext } from './RegionEstadosContext';
 import { EjeIndicadorBBDD } from '../types/tipadoPlan';
 import { ApiSuccess, LlamadasBBDD } from '../components/Utils/data/utilsData';
+import { useRegionContext } from './RegionContext';
 
 type IndicadorTipo = 'Realizacion' | 'Resultado';
 export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
@@ -82,7 +82,7 @@ export const useIndicadoresContext = () => useContext(IndicadorContext);
 export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { t, i18n } = useTranslation();
     const { user } = useUser();
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
     const [ejesIndicador, setEjesIndicador] = useState<EjeIndicadorBBDD[]>([]);
     const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);

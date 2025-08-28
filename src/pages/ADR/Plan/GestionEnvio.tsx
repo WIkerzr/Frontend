@@ -5,7 +5,7 @@ import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { useLocation } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Aviso, Boton, ModalSave } from '../../../components/Utils/utils';
-import { StatusColors, useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
+import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();

@@ -6,7 +6,7 @@ import { TablaIndicadorAccion } from './EditarAccionComponent';
 import React from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
-import { useEstadosPorAnio } from '../../../contexts/RegionEstadosContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();

@@ -10,7 +10,8 @@ import IconEye from '../../components/Icon/IconEye';
 import IconInfoCircle from '../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../components/Icon/IconInfoTriangle';
 import { Servicios } from '../../types/GeneralTypes';
-import { useRegionEstadosContext, useEstadosPorAnio } from '../../contexts/RegionEstadosContext';
+import { useRegionContext } from '../../contexts/RegionContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();
@@ -287,7 +288,7 @@ interface ListadoAccionesProps {
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const { yearData, EliminarAccion, SeleccionEditarAccion } = useYear();
-    const { regionSeleccionada } = useRegionEstadosContext();
+    const { regionSeleccionada } = useRegionContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);

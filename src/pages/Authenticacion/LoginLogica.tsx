@@ -8,11 +8,11 @@ import { UserID, UserRole } from '../../types/users';
 import { ApiTargetToken } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
-import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
 import { HomeComponent } from '../../router/routes';
+import { useRegionContext } from '../../contexts/RegionContext';
 
 const useLogin = () => {
-    const { setRegionSeleccionada } = useRegionEstadosContext();
+    const { setRegionSeleccionada } = useRegionContext();
     const { t, i18n } = useTranslation();
 
     const { login } = useAuth();
@@ -100,7 +100,9 @@ const useLogin = () => {
 
                 const token = result.access_token;
                 const refreshToken = result.refresh_token;
-                setRegionSeleccionada(Number(user.ambit));
+                if (Number(user.ambit) > 0) {
+                    setRegionSeleccionada(Number(user.ambit));
+                }
 
                 login({ user });
 
