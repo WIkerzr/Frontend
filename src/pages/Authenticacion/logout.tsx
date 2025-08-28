@@ -2,20 +2,24 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import IconLogout from '../../components/Icon/IconLogout';
 import { useAuth } from '../../contexts/AuthContext'; // Asegúrate de que la ruta es correcta
+import { RootContext } from '../../main';
+import { useContext } from 'react';
 
 const LogoutItem = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { logout } = useAuth();
+    const { handleLogout } = useContext(RootContext);
 
-    const handleLogout = () => {
+    const handleLogoutLastPass = () => {
         logout();
         navigate('/Authenticacion/Login');
+        handleLogout?.();
     };
 
     return (
         <li className="border-t border-white-light dark:border-white-light/10">
-            <button onClick={handleLogout} className="text-danger !py-3 flex items-center w-full text-left">
+            <button onClick={handleLogoutLastPass} className="text-danger !py-3 flex items-center w-full text-left">
                 <IconLogout className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 rotate-90 shrink-0" />
                 <span>{t('cerrarSesion')}</span>
             </button>

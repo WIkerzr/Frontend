@@ -33,7 +33,10 @@ const Index = () => {
     const role: UserRole = user!.role as UserRole;
 
     useEffect(() => {
-        if (location.pathname === '/configuracion/indicadoresADR' && regionSeleccionada) {
+        if (!regionSeleccionada) {
+            return;
+        }
+        if (location.pathname === '/configuracion/indicadoresADR') {
             PrimeraLlamada(regionSeleccionada);
             setRefres(true);
         }
@@ -43,6 +46,9 @@ const Index = () => {
     }, [location.pathname, regionSeleccionada]);
 
     useEffect(() => {
+        if (!regionSeleccionada) {
+            return;
+        }
         const refrescar = async () => {
             if (refres) {
                 setLoading(true);
@@ -53,7 +59,9 @@ const Index = () => {
         };
         refrescar();
     }, [refres]);
-
+    if (!regionSeleccionada) {
+        return;
+    }
     return (
         <div className="flex w-full gap-5">
             {loading ? (
