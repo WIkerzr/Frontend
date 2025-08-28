@@ -112,9 +112,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
     const indicadorReturn = indicador === null || indicador === undefined || indicador.length === 0;
 
-    // const [indicadoresPendientesRealizacion, setIndicadoresPendientesRealizacion] = useState<number[]>([]);
-    // const [indicadoresPendientesResultado, setIndicadoresPendientesResultado] = useState<number[]>([]);
-
     useEffect(() => {
         if (indicadorReturn) return;
         if (!editarPlan && !editarMemoria) {

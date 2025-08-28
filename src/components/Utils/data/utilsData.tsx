@@ -15,20 +15,31 @@ export type ApiError = {
     error: any;
 };
 
-type LlamadaBBDDParams<T = any> = {
+type LlamadaBBDDParams<T = any, TBody = any> = {
     setLoading: (a: boolean) => void;
     setErrorMessage?: (a: string) => void;
     setSuccessMessage?: (a: string) => void;
     setFechaUltimoActualizadoBBDD?: Dispatch<SetStateAction<Date>>;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    body?: any;
+    body?: TBody;
     url: string;
     onSuccess?: (data: ApiSuccess<T>) => void;
     onError?: (error: any) => void;
     onFinally?: () => void;
 };
 
-export const LlamadasBBDD = async ({ method, body, url, setLoading, setErrorMessage, setSuccessMessage, setFechaUltimoActualizadoBBDD, onSuccess, onError, onFinally }: LlamadaBBDDParams) => {
+export const LlamadasBBDD = async <T = any, TBody = any>({
+    method,
+    body,
+    url,
+    setLoading,
+    setErrorMessage,
+    setSuccessMessage,
+    setFechaUltimoActualizadoBBDD,
+    onSuccess,
+    onError,
+    onFinally,
+}: LlamadaBBDDParams<T, TBody>) => {
     const fetchData = async () => {
         setLoading(true);
         const token = sessionStorage.getItem('access_token');

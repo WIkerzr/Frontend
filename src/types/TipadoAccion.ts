@@ -231,3 +231,86 @@ export interface DatosMemoriaBack {
     DSeguimiento: string;
     ValFinal: string;
 }
+
+export interface DatosAccionDTO {
+    Id: number;
+    Nombre: string;
+    LineaActuaccion: string;
+    Plurianual?: boolean;
+    DatosPlanId?: number;
+    DatosPlan?: DatosPlanDTO;
+    DatosMemoriaId?: number;
+    DatosMemoria?: DatosMemoriaDTO;
+    AccionCompartidaId?: number;
+    AccionCompartida?: AccionCompartidaDTO;
+    IndicadorRealizacionAcciones?: IndicadorRealizacionAccionDTO[];
+    IndicadorResultadoAcciones?: IndicadorResultadoAccionDTO[];
+}
+export interface DatosPlanDTO {
+    Id: number;
+    Ejecutora?: string;
+    Implicadas?: string;
+    Comarcal?: string;
+    Supracomarcal?: string;
+    RangoAnios?: string;
+    OAccion?: string;
+    Ods?: string;
+    DAccion?: string;
+    Presupuesto?: string;
+    IMujHom?: string;
+    UEuskera?: string;
+    Sostenibilidad?: string;
+    DInteligent?: string;
+    Observaciones?: string;
+}
+
+export interface DatosMemoriaDTO {
+    Id: number;
+    SActual?: string;
+    DAccionAvances?: string;
+    PresupuestoEjecutado_Cuantia?: string;
+    PresupuestoEjecutado_FuenteDeFinanciacion?: string;
+    PresupuestoEjecutado_Observaciones?: string;
+    EjecucionPresupuestaria_Previsto?: string;
+    EjecucionPresupuestaria_Ejecutado?: string;
+    EjecucionPresupuestaria_Porcentaje?: string;
+    Observaciones?: string;
+    DSeguimiento?: string;
+    ValFinal?: string;
+}
+
+export interface AccionCompartidaDTO {
+    Id: number;
+    RegionLiderId?: number;
+}
+
+export interface IndicadorRealizacionAccionDTO {
+    IndicadorRealizacionId: number;
+    DatosAccionId: number;
+    Hipotesis?: string;
+    MetaAnual_Hombre?: string;
+    MetaAnual_Mujer?: string;
+    MetaAnual_Total?: string;
+    Ejecutado_Hombre?: string;
+    Ejecutado_Mujer?: string;
+    Ejecutado_Total?: string;
+    MetaFinal_Hombre?: string;
+    MetaFinal_Mujer?: string;
+    MetaFinal_Total?: string;
+    IdsResultados?: string;
+}
+
+export interface IndicadorResultadoAccionDTO {
+    IndicadorResultadoId: number;
+    DatosAccionId: number;
+    Hipotesis?: string;
+    MetaAnual_Hombre?: string;
+    MetaAnual_Mujer?: string;
+    MetaAnual_Total?: string;
+    Ejecutado_Hombre?: string;
+    Ejecutado_Mujer?: string;
+    Ejecutado_Total?: string;
+    MetaFinal_Hombre?: string;
+    MetaFinal_Mujer?: string;
+    MetaFinal_Total?: string;
+}

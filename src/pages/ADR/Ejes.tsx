@@ -185,7 +185,7 @@ const Index = () => {
                                     disabled={locked}
                                     id={`checkbox-${eje.EjeId}`}
                                 />
-                                <label htmlFor={`checkbox-${eje.EjeId}`} className={`ml-3 cursor-pointer w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''}`}>
+                                <label htmlFor={`checkbox-${eje.EjeId}`} className={`mb-0 cursor-pointer w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''}`}>
                                     {i18n.language === 'es' ? eje.NameEs : eje.NameEu}
                                 </label>
                             </li>

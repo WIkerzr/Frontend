@@ -19,7 +19,7 @@ const Index = () => {
         loading,
         mensajeError,
         fechaUltimoActualizadoBBDD,
-        llamarBBDD,
+        llamarIndicadoresBBDD,
         PrimeraLlamada,
         setLoading,
         setIndicadorSeleccionado,
@@ -83,7 +83,7 @@ const Index = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        llamarBBDD();
+                                        llamarIndicadoresBBDD();
                                         setLoading(false);
                                     }}
                                 >

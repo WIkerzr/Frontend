@@ -20,7 +20,7 @@ const Index = () => {
         setIndicadoresResultadoADR,
         mensajeError,
         fechaUltimoActualizadoBBDD,
-        llamarBBDD,
+        llamarIndicadoresBBDD,
         loading,
         setLoading,
         PrimeraLlamada,
@@ -44,7 +44,7 @@ const Index = () => {
 
     useEffect(() => {
         if (refres) {
-            llamarBBDD();
+            llamarIndicadoresBBDD();
         }
         setRefres(false);
     }, [refres]);
@@ -104,7 +104,7 @@ const Index = () => {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            llamarBBDD();
+                                            llamarIndicadoresBBDD();
                                             setLoading(false);
                                         }}
                                     >

@@ -36,11 +36,12 @@ type IndicadoresContextType = {
     ejesIndicador: EjeIndicadorBBDD[];
     indicadoresResultadoADR: IndicadorResultado[];
     indicadorSeleccionado: IndicadorSeleccionado | null;
-    llamarBBDD: () => void;
+    llamarIndicadoresBBDD: () => void;
     loading: boolean;
     mensajeError: string;
     ObtenerRealizacionPorRegion: () => Record<string | number, IndicadorRealizacion[]>;
     ObtenerResultadosPorRegion: () => Record<string | number, IndicadorResultado[]>;
+    ListadoNombresIdicadoresSegunADR: () => { [id: number]: string };
     PrimeraLlamada: (regionSeleccionada: string | null) => void;
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
@@ -61,11 +62,12 @@ const IndicadorContext = createContext<IndicadoresContextType>({
     ejesIndicador: [],
     indicadoresResultadoADR: [],
     indicadorSeleccionado: indicadorSeleccionadoInicial,
-    llamarBBDD: () => {},
+    llamarIndicadoresBBDD: () => {},
     loading: true,
     mensajeError: '',
     ObtenerRealizacionPorRegion: () => ({}),
     ObtenerResultadosPorRegion: () => ({}),
+    ListadoNombresIdicadoresSegunADR: () => [],
     PrimeraLlamada: () => {},
     setIndicadoresRealizacion: () => {},
     setIndicadoresRealizacionADR: () => {},
@@ -78,7 +80,7 @@ const IndicadorContext = createContext<IndicadoresContextType>({
 export const useIndicadoresContext = () => useContext(IndicadorContext);
 
 export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user } = useUser();
     const { regionSeleccionada } = useRegionEstadosContext();
     const [ejesIndicador, setEjesIndicador] = useState<EjeIndicadorBBDD[]>([]);
@@ -119,7 +121,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     });
 
-    const llamarBBDD = async () => {
+    const llamarIndicadoresBBDD = async () => {
         await llamadaBBDDIndicadores({
             setMensajeError,
             setIndicadoresRealizacion,
@@ -303,6 +305,21 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }, {});
     };
 
+    const ListadoNombresIdicadoresSegunADR = () => {
+        const combinados = [
+            ...(regionSeleccionada ? indicadoresRealizacion.filter((ind) => ind.RegionsId === regionSeleccionada) : []),
+            ...indicadoresRealizacion.filter((ind) => ind.RegionsId === null || ind.RegionsId === '0'),
+        ];
+
+        const listadoIndexado: { [id: number]: string } = combinados.reduce((acc, ind) => {
+            const nombre = i18n.language === 'eu' ? ind.NameEu : ind.NameEs;
+            if (nombre) acc[ind.Id] = nombre;
+            return acc;
+        }, {} as { [id: number]: string });
+
+        return listadoIndexado;
+    };
+
     useEffect(() => {
         const token = sessionStorage.getItem('access_token');
         if (!token) return;
@@ -374,11 +391,12 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 ejesIndicador,
                 indicadoresResultadoADR,
                 indicadorSeleccionado,
-                llamarBBDD,
+                llamarIndicadoresBBDD,
                 loading,
                 mensajeError,
                 ObtenerRealizacionPorRegion,
                 ObtenerResultadosPorRegion,
+                ListadoNombresIdicadoresSegunADR,
                 PrimeraLlamada,
                 setIndicadoresRealizacion,
                 setIndicadoresRealizacionADR,
