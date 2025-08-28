@@ -230,6 +230,15 @@ const fase6 = [
 
 const inicial = [
     {
+        path: '/',
+        element: (
+            //<OnlyIfNotLoggedIn>
+            <Login />
+            //</OnlyIfNotLoggedIn>
+        ),
+        layout: 'blank',
+    },
+    {
         path: DefaultPath,
         element: <OnlyIfLoggedIn>{DefaultPage}</OnlyIfLoggedIn>,
         errorElement: <NotFound />,
