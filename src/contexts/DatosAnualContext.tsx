@@ -2,13 +2,26 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { EjeBBDD, Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
-import { DatosAccion, DatosMemoriaBack, DatosMemoriaBackF, DatosPlan, DatosPlanBack, FuenteFinanciacion } from '../types/TipadoAccion';
+import {
+    DatosAccion,
+    DatosAccionDTO,
+    DatosMemoriaBack,
+    DatosMemoriaBackF,
+    DatosMemoriaDTO,
+    DatosPlan,
+    DatosPlanBack,
+    DatosPlanDTO,
+    FuenteFinanciacion,
+    IndicadorRealizacionAccionDTO,
+    IndicadorResultadoAccionDTO,
+} from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
 import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useRegionEstadosContext } from './RegionEstadosContext';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
+import { useIndicadoresContext } from './IndicadoresContext';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -45,6 +58,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
 
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearData] = useState<YearData>(() => {
@@ -90,6 +104,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     }, [successMessage]);
 
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
+        ListadoNombresIdicadoresSegunADR();
         LlamadasBBDD({
             method: 'POST',
             url: `actionData/${idAccion}`,
@@ -100,6 +115,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             onSuccess: (response) => {
                 const responseDataPlan: DatosPlanBack = response.data.DatosPlan;
                 const responseDataMemoria: DatosMemoriaBack = response.data.DatosMemoria;
+                const indicadoresRealizacionAccion: IndicadorRealizacionAccionDTO[] = response.data?.IndicadoresRealizacionAccion ?? [];
+                const indicadoresResultadoAccion: IndicadorResultadoAccionDTO[] = response.data.IndicadoresResultadoAccion ?? [];
                 const checkData = (value: any, name: string, defaultValue = '') => {
                     if (value === null || value === undefined) {
                         console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
@@ -145,13 +162,60 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     dSeguimiento: checkData(responseDataMemoria?.DSeguimiento, 'DSeguimiento'),
                     sActual: checkData(responseDataMemoria?.SActual, 'SActual'),
                 };
+                const indicadorRealizacionAccion: IndicadorRealizacionAccion[] = (indicadoresRealizacionAccion ?? []).map((item: any) => ({
+                    id: checkData(item.IndicadorRealizacionId, 'Id', '0'),
+                    descripcion: '',
+                    metaAnual: {
+                        hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
+                        mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
+                        total: checkData(item.MetaAnual_Total, 'MetaAnual_Total'),
+                    },
+                    ejecutado: {
+                        hombres: checkData(item.Ejecutado_Hombre, 'Ejecutado_Hombre'),
+                        mujeres: checkData(item.Ejecutado_Mujer, 'Ejecutado_Mujer'),
+                        total: checkData(item.Ejecutado_Total, 'Ejecutado_Total'),
+                    },
+                    metaFinal: {
+                        hombres: checkData(item.MetaFinal_Hombre, 'MetaFinal_Hombre'),
+                        mujeres: checkData(item.MetaFinal_Mujer, 'MetaFinal_Mujer'),
+                        total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
+                    },
+                    hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
+                    idsResultados: checkData(item.IdsResultados, 'IdsResultados', '')
+                        .split(',')
+                        .map((id: string) => id.trim()),
+                }));
+
+                const indicadorResultadoAccion: IndicadorResultadoAccion[] = (indicadoresResultadoAccion ?? []).map((item: any) => ({
+                    id: checkData(item.IndicadorResultadoId, 'Id', '0'),
+                    descripcion: '',
+                    metaAnual: {
+                        hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
+                        mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
+                        total: checkData(item.MetaAnual_Total, 'MetaAnual_Total'),
+                    },
+                    ejecutado: {
+                        hombres: checkData(item.Ejecutado_Hombre, 'Ejecutado_Hombre'),
+                        mujeres: checkData(item.Ejecutado_Mujer, 'Ejecutado_Mujer'),
+                        total: checkData(item.Ejecutado_Total, 'Ejecutado_Total'),
+                    },
+                    metaFinal: {
+                        hombres: checkData(item.MetaFinal_Hombre, 'MetaFinal_Hombre'),
+                        mujeres: checkData(item.MetaFinal_Mujer, 'MetaFinal_Mujer'),
+                        total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
+                    },
+                    hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
+                }));
 
                 const dataAccion: DatosAccion = {
                     id: checkData(response.data?.Id, 'Id', '0'),
                     accion: checkData(response.data?.Nombre, 'Nombre'),
                     lineaActuaccion: checkData(response.data?.LineaActuaccion, 'LineaActuaccion'),
                     plurianual: checkData(response.data?.Plurianual, 'Plurianual', 'false'),
-                    indicadorAccion: response.data?.Indicadores ?? { indicadoreRealizacion: [], indicadoreResultado: [] },
+                    indicadorAccion: {
+                        indicadoreRealizacion: indicadorRealizacionAccion,
+                        indicadoreResultado: indicadorResultadoAccion,
+                    },
                     accionCompartida: response.data?.AccionCompartida ?? null,
                     datosPlan: dataPlan,
                     datosMemoria: dataMemoria,
@@ -362,46 +426,11 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const EditarAccion = () => {
-        // const accionEnviar = convertirDatosAccionADatosAccionBackend(datosEditandoAccion);
-        const indicadoreRealizacionEdit: IndicadorRealizacionAccion[] = datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? [];
-        const indicadoreResultadoEdit: IndicadorResultadoAccion[] = datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? [];
-        if (!datosEditandoAccion) return;
-        if (!datosEditandoAccion.datosPlan) return;
-        if (!datosEditandoAccion.datosMemoria) return;
-        const DatosPlan: DatosPlanBack = {
-            Id: datosEditandoAccion.datosPlan.id,
-            Ejecutora: datosEditandoAccion.datosPlan.ejecutora,
-            Implicadas: datosEditandoAccion.datosPlan.implicadas,
-            Comarcal: datosEditandoAccion.datosPlan.comarcal,
-            Supracomarcal: datosEditandoAccion.datosPlan.supracomarcal,
-            RangoAnios: datosEditandoAccion.datosPlan.rangoAnios,
-            OAccion: datosEditandoAccion.datosPlan.oAccion,
-            Ods: datosEditandoAccion.datosPlan.ods,
-            DAccion: datosEditandoAccion.datosPlan.dAccion,
-            Presupuesto: datosEditandoAccion.datosPlan.presupuesto,
-            IMujHom: datosEditandoAccion.datosPlan.iMujHom,
-            UEuskera: datosEditandoAccion.datosPlan.uEuskera,
-            Sostenibilidad: datosEditandoAccion.datosPlan.sostenibilidad,
-            DInteligent: datosEditandoAccion.datosPlan.dInteligent,
-            Observaciones: datosEditandoAccion.datosPlan.observaciones,
-        };
+        const datos = convertirDatosAccionADatosAccionBackend();
+        if (!datos) return;
+        const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
 
-        const DatosMemoria: DatosMemoriaBack = {
-            Id: datosEditandoAccion.datosMemoria.id,
-            SActual: datosEditandoAccion.datosMemoria.sActual,
-            DAccionAvances: datosEditandoAccion.datosMemoria.dAccionAvances,
-            PresupuestoEjecutado_cuantia: datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia,
-            PresupuestoEjecutado_fuenteDeFinanciacion: convertirArrayACadena(datosEditandoAccion.datosMemoria.presupuestoEjecutado.fuenteDeFinanciacion),
-            PresupuestoEjecutado_observaciones: datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones,
-            EjecucionPresupuestaria_previsto: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.previsto,
-            EjecucionPresupuestaria_ejecutado: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.ejecutado,
-            EjecucionPresupuestaria_porcentaje: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.porcentaje,
-            Observaciones: datosEditandoAccion.datosMemoria.observaciones,
-            DSeguimiento: datosEditandoAccion.datosMemoria.dSeguimiento,
-            ValFinal: datosEditandoAccion.datosMemoria.valFinal,
-        };
-
-        LlamadasBBDD({
+        LlamadasBBDD<any, DatosAccionDTO>({
             method: 'POST',
             url: `actionData/editAction/${datosEditandoAccion.id}`,
             setLoading: setLoadingYearData,
@@ -409,14 +438,17 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage,
             setSuccessMessage,
             body: {
-                Id: datosEditandoAccion.id,
+                Id: Number(datosEditandoAccion.id),
                 Nombre: datosEditandoAccion.accion,
                 LineaActuaccion: datosEditandoAccion.lineaActuaccion,
                 Plurianual: datosEditandoAccion.plurianual,
+                DatosPlanId: DatosPlan.Id ? Number(DatosPlan.Id) : undefined,
                 DatosPlan: DatosPlan,
+                DatosMemoriaId: DatosMemoria.Id ? Number(DatosMemoria.Id) : undefined,
                 DatosMemoria: DatosMemoria,
-                AccionCompartidaId: datosEditandoAccion.accionCompartidaid ?? null,
-                IndicadorAccion: datosEditandoAccion.indicadorAccion ?? { indicadoreRealizacion: indicadoreRealizacionEdit, indicadoreResultado: indicadoreResultadoEdit },
+                AccionCompartidaId: datosEditandoAccion.accionCompartidaid ?? undefined,
+                IndicadorRealizacionAcciones: indicadoreRealizacionEdit,
+                IndicadorResultadoAcciones: indicadoreResultadoEdit,
             },
             onSuccess: (response) => {
                 setYearData({
@@ -424,7 +456,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     plan: {
                         ...yearData.plan,
                         ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                            eje.Id === idEjeEditado
+                            eje.Id === datosEditandoAccion.ejeId
                                 ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)) }
                                 : eje
                         ),
@@ -550,6 +582,88 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 });
             },
         });
+    };
+
+    const convertirDatosAccionADatosAccionBackend = () => {
+        if (!datosEditandoAccion) return;
+        if (!datosEditandoAccion.datosPlan) return;
+        if (!datosEditandoAccion.datosMemoria) return;
+
+        const mapIndicadoresRealizacion = (indicadores: IndicadorRealizacionAccion[] | undefined): IndicadorRealizacionAccionDTO[] =>
+            (indicadores ?? []).map((ind) => ({
+                IndicadorRealizacionId: ind.id,
+                DatosAccionId: Number(datosEditandoAccion.id),
+                Hipotesis: ind.hipotesis,
+                MetaAnual_Hombre: ind.metaAnual?.hombres?.toString(),
+                MetaAnual_Mujer: ind.metaAnual?.mujeres?.toString(),
+                MetaAnual_Total: ind.metaAnual?.total?.toString(),
+                Ejecutado_Hombre: ind.ejecutado?.hombres?.toString(),
+                Ejecutado_Mujer: ind.ejecutado?.mujeres?.toString(),
+                Ejecutado_Total: ind.ejecutado?.total?.toString(),
+                MetaFinal_Hombre: ind.metaFinal?.hombres?.toString(),
+                MetaFinal_Mujer: ind.metaFinal?.mujeres?.toString(),
+                MetaFinal_Total: ind.metaFinal?.total?.toString(),
+                IdsResultados: ind.idsResultados?.join(','),
+            }));
+
+        const mapIndicadoresResultado = (indicadores: IndicadorResultadoAccion[] | undefined): IndicadorResultadoAccionDTO[] =>
+            (indicadores ?? []).map((ind) => ({
+                IndicadorResultadoId: ind.id,
+                DatosAccionId: Number(datosEditandoAccion.id),
+                Hipotesis: ind.hipotesis,
+                MetaAnual_Hombre: ind.metaAnual?.hombres?.toString(),
+                MetaAnual_Mujer: ind.metaAnual?.mujeres?.toString(),
+                MetaAnual_Total: ind.metaAnual?.total?.toString(),
+                Ejecutado_Hombre: ind.ejecutado?.hombres?.toString(),
+                Ejecutado_Mujer: ind.ejecutado?.mujeres?.toString(),
+                Ejecutado_Total: ind.ejecutado?.total?.toString(),
+                MetaFinal_Hombre: ind.metaFinal?.hombres?.toString(),
+                MetaFinal_Mujer: ind.metaFinal?.mujeres?.toString(),
+                MetaFinal_Total: ind.metaFinal?.total?.toString(),
+            }));
+
+        const indicadoreRealizacionEdit = mapIndicadoresRealizacion(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion);
+        const indicadoreResultadoEdit = mapIndicadoresResultado(datosEditandoAccion.indicadorAccion?.indicadoreResultado);
+
+        const DatosPlan: DatosPlanDTO = {
+            Id: Number(datosEditandoAccion.datosPlan.id),
+            Ejecutora: datosEditandoAccion.datosPlan.ejecutora,
+            Implicadas: datosEditandoAccion.datosPlan.implicadas,
+            Comarcal: datosEditandoAccion.datosPlan.comarcal,
+            Supracomarcal: datosEditandoAccion.datosPlan.supracomarcal,
+            RangoAnios: datosEditandoAccion.datosPlan.rangoAnios,
+            OAccion: datosEditandoAccion.datosPlan.oAccion,
+            Ods: datosEditandoAccion.datosPlan.ods,
+            DAccion: datosEditandoAccion.datosPlan.dAccion,
+            Presupuesto: datosEditandoAccion.datosPlan.presupuesto,
+            IMujHom: datosEditandoAccion.datosPlan.iMujHom,
+            UEuskera: datosEditandoAccion.datosPlan.uEuskera,
+            Sostenibilidad: datosEditandoAccion.datosPlan.sostenibilidad,
+            DInteligent: datosEditandoAccion.datosPlan.dInteligent,
+            Observaciones: datosEditandoAccion.datosPlan.observaciones,
+        };
+
+        const DatosMemoria: DatosMemoriaDTO = {
+            Id: Number(datosEditandoAccion.datosMemoria.id),
+            SActual: datosEditandoAccion.datosMemoria.sActual,
+            DAccionAvances: datosEditandoAccion.datosMemoria.dAccionAvances,
+            PresupuestoEjecutado_Cuantia: datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia,
+            PresupuestoEjecutado_FuenteDeFinanciacion: convertirArrayACadena(datosEditandoAccion.datosMemoria.presupuestoEjecutado.fuenteDeFinanciacion),
+            PresupuestoEjecutado_Observaciones: datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones,
+            EjecucionPresupuestaria_Previsto: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.previsto,
+            EjecucionPresupuestaria_Ejecutado: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.ejecutado,
+            EjecucionPresupuestaria_Porcentaje: datosEditandoAccion.datosMemoria.ejecucionPresupuestaria.porcentaje,
+            Observaciones: datosEditandoAccion.datosMemoria.observaciones,
+            DSeguimiento: datosEditandoAccion.datosMemoria.dSeguimiento,
+            ValFinal: datosEditandoAccion.datosMemoria.valFinal,
+        };
+
+        return {
+            indicadoreRealizacionEdit,
+            indicadoreResultadoEdit,
+            DatosPlan,
+            DatosMemoria,
+        };
     };
 
     return (
