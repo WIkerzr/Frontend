@@ -249,6 +249,10 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
                 return { mensaje: t('error:errorPeticionIncorrecta'), tipo: 'warning' };
             case 401:
                 console.error(`401:${t('error:errorNoAutorizado')}`);
+                window.alert(t('error:errorNoAutorizado'));
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = '/Authenticacion/Login';
                 return { mensaje: t('error:errorNoAutorizado'), tipo: 'error' };
             case 403:
                 console.error(`403:${t('error:errorAccesoDenegado')}`);
