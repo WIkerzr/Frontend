@@ -43,10 +43,15 @@ const Index = () => {
     }, [location.pathname, regionSeleccionada]);
 
     useEffect(() => {
-        if (refres) {
-            llamarIndicadoresBBDD();
-        }
-        setRefres(false);
+        const refrescar = async () => {
+            if (refres) {
+                setLoading(true);
+                await llamarIndicadoresBBDD();
+                setLoading(false);
+                setRefres(false);
+            }
+        };
+        refrescar();
     }, [refres]);
 
     return (

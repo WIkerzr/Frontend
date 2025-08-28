@@ -15,6 +15,7 @@ const Index = () => {
     const { users, setUsers, loading, llamadaBBDDUsers, fechaUltimoActualizadoBBDD, errorMessage, setErrorMessage } = useUsers();
     const { t } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
+    const [refres, setRefres] = useState(false);
 
     const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
     const [page, setPage] = useState(1);
@@ -24,7 +25,18 @@ const Index = () => {
 
     useEffect(() => {
         llamadaBBDDUsers(true);
+        setRefres(true);
     }, []);
+
+    useEffect(() => {
+        const refrescar = async () => {
+            if (refres) {
+                await llamadaBBDDUsers();
+                setRefres(false);
+            }
+        };
+        refrescar();
+    }, [refres]);
 
     useEffect(() => {
         if (users.length > 0) {
