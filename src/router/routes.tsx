@@ -21,7 +21,7 @@ const Profile = lazy(() => import('../pages/profile/profile'));
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Usuarios'));
 
-const paginaPorDefectoPorFases: { [key: string]: JSX.Element } = {
+const paginaPorDefectoPorFases: { [key: number]: JSX.Element } = {
     1: <Usuarios />,
     2: <IndicadoresADR />,
     3: <Acciones />,
@@ -29,7 +29,18 @@ const paginaPorDefectoPorFases: { [key: string]: JSX.Element } = {
     5: <PlanesGestion />,
     6: <IndicadoresInpacto />,
 };
-const HomeComponent = paginaPorDefectoPorFases[String(Fases)] || <CuadroMando />;
+
+const paginaPorDefectoPorFasesPath: { [key: number]: string } = {
+    1: '/configuracion/usuarios',
+    2: '/configuracion/indicadoresADR',
+    3: '/adr/acciones',
+    4: '/adr/accionesYproyectos',
+    5: '/adr/planesGestion',
+    6: '/configuracion/indicadoresInpacto',
+};
+
+export const HomeComponent: [string, JSX.Element] = [paginaPorDefectoPorFasesPath[Fases] || '/configuracion/CuadroMando', paginaPorDefectoPorFases[Fases] || <CuadroMando />];
+const [DefaultPath, DefaultPage] = HomeComponent;
 
 const fase1 = [
     {
@@ -219,8 +230,8 @@ const fase6 = [
 
 const inicial = [
     {
-        path: '/',
-        element: <OnlyIfLoggedIn>{HomeComponent}</OnlyIfLoggedIn>,
+        path: DefaultPath,
+        element: <OnlyIfLoggedIn>{DefaultPage}</OnlyIfLoggedIn>,
         errorElement: <NotFound />,
         layout: 'default',
     },

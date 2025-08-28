@@ -9,6 +9,7 @@ import { ApiTargetToken } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 import { useRegionEstadosContext } from '../../contexts/RegionEstadosContext';
+import { HomeComponent } from '../../router/routes';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionEstadosContext();
@@ -21,6 +22,8 @@ const useLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+
+    const [DefaultPath] = HomeComponent;
 
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,8 +115,9 @@ const useLogin = () => {
                 if (recordarSesion) {
                     sessionStorage.setItem('refresh_token', refreshToken);
                 }
+
                 setTimeout(() => {
-                    navigate('/');
+                    navigate(DefaultPath);
                 }, 200);
             }
         } catch (err) {
