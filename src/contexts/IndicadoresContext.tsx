@@ -8,6 +8,7 @@ import { useUser } from './UserContext';
 import { EjeIndicadorBBDD } from '../types/tipadoPlan';
 import { ApiSuccess, LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { useRegionContext } from './RegionContext';
+import { useAuth } from './AuthContext';
 
 type IndicadorTipo = 'Realizacion' | 'Resultado';
 export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
@@ -89,7 +90,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [indicadoresRealizacionADR, setIndicadoresRealizacionADR] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultadoADR, setIndicadoresResultadoADR] = useState<IndicadorResultado[]>([]);
     const [loading, setLoading] = useState(true);
-    const [regionSeleccionadaIndicadores, setRegionSeleccionadaIndicadores] = useState<string | null>('0');
+    const { login } = useAuth();
 
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('indicadores');
@@ -120,6 +121,12 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             };
         }
     });
+
+    useEffect(() => {
+        const token = sessionStorage.getItem('access_token');
+        if (!token) return;
+        llamarIndicadoresBBDD();
+    }, [login]);
 
     const llamarIndicadoresBBDD = async () => {
         await llamadaBBDDIndicadores({
@@ -172,19 +179,19 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             const realizacionADR = transformarRealizacionPorRegion(indicadoresRealizacionPreFiltrado);
             const indicadoresResultadoPreFiltrado: IndicadorRealizacion[] = JSON.parse(storedResultado);
             const resultadoADR = transformarResultadoPorRegion(indicadoresResultadoPreFiltrado);
-            if (!regionSeleccionadaIndicadores) {
+            if (!regionSeleccionada) {
                 setIndicadoresRealizacionADR([]);
                 localStorage.setItem('indicadoresRealizacionFiltrado', '[]');
             } else {
-                const realizacionRegionSelec = realizacionADR[Number(regionSeleccionadaIndicadores)];
+                const realizacionRegionSelec = realizacionADR[Number(regionSeleccionada)];
                 setIndicadoresRealizacionADR(realizacionRegionSelec ?? []);
                 localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(realizacionRegionSelec ?? []));
             }
-            if (!regionSeleccionadaIndicadores) {
+            if (!regionSeleccionada) {
                 setIndicadoresResultadoADR([]);
                 localStorage.setItem('indicadoresResultadoFiltrado', '[]');
             } else {
-                const resultadoRegionSelec = resultadoADR[Number(regionSeleccionadaIndicadores)];
+                const resultadoRegionSelec = resultadoADR[Number(regionSeleccionada)];
                 localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(resultadoRegionSelec ?? []));
                 setIndicadoresResultadoADR(resultadoRegionSelec ?? []);
             }
@@ -201,8 +208,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
             const storedResultado = localStorage.getItem('indicadoresResultado');
 
-            if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]' && regionSeleccionadaIndicadores === regionSeleccionada) {
-                setRegionSeleccionadaIndicadores(regionSeleccionada ?? '0');
+            if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]' && regionSeleccionada === regionSeleccionada) {
                 const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
                 setIndicadoresRealizacion(indicadoresRealizacion);
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
@@ -212,8 +218,6 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 setLoading(false);
                 return;
             } else {
-                setRegionSeleccionadaIndicadores(regionSeleccionada ?? '0');
-
                 SegundaLlamadaEjes();
                 setLoading(false);
             }
@@ -235,13 +239,13 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // }, [regionSeleccionada, PrimeraLlamada]);
 
     const SegundaLlamadaEjes = () => {
-        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionadaIndicadores}`);
+        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
         if (ejes) {
             setEjesIndicador(JSON.parse(ejes));
             return;
         }
 
-        const url = regionSeleccionadaIndicadores ? `ejes/${regionSeleccionadaIndicadores}` : `/ejes`;
+        const url = regionSeleccionada ? `ejes/${regionSeleccionada}` : `/ejes`;
         LlamadasBBDD({
             method: 'GET',
             url: url,
@@ -260,7 +264,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                         localStorage.removeItem(key);
                     }
                 }
-                localStorage.setItem(`EjesIndicador_${regionSeleccionadaIndicadores}`, JSON.stringify(arrayMapeado));
+                localStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
             },
         });
     };
@@ -324,9 +328,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const token = sessionStorage.getItem('access_token');
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
-            if (indicadoresResultado.length > 0) {
-                actualizarIndicadoresADR();
-            }
+            actualizarIndicadoresADR();
         }
     }, [regionSeleccionada]);
 

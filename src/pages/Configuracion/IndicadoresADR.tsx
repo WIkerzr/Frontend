@@ -27,7 +27,6 @@ const Index = () => {
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
     const [modalNuevo, setModalNuevo] = useState(false);
-    const [refres, setRefres] = useState(false);
     const { regionSeleccionada } = useRegionContext();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
@@ -38,27 +37,12 @@ const Index = () => {
         }
         if (location.pathname === '/configuracion/indicadoresADR') {
             PrimeraLlamada(regionSeleccionada);
-            setRefres(true);
         }
         if (!regionSeleccionada) {
             setLoading(false);
         }
     }, [location.pathname, regionSeleccionada]);
 
-    useEffect(() => {
-        if (!regionSeleccionada) {
-            return;
-        }
-        const refrescar = async () => {
-            if (refres) {
-                setLoading(true);
-                await llamarIndicadoresBBDD();
-                setLoading(false);
-                setRefres(false);
-            }
-        };
-        refrescar();
-    }, [refres]);
     if (!regionSeleccionada) {
         return;
     }
