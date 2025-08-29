@@ -20,7 +20,6 @@ import { isEqual } from 'lodash';
 import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
-import { useIndicadoresContext } from './IndicadoresContext';
 import { useRegionContext } from './RegionContext';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
@@ -58,7 +57,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
 
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearData] = useState<YearData>(() => {
@@ -104,7 +102,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     }, [successMessage]);
 
     const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
-        ListadoNombresIdicadoresSegunADR();
         LlamadasBBDD({
             method: 'POST',
             url: `actionData/${idAccion}`,
@@ -184,6 +181,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     idsResultados: checkData(item.IdsResultados, 'IdsResultados', '')
                         .split(',')
                         .map((id: string) => id.trim()),
+                    indicadorRealizacionId: checkData(item.IndicadorRealizacionId, 'IndicadorRealizacionId', undefined) as number | undefined,
                 }));
 
                 const indicadorResultadoAccion: IndicadorResultadoAccion[] = (indicadoresResultadoAccion ?? []).map((item: any) => ({
@@ -205,6 +203,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
                     },
                     hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
+                    indicadorResultadoId: checkData(item.IndicadorResultadoId, 'IndicadorResultadoId', undefined) as number | undefined,
                 }));
 
                 const dataAccion: DatosAccion = {

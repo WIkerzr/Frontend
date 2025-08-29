@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { indicadoresRealizacion, indicadoresResultado } from './BBDD/indicadores';
+import { TiposDeIndicadores } from '../types/Indicadores';
 
 export const handlers = [
     // http.post('/api/login', async ({ request }) => {
@@ -209,7 +210,7 @@ export const handlers = [
 
     http.put('/api/modIndicador', async ({ request }) => {
         const updatedindicador = (await request.json()) as {
-            tipo: 'realizacion' | 'resultado';
+            tipo: TiposDeIndicadores;
             id: number;
             nuevaDescripcion: string;
         };
@@ -245,7 +246,7 @@ export const handlers = [
 
     http.delete('/api/eliminarIndicador', async ({ request }) => {
         const { tipo, id } = (await request.json()) as {
-            tipo: 'realizacion' | 'resultado';
+            tipo: TiposDeIndicadores;
             id: number;
         };
 
@@ -280,7 +281,7 @@ export const handlers = [
         const body = (await request.json()) as {
             descripcion: string;
             ano: number;
-            tipo: 'realizacion' | 'resultado';
+            tipo: TiposDeIndicadores;
         };
 
         const { descripcion, ano, tipo } = body;

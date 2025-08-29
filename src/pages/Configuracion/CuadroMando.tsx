@@ -16,7 +16,7 @@ interface tablaIndicadoresProps {
 const TablaCuadroMando = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ indicador, titulo }, ref) => {
     const { t } = useTranslation();
     const [initialRecords, setInitialRecords] = useState(sortBy(indicador, 'id'));
-    const [recordsData] = useState(initialRecords);
+    // const [recordsData] = useState(initialRecords);
 
     const [search] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
@@ -67,7 +67,7 @@ const TablaCuadroMando = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ in
         <div className="datatables" ref={ref}>
             <DataTable
                 className="whitespace-nowrap table-hover mantine-table"
-                records={recordsData}
+                // records={recordsData}
                 groups={columnGroups}
                 withRowBorders={false}
                 withColumnBorders={true}

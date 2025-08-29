@@ -5,13 +5,14 @@ import { EstadoLabel } from '../../../types/TipadoAccion';
 import { ModalNuevoIndicadorAccion } from './EditarAccionIndicadores';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import React from 'react';
+import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 
 interface TabCardProps {
     icon: string;
@@ -86,7 +87,7 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
 }
 
 interface tablaIndicadoresProps {
-    tipoTabla: 'realizacion' | 'resultado';
+    tipoTabla: TiposDeIndicadores;
     creaccion?: boolean;
 }
 
@@ -109,8 +110,11 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     const [editableRowIndex, setEditableRowIndex] = useState(-1);
     const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
     const [open, setOpen] = useState(false);
-    const indicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
+    const indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[] =
+        tipoTabla === 'realizacion' ? datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? [] : datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? [];
     const indicadorReturn = indicador === null || indicador === undefined || indicador.length === 0;
+    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
+    const listadoNombresIndicadores = ListadoNombresIdicadoresSegunADR();
 
     useEffect(() => {
         if (indicadorReturn) return;
@@ -135,7 +139,11 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     useEffect(() => {
         if (indicadorReturn) return;
         if (indicadores != indicador) {
-            setIndicadores(indicador);
+            const indicadorActualizado = indicador.map((ind) => ({
+                ...ind,
+                descripcion: listadoNombresIndicadores[ind.id] || ind.descripcion,
+            }));
+            setIndicadores(indicadorActualizado);
         }
     }, [indicador]);
 

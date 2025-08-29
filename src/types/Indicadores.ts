@@ -1,6 +1,7 @@
 import { EjeIndicadorBBDD } from './tipadoPlan';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+export type TiposDeIndicadores = 'realizacion' | 'resultado';
 export interface Indicador {
     id: number;
     NameEs: string;
@@ -21,6 +22,7 @@ export interface IndicadorRealizacionAccion {
     ejecutado?: HMT;
     metaFinal?: HMT;
     hipotesis?: string;
+    indicadorRealizacionId?: number;
     [key: string]: any;
 }
 export interface IndicadorResultadoAccion {
@@ -30,6 +32,7 @@ export interface IndicadorResultadoAccion {
     ejecutado?: HMT;
     metaFinal?: HMT;
     hipotesis?: string;
+    indicadorResultadoId?: number;
     [key: string]: any;
 }
 
