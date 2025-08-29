@@ -231,8 +231,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         secondSurname: UserData.secondSurname === '' ? '-' : UserData.secondSurname,
                         role: UserData.role,
                         email: UserData.email,
-                        ambit: UserData.ambit,
-                        RegionId: formateaConCeroDelante(`${UserData.ambit}`),
+                        ambit: UserData.role === 'ADR' ? UserData.ambit : '-',
+                        RegionId: UserData.role === 'ADR' ? formateaConCeroDelante(`${UserData.ambit}`) : null,
                         id: UserData.id,
                         status: true,
                     }),
@@ -250,7 +250,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                     const region = regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(data.data.RegionId));
                     const dataConRegionName = {
                         ...data.data,
-                        RegionName: region ? (i18n.language === 'es' ? region.NameEs : region.NameEu) : 'Desconocido',
+                        RegionName: region ? (i18n.language === 'es' ? region.NameEs : region.NameEu) : '-',
                     };
                     agregarUsuario(dataConRegionName);
                 }

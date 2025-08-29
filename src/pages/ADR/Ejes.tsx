@@ -30,27 +30,6 @@ const Index = () => {
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
-    useEffect(() => {
-        if (yearData) {
-            setLocked(true);
-            const planes = yearData.plan.ejes;
-            const planesPrioritarios = yearData.plan.ejes;
-            const combinados = [...planes, ...planesPrioritarios];
-            const ordenados = combinados
-                .sort((a, b) => Number(a.Id) - Number(b.Id))
-                .map((eje) => ({
-                    EjeId: eje.Id,
-                    NameEs: eje.NameEs,
-                    NameEu: eje.NameEu,
-                    IsActive: eje.IsActive,
-                    IsPrioritarios: eje.IsPrioritarios,
-                    PlanId: yearData.plan.id,
-                    acciones: [],
-                }));
-            setEjes(ordenados);
-        }
-    }, [yearData]);
-
     const llamadaBBDDEjesRegion = () => {
         setErrorMessage('');
         LlamadasBBDD({
@@ -82,9 +61,12 @@ const Index = () => {
 
     const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
         if (locked) return;
+        if (!ejes) return;
+        const contadorPrioritarios = ejes.filter((i) => i.IsPrioritarios).length;
         const checked = e.target.checked;
-
-        setEjes((prev) => prev!.map((i) => (i.EjeId === id ? { ...i, IsPrioritarios: checked } : i)));
+        if (!checked || contadorPrioritarios < 3) {
+            setEjes((prev) => prev!.map((i) => (i.EjeId === id ? { ...i, IsPrioritarios: checked } : i)));
+        }
     };
 
     useEffect(() => {
@@ -108,7 +90,7 @@ const Index = () => {
             setLocked(false);
             llamadaBBDDEjesRegion();
         }
-    }, [regionSeleccionada]);
+    }, [yearData]);
 
     const handleSave = () => {
         const fetchAxes = async () => {

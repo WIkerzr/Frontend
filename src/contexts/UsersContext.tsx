@@ -59,7 +59,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                     if (region) {
                         user.RegionName = i18n.language === 'es' ? region.NameEs : region.NameEu;
                     } else {
-                        user.RegionName = 'Desconocido';
+                        user.RegionName = '-';
                         console.error(`Usuario con ID ${user.id} no tiene RegionName ni coincidencia en regiones.`);
                     }
                 }
