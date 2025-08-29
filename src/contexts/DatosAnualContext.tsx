@@ -39,7 +39,7 @@ interface YearContextType {
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
-    llamadaBBDDYearData: (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string, ignorarStorage: boolean) => void;
+    llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean) => void;
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
@@ -54,7 +54,7 @@ interface YearContextType {
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -516,7 +516,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
-    const llamadaBBDDYearData = (anioSeleccionada: number, regionSeleccionada: string, nombreRegionSeleccionada: string, ignorarStorage: boolean) => {
+    const llamadaBBDDYearData = (anioSeleccionada: number, ignorarStorage: boolean) => {
         const stored = localStorage.getItem('DataYear');
         if (stored && !ignorarStorage) {
             const data: YearData = JSON.parse(stored);

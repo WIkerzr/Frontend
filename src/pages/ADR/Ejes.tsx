@@ -51,7 +51,7 @@ const Index = () => {
         }
     }, [yearData]);
 
-    const llamadaBBDDEjesRegion = (regionSeleccionada: string | null) => {
+    const llamadaBBDDEjesRegion = () => {
         setErrorMessage('');
         LlamadasBBDD({
             method: 'GET',
@@ -106,7 +106,7 @@ const Index = () => {
             setEjes(ordenados);
         } else {
             setLocked(false);
-            llamadaBBDDEjesRegion(regionSeleccionada);
+            llamadaBBDDEjesRegion();
         }
     }, [regionSeleccionada]);
 
@@ -128,7 +128,7 @@ const Index = () => {
                     console.log(errorInfo.mensaje);
                     return;
                 }
-                llamadaBBDDYearData(anioSeleccionada!, regionSeleccionada!, '', true);
+                llamadaBBDDYearData(anioSeleccionada!, true);
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);
                 console.log(errorInfo.mensaje);
@@ -168,7 +168,7 @@ const Index = () => {
                         <div className="flex items-center space-x-2">
                             <PrintFecha date={fechaUltimoActualizadoBBDD} />
                             <Tippy content={t('Actualizar')}>
-                                <button type="button" onClick={() => llamadaBBDDEjesRegion(regionSeleccionada)}>
+                                <button type="button" onClick={() => llamadaBBDDEjesRegion()}>
                                     <IconRefresh />
                                 </button>
                             </Tippy>

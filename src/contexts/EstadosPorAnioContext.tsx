@@ -145,7 +145,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-            llamadaBBDDYearData(anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada, false);
+            llamadaBBDDYearData(anioSeleccionada, false);
         }
     }, [anioSeleccionada, nombreRegionSeleccionada]);
 
