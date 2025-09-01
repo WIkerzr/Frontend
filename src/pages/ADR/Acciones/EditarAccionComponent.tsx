@@ -1,13 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EstadoLabel } from '../../../types/TipadoAccion';
+import { DatosAccion, EstadoLabel } from '../../../types/TipadoAccion';
 import { ModalNuevoIndicadorAccion } from './EditarAccionIndicadores';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
-import { indicadoresRealizacion, indicadoresResultado } from '../../../mocks/BBDD/indicadores';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
@@ -86,36 +86,73 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
     );
 }
 
-interface tablaIndicadoresProps {
-    tipoTabla: TiposDeIndicadores;
+export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: DatosAccion, t: (key: string, options?: any) => string) {
+    const invalidIndicesRealizacion: number[] = [];
+    const invalidIndicesResultado: number[] = [];
+
+    const esValidoRealizacion =
+        datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion?.every((fila, index) => {
+            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0;
+
+            if (isInvalid) {
+                invalidIndicesRealizacion.push(index);
+            }
+
+            return !isInvalid;
+        }) ?? false;
+
+    const esValidoResultado =
+        datosEditandoAccion?.indicadorAccion?.indicadoreResultado?.every((fila, index) => {
+            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0;
+
+            if (isInvalid) {
+                invalidIndicesResultado.push(index);
+            }
+
+            return !isInvalid;
+        }) ?? false;
+
+    if (!esValidoRealizacion) {
+        alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
+        return false;
+    }
+    if (!esValidoResultado) {
+        alert(t('completarUltimaFila', { tipo: t('Resultado') }));
+        return false;
+    }
+    return true;
+}
+
+type AccionPorTipo<T extends TiposDeIndicadores> = T extends 'resultado' ? IndicadorResultadoAccion[] : IndicadorRealizacionAccion[];
+
+interface TablaIndicadoresProps<T extends TiposDeIndicadores> {
+    tipoTabla: T;
     creaccion?: boolean;
 }
 
-//Import temporal
-const realizaciones: IndicadorRealizacionAccion[] = indicadoresRealizacion;
-
-const listadoIndicadoresResultados: IndicadorResultadoAccion[] = indicadoresResultado;
-
-//Temporal
-
-export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresProps>(({ tipoTabla, creaccion = false }, ref) => {
+export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadoresProps<TiposDeIndicadores>>(({ tipoTabla, creaccion = false }, ref) => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
-    const [indicadores, setIndicadores] = useState<IndicadorRealizacionAccion[]>([]);
-    const [indicadoresRealizacionesModal, setIndicadoresRealizacionesModal] = useState<IndicadorRealizacionAccion[]>(realizaciones);
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
     const [editableRowIndex, setEditableRowIndex] = useState(-1);
-    const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
     const [open, setOpen] = useState(false);
-    const indicador: IndicadorRealizacionAccion[] | IndicadorResultadoAccion[] =
-        tipoTabla === 'realizacion' ? datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? [] : datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? [];
+
+    const [indicadores, setIndicadores] = useState<AccionPorTipo<typeof tipoTabla>>([] as AccionPorTipo<typeof tipoTabla>);
+    const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
+    //const [indicadoresRealizacionesModal, setIndicadoresRealizacionesModal] = useState<{ id: number; nombre: string; idsResultados?: number[] | undefined }[]>([]);
+
+    const indicador: AccionPorTipo<typeof tipoTabla> =
+        (tipoTabla === 'realizacion' ? datosEditandoAccion.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion.indicadorAccion?.indicadoreResultado) ??
+        ([] as AccionPorTipo<typeof tipoTabla>);
+
     const indicadorReturn = indicador === null || indicador === undefined || indicador.length === 0;
     const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
-    const listadoNombresIndicadores = ListadoNombresIdicadoresSegunADR();
+    const listadoNombresIndicadores = ListadoNombresIdicadoresSegunADR(tipoTabla);
 
+    //Bloqueo si no esta en edicion
     useEffect(() => {
         if (indicadorReturn) return;
         if (!editarPlan && !editarMemoria) {
@@ -127,6 +164,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
         }
     }, []);
 
+    // Cargar los indicadores de la accion al iniciar el componente
     useEffect(() => {
         if (indicadorReturn) return;
         const rescargarIndicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
@@ -138,12 +176,27 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
 
     useEffect(() => {
         if (indicadorReturn) return;
-        if (indicadores != indicador) {
-            const indicadorActualizado = indicador.map((ind) => ({
-                ...ind,
-                descripcion: listadoNombresIndicadores[ind.id] || ind.descripcion,
-            }));
+        if (indicadores !== indicador) {
+            const indicadorActualizado = indicador.map((ind) => {
+                const nombre = listadoNombresIndicadores.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
+                return {
+                    ...ind,
+                    descripcion: nombre,
+                };
+            });
+
             setIndicadores(indicadorActualizado);
+
+            // const indicadoresModal = indicador.map((ind) => {
+            //     const nombre = listadoNombresIndicadores.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
+            //     return {
+            //         id: ind.id,
+            //         nombre,
+            //         idsResultados: ind.idsResultados ?? undefined,
+            //     };
+            // });
+
+            //setIndicadoresRealizacionesModal(indicadoresModal);
         }
     }, [indicador]);
 
@@ -169,14 +222,14 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
         });
     }, [search, indicadores]);
 
-    useEffect(() => {
-        if (indicadorReturn) return;
-        if (tipoTabla === 'realizacion' && indicadores.length > 0) {
-            const idsIndicadores = new Set(indicadores.map((i) => i.id));
-            const filtrados = realizaciones.filter((item) => !idsIndicadores.has(item.id));
-            setIndicadoresRealizacionesModal(filtrados);
-        }
-    }, [indicadores]);
+    // useEffect(() => {
+    //     if (indicadorReturn) return;
+    //     if (tipoTabla === 'realizacion' && listadoNombresIndicadores.length > 0) {
+    //         const idsIndicadores = new Set(listadoNombresIndicadores.map((i) => i.id));
+    //         const filtrados = indicadoresRealizacionesModal.filter((item) => !idsIndicadores.has(item.id));
+    //         setIndicadoresRealizacionesModal(filtrados);
+    //     }
+    // }, []);
 
     useEffect(() => {
         if (indicadorReturn) return;
@@ -311,24 +364,25 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     });
 
     const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
-        const indicadorBase = realizaciones.find((r) => r.id === seleccion.idRealizacion);
+        const indicadorNuevoRealizacion = listadoNombresIndicadores.find((r) => r.id === seleccion.idRealizacion);
 
         const nuevosIndicadoresRealizacion = [
             ...(datosEditandoAccion?.indicadorAccion?.indicadoreResultado ?? []),
             ...seleccion.idsResultadosEnRealizacion.map(() => ({
                 id: seleccion.idRealizacion,
-                descripcion: `${indicadorBase?.descripcion}`,
+                descripcion: `${indicadorNuevoRealizacion?.nombre}`,
                 idsResultados: seleccion.idsResultadosEnRealizacion,
                 metaAnual: { hombres: 0, mujeres: 0, total: 0 },
                 ejecutado: { hombres: 0, mujeres: 0, total: 0 },
                 metaFinal: { hombres: 0, mujeres: 0, total: 0 },
             })),
         ];
+
         const nuevosIndicadoresResultado = [
             ...(datosEditandoAccion?.indicadorAccion?.indicadoreResultado ?? []),
             ...seleccion.idsResultadosEnRealizacion.map((idResultado) => ({
                 id: idResultado,
-                descripcion: listadoIndicadoresResultados.find((item) => item.id === idResultado)?.descripcion || '',
+                descripcion: indicadores.find((item) => item.id === idResultado)?.nombre || '',
                 idsResultados: seleccion.idsResultadosEnRealizacion,
                 metaAnual: { hombres: 0, mujeres: 0, total: 0 },
                 ejecutado: { hombres: 0, mujeres: 0, total: 0 },
@@ -348,43 +402,9 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
     };
 
     const handleOpenModal = () => {
-        const invalidIndicesRealizacion: number[] = [];
-        const invalidIndicesResultado: number[] = [];
-
-        const esValidoRealizacion =
-            datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion?.every((fila, index) => {
-                const isInvalid = !fila || fila.descripcion === '' || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0;
-
-                if (isInvalid) {
-                    invalidIndicesRealizacion.push(index);
-                }
-
-                return !isInvalid;
-            }) ?? false;
-
-        const esValidoResultado =
-            datosEditandoAccion?.indicadorAccion?.indicadoreResultado?.every((fila, index) => {
-                const isInvalid = !fila || fila.descripcion === '' || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0;
-
-                if (isInvalid) {
-                    invalidIndicesResultado.push(index);
-                }
-
-                return !isInvalid;
-            }) ?? false;
-
-        // setIndicadoresPendientesRealizacion(invalidIndicesRealizacion);
-        // setIndicadoresPendientesResultado(invalidIndicesResultado);
-
-        if (!esValidoRealizacion) {
-            alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
-            return;
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, t)) {
+            setOpen(true);
         }
-        if (!esValidoResultado) {
-            alert(t('completarUltimaFila', { tipo: t('Resultado') }));
-            return;
-        }
-        setOpen(true);
     };
 
     return (
@@ -400,15 +420,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, tablaIndicadoresP
                         <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
                             {t('newFileIndicador', { tipo: t('RealizacionMin') })}
                         </button>
-                        {open && (
-                            <ModalNuevoIndicadorAccion
-                                realizaciones={indicadoresRealizacionesModal}
-                                resultados={listadoIndicadoresResultados}
-                                open={open}
-                                onClose={() => setOpen(false)}
-                                onSave={handleSave}
-                            />
-                        )}
+                        {open && <ModalNuevoIndicadorAccion open={open} onClose={() => setOpen(false)} onSave={handleSave} />}
                     </>
                 )}
             </div>

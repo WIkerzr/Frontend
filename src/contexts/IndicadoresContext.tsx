@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { indicadorInicial, IndicadorRealizacion, IndicadorResultado } from '../types/Indicadores';
+import { indicadorInicial, IndicadorRealizacion, IndicadorResultado, TiposDeIndicadores } from '../types/Indicadores';
 import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,7 @@ import { ApiSuccess, LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { useRegionContext } from './RegionContext';
 import { useAuth } from './AuthContext';
 
-type IndicadorTipo = 'Realizacion' | 'Resultado';
+export type IndicadorTipo = 'Realizacion' | 'Resultado';
 export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
 
 interface IndicadorSeleccionado {
@@ -42,7 +42,7 @@ type IndicadoresContextType = {
     mensajeError: string;
     ObtenerRealizacionPorRegion: () => Record<string | number, IndicadorRealizacion[]>;
     ObtenerResultadosPorRegion: () => Record<string | number, IndicadorResultado[]>;
-    ListadoNombresIdicadoresSegunADR: () => { [id: number]: string };
+    ListadoNombresIdicadoresSegunADR: (tipoIndicador: TiposDeIndicadores) => { id: number; nombre: string; idsResultados?: number[] | undefined }[];
     PrimeraLlamada: (regionSeleccionada: string | null) => void;
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
     setIndicadoresRealizacionADR: React.Dispatch<React.SetStateAction<IndicadorRealizacion[]>>;
@@ -309,19 +309,33 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }, {});
     };
 
-    const ListadoNombresIdicadoresSegunADR = () => {
+    const ListadoNombresIdicadoresSegunADR = (tipoIndicador: TiposDeIndicadores): { id: number; nombre: string; idsResultados?: number[] | undefined }[] => {
+        let indicador: IndicadorRealizacion[] | IndicadorResultado[] = [];
+
+        if (tipoIndicador === 'realizacion') {
+            indicador = indicadoresRealizacion;
+        } else if (tipoIndicador === 'resultado') {
+            indicador = indicadoresResultado;
+        }
+
         const combinados = [
-            ...(regionSeleccionada ? indicadoresRealizacion.filter((ind) => ind.RegionsId === regionSeleccionada) : []),
-            ...indicadoresRealizacion.filter((ind) => ind.RegionsId === null || ind.RegionsId === '0'),
+            ...(regionSeleccionada ? indicador.filter((ind) => Number(ind.RegionsId) === Number(regionSeleccionada)) : []),
+            ...indicador.filter((ind) => ind.RegionsId === null || Number(ind.RegionsId) === 0),
         ];
 
-        const listadoIndexado: { [id: number]: string } = combinados.reduce((acc, ind) => {
-            const nombre = i18n.language === 'eu' ? ind.NameEu : ind.NameEs;
-            if (nombre) acc[ind.Id] = nombre;
-            return acc;
-        }, {} as { [id: number]: string });
+        const listadoArray = combinados.map((ind) => {
+            const nombre = (i18n.language === 'eu' ? ind.NameEu : ind.NameEs) ?? '';
 
-        return listadoIndexado;
+            const idsResultados = tipoIndicador === 'realizacion' && 'Resultados' in ind && Array.isArray(ind.Resultados) ? ind.Resultados.map((res) => res.Id) : undefined;
+
+            return {
+                id: ind.Id,
+                nombre,
+                idsResultados,
+            };
+        });
+
+        return listadoArray;
     };
 
     useEffect(() => {

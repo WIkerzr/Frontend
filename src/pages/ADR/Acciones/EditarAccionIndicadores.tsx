@@ -7,6 +7,7 @@ import React from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
@@ -164,39 +165,47 @@ export const PestanaIndicadoresServicios = React.forwardRef<HTMLButtonElement>((
     );
 });
 
-type Indicador = { id: number; descripcion: string; idsResultados?: number[] };
+type Indicador = { id: number; nombre: string; checked: boolean; idsResultados?: number[] | undefined };
 
 interface ModalNuevoIndicadorAccionProps {
     open: boolean;
     onClose: () => void;
-    realizaciones: Indicador[];
-    resultados: Indicador[];
+    // realizaciones: Indicador[];
     onSave?: (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => void;
 }
 
-export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, realizaciones, resultados, onSave }, ref) => {
+export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, onSave }, ref) => {
     const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
-    const [seleccionados, setSeleccionados] = useState<number[]>([]);
-    const { t } = useTranslation();
+    const [resultadosRelacionados, setResultadosRelacionados] = useState<Indicador[]>([]);
 
-    const realizacionSeleccionada = realizaciones.find((r) => r.id === indicadorRealizacionId);
-    const resultadosRelacionados = realizacionSeleccionada?.idsResultados ? resultados.filter((res) => realizacionSeleccionada.idsResultados!.includes(res.id)) : [];
+    const { t } = useTranslation();
+    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
+    const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
+    const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
 
     const handleToggleResultado = (id: number) => {
-        setSeleccionados((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
+        setResultadosRelacionados((prevResultados) => prevResultados.map((resultado) => (resultado.id === id ? { ...resultado, checked: !resultado.checked } : resultado)));
     };
 
     const handleChangeRealizacion = (id: number) => {
         setIndicadorRealizacionId(id);
-        const relacionados = realizaciones.find((r) => r.id === id)?.idsResultados ?? [];
-        setSeleccionados(relacionados);
+        const relacionados = listadoNombresIndicadoresRealizacion.find((r) => r.id === id)?.idsResultados ?? [];
+
+        const resultadosFiltrados: Indicador[] = listadoNombresIndicadoresResultado
+            .filter((resultado) => relacionados.includes(resultado.id))
+            .map((resultado) => ({
+                ...resultado,
+                checked: true,
+            }));
+
+        setResultadosRelacionados(resultadosFiltrados);
     };
 
     const handleSave = () => {
         if (onSave && indicadorRealizacionId !== null) {
             onSave({
                 idRealizacion: indicadorRealizacionId,
-                idsResultadosEnRealizacion: seleccionados,
+                idsResultadosEnRealizacion: resultadosRelacionados.filter((r) => r.checked).map((r) => r.id),
             });
         }
         onClose();
@@ -210,9 +219,9 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                     <option value="" disabled>
                         {t('seleccionaIndicador')}
                     </option>
-                    {realizaciones.map((r) => (
-                        <option value={r.id} key={r.id}>
-                            {r.descripcion}
+                    {listadoNombresIndicadoresRealizacion.map((r) => (
+                        <option className={`${r.nombre[4] === '.' ? 'bg-blue-200' : 'bg-white'}`} value={r.id} key={r.id}>
+                            {r.nombre}
                         </option>
                     ))}
                 </select>
@@ -225,8 +234,8 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                         {resultadosRelacionados.map((res) => (
                             <li key={res.id} className="mb-2">
                                 <label className="flex items-center">
-                                    <input type="checkbox" checked={seleccionados.includes(res.id)} onChange={() => handleToggleResultado(res.id)} className="mr-2" />
-                                    {res.descripcion}
+                                    <input type="checkbox" checked={res.checked} onChange={() => handleToggleResultado(res.id)} className="mr-2" />
+                                    {res.nombre}
                                 </label>
                             </li>
                         ))}
