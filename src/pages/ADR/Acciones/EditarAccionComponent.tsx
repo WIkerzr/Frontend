@@ -3,17 +3,14 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatosAccion, EstadoLabel } from '../../../types/TipadoAccion';
-import { ModalNuevoIndicadorAccion } from './EditarAccionIndicadores';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import React from 'react';
-import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
-
 interface TabCardProps {
     icon: string;
     label: string;
@@ -123,91 +120,54 @@ export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: Datos
     return true;
 }
 
-type AccionPorTipo<T extends TiposDeIndicadores> = T extends 'resultado' ? IndicadorResultadoAccion[] : IndicadorRealizacionAccion[];
-
-interface TablaIndicadoresProps<T extends TiposDeIndicadores> {
-    tipoTabla: T;
-    creaccion?: boolean;
+interface TablasIndicadoresProps<T> {
+    records: T[];
+    setIndicador: React.Dispatch<React.SetStateAction<T[]>>;
+    editableRowIndex: number;
+    setEditableRowIndex: React.Dispatch<React.SetStateAction<number>>;
+    sortStatus: DataTableSortStatus<T>;
+    setSortStatus: React.Dispatch<React.SetStateAction<DataTableSortStatus<T>>>;
+}
+interface TablaIndicadorAccionProps {
+    indicadoresRealizacion: IndicadorRealizacionAccion[];
+    setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
+    indicadoresResultado: IndicadorRealizacionAccion[];
+    setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
+    botonNuevoIndicadorAccion: React.ReactNode;
 }
 
-export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadoresProps<TiposDeIndicadores>>(({ tipoTabla, creaccion = false }, ref) => {
-    const { t } = useTranslation();
-    const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
-    const { editarPlan, editarMemoria } = useEstadosPorAnio();
-    const [bloqueo, setBloqueo] = useState<boolean>(block);
-    const [search, setSearch] = useState('');
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
-    const [editableRowIndex, setEditableRowIndex] = useState(-1);
-    const [open, setOpen] = useState(false);
+export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
+    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, botonNuevoIndicadorAccion }, ref) => {
+        const { t } = useTranslation();
 
-    const [indicadores, setIndicadores] = useState<AccionPorTipo<typeof tipoTabla>>([] as AccionPorTipo<typeof tipoTabla>);
-    const [initialRecords, setInitialRecords] = useState(sortBy(indicadores, 'id'));
-    //const [indicadoresRealizacionesModal, setIndicadoresRealizacionesModal] = useState<{ id: number; nombre: string; idsResultados?: number[] | undefined }[]>([]);
+        const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
 
-    const indicador: AccionPorTipo<typeof tipoTabla> =
-        (tipoTabla === 'realizacion' ? datosEditandoAccion.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion.indicadorAccion?.indicadoreResultado) ??
-        ([] as AccionPorTipo<typeof tipoTabla>);
+        const { editarPlan, editarMemoria } = useEstadosPorAnio();
+        const [bloqueo, setBloqueo] = useState<boolean>(block);
+        const [search, setSearch] = useState('');
+        const [sortStatusRealizacion, setSortStatusRealizacion] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
+        const [sortStatusResultado, setSortStatusResultado] = useState<DataTableSortStatus<IndicadorResultadoAccion>>({ columnAccessor: 'id', direction: 'asc' });
+        const [editableRowIndexRealizacion, setEditableRowIndexRealizacion] = useState(-1);
+        const [editableRowIndexResultado, setEditableRowIndexResultado] = useState(-1);
+        const [dataRealizacion, setDataRealizacion] = useState(sortBy(indicadoresRealizacion, 'id'));
+        const [dataResultado, setDataResultado] = useState(sortBy(indicadoresResultado, 'id'));
 
-    const indicadorReturn = indicador === null || indicador === undefined || indicador.length === 0;
-    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
-    const listadoNombresIndicadores = ListadoNombresIdicadoresSegunADR(tipoTabla);
-
-    //Bloqueo si no esta en edicion
-    useEffect(() => {
-        if (indicadorReturn) return;
-        if (!editarPlan && !editarMemoria) {
-            setBloqueo(true);
-        } else {
-            if (!block) {
-                setBloqueo(false);
+        useEffect(() => {
+            if (!editarPlan && !editarMemoria) {
+                setBloqueo(true);
+            } else {
+                if (!block) {
+                    setBloqueo(false);
+                }
             }
-        }
-    }, []);
+        }, []);
 
-    // Cargar los indicadores de la accion al iniciar el componente
-    useEffect(() => {
-        if (indicadorReturn) return;
-        const rescargarIndicador = tipoTabla === 'realizacion' ? datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion : datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
-        if (!rescargarIndicador) {
-            return;
-        }
-        setIndicadores(rescargarIndicador);
-    }, [datosEditandoAccion]);
-
-    useEffect(() => {
-        if (indicadorReturn) return;
-        if (indicadores !== indicador) {
-            const indicadorActualizado = indicador.map((ind) => {
-                const nombre = listadoNombresIndicadores.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
-                return {
-                    ...ind,
-                    descripcion: nombre,
-                };
-            });
-
-            setIndicadores(indicadorActualizado);
-
-            // const indicadoresModal = indicador.map((ind) => {
-            //     const nombre = listadoNombresIndicadores.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
-            //     return {
-            //         id: ind.id,
-            //         nombre,
-            //         idsResultados: ind.idsResultados ?? undefined,
-            //     };
-            // });
-
-            //setIndicadoresRealizacionesModal(indicadoresModal);
-        }
-    }, [indicador]);
-
-    useEffect(() => {
-        if (indicadorReturn) return;
-        setInitialRecords(() => {
-            if (!search.trim()) return sortBy(indicadores, 'id');
+        const filtrarIndicadores = <T extends { descripcion?: string; metaAnual?: any; ejecutado?: any; metaFinal?: any; hipotesis?: string }>(lista: T[]) => {
+            if (!search.trim()) return sortBy(lista, 'id');
             const s = search.toLowerCase();
-            return indicadores.filter(
+            return lista.filter(
                 (item) =>
-                    (item.descripcion && String(item.descripcion).toLowerCase().includes(s)) ||
+                    item.descripcion?.toLowerCase().includes(s) ||
                     (item.metaAnual?.hombres !== undefined && String(item.metaAnual.hombres).toLowerCase().includes(s)) ||
                     (item.metaAnual?.mujeres !== undefined && String(item.metaAnual.mujeres).toLowerCase().includes(s)) ||
                     (item.metaAnual?.total !== undefined && String(item.metaAnual.total).toLowerCase().includes(s)) ||
@@ -217,31 +177,39 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadoresP
                     (item.metaFinal?.hombres !== undefined && String(item.metaFinal.hombres).toLowerCase().includes(s)) ||
                     (item.metaFinal?.mujeres !== undefined && String(item.metaFinal.mujeres).toLowerCase().includes(s)) ||
                     (item.metaFinal?.total !== undefined && String(item.metaFinal.total).toLowerCase().includes(s)) ||
-                    (item.hipotesis && item.hipotesis.toLowerCase().includes(s))
+                    item.hipotesis?.toLowerCase().includes(s)
             );
-        });
-    }, [search, indicadores]);
+        };
 
-    // useEffect(() => {
-    //     if (indicadorReturn) return;
-    //     if (tipoTabla === 'realizacion' && listadoNombresIndicadores.length > 0) {
-    //         const idsIndicadores = new Set(listadoNombresIndicadores.map((i) => i.id));
-    //         const filtrados = indicadoresRealizacionesModal.filter((item) => !idsIndicadores.has(item.id));
-    //         setIndicadoresRealizacionesModal(filtrados);
-    //     }
-    // }, []);
+        useEffect(() => {
+            setDataRealizacion(filtrarIndicadores(indicadoresRealizacion));
+            setDataResultado(filtrarIndicadores(indicadoresResultado));
+        }, [search, indicadoresRealizacion, indicadoresResultado]);
 
-    useEffect(() => {
-        if (indicadorReturn) return;
-        const data = sortBy(initialRecords, sortStatus.columnAccessor);
-        setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-    }, [sortStatus]);
+        // useEffect(() => {
+        //     if (indicadorReturn) return;
+        //     if (tipoTabla === 'realizacion' && listadoNombresIndicadores.length > 0) {
+        //         const idsIndicadores = new Set(listadoNombresIndicadores.map((i) => i.id));
+        //         const filtrados = indicadoresRealizacionesModal.filter((item) => !idsIndicadores.has(item.id));
+        //         setIndicadoresRealizacionesModal(filtrados);
+        //     }
+        // }, []);
 
-    const handleEliminarFila = (rowIndex: number) => {
-        if (window.confirm(t('confirmarEliminarIndicador'))) {
-            const nuevosIndicadores = indicadores.filter((_row, idx) => idx !== rowIndex);
-            setIndicadores(nuevosIndicadores);
-            if (tipoTabla === 'realizacion') {
+        useEffect(() => {
+            const data = sortBy(dataRealizacion, sortStatusRealizacion.columnAccessor);
+            setDataRealizacion(sortStatusRealizacion.direction === 'desc' ? data.reverse() : data);
+        }, [sortStatusRealizacion]);
+
+        useEffect(() => {
+            const data = sortBy(dataResultado, sortStatusResultado.columnAccessor);
+            setDataResultado(sortStatusResultado.direction === 'desc' ? data.reverse() : data);
+        }, [sortStatusRealizacion]);
+
+        const handleEliminarFila = (rowIndex: number) => {
+            if (window.confirm(t('confirmarEliminarIndicador'))) {
+                const nuevosIndicadores = indicadoresRealizacion.filter((_row, idx) => idx !== rowIndex);
+                setIndicadoresRealizacion(nuevosIndicadores);
+                // if (tipoTabla === 'realizacion') {
                 setDatosEditandoAccion({
                     ...datosEditandoAccion!,
                     indicadorAccion: {
@@ -249,182 +217,155 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadoresP
                         indicadoreResultado: datosEditandoAccion!.indicadorAccion?.indicadoreResultado ?? [],
                     },
                 });
-            } else {
-                setDatosEditandoAccion({
-                    ...datosEditandoAccion!,
-                    indicadorAccion: {
-                        indicadoreRealizacion: datosEditandoAccion!.indicadorAccion?.indicadoreRealizacion ?? [],
-                        indicadoreResultado: nuevosIndicadores,
-                    },
-                });
+                // } else {
+                //     setDatosEditandoAccion({
+                //         ...datosEditandoAccion!,
+                //         indicadorAccion: {
+                //             indicadoreRealizacion: datosEditandoAccion!.indicadorAccion?.indicadoreRealizacion ?? [],
+                //             indicadoreResultado: nuevosIndicadores,
+                //         },
+                //     });
+                // }
             }
-        }
-    };
+        };
 
-    const TablasIndicadores = React.forwardRef<HTMLButtonElement>(() => {
-        if (indicadorReturn) return <></>;
+        const TablasIndicadores = React.forwardRef<HTMLDivElement, TablasIndicadoresProps<IndicadorRealizacionAccion | IndicadorResultadoAccion>>(
+            ({ records, setIndicador, editableRowIndex, setEditableRowIndex, sortStatus, setSortStatus }, ref) => {
+                const columnMetaAnual = [
+                    editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
+                    editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
+                    editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
+                ];
 
-        const columnMetaAnual = [
-            editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicadores, editableRowIndex, editarPlan),
-        ];
+                const columnEjecutadoAnual = [
+                    editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicador, editableRowIndex, editarMemoria),
+                    editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarMemoria),
+                    editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicador, editableRowIndex, editarMemoria),
+                ];
 
-        const columnEjecutadoAnual = [
-            editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarMemoria),
-            editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarMemoria),
-            editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicadores, editableRowIndex, editarMemoria),
-        ];
+                const columnMetaFinal = [
+                    editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
+                    editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
+                    editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
+                ];
+                const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
 
-        const columnMetaFinal = [
-            editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicadores, editableRowIndex, editarPlan),
-            editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicadores, editableRowIndex, editarPlan),
-        ];
-        const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicadores, editableRowIndex, false)];
+                const columns = [
+                    editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
+                    ...(!bloqueo
+                        ? [
+                              {
+                                  accessor: 'acciones',
+                                  title: 'Acciones',
+                                  render: (_row: IndicadorRealizacionAccion, index: number) => {
+                                      return editableRowIndex === index ? (
+                                          <button
+                                              className="bg-green-500 text-white px-2 py-1 rounded"
+                                              onClick={() => {
+                                                  const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
+                                                  const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
+                                                  const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
+                                                  let valido = false;
+                                                  let errorAlert = '';
+                                                  if (editarMemoria) {
+                                                      if (ejecutadoOk) {
+                                                          valido = true;
+                                                      } else {
+                                                          errorAlert = t('alertTotalesMemoriaActivo');
+                                                      }
+                                                  }
+                                                  if (editarPlan) {
+                                                      if (metaAnualOk && metaFinalOk) {
+                                                          valido = true;
+                                                      } else {
+                                                          errorAlert = t('alertTotalesPlanActivo');
+                                                      }
+                                                  }
+                                                  if (valido) {
+                                                      setEditableRowIndex(-1);
+                                                  } else {
+                                                      alert(t('alertIndicadores', { totales: errorAlert }));
+                                                  }
+                                              }}
+                                          >
+                                              {t('guardar')}
+                                          </button>
+                                      ) : (
+                                          <div className="flex gap-2 w-full">
+                                              <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                                                  {t('editar')}
+                                              </button>
+                                              <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
+                                                  {t('Eliminar')}
+                                              </button>
+                                          </div>
+                                      );
+                                  },
+                              },
+                          ]
+                        : []),
+                ];
+                const columnGroups = [
+                    { id: 'descripcion', title: '', columns: columnNombre },
+                    { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
+                    { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+                    { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
+                    { id: 'final', title: '', columns: columns },
+                ];
+                return (
+                    <div ref={ref}>
+                        <DataTable
+                            className={`datatable-pagination-horizontal `}
+                            records={records}
+                            groups={columnGroups}
+                            withRowBorders={false}
+                            withColumnBorders={true}
+                            striped={true}
+                            highlightOnHover={true}
+                            sortStatus={sortStatus}
+                            onSortStatusChange={setSortStatus}
+                            minHeight={200}
+                        />
+                    </div>
+                );
+            }
+        );
 
-        const columns = [
-            editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicadores, editableRowIndex, true),
-            ...(!bloqueo
-                ? [
-                      {
-                          accessor: 'acciones',
-                          title: 'Acciones',
-                          render: (_row: IndicadorRealizacionAccion, index: number) => {
-                              return editableRowIndex === index ? (
-                                  <button
-                                      className="bg-green-500 text-white px-2 py-1 rounded"
-                                      onClick={() => {
-                                          const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
-                                          const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
-                                          const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
-                                          let valido = false;
-                                          let errorAlert = '';
-                                          if (editarMemoria) {
-                                              if (ejecutadoOk) {
-                                                  valido = true;
-                                              } else {
-                                                  errorAlert = t('alertTotalesMemoriaActivo');
-                                              }
-                                          }
-                                          if (editarPlan) {
-                                              if (metaAnualOk && metaFinalOk) {
-                                                  valido = true;
-                                              } else {
-                                                  errorAlert = t('alertTotalesPlanActivo');
-                                              }
-                                          }
-                                          if (valido) {
-                                              setEditableRowIndex(-1);
-                                          } else {
-                                              alert(t('alertIndicadores', { totales: errorAlert }));
-                                          }
-                                      }}
-                                  >
-                                      {t('guardar')}
-                                  </button>
-                              ) : (
-                                  <div className="flex gap-2 w-full">
-                                      <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                                          {t('editar')}
-                                      </button>
-                                      <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
-                                          {t('Eliminar')}
-                                      </button>
-                                  </div>
-                              );
-                          },
-                      },
-                  ]
-                : []),
-        ];
-        const columnGroups = [
-            { id: 'descripcion', title: '', columns: columnNombre },
-            { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
-            { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
-            { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
-            { id: 'final', title: '', columns: columns },
-        ];
         return (
-            <div>
-                <DataTable
-                    className={`datatable-pagination-horizontal `}
-                    records={indicadores}
-                    groups={columnGroups}
-                    withRowBorders={false}
-                    withColumnBorders={true}
-                    striped={true}
-                    highlightOnHover={true}
-                    sortStatus={sortStatus}
-                    onSortStatusChange={setSortStatus}
-                    minHeight={200}
-                />
+            <div ref={ref}>
+                <div className="panel mt-6">
+                    <span className="text-xl">{t('indicadorTipo', { tipo: t('RealizacionMin') })}</span>
+                    <div className="flex items-center justify-between mb-4">
+                        <input
+                            type="text"
+                            className="border border-gray-300 rounded p-2 w-full max-w-xs"
+                            placeholder={t('Buscar') + ' ...'}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                        {botonNuevoIndicadorAccion}
+                    </div>
+                    <TablasIndicadores
+                        records={dataRealizacion}
+                        setIndicador={setIndicadoresRealizacion}
+                        editableRowIndex={editableRowIndexRealizacion}
+                        setEditableRowIndex={setEditableRowIndexRealizacion}
+                        sortStatus={sortStatusRealizacion}
+                        setSortStatus={setSortStatusRealizacion}
+                    />
+                </div>
+                <div className="panel mt-6">
+                    <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
+                    <TablasIndicadores
+                        records={dataResultado}
+                        setIndicador={setIndicadoresResultado}
+                        editableRowIndex={editableRowIndexResultado}
+                        setEditableRowIndex={setEditableRowIndexResultado}
+                        sortStatus={sortStatusResultado}
+                        setSortStatus={setSortStatusResultado}
+                    />
+                </div>
             </div>
         );
-    });
-
-    const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
-        const indicadorNuevoRealizacion = listadoNombresIndicadores.find((r) => r.id === seleccion.idRealizacion);
-
-        const nuevosIndicadoresRealizacion = [
-            ...(datosEditandoAccion?.indicadorAccion?.indicadoreResultado ?? []),
-            ...seleccion.idsResultadosEnRealizacion.map(() => ({
-                id: seleccion.idRealizacion,
-                descripcion: `${indicadorNuevoRealizacion?.nombre}`,
-                idsResultados: seleccion.idsResultadosEnRealizacion,
-                metaAnual: { hombres: 0, mujeres: 0, total: 0 },
-                ejecutado: { hombres: 0, mujeres: 0, total: 0 },
-                metaFinal: { hombres: 0, mujeres: 0, total: 0 },
-            })),
-        ];
-
-        const nuevosIndicadoresResultado = [
-            ...(datosEditandoAccion?.indicadorAccion?.indicadoreResultado ?? []),
-            ...seleccion.idsResultadosEnRealizacion.map((idResultado) => ({
-                id: idResultado,
-                descripcion: indicadores.find((item) => item.id === idResultado)?.nombre || '',
-                idsResultados: seleccion.idsResultadosEnRealizacion,
-                metaAnual: { hombres: 0, mujeres: 0, total: 0 },
-                ejecutado: { hombres: 0, mujeres: 0, total: 0 },
-                metaFinal: { hombres: 0, mujeres: 0, total: 0 },
-            })),
-        ];
-
-        setIndicadores(nuevosIndicadoresRealizacion);
-
-        setDatosEditandoAccion({
-            ...datosEditandoAccion!,
-            indicadorAccion: {
-                indicadoreRealizacion: nuevosIndicadoresRealizacion,
-                indicadoreResultado: nuevosIndicadoresResultado,
-            },
-        });
-    };
-
-    const handleOpenModal = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, t)) {
-            setOpen(true);
-        }
-    };
-
-    return (
-        <div ref={ref}>
-            <div className="p-1 flex items-center space-x-4 mb-5 justify-between">
-                {!indicadorReturn ? (
-                    <input type="text" className="border border-gray-300 rounded p-2 w-full max-w-xs" placeholder={t('Buscar') + ' ...'} value={search} onChange={(e) => setSearch(e.target.value)} />
-                ) : (
-                    <div></div>
-                )}
-                {creaccion && !block && editarPlan && (
-                    <>
-                        <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
-                            {t('newFileIndicador', { tipo: t('RealizacionMin') })}
-                        </button>
-                        {open && <ModalNuevoIndicadorAccion open={open} onClose={() => setOpen(false)} onSave={handleSave} />}
-                    </>
-                )}
-            </div>
-            <TablasIndicadores />
-        </div>
-    );
-});
+    }
+);

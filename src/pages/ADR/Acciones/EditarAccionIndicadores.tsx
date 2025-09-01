@@ -1,28 +1,306 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { forwardRef, useRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../../components/Utils/utils';
-import { TablaIndicadorAccion } from './EditarAccionComponent';
+import { TablaIndicadorAccion, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import React from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
+    const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
+    const [open, setOpen] = useState(false);
+    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
+    const { editarPlan } = useEstadosPorAnio();
+    const [carga, setCarga] = useState<boolean>(false);
+
+    const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? []);
+    const [indicadoresResultadoTabla, setIndicadoresResultadoTabla] = useState<IndicadorResultadoAccion[]>(datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? []);
+
+    const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
+    const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
+
+    useEffect(() => {
+        if (datosEditandoAccion.indicadorAccion?.indicadoreRealizacion) {
+            setCarga(true);
+        }
+
+        const rescargarIndicadorRealizacion = datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion;
+        if (!rescargarIndicadorRealizacion) {
+            return;
+        }
+        setIndicadoresRealizacionTabla(rescargarIndicadorRealizacion);
+
+        const rescargarIndicadorResultado = datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
+        if (!rescargarIndicadorResultado) {
+            return;
+        }
+        setIndicadoresResultadoTabla(rescargarIndicadorResultado);
+    }, [datosEditandoAccion]);
+
+    useEffect(() => {
+        const indicadorActualizado = indicadoresRealizacionTabla.map((ind) => {
+            const nombre = listadoNombresIndicadoresRealizacion.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
+            return {
+                ...ind,
+                descripcion: nombre,
+            };
+        });
+
+        const haCambiado = indicadorActualizado.some((newInd, i) => newInd.descripcion !== indicadoresRealizacionTabla[i].descripcion);
+
+        if (haCambiado) {
+            setIndicadoresRealizacionTabla(indicadorActualizado);
+        }
+    }, [indicadoresRealizacionTabla]);
+
+    useEffect(() => {
+        const indicadorActualizado = indicadoresResultadoTabla.map((ind) => {
+            const nombre = listadoNombresIndicadoresResultado.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
+            return {
+                ...ind,
+                descripcion: nombre,
+            };
+        });
+
+        const haCambiado = indicadorActualizado.some((newInd, i) => newInd.descripcion !== indicadoresResultadoTabla[i].descripcion);
+
+        if (haCambiado) {
+            setIndicadoresResultadoTabla(indicadorActualizado);
+        }
+    }, [indicadoresResultadoTabla]);
+
+    if (!carga) {
+        return;
+    }
+
+    const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
+        const existeRealizacion = indicadoresRealizacionTabla.some((ind) => ind.id === seleccion.idRealizacion);
+        const existeResultado = indicadoresResultadoTabla.some((ind) => seleccion.idsResultadosEnRealizacion.includes(ind.id));
+
+        let continuar = true;
+
+        if (existeRealizacion && existeResultado) {
+            continuar = window.confirm('Algunos indicadores ya existen. ¿Deseas reemplazarlos?');
+        } else if (existeRealizacion) {
+            continuar = window.confirm('Algunos indicadores de Realizacion ya existen. ¿Deseas reemplazarlos?');
+        }
+
+        if (!continuar) return;
+
+        const nuevosIndicadoresRealizacionAccion: IndicadorRealizacionAccion[] = [
+            {
+                id: seleccion.idRealizacion,
+                descripcion: `${listadoNombresIndicadoresRealizacion.find((item) => item.id === seleccion.idRealizacion)?.nombre}`,
+                metaAnual: { hombres: 0, mujeres: 0, total: 0 },
+                ejecutado: { hombres: 0, mujeres: 0, total: 0 },
+                metaFinal: { hombres: 0, mujeres: 0, total: 0 },
+                hipotesis: '',
+            },
+        ];
+
+        const nuevosIndicadoresResultadoAccion: IndicadorResultadoAccion[] = seleccion.idsResultadosEnRealizacion.map((id) => ({
+            id,
+            descripcion: listadoNombresIndicadoresResultado.find((item) => item.id === id)?.nombre ?? '',
+            metaAnual: { hombres: 0, mujeres: 0, total: 0 },
+            ejecutado: { hombres: 0, mujeres: 0, total: 0 },
+            metaFinal: { hombres: 0, mujeres: 0, total: 0 },
+            hipotesis: '',
+        }));
+
+        setDatosEditandoAccion((prev) => ({
+            ...prev,
+            indicadorAccion: {
+                indicadoreRealizacion: [...(prev.indicadorAccion?.indicadoreRealizacion?.filter((ind) => ind.id !== seleccion.idRealizacion) ?? []), ...nuevosIndicadoresRealizacionAccion],
+                indicadoreResultado: [
+                    ...(prev.indicadorAccion?.indicadoreResultado?.filter((ind) => !seleccion.idsResultadosEnRealizacion.includes(ind.id)) ?? []),
+                    ...nuevosIndicadoresResultadoAccion,
+                ],
+            },
+        }));
+    };
+
+    const handleOpenModal = () => {
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, t)) {
+            setOpen(true);
+        }
+    };
 
     return (
-        <>
-            <div className="panel mt-6 ">
-                <span className="text-xl">{t('indicadorTipo', { tipo: t('RealizacionMin') })}</span>
-                <TablaIndicadorAccion tipoTabla="realizacion" creaccion={true} />
+        <TablaIndicadorAccion
+            indicadoresRealizacion={indicadoresRealizacionTabla}
+            setIndicadoresRealizacion={setIndicadoresRealizacionTabla}
+            indicadoresResultado={indicadoresResultadoTabla}
+            setIndicadoresResultado={setIndicadoresResultadoTabla}
+            botonNuevoIndicadorAccion={
+                <BtnNuevoIndicadorAccion
+                    indicadoresRealizacionTabla={indicadoresRealizacionTabla}
+                    indicadoresResultadoTabla={indicadoresResultadoTabla}
+                    block={block}
+                    editarPlan={editarPlan}
+                    open={open}
+                    setOpen={setOpen}
+                    handleOpenModal={handleOpenModal}
+                    handleSave={handleSave}
+                />
+            }
+        />
+    );
+});
+
+interface BtnNuevoIndicadorProps {
+    indicadoresRealizacionTabla: IndicadorRealizacionAccion[];
+    indicadoresResultadoTabla: IndicadorResultadoAccion[];
+    block: boolean;
+    editarPlan: boolean;
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    handleOpenModal: () => void;
+    handleSave: (data: any) => void;
+}
+
+const BtnNuevoIndicadorAccion: React.FC<BtnNuevoIndicadorProps> = ({ indicadoresRealizacionTabla, indicadoresResultadoTabla, block, editarPlan, open, setOpen, handleOpenModal, handleSave }) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className="flex items-center justify-between mb-5">
+            {!block && editarPlan && (
+                <div className="flex items-center space-x-4">
+                    <button className="px-4 py-2 bg-primary text-white rounded" onClick={handleOpenModal}>
+                        {t('newFileIndicador', { tipo: t('RealizacionMin') })}
+                    </button>
+                    {open && (
+                        <ModalNuevoIndicadorAccion
+                            indicadoresRealizacionTabla={indicadoresRealizacionTabla}
+                            indicadoresResultadoTabla={indicadoresResultadoTabla}
+                            open={open}
+                            onClose={() => setOpen(false)}
+                            onSave={handleSave}
+                        />
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+type Indicador = { id: number; nombre: string; checked: boolean; idsResultados?: number[] | undefined };
+
+interface ModalNuevoIndicadorAccionProps {
+    indicadoresRealizacionTabla: IndicadorRealizacionAccion[];
+    indicadoresResultadoTabla: IndicadorResultadoAccion[];
+    open: boolean;
+    onClose: () => void;
+    // realizaciones: Indicador[];
+    onSave?: (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => void;
+}
+
+export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(function ModalNuevoIndicadorAccion(props, ref) {
+    const { indicadoresRealizacionTabla, indicadoresResultadoTabla, open, onClose, onSave } = props;
+
+    const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
+    const [resultadosRelacionados, setResultadosRelacionados] = useState<Indicador[]>([]);
+
+    const { t } = useTranslation();
+    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
+
+    const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
+    const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
+    const listadoNombresIndicadoresRealizacionFiltrado = listadoNombresIndicadoresRealizacion.filter((item) => indicadoresRealizacionTabla.some((tabla) => tabla.id === item.id));
+    const listadoNombresIndicadoresResultadoFiltrado = listadoNombresIndicadoresResultado.filter((item) => indicadoresResultadoTabla.some((tabla) => tabla.id === item.id));
+
+    const handleToggleResultado = (id: number) => {
+        setResultadosRelacionados((prevResultados) => prevResultados.map((resultado) => (resultado.id === id ? { ...resultado, checked: !resultado.checked } : resultado)));
+    };
+
+    const handleChangeRealizacion = (id: number) => {
+        setIndicadorRealizacionId(id);
+        const relacionados = listadoNombresIndicadoresRealizacion.find((r) => r.id === id)?.idsResultados ?? [];
+
+        const resultadosFiltrados: Indicador[] = listadoNombresIndicadoresResultado
+            .filter((resultado) => relacionados.includes(resultado.id))
+            .map((resultado) => ({
+                ...resultado,
+                checked: true,
+            }));
+
+        setResultadosRelacionados(resultadosFiltrados);
+    };
+
+    const handleSave = () => {
+        if (listadoNombresIndicadoresRealizacionFiltrado.some((f) => f.id === indicadorRealizacionId)) {
+            console.log('Realizacion ya está en el listado');
+            //TODO Que se prefiere que desaparezca las opciones, que lo sobrescriba avisando antes o aviso y ya?
+            return;
+        } else {
+            console.log('Realizacion Nuevo');
+        }
+
+        resultadosRelacionados.forEach((resultado) => {
+            if (listadoNombresIndicadoresResultadoFiltrado.some((f) => f.id === resultado.id)) {
+                console.log('Resultado ya está en el listado');
+                //TODO Que se prefiere que desaparezca las opciones, que lo sobrescriba avisando antes o aviso y ya?
+                return;
+            } else {
+                console.log('Resultado Nuevo');
+            }
+        });
+
+        if (onSave && indicadorRealizacionId !== null) {
+            onSave({
+                idRealizacion: indicadorRealizacionId,
+                idsResultadosEnRealizacion: resultadosRelacionados.filter((r) => r.checked).map((r) => r.id),
+            });
+        }
+        onClose();
+    };
+
+    return (
+        <NewModal open={open} onClose={onClose} title={t('nuevoIndicadorRealizacion')}>
+            <div ref={ref}>
+                <label className="block mb-2 font-semibold">{t('seleccionaElIndicador', { tipo: t('Realizacion') })}:</label>
+                <select className="w-full mb-4 border rounded px-2 py-1" value={indicadorRealizacionId ?? ''} onChange={(e) => handleChangeRealizacion(Number(e.target.value))}>
+                    <option value="" disabled>
+                        {t('seleccionaIndicador')}
+                    </option>
+                    {listadoNombresIndicadoresRealizacion.map((r) => (
+                        <option className={`${r.nombre[4] === '.' ? 'bg-blue-200' : 'bg-white'}`} value={r.id} key={r.id}>
+                            {r.nombre}
+                        </option>
+                    ))}
+                </select>
             </div>
-            <div className="panel mt-6 ">
-                <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
-                <TablaIndicadorAccion tipoTabla="resultado" />
+
+            {indicadorRealizacionId && (
+                <div>
+                    <label className="block mb-2 font-semibold">{t('indicadoresResultadoRelacionados')}:</label>
+                    <ul className="pl-0 mb-4">
+                        {resultadosRelacionados.map((res) => (
+                            <li key={res.id} className="mb-2">
+                                <label className="flex items-center">
+                                    <input type="checkbox" checked={res.checked} onChange={() => handleToggleResultado(res.id)} className="mr-2" />
+                                    {res.nombre}
+                                </label>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            <div className="flex justify-end gap-2 mt-4">
+                <button onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">
+                    {t('cancelar')}
+                </button>
+                <button onClick={handleSave} className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    {t('anadir')}
+                </button>
             </div>
-        </>
+        </NewModal>
     );
 });
 
@@ -162,95 +440,5 @@ export const PestanaIndicadoresServicios = React.forwardRef<HTMLButtonElement>((
                 </tbody>
             </table>
         </div>
-    );
-});
-
-type Indicador = { id: number; nombre: string; checked: boolean; idsResultados?: number[] | undefined };
-
-interface ModalNuevoIndicadorAccionProps {
-    open: boolean;
-    onClose: () => void;
-    // realizaciones: Indicador[];
-    onSave?: (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => void;
-}
-
-export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(({ open, onClose, onSave }, ref) => {
-    const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
-    const [resultadosRelacionados, setResultadosRelacionados] = useState<Indicador[]>([]);
-
-    const { t } = useTranslation();
-    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
-    const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
-    const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
-
-    const handleToggleResultado = (id: number) => {
-        setResultadosRelacionados((prevResultados) => prevResultados.map((resultado) => (resultado.id === id ? { ...resultado, checked: !resultado.checked } : resultado)));
-    };
-
-    const handleChangeRealizacion = (id: number) => {
-        setIndicadorRealizacionId(id);
-        const relacionados = listadoNombresIndicadoresRealizacion.find((r) => r.id === id)?.idsResultados ?? [];
-
-        const resultadosFiltrados: Indicador[] = listadoNombresIndicadoresResultado
-            .filter((resultado) => relacionados.includes(resultado.id))
-            .map((resultado) => ({
-                ...resultado,
-                checked: true,
-            }));
-
-        setResultadosRelacionados(resultadosFiltrados);
-    };
-
-    const handleSave = () => {
-        if (onSave && indicadorRealizacionId !== null) {
-            onSave({
-                idRealizacion: indicadorRealizacionId,
-                idsResultadosEnRealizacion: resultadosRelacionados.filter((r) => r.checked).map((r) => r.id),
-            });
-        }
-        onClose();
-    };
-
-    return (
-        <NewModal open={open} onClose={onClose} title={t('nuevoIndicadorRealizacion')}>
-            <div ref={ref}>
-                <label className="block mb-2 font-semibold">{t('seleccionaElIndicador', { tipo: t('Realizacion') })}:</label>
-                <select className="w-full mb-4 border rounded px-2 py-1" value={indicadorRealizacionId ?? ''} onChange={(e) => handleChangeRealizacion(Number(e.target.value))}>
-                    <option value="" disabled>
-                        {t('seleccionaIndicador')}
-                    </option>
-                    {listadoNombresIndicadoresRealizacion.map((r) => (
-                        <option className={`${r.nombre[4] === '.' ? 'bg-blue-200' : 'bg-white'}`} value={r.id} key={r.id}>
-                            {r.nombre}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {indicadorRealizacionId && (
-                <div>
-                    <label className="block mb-2 font-semibold">{t('indicadoresResultadoRelacionados')}:</label>
-                    <ul className="pl-0 mb-4">
-                        {resultadosRelacionados.map((res) => (
-                            <li key={res.id} className="mb-2">
-                                <label className="flex items-center">
-                                    <input type="checkbox" checked={res.checked} onChange={() => handleToggleResultado(res.id)} className="mr-2" />
-                                    {res.nombre}
-                                </label>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            <div className="flex justify-end gap-2 mt-4">
-                <button onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">
-                    {t('cancelar')}
-                </button>
-                <button onClick={handleSave} className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded">
-                    {t('anadir')}
-                </button>
-            </div>
-        </NewModal>
     );
 });
