@@ -42,7 +42,7 @@ interface YearContextType {
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
-    EditarAccion: () => void;
+    GuardarLaEdicionAccion: () => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
     errorMessage: string | null;
@@ -424,7 +424,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const EditarAccion = () => {
+    const GuardarLaEdicionAccion = () => {
         const datos = convertirDatosAccionADatosAccionBackend();
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
@@ -675,7 +675,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 fechaUltimoActualizadoBBDDYearData,
                 setDatosEditandoAccion,
                 AgregarAccion,
-                EditarAccion,
+                GuardarLaEdicionAccion,
                 EliminarAccion,
                 AgregarServicio,
                 SeleccionEditarAccion,

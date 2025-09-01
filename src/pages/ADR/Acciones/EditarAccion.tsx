@@ -1,7 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useState } from 'react';
-import { TabCard } from './EditarAccionComponent';
+import { TabCard, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
@@ -39,7 +39,7 @@ const Index: React.FC = () => {
         block,
         datosEditandoServicio,
         setDatosEditandoServicio,
-        EditarAccion,
+        GuardarLaEdicionAccion,
     } = useYear();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -77,8 +77,10 @@ const Index: React.FC = () => {
     };
 
     const handleSave = () => {
-        EditarAccion();
-        setMostrandoAccionConcreta(true);
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, 'GuardadoEdicion', t)) {
+            GuardarLaEdicionAccion();
+            setMostrandoAccionConcreta(true);
+        }
     };
 
     return (

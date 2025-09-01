@@ -10,9 +10,9 @@ export interface Indicador {
     ano: number;
 }
 export interface HMT {
-    hombres: number;
-    mujeres: number;
-    total: number;
+    hombres: number | string;
+    mujeres: number | string;
+    total: number | string;
 }
 export interface IndicadorRealizacionAccion {
     id: number;

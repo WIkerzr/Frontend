@@ -83,13 +83,13 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
     );
 }
 
-export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: DatosAccion, t: (key: string, options?: any) => string) {
+export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: DatosAccion, ubicacionDelVerificador: 'NuevoIndicador' | 'GuardadoEdicion', t: (key: string, options?: any) => string) {
     const invalidIndicesRealizacion: number[] = [];
     const invalidIndicesResultado: number[] = [];
 
     const esValidoRealizacion =
         datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion?.every((fila, index) => {
-            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0;
+            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0 || fila.metaAnual?.total === '0' || fila.metaFinal?.total === '0';
 
             if (isInvalid) {
                 invalidIndicesRealizacion.push(index);
@@ -100,7 +100,7 @@ export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: Datos
 
     const esValidoResultado =
         datosEditandoAccion?.indicadorAccion?.indicadoreResultado?.every((fila, index) => {
-            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0;
+            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0 || fila.metaAnual?.total === '0' || fila.metaFinal?.total === '0';
 
             if (isInvalid) {
                 invalidIndicesResultado.push(index);
@@ -110,11 +110,19 @@ export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: Datos
         }) ?? false;
 
     if (!esValidoRealizacion) {
-        alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
+        if (ubicacionDelVerificador === 'NuevoIndicador') {
+            alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
+        } else if (ubicacionDelVerificador === 'GuardadoEdicion') {
+            alert(t('completarUltimaFilaGuardar', { tipo: t('Realizacion') }));
+        }
         return false;
     }
     if (!esValidoResultado) {
-        alert(t('completarUltimaFila', { tipo: t('Resultado') }));
+        if (ubicacionDelVerificador === 'NuevoIndicador') {
+            alert(t('completarUltimaFila', { tipo: t('Resultado') }));
+        } else if (ubicacionDelVerificador === 'GuardadoEdicion') {
+            alert(t('completarUltimaFilaGuardar', { tipo: t('Resultado') }));
+        }
         return false;
     }
     return true;
