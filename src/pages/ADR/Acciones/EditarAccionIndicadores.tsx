@@ -9,7 +9,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
@@ -125,6 +125,58 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
         }));
     };
 
+    const handleEliminarIndicador = (tipoIndicador: TiposDeIndicadores, rowIndex: number) => {
+        if (tipoIndicador === 'realizacion') {
+            const indicadorRealizacionAEliminar = indicadoresRealizacionTabla.filter((_row, idx) => idx === rowIndex);
+            let textoEliminar = `${t('confirmarEliminarIndicador')} \n-${indicadorRealizacionAEliminar[0].descripcion} \n`;
+
+            const resultadosAEliminar = listadoNombresIndicadoresRealizacion.find((r) => r.id === indicadorRealizacionAEliminar[0].id)?.idsResultados;
+
+            if (resultadosAEliminar && resultadosAEliminar.length > 0) {
+                resultadosAEliminar.forEach((raE, index) => {
+                    if (index === 0) {
+                        textoEliminar += '\n';
+                        textoEliminar += t('confirmarEliminarIndicadorResultados');
+                    }
+                    const resultadosAEliminar2 = listadoNombresIndicadoresResultado.find((r) => r.id === raE);
+                    if (resultadosAEliminar2) {
+                        textoEliminar += `\n-${resultadosAEliminar2.nombre}`;
+                    }
+                });
+            }
+
+            if (window.confirm(textoEliminar)) {
+                const nuevosIndicadoresRealizacion = indicadoresRealizacionTabla.filter((_row, idx) => idx !== rowIndex);
+                setIndicadoresRealizacionTabla(nuevosIndicadoresRealizacion);
+
+                const nuevosIndicadoresResultado =
+                    resultadosAEliminar && resultadosAEliminar.length > 0 ? indicadoresResultadoTabla.filter((r) => !resultadosAEliminar.includes(r.id)) : indicadoresResultadoTabla;
+
+                setDatosEditandoAccion({
+                    ...datosEditandoAccion!,
+                    indicadorAccion: {
+                        indicadoreRealizacion: nuevosIndicadoresRealizacion,
+                        indicadoreResultado: nuevosIndicadoresResultado,
+                    },
+                });
+            }
+        }
+
+        if (tipoIndicador === 'resultado') {
+            if (window.confirm(t('confirmarEliminarIndicador'))) {
+                const nuevosIndicadores = indicadoresResultadoTabla.filter((_row, idx) => idx !== rowIndex);
+                setIndicadoresResultadoTabla(nuevosIndicadores);
+                setDatosEditandoAccion({
+                    ...datosEditandoAccion!,
+                    indicadorAccion: {
+                        indicadoreRealizacion: datosEditandoAccion!.indicadorAccion?.indicadoreRealizacion ?? [],
+                        indicadoreResultado: nuevosIndicadores,
+                    },
+                });
+            }
+        }
+    };
+
     const handleOpenModal = () => {
         if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, 'NuevoIndicador', t)) {
             setOpen(true);
@@ -137,6 +189,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
             setIndicadoresRealizacion={setIndicadoresRealizacionTabla}
             indicadoresResultado={indicadoresResultadoTabla}
             setIndicadoresResultado={setIndicadoresResultadoTabla}
+            handleEliminarIndicador={handleEliminarIndicador}
             botonNuevoIndicadorAccion={
                 <BtnNuevoIndicadorAccion
                     indicadoresRealizacionTabla={indicadoresRealizacionTabla}

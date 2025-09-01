@@ -62,6 +62,8 @@
     "confirmacionReabrir": "¿Estás seguro que deseas REABRIR {{zona}} {{fecha}}?",
     "confirmacionRechazar": "¿Estás seguro que deseas RECHAZAR {{zona}} {{fecha}}?",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
+    "confirmarEliminarIndicador": "¿Esta seguro que quiere eliminar el indicador?",
+    "confirmarEliminarIndicadorResultados": "Se procedera a eliminar los siguientes indicadores de resultado:",
     "contraNueva": "Contraseña nueva",
     "contrasena": "Contraseña",
     "ContrasenaNoCoincide": "Las contraseñas no coinciden.",

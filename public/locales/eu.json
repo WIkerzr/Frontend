@@ -62,6 +62,8 @@
     "confirmacionReabrir": "Ziur zaude {{zona}} {{fecha}} BERRIREKI nahi duzula?",
     "confirmacionRechazar": "Ziur zaude {{zona}} {{fecha}} BAZTERTU nahi duzula?",
     "confirmarEliminar": "Ziur zaude {{nombre}} ezabatu nahi duzula?",
+    "confirmarEliminarIndicador": "Ziur zaude adierazlea ezabatu nahi duzula?",
+    "confirmarEliminarIndicadorResultados": "Ondorengo emaitza-adierazleak ezabatuko dira:",
     "contraNueva": "Pasahitz berria",
     "contrasena": "Pasahitza",
     "ContrasenaNoCoincide": "Pasahitzak ez datoz bat.",

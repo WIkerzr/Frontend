@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DatosAccion, EstadoLabel } from '../../../types/TipadoAccion';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
 import { editableColumnByPath } from './Columnas';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
@@ -128,13 +128,8 @@ export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: Datos
     return true;
 }
 
-interface TablasIndicadoresProps<T> {
-    records: T[];
-    setIndicador: React.Dispatch<React.SetStateAction<T[]>>;
-    editableRowIndex: number;
-    setEditableRowIndex: React.Dispatch<React.SetStateAction<number>>;
-    sortStatus: DataTableSortStatus<T>;
-    setSortStatus: React.Dispatch<React.SetStateAction<DataTableSortStatus<T>>>;
+interface TablasIndicadoresProps {
+    tipoIndicador: TiposDeIndicadores;
 }
 interface TablaIndicadorAccionProps {
     indicadoresRealizacion: IndicadorRealizacionAccion[];
@@ -142,13 +137,14 @@ interface TablaIndicadorAccionProps {
     indicadoresResultado: IndicadorRealizacionAccion[];
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
     botonNuevoIndicadorAccion: React.ReactNode;
+    handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void; // <-- nuevo
 }
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
-    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, botonNuevoIndicadorAccion }, ref) => {
+    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, botonNuevoIndicadorAccion, handleEliminarIndicador }, ref) => {
         const { t } = useTranslation();
 
-        const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
+        const { block } = useYear();
 
         const { editarPlan, editarMemoria } = useEstadosPorAnio();
         const [bloqueo, setBloqueo] = useState<boolean>(block);
@@ -213,131 +209,112 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             setDataResultado(sortStatusResultado.direction === 'desc' ? data.reverse() : data);
         }, [sortStatusRealizacion]);
 
-        const handleEliminarFila = (rowIndex: number) => {
-            if (window.confirm(t('confirmarEliminarIndicador'))) {
-                const nuevosIndicadores = indicadoresRealizacion.filter((_row, idx) => idx !== rowIndex);
-                setIndicadoresRealizacion(nuevosIndicadores);
-                // if (tipoTabla === 'realizacion') {
-                setDatosEditandoAccion({
-                    ...datosEditandoAccion!,
-                    indicadorAccion: {
-                        indicadoreRealizacion: nuevosIndicadores,
-                        indicadoreResultado: datosEditandoAccion!.indicadorAccion?.indicadoreResultado ?? [],
-                    },
-                });
-                // } else {
-                //     setDatosEditandoAccion({
-                //         ...datosEditandoAccion!,
-                //         indicadorAccion: {
-                //             indicadoreRealizacion: datosEditandoAccion!.indicadorAccion?.indicadoreRealizacion ?? [],
-                //             indicadoreResultado: nuevosIndicadores,
-                //         },
-                //     });
-                // }
-            }
-        };
+        const TablasIndicadores = forwardRef<HTMLDivElement, TablasIndicadoresProps>(({ tipoIndicador }, ref) => {
+            const records = tipoIndicador === 'realizacion' ? dataRealizacion : dataResultado;
+            const setIndicador = tipoIndicador === 'realizacion' ? setIndicadoresRealizacion : setIndicadoresResultado;
+            const editableRowIndex = tipoIndicador === 'realizacion' ? editableRowIndexRealizacion : editableRowIndexResultado;
+            const setEditableRowIndex = tipoIndicador === 'realizacion' ? setEditableRowIndexRealizacion : setEditableRowIndexResultado;
+            const sortStatus = tipoIndicador === 'realizacion' ? sortStatusRealizacion : sortStatusResultado;
+            const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
 
-        const TablasIndicadores = React.forwardRef<HTMLDivElement, TablasIndicadoresProps<IndicadorRealizacionAccion | IndicadorResultadoAccion>>(
-            ({ records, setIndicador, editableRowIndex, setEditableRowIndex, sortStatus, setSortStatus }, ref) => {
-                const columnMetaAnual = [
-                    editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
-                    editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
-                    editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
-                ];
+            const columnMetaAnual = [
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
+            ];
 
-                const columnEjecutadoAnual = [
-                    editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicador, editableRowIndex, editarMemoria),
-                    editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarMemoria),
-                    editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicador, editableRowIndex, editarMemoria),
-                ];
+            const columnEjecutadoAnual = [
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicador, editableRowIndex, editarMemoria),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarMemoria),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicador, editableRowIndex, editarMemoria),
+            ];
 
-                const columnMetaFinal = [
-                    editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
-                    editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
-                    editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
-                ];
-                const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
+            const columnMetaFinal = [
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
+            ];
+            const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
 
-                const columns = [
-                    editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
-                    ...(!bloqueo
-                        ? [
-                              {
-                                  accessor: 'acciones',
-                                  title: 'Acciones',
-                                  render: (_row: IndicadorRealizacionAccion, index: number) => {
-                                      return editableRowIndex === index ? (
-                                          <button
-                                              className="bg-green-500 text-white px-2 py-1 rounded"
-                                              onClick={() => {
-                                                  const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
-                                                  const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
-                                                  const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
-                                                  let valido = false;
-                                                  let errorAlert = '';
-                                                  if (editarMemoria) {
-                                                      if (ejecutadoOk) {
-                                                          valido = true;
-                                                      } else {
-                                                          errorAlert = t('alertTotalesMemoriaActivo');
-                                                      }
-                                                  }
-                                                  if (editarPlan) {
-                                                      if (metaAnualOk && metaFinalOk) {
-                                                          valido = true;
-                                                      } else {
-                                                          errorAlert = t('alertTotalesPlanActivo');
-                                                      }
-                                                  }
-                                                  if (valido) {
-                                                      setEditableRowIndex(-1);
+            const columns = [
+                editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
+                ...(!bloqueo
+                    ? [
+                          {
+                              accessor: 'acciones',
+                              title: 'Acciones',
+                              render: (_row: IndicadorRealizacionAccion, index: number) => {
+                                  return editableRowIndex === index ? (
+                                      <button
+                                          className="bg-green-500 text-white px-2 py-1 rounded"
+                                          onClick={() => {
+                                              const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
+                                              const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
+                                              const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
+                                              let valido = false;
+                                              let errorAlert = '';
+                                              if (editarMemoria) {
+                                                  if (ejecutadoOk) {
+                                                      valido = true;
                                                   } else {
-                                                      alert(t('alertIndicadores', { totales: errorAlert }));
+                                                      errorAlert = t('alertTotalesMemoriaActivo');
                                                   }
-                                              }}
-                                          >
-                                              {t('guardar')}
+                                              }
+                                              if (editarPlan) {
+                                                  if (metaAnualOk && metaFinalOk) {
+                                                      valido = true;
+                                                  } else {
+                                                      errorAlert = t('alertTotalesPlanActivo');
+                                                  }
+                                              }
+                                              if (valido) {
+                                                  setEditableRowIndex(-1);
+                                              } else {
+                                                  alert(t('alertIndicadores', { totales: errorAlert }));
+                                              }
+                                          }}
+                                      >
+                                          {t('guardar')}
+                                      </button>
+                                  ) : (
+                                      <div className="flex gap-2 w-full">
+                                          <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                                              {t('editar')}
                                           </button>
-                                      ) : (
-                                          <div className="flex gap-2 w-full">
-                                              <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                                                  {t('editar')}
-                                              </button>
-                                              <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
-                                                  {t('Eliminar')}
-                                              </button>
-                                          </div>
-                                      );
-                                  },
+                                          <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarIndicador(tipoIndicador, index)}>
+                                              {t('Eliminar')}
+                                          </button>
+                                      </div>
+                                  );
                               },
-                          ]
-                        : []),
-                ];
-                const columnGroups = [
-                    { id: 'descripcion', title: '', columns: columnNombre },
-                    { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
-                    { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
-                    { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
-                    { id: 'final', title: '', columns: columns },
-                ];
-                return (
-                    <div ref={ref}>
-                        <DataTable
-                            className={`datatable-pagination-horizontal `}
-                            records={records}
-                            groups={columnGroups}
-                            withRowBorders={false}
-                            withColumnBorders={true}
-                            striped={true}
-                            highlightOnHover={true}
-                            sortStatus={sortStatus}
-                            onSortStatusChange={setSortStatus}
-                            minHeight={200}
-                        />
-                    </div>
-                );
-            }
-        );
+                          },
+                      ]
+                    : []),
+            ];
+            const columnGroups = [
+                { id: 'descripcion', title: '', columns: columnNombre },
+                { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
+                { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+                { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
+                { id: 'final', title: '', columns: columns },
+            ];
+            return (
+                <div ref={ref}>
+                    <DataTable
+                        className={`datatable-pagination-horizontal `}
+                        records={records}
+                        groups={columnGroups}
+                        withRowBorders={false}
+                        withColumnBorders={true}
+                        striped={true}
+                        highlightOnHover={true}
+                        sortStatus={sortStatus}
+                        onSortStatusChange={setSortStatus}
+                        minHeight={200}
+                    />
+                </div>
+            );
+        });
 
         return (
             <div ref={ref}>
@@ -353,25 +330,11 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                         />
                         {botonNuevoIndicadorAccion}
                     </div>
-                    <TablasIndicadores
-                        records={dataRealizacion}
-                        setIndicador={setIndicadoresRealizacion}
-                        editableRowIndex={editableRowIndexRealizacion}
-                        setEditableRowIndex={setEditableRowIndexRealizacion}
-                        sortStatus={sortStatusRealizacion}
-                        setSortStatus={setSortStatusRealizacion}
-                    />
+                    <TablasIndicadores tipoIndicador="realizacion" />
                 </div>
                 <div className="panel mt-6">
                     <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
-                    <TablasIndicadores
-                        records={dataResultado}
-                        setIndicador={setIndicadoresResultado}
-                        editableRowIndex={editableRowIndexResultado}
-                        setEditableRowIndex={setEditableRowIndexResultado}
-                        sortStatus={sortStatusResultado}
-                        setSortStatus={setSortStatusResultado}
-                    />
+                    <TablasIndicadores tipoIndicador="resultado" />
                 </div>
             </div>
         );
