@@ -570,7 +570,12 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ejesPrioritarios: ejesPrioritarios,
                         introduccion: data.data.Plan.Introduccion,
                         proceso: data.data.Plan.Procesos,
-                        generalOperationADR: data.data.Plan.GeneralOperationADR,
+                        generalOperationADR: data.data.Plan.GeneralOperationADR || {
+                            adrInternalTasks: '',
+                            operationalIndicators: [],
+                            dSeguimiento: '',
+                            valFinal: '',
+                        },
                         status: status,
                     },
                     memoria: {

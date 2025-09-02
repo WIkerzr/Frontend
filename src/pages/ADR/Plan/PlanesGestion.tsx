@@ -33,7 +33,7 @@ const Index = () => {
     function validarCamposPlan(yearData: YearData): boolean {
         const plan = yearData.plan;
         setMensajeError('');
-        const camposTextoLlenos = plan.introduccion.trim() !== '' && plan.proceso.trim() !== '' && plan.generalOperationADR.adrInternalTasks.trim() !== '';
+        const camposTextoLlenos = (plan.introduccion?.trim() || '') !== '' && (plan.proceso?.trim() || '') !== '' && (plan.generalOperationADR?.adrInternalTasks?.trim() || '') !== '';
 
         if (camposTextoLlenos === false) {
             setMensajeError(t('rellenaLosCamposVaciosObligatorios') + '\n');
@@ -71,8 +71,6 @@ const Index = () => {
     }
 
     useEffect(() => {
-        // console.log('validarCamposPlan ' + validarCamposPlan(yearData));
-        // console.log('validarPlan ' + validarPlan(yearData));
         if (validarCamposPlan(yearData) && validarPlan(yearData)) {
             setCamposRellenos(true);
         } else {
