@@ -1,7 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useState } from 'react';
-import { TabCard, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
+import { TabCard, VerificarAccionAntesDeGuardar, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
@@ -44,9 +44,30 @@ const Index: React.FC = () => {
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
+    const [nombreEje, setNombreEje] = useState<string>('');
     const [mostrandoAccionConcreta, setMostrandoAccionConcreta] = useState(false);
 
+    const datosVacios = datosEditandoAccion.id === '0';
     useEffect(() => {
+        if (datosVacios) {
+            return;
+        }
+        if (!(i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu)) {
+            const eje = yearData.plan.ejesPrioritarios.find((r) => r.Id === datosEditandoAccion.ejeId);
+            if (eje) {
+                setNombreEje(i18n.language === 'es' ? eje.NameEs : eje.NameEu);
+            }
+        } else {
+            const nombreDelEje = i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu;
+            if (nombreDelEje) {
+                setNombreEje(nombreDelEje);
+            }
+        }
+    }, [datosEditandoAccion]);
+    useEffect(() => {
+        if (datosVacios) {
+            return;
+        }
         if (!editarPlan && !editarMemoria) {
             setBloqueo(true);
         } else {
@@ -55,6 +76,10 @@ const Index: React.FC = () => {
             }
         }
     }, []);
+
+    if (datosEditandoAccion.id === '0') {
+        return;
+    }
 
     if (!datosEditandoAccion) {
         if (!servicio) {
@@ -68,6 +93,12 @@ const Index: React.FC = () => {
             accion: `${e.target.value}`,
         });
     };
+    const handleLineaActuacionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setDatosEditandoAccion({
+            ...datosEditandoAccion!,
+            lineaActuaccion: `${e.target.value}`,
+        });
+    };
 
     const handleServicioChange = (campo: keyof Servicios, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoServicio((prev) => ({
@@ -78,8 +109,13 @@ const Index: React.FC = () => {
 
     const handleSave = () => {
         if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, 'GuardadoEdicion', t)) {
-            GuardarLaEdicionAccion();
-            setMostrandoAccionConcreta(true);
+            const camposFaltantes = VerificarAccionAntesDeGuardar(datosEditandoAccion, yearData);
+            if (camposFaltantes && camposFaltantes.length === 0) {
+                GuardarLaEdicionAccion();
+                setMostrandoAccionConcreta(true);
+            } else if (camposFaltantes && camposFaltantes.length > 0) {
+                alert('Faltan estos campos obligatorios:\n' + camposFaltantes.join('\n'));
+            }
         }
     };
 
@@ -123,15 +159,26 @@ const Index: React.FC = () => {
                                 <>
                                     <div className="w-1/2 flex flex-col gap-2 justify-center">
                                         <span className="block  font-semibold mb-1">
-                                            <span className="font-normal text-lg">{i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu}</span>
+                                            <span className="font-normal text-lg">{nombreEje}</span>
                                         </span>
                                         <span className="block  font-semibold">
-                                            <span className="font-normal text-col text-info">{datosEditandoAccion.lineaActuaccion}</span>
+                                            {editarPlan ? (
+                                                <input type="text" className="form-input w-3/4 text-info" value={datosEditandoAccion.lineaActuaccion} onChange={(e) => handleLineaActuacionChange(e)} />
+                                            ) : (
+                                                <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
+                                            )}
                                         </span>
                                     </div>
                                     <div className="flex">
                                         <input
-                                            onChange={(e) => setDatosEditandoAccion({ ...datosEditandoAccion!, plurianual: e.target.checked })}
+                                            onChange={(e) => {
+                                                if (editarPlan) {
+                                                    setDatosEditandoAccion({
+                                                        ...datosEditandoAccion!,
+                                                        plurianual: e.target.checked,
+                                                    });
+                                                }
+                                            }}
                                             type="checkbox"
                                             className="form-checkbox h-5 w-5 "
                                             checked={datosEditandoAccion.plurianual}
