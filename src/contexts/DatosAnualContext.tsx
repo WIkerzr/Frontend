@@ -218,6 +218,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     accionCompartida: response.data?.AccionCompartida ?? null,
                     datosPlan: dataPlan,
                     datosMemoria: dataMemoria,
+                    ejeId: idEjePrioritario,
                 };
 
                 setIdEjeEditado(idEjePrioritario);
@@ -645,7 +646,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const DatosMemoria: DatosMemoriaDTO = {
             Id: Number(datosEditandoAccion.datosMemoria.id),
             SActual: datosEditandoAccion.datosMemoria.sActual,
-            DAccionAvances: datosEditandoAccion.datosMemoria.dAccionAvances,
+            //DAccionAvances: datosEditandoAccion.datosMemoria.dAccionAvances,
             PresupuestoEjecutado_Cuantia: datosEditandoAccion.datosMemoria.presupuestoEjecutado.cuantia,
             PresupuestoEjecutado_FuenteDeFinanciacion: convertirArrayACadena(datosEditandoAccion.datosMemoria.presupuestoEjecutado.fuenteDeFinanciacion),
             PresupuestoEjecutado_Observaciones: datosEditandoAccion.datosMemoria.presupuestoEjecutado.observaciones,

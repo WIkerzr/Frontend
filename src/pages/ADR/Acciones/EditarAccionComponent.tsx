@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DatosAccion, EstadoLabel } from '../../../types/TipadoAccion';
+import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
@@ -11,6 +11,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { Estado } from '../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import React from 'react';
+import { YearData } from '../../../types/tipadoPlan';
 interface TabCardProps {
     icon: string;
     label: string;
@@ -126,6 +127,68 @@ export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: Datos
         return false;
     }
     return true;
+}
+
+export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, yearData: YearData) {
+    const statusPlan = yearData.plan.status;
+    const statusMemoria = yearData.memoria.status;
+    if (!datosEditandoAccion.indicadorAccion) {
+        return;
+    }
+    const camposPendientes: string[] = [];
+    const plan = datosEditandoAccion.datosPlan!;
+    const memoria: DatosMemoria = datosEditandoAccion.datosMemoria as DatosMemoria;
+    const indicadoresRealizacionAccion: IndicadorRealizacionAccion[] = datosEditandoAccion.indicadorAccion.indicadoreRealizacion;
+    const indicadoresResultadoAccion: IndicadorResultadoAccion[] = datosEditandoAccion.indicadorAccion.indicadoreResultado;
+    const checkData = (value: any, name: string) => {
+        if (value === null || value === undefined || value === '') {
+            camposPendientes.push(name);
+            return false;
+        }
+        return true;
+    };
+
+    //Plan
+    checkData(plan.ejecutora, 'Ejecutora');
+    checkData(plan.implicadas, 'Implicadas');
+    if (datosEditandoAccion.plurianual) {
+        checkData(plan.rangoAnios, 'RangoAnios');
+    }
+    checkData(plan.oAccion, 'OAccion');
+    checkData(plan.dAccion, 'DAccion');
+
+    //Memoria
+    checkData(memoria.presupuestoEjecutado.fuenteDeFinanciacion, 'fuenteDeFinanciacion');
+    checkData(memoria.presupuestoEjecutado.cuantia, 'cuantia');
+    checkData(memoria.presupuestoEjecutado.observaciones, 'observaciones');
+    checkData(memoria.ejecucionPresupuestaria.previsto, 'previsto');
+    checkData(memoria.ejecucionPresupuestaria.ejecutado, 'ejecutado');
+    checkData(memoria.ejecucionPresupuestaria.porcentaje, 'porcentaje');
+
+    //Indicador Realizacion
+    indicadoresRealizacionAccion.forEach((i, idx) => {
+        checkData(i.metaAnual!.total, `Realización #${idx + 1}: MetaAnual_Total`);
+        if (statusPlan !== 'borrador' && statusMemoria === 'borrador') {
+            checkData(i.ejecutado!.total, `Realización #${idx + 1}: Ejecutado_Total`);
+        }
+        checkData(i.metaFinal!.total, `Realización #${idx + 1}: MetaFinal_Total`);
+    });
+
+    //Indicador Resultado
+    indicadoresResultadoAccion.forEach((i, idx) => {
+        checkData(i.metaAnual!.total, `Resultado #${idx + 1}: MetaAnual_Total`);
+        if (statusPlan !== 'borrador' && statusMemoria === 'borrador') {
+            checkData(i.ejecutado!.total, `Resultado #${idx + 1}: Ejecutado_Total`);
+        }
+        checkData(i.metaFinal!.total, `Resultado #${idx + 1}: MetaFinal_Total`);
+    });
+
+    //DataAccion
+    checkData(datosEditandoAccion.accion, 'Nombre');
+    checkData(datosEditandoAccion.lineaActuaccion, 'LineaActuaccion');
+    checkData(datosEditandoAccion.plurianual, 'Plurianual');
+
+    return camposPendientes;
 }
 
 interface TablasIndicadoresProps {

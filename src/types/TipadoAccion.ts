@@ -37,21 +37,21 @@ export interface DatosPlan {
 
 export interface DatosMemoria {
     id: string;
-    ejecutora: string;
-    implicadas: string;
-    comarcal: string;
-    supracomarcal: string;
-    rangoAnios: string;
+    // ejecutora: string;
+    // implicadas: string;
+    // comarcal: string;
+    // supracomarcal: string;
+    // rangoAnios: string;
     sActual: EstadoLabel;
-    oAccion: string;
-    ods: string;
-    dAccionAvances: string;
+    // oAccion: string;
+    // ods: string;
+    //dAccionAvances: string;
     presupuestoEjecutado: PresupuestoEjecutado;
     ejecucionPresupuestaria: EjecucionPresupuestaria;
-    iMujHom: string;
-    uEuskera: string;
-    sostenibilidad: string;
-    dInteligent: string;
+    //iMujHom: string;
+    // uEuskera: string;
+    // sostenibilidad: string;
+    // dInteligent: string;
     observaciones: string;
     dSeguimiento: string;
     valFinal: string;
@@ -107,14 +107,14 @@ export const datosInicializadosAccion: DatosAccion = {
     },
     datosMemoria: {
         id: '0',
-        ejecutora: '',
-        implicadas: '',
-        comarcal: '',
-        supracomarcal: '',
-        rangoAnios: '',
+        // ejecutora: '',
+        // implicadas: '',
+        // comarcal: '',
+        // supracomarcal: '',
+        // rangoAnios: '',
         sActual: 'Actuación en ejecución',
-        oAccion: '',
-        ods: '',
+        // oAccion: '',
+        // ods: '',
         dAccionAvances: '',
         presupuestoEjecutado: {
             cuantia: '',
@@ -126,10 +126,10 @@ export const datosInicializadosAccion: DatosAccion = {
             ejecutado: '',
             porcentaje: '',
         },
-        iMujHom: '',
-        uEuskera: '',
-        sostenibilidad: '',
-        dInteligent: '',
+        //iMujHom: '',
+        // uEuskera: '',
+        // sostenibilidad: '',
+        // dInteligent: '',
         observaciones: '',
         dSeguimiento: '',
         valFinal: '',
@@ -161,15 +161,15 @@ export const datosPlanInicializada: DatosPlan = {
 
 export const datosMemoriaInicializada: DatosMemoria = {
     id: '0',
-    ejecutora: '',
-    implicadas: '',
-    comarcal: '',
-    supracomarcal: '',
-    rangoAnios: '',
+    //ejecutora: '',
+    //implicadas: '',
+    //comarcal: '',
+    //supracomarcal: '',
+    //rangoAnios: '',
     sActual: 'Actuación en ejecución',
-    oAccion: '',
-    ods: '',
-    dAccionAvances: '',
+    //oAccion: '',
+    //ods: '',
+    //dAccionAvances: '',
     presupuestoEjecutado: {
         cuantia: '',
         fuenteDeFinanciacion: [''],
@@ -180,10 +180,10 @@ export const datosMemoriaInicializada: DatosMemoria = {
         ejecutado: '',
         porcentaje: '',
     },
-    iMujHom: '',
-    uEuskera: '',
-    sostenibilidad: '',
-    dInteligent: '',
+    //iMujHom: '',
+    //uEuskera: '',
+    //sostenibilidad: '',
+    //dInteligent: '',
     observaciones: '',
     dSeguimiento: '',
     valFinal: '',
