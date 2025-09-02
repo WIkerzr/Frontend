@@ -205,7 +205,7 @@ interface TablaIndicadorAccionProps {
     indicadoresResultado: IndicadorRealizacionAccion[];
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
     botonNuevoIndicadorAccion: React.ReactNode;
-    handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void; // <-- nuevo
+    handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
 }
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
@@ -216,7 +216,8 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
 
         const { editarPlan, editarMemoria } = useEstadosPorAnio();
         const [bloqueo, setBloqueo] = useState<boolean>(block);
-        const [search, setSearch] = useState('');
+        const [searchRealizacion, setSearchRealizacion] = useState('');
+        const [searchResultado, setSearchResultado] = useState('');
         const [sortStatusRealizacion, setSortStatusRealizacion] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
         const [sortStatusResultado, setSortStatusResultado] = useState<DataTableSortStatus<IndicadorResultadoAccion>>({ columnAccessor: 'id', direction: 'asc' });
         const [editableRowIndexRealizacion, setEditableRowIndexRealizacion] = useState(-1);
@@ -234,7 +235,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             }
         }, []);
 
-        const filtrarIndicadores = <T extends { descripcion?: string; metaAnual?: any; ejecutado?: any; metaFinal?: any; hipotesis?: string }>(lista: T[]) => {
+        const filtrarIndicadores = <T extends { descripcion?: string; metaAnual?: any; ejecutado?: any; metaFinal?: any; hipotesis?: string }>(lista: T[], search: string) => {
             if (!search.trim()) return sortBy(lista, 'id');
             const s = search.toLowerCase();
             return lista.filter(
@@ -254,18 +255,12 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
         };
 
         useEffect(() => {
-            setDataRealizacion(filtrarIndicadores(indicadoresRealizacion));
-            setDataResultado(filtrarIndicadores(indicadoresResultado));
-        }, [search, indicadoresRealizacion, indicadoresResultado]);
+            setDataRealizacion(filtrarIndicadores(indicadoresRealizacion, searchRealizacion));
+        }, [searchRealizacion, indicadoresRealizacion]);
 
-        // useEffect(() => {
-        //     if (indicadorReturn) return;
-        //     if (tipoTabla === 'realizacion' && listadoNombresIndicadores.length > 0) {
-        //         const idsIndicadores = new Set(listadoNombresIndicadores.map((i) => i.id));
-        //         const filtrados = indicadoresRealizacionesModal.filter((item) => !idsIndicadores.has(item.id));
-        //         setIndicadoresRealizacionesModal(filtrados);
-        //     }
-        // }, []);
+        useEffect(() => {
+            setDataResultado(filtrarIndicadores(indicadoresResultado, searchResultado));
+        }, [searchResultado, indicadoresResultado]);
 
         useEffect(() => {
             const data = sortBy(dataRealizacion, sortStatusRealizacion.columnAccessor);
@@ -393,8 +388,8 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                             type="text"
                             className="border border-gray-300 rounded p-2 w-full max-w-xs"
                             placeholder={t('Buscar') + ' ...'}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            value={searchRealizacion}
+                            onChange={(e) => setSearchRealizacion(e.target.value)}
                         />
                         {botonNuevoIndicadorAccion}
                     </div>
@@ -402,6 +397,16 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                 </div>
                 <div className="panel mt-6">
                     <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
+                    <div className="flex items-center justify-between mb-4">
+                        <input
+                            type="text"
+                            className="border border-gray-300 rounded p-2 w-full max-w-xs"
+                            placeholder={t('Buscar') + ' ...'}
+                            value={searchResultado}
+                            onChange={(e) => setSearchResultado(e.target.value)}
+                        />
+                        {botonNuevoIndicadorAccion}
+                    </div>
                     <TablasIndicadores tipoIndicador="resultado" />
                 </div>
             </div>
