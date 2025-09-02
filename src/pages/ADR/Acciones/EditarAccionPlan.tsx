@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosPlan } from '../../../types/TipadoAccion';
-import { InputField, SimpleDropdown, TextArea } from '../../../components/Utils/inputs';
+import { DropdownTraducido, InputField, TextArea } from '../../../components/Utils/inputs';
 import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../types/GeneralTypes';
 import Multiselect from 'multiselect-react-dropdown';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,10 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [regionesSupracomarcal, setRegionesSupracomarcal] = useState<boolean>(false);
+
+    const opcionesComarcalES = t('object:opcionesComarcal', { returnObjects: true }) as string[];
+    const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
+    const opcionesODSEUSegunIdioma = t('object:opcionesODS', { returnObjects: true }) as string[];
 
     if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {
         return;
@@ -105,21 +109,23 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                     )}
                 </div>
                 <div className="flex gap-4">
-                    <SimpleDropdown
+                    <DropdownTraducido
                         title={'tratamientoComarcal'}
                         disabled={bloqueo}
                         value={opcionesComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.comarcal) ? datosEditandoAccion.datosPlan?.comarcal : 'Otros'}
                         options={opcionesComarcal}
+                        visualOptions={opcionesComarcalES}
                         onChange={(e) => handleChangeCampos('comarcal', e)}
                     />
                     {!opcionesComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.comarcal || '') && (
                         <InputField nombreInput="tratamientoComarcal" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.comarcal} onChange={(e) => handleChangeCampos('comarcal', e)} />
                     )}
-                    <SimpleDropdown
+                    <DropdownTraducido
                         title={'supracomarcal'}
                         disabled={bloqueo}
                         value={opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal) ? datosEditandoAccion.datosPlan?.supracomarcal : 'Otros'}
                         options={opcionesSupraComarcal}
+                        visualOptions={opcionesSupraComarcalSegunIdioma}
                         onChange={(e) => handleChangeCampos('supracomarcal', e)}
                     />
                     {!opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal || '') && (
@@ -155,7 +161,15 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             <div className="flex-1"></div>
             <div className="flex gap-4 panel">
                 <TextArea required nombreInput="oAccion" className={'h-[38px]'} disabled={bloqueo} value={datosEditandoAccion.datosPlan.oAccion} onChange={(e) => handleChangeCampos('oAccion', e)} />
-                <SimpleDropdown title="ods" disabled={bloqueo} value={datosEditandoAccion.datosPlan.ods} options={opcionesODS} onChange={(e) => handleChangeCampos('ods', e)} mostrarSeleccionaopcion />
+                <DropdownTraducido
+                    title={'ods'}
+                    disabled={bloqueo}
+                    value={datosEditandoAccion.datosPlan.ods}
+                    options={opcionesODS}
+                    visualOptions={opcionesODSEUSegunIdioma}
+                    onChange={(e) => handleChangeCampos('ods', e)}
+                    mostrarSeleccionaopcion
+                />
             </div>
 
             <div className="panel">

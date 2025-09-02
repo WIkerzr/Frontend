@@ -1,0 +1,55 @@
+{
+  "opcionesComarcal": [
+    "Eskualde tratamendurik gabe",
+    "Arreta bereziko eremuak",
+    "Landagune guztiak dituzten udalerriak",
+    "Sakabanatutako landa-habitat duten udalerriak",
+    "Eskualdeko landa-eremu guztiak",
+    "Beste batzuk"
+  ],
+  "opcionesSupraComarcal": [
+    "Eskualde gaindiko tratamendurik gabe",
+    "Lurralde historikoa",
+    "Euskadi",
+    "Beste batzuk"
+  ],
+  "opcionesODS": [
+    "Pobrezia desagerraraztea",
+    "Gosea amaitzea",
+    "Osasuna eta ongizatea",
+    "Kalitatezko hezkuntza",
+    "Genero berdintasuna",
+    "Ura eta saneamendu garbia",
+    "Energia eskuragarria eta ez kutsatzailea",
+    "Industria, berrikuntza eta azpiegiturak",
+    "Desberdintasunak murriztea",
+    "Hiri eta komunitate jasangarriak",
+    "Ekoizpen eta kontsumo arduratsuak",
+    "Klima ekintza",
+    "Itsas bizitza",
+    "Lurreko ekosistemak",
+    "Bakea, justizia eta instituzio sendoak",
+    "Helburuak lortzeko aliantzak"
+  ],
+  "estados": [
+    "Exekuzioan dagoen ekintza",
+    "Zain dagoen ekintza",
+    "Amaitutako ekintza",
+    "Utzi den ekintza"
+  ],
+  "fuentesFinanciacion": [
+    "Eusko Jaurlaritza",
+    "DDFF",
+    "Tokiko administrazioak",
+    "Finantza pribatua",
+    "Autofinantzaketa",
+    "Beste batzuk"
+  ],
+  "tareasInternas": [
+    "ADR-ren egokitasuneko funtzionamendua bermatzen duten barne kudeaketa-lanak honako hauek dira:",
+    "Urteko PG-ren prestaketa eta proposatutako ekintzen jarraipena.",
+    "Urteko memoria laburbildua prestaketa, aurreikusitako ekintzen betetze-maila aztertuz.",
+    "Elkartearen barne kudeaketa administratiboari dagozkion lanak: zuzendaritza batzarren deialdia, aktak eta memoriak prestaketa, aurrekontuaren kudeaketa, etab.",
+    "ADR-ren komunikazioa (ekintza propioen zabalkundea, prentsa-oharren prestaketa, ekitaldietarako izen-emateen jasotzea, sare sozialak, laguntzak, eskualdeko albiste interesgarriak, prentsaurrekoen antolaketa, etab.)"
+  ]
+}

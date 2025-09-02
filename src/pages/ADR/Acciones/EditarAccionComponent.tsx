@@ -49,6 +49,7 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
     const selected = estados.find((e) => e.label === value) || estados[0];
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
     const handleSelect = (estado: { label: EstadoLabel; color: string }) => {
         onChange(estado.label);
@@ -65,18 +66,22 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const ESTADOS: EstadoLabel[] = ['Actuación en ejecución', 'Actuación en espera', 'Actuación finalizada', 'Actuación abandonada'];
+
+    const EstadoLabelTraducidos = t('object:estados', { returnObjects: true }) as string[];
+
     return (
         <div className="relative w-full max-w-sm -top-[2px]" ref={dropdownRef}>
             <button type="button" onClick={() => setOpen(!open)} disabled={disabled} className={`w-full text-left p-2 rounded border ${disabled ? 'bg-gray-600' : selected.color}`}>
-                {selected.label}
+                {EstadoLabelTraducidos[ESTADOS.indexOf(selected.label as EstadoLabel)]}
             </button>
 
             {open && (
                 <div className={`absolute mt-1 w-full border rounded shadow bg-white z-10`}>
-                    {estados.map((estado) => (
-                        <div key={estado.label} onClick={() => handleSelect(estado)} className={`p-2 cursor-pointer hover:bg-gray-100 ${estado.color}`}>
-                            {estado.label}
-                        </div>
+                    {estados.map((estado, idx) => (
+                        <option key={estado.label} onClick={() => handleSelect(estado)} className={`p-2 cursor-pointer hover:bg-gray-100 ${estado.color}`}>
+                            {EstadoLabelTraducidos[idx]}
+                        </option>
                     ))}
                 </div>
             )}

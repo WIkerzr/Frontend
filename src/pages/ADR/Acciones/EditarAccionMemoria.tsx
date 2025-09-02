@@ -27,13 +27,16 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
             }
         }
     }, []);
+
+    const FuentesFinanciacionTraduciones = t('object:fuentesFinanciacion', { returnObjects: true }) as string[];
+
     const Fuentes_Financiacion = [
-        { label: 'Gobierno Vasco', value: 'Gobierno Vasco' },
-        { label: 'DDFF', value: 'DDFF' },
-        { label: 'Administraciones locales', value: 'Administraciones locales' },
-        { label: 'Fuentes Privadas', value: 'Fuentes Privadas' },
-        { label: 'Autofinanciación', value: 'Autofinanciación' },
-        { label: 'Otros', value: 'Otros' },
+        { label: FuentesFinanciacionTraduciones[0], value: 'Gobierno Vasco' },
+        { label: FuentesFinanciacionTraduciones[1], value: 'DDFF' },
+        { label: FuentesFinanciacionTraduciones[2], value: 'Administraciones locales' },
+        { label: FuentesFinanciacionTraduciones[3], value: 'Fuentes Privadas' },
+        { label: FuentesFinanciacionTraduciones[4], value: 'Autofinanciación' },
+        { label: FuentesFinanciacionTraduciones[5], value: 'Otros' },
     ] satisfies { label: string; value: FuenteFinanciacion }[];
 
     const handleChangeCampos = (campo: keyof DatosMemoria, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

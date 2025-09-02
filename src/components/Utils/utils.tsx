@@ -401,6 +401,7 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
     const { i18n } = useTranslation();
     const prevIsOpen = useRef(isOpen);
     const [mostrarTodos, setMostrarTodos] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         setSelected((prev) => (JSON.stringify(prev) === JSON.stringify(preSelected) ? prev : preSelected));
@@ -446,7 +447,7 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
             <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1 mb-1 p-1 border rounded bg-gray-100">
                 {mostrarTodos ? (
                     <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded cursor-pointer" onClick={() => setMostrarTodos(false)}>
-                        TODOS ×
+                        {t('TODOS')} ×
                     </span>
                 ) : (
                     selected.map((eje) => (
@@ -458,13 +459,13 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
             </div>
 
             <div className="border rounded p-2 cursor-pointer bg-white" onClick={() => setIsOpen((prev) => !prev)}>
-                {selected.length === 0 ? 'Selecciona opciones...' : `${selected.length} seleccionados`}
+                {selected.length === 0 ? t('selecionaOpciones') : t('seleccionadosOpciones', { count: selected.length })}
             </div>
 
             {isOpen && (
                 <div className="absolute w-full max-h-60 overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
                     <div className="p-2 border-b cursor-pointer hover:bg-gray-200 font-semibold" onClick={toggleSelectAll}>
-                        {selected.length > 0 && selected.length === objeto.length ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                        {selected.length > 0 && selected.length === objeto.length ? t('deseleccionarTodo') : t('seleccionarTodo')}
                     </div>
                     {drop.map((eje) => (
                         <div key={eje.EjeId} className={`p-2 cursor-pointer hover:bg-gray-200 ${selected.some((s) => s.EjeId === eje.EjeId) ? 'bg-gray-100' : ''}`} onClick={() => toggleOption(eje)}>

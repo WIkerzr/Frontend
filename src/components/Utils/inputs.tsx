@@ -81,6 +81,11 @@ export const LanguageSelector = () => {
 
     const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedLang = e.target.value;
+        if (selectedLang === 'es') {
+            document.title = 'PLATAFORMA DIGITAL DE GESTIÓN';
+        } else {
+            document.title = 'KUDEAKETA PLATAFORMA DIGITALA';
+        }
         i18n.changeLanguage(selectedLang);
         localStorage.setItem('idioma', selectedLang);
     };
@@ -173,6 +178,30 @@ export const SimpleDropdown = ({ title, options, value, disabled, mostrarSelecci
     );
 };
 
+interface DropdownTraducidoProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+    title?: string;
+    options: readonly number[] | string[];
+    visualOptions: readonly number[] | string[];
+    mostrarSeleccionaopcion?: boolean;
+    onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+export const DropdownTraducido = ({ title, options, visualOptions, value, disabled, mostrarSeleccionaopcion = false, onChange }: DropdownTraducidoProps) => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex-1">
+            {title && <label>{t(title)}</label>}
+            <select className="w-full border rounded p-2 resize-y" disabled={disabled} value={value} onChange={onChange}>
+                <option disabled={!mostrarSeleccionaopcion}>{t('seleccionaopcion')}</option>
+                {options.map((value, idx) => (
+                    <option key={value} value={value}>
+                        {visualOptions[idx]}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+};
+
 interface AttachProps {
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
@@ -187,6 +216,7 @@ export function isImage(file: File) {
 
 export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }: AttachProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -218,11 +248,11 @@ export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }:
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                 >
-                    Escoge o suelta un archivo aquí a subir
+                    {t('inputArchivos')}
                     <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple={multiple} style={{ display: 'none' }} onChange={handleChange} />
                 </div>
                 <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => fileInputRef.current?.click()}>
-                    Explorar
+                    {t('Explorar')}
                 </button>
             </div>
             <div className="mt-4 space-y-2">

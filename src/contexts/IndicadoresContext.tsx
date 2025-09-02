@@ -324,8 +324,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         ];
 
         const listadoArray = combinados.map((ind) => {
-            const nombre = (i18n.language === 'eu' ? ind.NameEu : ind.NameEs) ?? '';
-
+            const nombre = i18n.language === 'eu' ? ind.NameEu?.trim() || ind.NameEs || '' : ind.NameEs?.trim() || ind.NameEu || '';
             const idsResultados = tipoIndicador === 'realizacion' && 'Resultados' in ind && Array.isArray(ind.Resultados) ? ind.Resultados.map((res) => res.Id) : undefined;
 
             return {

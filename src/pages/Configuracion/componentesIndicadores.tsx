@@ -512,7 +512,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                             </option>
                             {opcionesFiltradas.map((op) => (
                                 <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
-                                    {i18n.language === 'eu' ? op.NameEu : op.NameEs}
+                                    {i18n.language === 'eu' ? op.NameEu?.trim() || op.NameEs || '' : op.NameEs?.trim() || op.NameEu || ''}
                                 </option>
                             ))}
                         </select>

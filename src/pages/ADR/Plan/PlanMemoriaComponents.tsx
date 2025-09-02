@@ -98,6 +98,7 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
 
 export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
     const { t } = useTranslation();
+    const TareasInternasTraduciones = t('object:tareasInternas', { returnObjects: true }) as string[];
     return (
         <div className=" flex flex-col gap-4" ref={ref}>
             {/* <Campos campo="introduccion" mostrar={pantalla === 'Plan'} /> */}
@@ -106,15 +107,15 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                 <span className="text-xl  font-semibold text-gray-700 tracking-wide block mb-2">{t('funcionamientoGeneral')}</span>
                 <div className="mb-[10px]">
                     <span>
-                        Las tareas internas de gestión que aseguran un adecuado funcionamiento de la ADR son las siguientes:
+                        {TareasInternasTraduciones[0]}
                         <br />
-                        - Elaboración del PG anual y seguimiento de las actuaciones propuestas.
+                        {TareasInternasTraduciones[1]}
                         <br />
-                        - Elaboración de la memoria recapitulativa anual analizando el grado de ejecución de las actuaciones previstas.
+                        {TareasInternasTraduciones[2]}
                         <br />
-                        - Labores propias de la gestión administrativa interna de la asociación: convocatoria de juntas directivas, elaboración de actas y memorias, gestión del presupuesto, etc.
-                        <br />- Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de
-                        interés de la comarca, organización de ruedas de prensa, etc.).
+                        {TareasInternasTraduciones[3]}
+                        <br />
+                        {TareasInternasTraduciones[4]}
                     </span>
                 </div>
                 <Campos campo2="adrInternalTasks" mostrar={pantalla === 'Plan'} />

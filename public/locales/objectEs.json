@@ -1,0 +1,56 @@
+{
+  "opcionesComarcal": [
+    "Sin tratamiento territorial comarcal",
+    "Zonas de especial atención",
+    "Municipios con todas las zonas rurales",
+    "Municipios con habitat rural disperso",
+    "Todas las entidades rurales de la comarca",
+    "Otros"
+  ],
+  "opcionesSupraComarcal": [
+    "Sin tratamiento territorial supracomarcal",
+    "Territorio histórico",
+    "Euskadi",
+    "Otros"
+  ],
+  "opcionesODS": [
+    "Fin de la Pobreza",
+    "Hambre Cero",
+    "Salud y Bienestar",
+    "Educación de Calidad",
+    "Igualdad de Género",
+    "Agua Limpia y Saneamiento",
+    "Energía Asequible y no Contaminante",
+    "Industria, Innovación e Infraestructura",
+    "Reducción de las Desigualdades",
+    "Ciudades y Comunidades Sostenibles",
+    "Producción y Consumo Responsables",
+    "Acción por el Clima",
+    "Vida Submarina",
+    "Vida de Ecosistemas Terrestres",
+    "Paz, Justicia e Instituciones Sólidas",
+    "Alianzas para Lograr los Objetivos"
+  ],
+  "estados": [
+    "Actuación en ejecución",
+    "Actuación en espera",
+    "Actuación finalizada",
+    "Actuación abandonada"
+  ],
+  "fuentesFinanciacion": [
+    "Gobierno Vasco",
+    "DDFF",
+    "Administraciones locales",
+    "Fuentes Privadas",
+    "Autofinanciación",
+    "Otros"
+  ],
+  "tareasInternas": [
+    "Las tareas internas de gestión que aseguran un adecuado funcionamiento de la ADR son las siguientes:",
+    "Elaboración del PG anual y seguimiento de las actuaciones propuestas.",
+    "Elaboración de la memoria recapitulativa anual analizando el grado de ejecución de las actuaciones previstas.",
+    "Labores propias de la gestión administrativa interna de la asociación: convocatoria de juntas directivas, elaboración de actas y memorias, gestión del presupuesto, etc.",
+    "Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa, etc.)"
+  ]
+
+}

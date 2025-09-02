@@ -94,7 +94,7 @@ export interface Indicadoreslist {
 }
 
 const Index = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const nuevosIndicadores = convertirIndicadores(listadoIndicadoresImpacto);
     const [indicadores, setIndicadores] = useState<Indicador[]>(nuevosIndicadores);
     const [mostrarDrop, setMostrarDrop] = useState<number>(0);
@@ -235,7 +235,7 @@ const Index = () => {
                 if (record.categorias && record.categorias.length > 0 && (isFirst || prueba)) {
                     const datos = indicadores.filter((ind) => ind.idTemp === record.idTemp);
                     const opcionesYaMostradas = datos.filter((dato) => dato.mostrar && !dato.categorias).map((dato) => dato.categoria);
-                    const opciones = record.categorias.map((c) => c.nameEs).filter((name) => !opcionesYaMostradas.includes(name));
+                    const opciones = record.categorias.map((c) => (i18n.language === 'eu' ? c.nameEu : c.nameEs)).filter((name) => !opcionesYaMostradas.includes(name));
 
                     return (
                         <div style={{ position: 'relative', minHeight: 40 }}>

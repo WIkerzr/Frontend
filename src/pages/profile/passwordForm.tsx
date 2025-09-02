@@ -36,7 +36,7 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ onSubmit, passwordData, onC
                 setConditional(true);
             }
         }
-    }, [passwordData]);
+    }, [passwordData, t]);
     return (
         <div>
             <form className="panel h-full" onSubmit={onSubmit}>
