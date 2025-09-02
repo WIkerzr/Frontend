@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { get, set } from 'lodash';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
-import IconArrowLeft from '../../../components/Icon/IconArrowLeft';
-import IconEqual from '../../../components/Icon/IconEqual';
+import IconArrowLeft from '../../Icon/IconArrowLeft';
+import IconEqual from '../../Icon/IconEqual';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
     'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },

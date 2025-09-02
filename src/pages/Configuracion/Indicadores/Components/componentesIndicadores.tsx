@@ -3,19 +3,19 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { IndicadorResultado, IndicadorRealizacion, indicadorInicial, indicadorResultadoinicial } from '../../types/Indicadores';
+import { IndicadorResultado, IndicadorRealizacion, indicadorInicial, indicadorResultadoinicial } from '../../../../types/Indicadores';
 import Tippy from '@tippyjs/react';
-import IconPencil from '../../components/Icon/IconPencil';
-import IconTrash from '../../components/Icon/IconTrash';
+import IconPencil from '../../../../components/Icon/IconPencil';
+import IconTrash from '../../../../components/Icon/IconTrash';
 import React from 'react';
-import { RegionInterface } from '../../components/Utils/data/getRegiones';
-import { Acciones, useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { ApiTarget } from '../../components/Utils/data/controlDev';
-import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, MultiSelectDOM } from '../../components/Utils/utils';
-import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../components/Utils/data/dataIndicadores';
-import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
-import { ErrorMessage } from '../../components/Utils/animations';
-import { useRegionContext } from '../../contexts/RegionContext';
+import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
+import { Acciones, useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
+import { ApiTarget } from '../../../../components/Utils/data/controlDev';
+import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, MultiSelectDOM } from '../../../../components/Utils/utils';
+import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../../../components/Utils/data/dataIndicadores';
+import { EjeIndicadorBBDD } from '../../../../types/tipadoPlan';
+import { ErrorMessage } from '../../../../components/Utils/animations';
+import { useRegionContext } from '../../../../contexts/RegionContext';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {

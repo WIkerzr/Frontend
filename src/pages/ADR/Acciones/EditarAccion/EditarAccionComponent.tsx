@@ -2,16 +2,16 @@
 /* eslint-disable no-unused-vars */
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../types/TipadoAccion';
+import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../../types/TipadoAccion';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
-import { editableColumnByPath } from './Columnas';
-import { useYear } from '../../../contexts/DatosAnualContext';
-import { Estado } from '../../../types/GeneralTypes';
-import { StatusColorsFonds, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
+import { editableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
+import { useYear } from '../../../../contexts/DatosAnualContext';
+import { Estado } from '../../../../types/GeneralTypes';
+import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
-import { YearData } from '../../../types/tipadoPlan';
+import { YearData } from '../../../../types/tipadoPlan';
 interface TabCardProps {
     icon: string;
     label: string;

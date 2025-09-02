@@ -4,7 +4,7 @@ import { getRegiones, RegionInterface } from '../components/Utils/data/getRegion
 import { useUser } from './UserContext';
 import { InitialDataResponse, yearIniciadoVacio } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';
-import { GenerarCodigosRegiones } from '../pages/Configuracion/componentesIndicadores';
+import { GenerarCodigosRegiones } from '../pages/Configuracion/Indicadores/Components/componentesIndicadores';
 import { useTranslation } from 'react-i18next';
 
 interface CodRegiones {

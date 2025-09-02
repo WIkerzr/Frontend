@@ -6,20 +6,20 @@ import { Fases } from '../components/Utils/data/controlDev';
 const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
 const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
-const Acciones = lazy(() => import('../pages/ADR/Acciones'));
-const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion'));
-const AccionesAccesorias = lazy(() => import('../pages/ADR/AccionesAccesorias'));
-const MemoriasAnuales = lazy(() => import('../pages/ADR/MemoriasAnuales'));
-const IndicadoresInpacto = lazy(() => import('../pages/Configuracion/IndicadoresInpacto'));
-const IndicadoresADR = lazy(() => import('../pages/Configuracion/IndicadoresADR'));
+const Acciones = lazy(() => import('../pages/ADR/Acciones/Acciones'));
+const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion/EditarAccion'));
+const AccionesAccesorias = lazy(() => import('../pages/ADR/Acciones/AccionesAccesorias'));
+const MemoriasAnuales = lazy(() => import('../pages/ADR/PlanMemoria/MemoriasAnuales'));
+const IndicadoresInpacto = lazy(() => import('../pages/Configuracion/indicadoresImpacto/IndicadoresInpacto'));
+const IndicadoresADR = lazy(() => import('../pages/Configuracion/Indicadores/IndicadoresADR'));
 const PCDR = lazy(() => import('../pages/Configuracion/PCDR'));
-const PlanesGestion = lazy(() => import('../pages/ADR/Plan/PlanesGestion'));
-const GestionEnvio = lazy(() => import('../pages/ADR/Plan/GestionEnvio'));
-const Servicios = lazy(() => import('../pages/ADR/Servicios'));
+const PlanesGestion = lazy(() => import('../pages/ADR/PlanMemoria/PlanesGestion'));
+const GestionEnvio = lazy(() => import('../pages/ADR/PlanMemoria/GestionEnvio'));
+const Servicios = lazy(() => import('../pages/ADR/Servicios/Servicios'));
 const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
 const Profile = lazy(() => import('../pages/profile/profile'));
-const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores'));
-const Usuarios = lazy(() => import('../pages/Configuracion/Usuarios'));
+const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores/Indicadores'));
+const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
 
 const paginaPorDefectoPorFases: { [key: number]: JSX.Element } = {
     1: <Usuarios />,

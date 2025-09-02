@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { ZonaTitulo } from '../../Configuracion/componentes';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { useLocation } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';

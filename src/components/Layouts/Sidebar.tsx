@@ -19,7 +19,7 @@ import IconPlan from '../Icon/Menu/IconPlan.svg';
 import IconMemoria from '../Icon/Menu/IconMemoria.svg';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { TabCard } from '../../pages/ADR/Acciones/EditarAccionComponent';
+import { TabCard } from '../../pages/ADR/Acciones/EditarAccion/EditarAccionComponent';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/data/controlDev';

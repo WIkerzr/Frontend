@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
-import IconPencil from '../../components/Icon/IconPencil';
-import IconTrash from '../../components/Icon/IconTrash';
+import IconPencil from '../../../components/Icon/IconPencil';
+import IconTrash from '../../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
-import { formateaConCeroDelante, NewModal } from '../../components/Utils/utils';
 import { NavLink } from 'react-router-dom';
-import { DatosAccion } from '../../types/TipadoAccion';
-import { useYear } from '../../contexts/DatosAnualContext';
-import IconEye from '../../components/Icon/IconEye';
-import IconInfoCircle from '../../components/Icon/IconInfoCircle';
-import IconInfoTriangle from '../../components/Icon/IconInfoTriangle';
-import { Servicios } from '../../types/GeneralTypes';
-import { useRegionContext } from '../../contexts/RegionContext';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { DatosAccion } from '../../../types/TipadoAccion';
+import { useYear } from '../../../contexts/DatosAnualContext';
+import IconEye from '../../../components/Icon/IconEye';
+import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
+import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
+import { Servicios } from '../../../types/GeneralTypes';
+import { NewModal, formateaConCeroDelante } from '../../../components/Utils/utils';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
 
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();

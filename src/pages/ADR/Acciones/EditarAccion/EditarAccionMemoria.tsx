@@ -1,11 +1,11 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { CustomSelect } from './EditarAccionComponent';
 import { useTranslation } from 'react-i18next';
-import { DatosMemoria, EstadoLabel, FuenteFinanciacion } from '../../../types/TipadoAccion';
-import { useYear } from '../../../contexts/DatosAnualContext';
+import { DatosMemoria, EstadoLabel, FuenteFinanciacion } from '../../../../types/TipadoAccion';
+import { useYear } from '../../../../contexts/DatosAnualContext';
 import Select, { MultiValue } from 'react-select';
-import { TextArea } from '../../../components/Utils/inputs';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { TextArea } from '../../../../components/Utils/inputs';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 
 export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();

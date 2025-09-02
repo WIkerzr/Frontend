@@ -1,14 +1,14 @@
 import { forwardRef, useEffect, useState } from 'react';
-import { useYear } from '../../../contexts/DatosAnualContext';
-import { DatosPlan } from '../../../types/TipadoAccion';
-import { DropdownTraducido, InputField, TextArea } from '../../../components/Utils/inputs';
-import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../types/GeneralTypes';
+import { useYear } from '../../../../contexts/DatosAnualContext';
+import { DatosPlan } from '../../../../types/TipadoAccion';
+import { DropdownTraducido, InputField, TextArea } from '../../../../components/Utils/inputs';
+import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../../types/GeneralTypes';
 import Multiselect from 'multiselect-react-dropdown';
 import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@mantine/core';
-import { RegionInterface } from '../../../components/Utils/data/getRegiones';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { useRegionContext } from '../../../contexts/RegionContext';
+import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../../contexts/RegionContext';
 
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t, i18n } = useTranslation();

@@ -1,10 +1,10 @@
 import { DataTable, DataTableColumn } from 'mantine-datatable';
 import { useEffect, useState } from 'react';
 import { listadoIndicadoresImpacto, IndicadoresImpacto, categorias, unidadesMedida, Categorias } from './IndicadoresImpactoTEMP';
-import { editableColumnByPathInput } from '../ADR/Acciones/Columnas';
+import { editableColumnByPathInput } from '../../../components/Utils/utilsTabla/Columnas';
 import { useTranslation } from 'react-i18next';
-import { SimpleDropdown } from '../../components/Utils/inputs';
-import { ZonaTitulo } from './componentes';
+import { SimpleDropdown } from '../../../components/Utils/inputs';
+import { ZonaTitulo } from '../Users/componentes';
 
 type typeObjetivo = 'Aumentar' | 'Disminuir' | 'Mantener';
 interface Indicador {

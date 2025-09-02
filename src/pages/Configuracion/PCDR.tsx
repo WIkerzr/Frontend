@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AdjuntarArchivos, isImage } from '../../components/Utils/inputs';
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from './componentes';
+import { ZonaTitulo } from './Users/componentes';
 
 const Index = () => {
     const { t } = useTranslation();

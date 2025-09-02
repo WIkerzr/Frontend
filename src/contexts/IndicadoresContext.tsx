@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado, TiposDeIndicadores } from '../types/Indicadores';
-import { llamadaBBDDIndicadores } from '../pages/Configuracion/componentesIndicadores';
+import { llamadaBBDDIndicadores } from '../pages/Configuracion/Indicadores/Components/componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 import { useUser } from './UserContext';

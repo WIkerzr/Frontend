@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../Configuracion/componentes';
+import { ZonaTitulo } from './Users/componentes';
 import { sortBy } from 'lodash';
 import { DataTableSortStatus, DataTableColumnTextAlign, DataTable } from 'mantine-datatable';
 import { forwardRef, useState, useEffect } from 'react';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
-import { visualColumnByPath } from '../ADR/Acciones/Columnas';
+import { visualColumnByPath } from '../../components/Utils/utilsTabla/Columnas';
 import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 

@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UserID } from '../../types/users';
+import { UserID } from '../../../types/users';
 import { ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import 'tippy.js/dist/tippy.css';
 
-import { User } from '../../types/users';
-import UserDataForm from '../profile/userDateForm';
+import { User } from '../../../types/users';
+import UserDataForm from '../../profile/userDateForm';
 import 'mantine-datatable/styles.layer.css';
 import '@mantine/core/styles.css';
-import { EstadosLoading } from '../../types/GeneralTypes';
-import { ApiTarget } from '../../components/Utils/data/controlDev';
-import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../components/Utils/utils';
-import { useUsers } from '../../contexts/UsersContext';
-import { useRegionContext } from '../../contexts/RegionContext';
+import { EstadosLoading } from '../../../types/GeneralTypes';
+import { ApiTarget } from '../../../components/Utils/data/controlDev';
+import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../../components/Utils/utils';
+import { useUsers } from '../../../contexts/UsersContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
 export const newUser: UserID = {
     name: '',
     lastName: '',

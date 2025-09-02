@@ -565,7 +565,7 @@ export const generarDocumentoWord = (datos: YearData, pantalla: 'Plan' | 'Memori
                 ? [
                       new Paragraph({
                           spacing: { before: 50 },
-                          children: [new TextRun({ text: `Descripción de los avances: ${accion.datosMemoria?.dAccionAvances}`, size: sizeTexto })],
+                          //   children: [new TextRun({ text: `Descripción de los avances: ${accion.datosMemoria?.dAccionAvances}`, size: sizeTexto })],
                       }),
                   ]
                 : []),

@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useYear } from '../../contexts/DatosAnualContext';
-import IconTrash from '../../components/Icon/IconTrash';
+
 import { NavLink } from 'react-router-dom';
-import IconPencil from '../../components/Icon/IconPencil';
-import IconEye from '../../components/Icon/IconEye';
-import { ZonaTitulo } from '../Configuracion/componentes';
 import { useTranslation } from 'react-i18next';
-import { Servicios } from '../../types/GeneralTypes';
-import { MostrarAvisoCamposServicios } from './ComponentesAccionesServicios';
-import { Boton } from '../../components/Utils/utils';
-import { servicioIniciadoVacio } from '../../types/tipadoPlan';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import IconEye from '../../../components/Icon/IconEye';
+import IconPencil from '../../../components/Icon/IconPencil';
+import IconTrash from '../../../components/Icon/IconTrash';
+import { Boton } from '../../../components/Utils/utils';
+import { useYear } from '../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { Servicios } from '../../../types/GeneralTypes';
+import { servicioIniciadoVacio } from '../../../types/tipadoPlan';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { MostrarAvisoCamposServicios } from '../Acciones/ComponentesAccionesServicios';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();

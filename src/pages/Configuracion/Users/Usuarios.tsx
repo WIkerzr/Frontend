@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ErrorMessage, Loading } from '../../components/Utils/animations';
-import { ChangeStatus, DeleteUser, EditUser, NewUser } from './componentesUser';
-import { useUsers } from '../../contexts/UsersContext';
+import { ErrorMessage, Loading } from '../../../components/Utils/animations';
+import { ChangeStatus, DeleteUser, EditUser, NewUser } from './ActionsUser';
+import { useUsers } from '../../../contexts/UsersContext';
 import Tippy from '@tippyjs/react';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import IconRefresh from '../../components/Icon/IconRefresh';
-import { IRootState } from '../../store';
-import { UserID } from '../../types/users';
-import { PrintFecha } from '../../components/Utils/utils';
+import IconRefresh from '../../../components/Icon/IconRefresh';
+import { IRootState } from '../../../store';
+import { UserID } from '../../../types/users';
+import { PrintFecha } from '../../../components/Utils/utils';
 
 const Index = () => {
     const { users, setUsers, loading, llamadaBBDDUsers, fechaUltimoActualizadoBBDD, errorMessage, setErrorMessage } = useUsers();

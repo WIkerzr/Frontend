@@ -1,13 +1,13 @@
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loading } from '../../components/Utils/animations';
-import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
-import IconRefresh from '../../components/Icon/IconRefresh';
+import { Loading } from '../../../components/Utils/animations';
+import { ModalNuevoIndicador, TablaIndicadores } from './Components/componentesIndicadores';
+import IconRefresh from '../../../components/Icon/IconRefresh';
 import Tippy from '@tippyjs/react';
-import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { PrintFecha } from '../../components/Utils/utils';
-import { indicadorInicial } from '../../types/Indicadores';
+import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
+import { PrintFecha } from '../../../components/Utils/utils';
+import { indicadorInicial } from '../../../types/Indicadores';
 import { useLocation } from 'react-router-dom';
 
 const Index = () => {

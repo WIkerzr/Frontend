@@ -2,14 +2,14 @@
 /* eslint-disable no-unused-vars */
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NewModal } from '../../../components/Utils/utils';
+import { NewModal } from '../../../../components/Utils/utils';
 import { TablaIndicadorAccion, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import React from 'react';
-import { useYear } from '../../../contexts/DatosAnualContext';
-import { Servicios } from '../../../types/GeneralTypes';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../types/Indicadores';
+import { useYear } from '../../../../contexts/DatosAnualContext';
+import { Servicios } from '../../../../types/GeneralTypes';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
+import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();

@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../Configuracion/componentes';
-import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './Plan/PlanMemoriaComponents';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
-import IconDownloand from '../../components/Icon/IconDownloand.svg';
-import IconEnviar from '../../components/Icon/IconEnviar.svg';
+import IconDownloand from '../../../components/Icon/IconDownloand.svg';
+import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { useState } from 'react';
-import { generarDocumentoWord } from '../../components/Utils/genWORD';
-import { useYear } from '../../contexts/DatosAnualContext';
-import { useEstadosPorAnio, StatusColors } from '../../contexts/EstadosPorAnioContext';
+import { generarDocumentoWord } from '../../../components/Utils/genWORD';
+import { useYear } from '../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
 
 interface Archivo {
     nombre: string;

@@ -4,7 +4,7 @@ import { Input } from '../../components/Utils/inputs';
 import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { User, UserID } from '../../types/users';
 import { useEffect, useState } from 'react';
-import { newUser } from '../Configuracion/componentes';
+import { newUser } from '../Configuracion/Users/componentes';
 import { formateaConCeroDelante } from '../../components/Utils/utils';
 import { useUser } from '../../contexts/UserContext';
 import { useUsers } from '../../contexts/UsersContext';

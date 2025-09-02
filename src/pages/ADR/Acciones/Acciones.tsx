@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { ListadoAcciones, ModalAccion } from './ComponentesAccionesServicios';
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../Configuracion/componentes';
-import { useYear } from '../../contexts/DatosAnualContext';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { useYear } from '../../../contexts/DatosAnualContext';
 import { useNavigate } from 'react-router-dom';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { ListadoAcciones, ModalAccion } from './ComponentesAccionesServicios';
 
 interface ModalAvisoProps {
     isOpen: boolean;

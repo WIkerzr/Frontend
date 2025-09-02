@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
-import { ZonaTitulo } from '../Configuracion/componentes';
-import { useYear } from '../../contexts/DatosAnualContext';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { useYear } from '../../../contexts/DatosAnualContext';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
-import IconEye from '../../components/Icon/IconEye';
-import IconPencil from '../../components/Icon/IconPencil';
-import IconTrash from '../../components/Icon/IconTrash';
-import { DatosAccion } from '../../types/TipadoAccion';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
+import IconEye from '../../../components/Icon/IconEye';
+import IconPencil from '../../../components/Icon/IconPencil';
+import IconTrash from '../../../components/Icon/IconTrash';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { DatosAccion } from '../../../types/TipadoAccion';
+import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();

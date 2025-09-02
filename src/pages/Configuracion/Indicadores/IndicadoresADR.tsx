@@ -1,16 +1,16 @@
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loading } from '../../components/Utils/animations';
-import { ModalNuevoIndicador, TablaIndicadores } from './componentesIndicadores';
+import { Loading } from '../../../components/Utils/animations';
+import { ModalNuevoIndicador, TablaIndicadores } from './Components/componentesIndicadores';
 import Tippy from '@tippyjs/react';
-import IconRefresh from '../../components/Icon/IconRefresh';
-import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { useUser } from '../../contexts/UserContext';
-import { UserRole } from '../../types/users';
-import { PrintFecha } from '../../components/Utils/utils';
-import { indicadorInicial } from '../../types/Indicadores';
-import { useRegionContext } from '../../contexts/RegionContext';
+import IconRefresh from '../../../components/Icon/IconRefresh';
+import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
+import { useUser } from '../../../contexts/UserContext';
+import { UserRole } from '../../../types/users';
+import { PrintFecha } from '../../../components/Utils/utils';
+import { indicadorInicial } from '../../../types/Indicadores';
+import { useRegionContext } from '../../../contexts/RegionContext';
 
 const Index = () => {
     const { t } = useTranslation();

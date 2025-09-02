@@ -2,14 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
-import { ZonaTitulo } from '../../Configuracion/componentes';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
-import { validarCamposObligatoriosAccion } from '../ComponentesAccionesServicios';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { validarCamposObligatoriosAccion } from '../Acciones/ComponentesAccionesServicios';
 interface Archivo {
     nombre: string;
     url: string;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../Configuracion/componentes';
+import { ZonaTitulo } from '../Configuracion/Users/componentes';
 import { EjesBBDD } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { ApiTarget } from '../../components/Utils/data/controlDev';

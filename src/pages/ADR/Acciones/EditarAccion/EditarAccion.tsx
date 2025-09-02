@@ -1,21 +1,21 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
-import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
+import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useState } from 'react';
 import { TabCard, VerificarAccionAntesDeGuardar, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
-import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
-import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
+import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
+import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionIndicadores';
-import { ZonaTitulo } from '../../Configuracion/componentes';
-import { useYear } from '../../../contexts/DatosAnualContext';
+import { ZonaTitulo } from '../../../Configuracion/Users/componentes';
+import { useYear } from '../../../../contexts/DatosAnualContext';
+import { Boton, ModalSave } from '../../../../components/Utils/utils';
+import { TextArea } from '../../../../components/Utils/inputs';
+import { Servicios } from '../../../../types/GeneralTypes';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { ErrorFullScreen } from '../ComponentesAccionesServicios';
-import { Boton, ModalSave } from '../../../components/Utils/utils';
-import { TextArea } from '../../../components/Utils/inputs';
-import { Servicios } from '../../../types/GeneralTypes';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
