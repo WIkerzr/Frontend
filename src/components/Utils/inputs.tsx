@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -202,6 +202,72 @@ export const DropdownTraducido = ({ title, options, visualOptions, value, disabl
     );
 };
 
+interface EditableDropdownProps<T extends string | number> {
+    title?: string;
+    options: readonly T[];
+    value?: T | '';
+    placeholder?: string;
+    disabled?: boolean;
+    onValueChange?: (value: T | '') => void;
+}
+
+export const EditableDropdown = <T extends string | number>({ title, options, value, placeholder, disabled, onValueChange }: EditableDropdownProps<T>) => {
+    const { t } = useTranslation();
+    const [isOpen, setIsOpen] = useState(false);
+    const [inputValue, setInputValue] = useState<string>(value?.toString() || '');
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const filteredOptions = options.filter((opt) => opt.toString().toLowerCase().includes(inputValue.toLowerCase()));
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSelect = (val: T) => {
+        setInputValue(val.toString());
+        onValueChange?.(val);
+        setIsOpen(false);
+    };
+
+    return (
+        <div className="flex flex-col w-full relative" ref={containerRef}>
+            {title && <label className="mb-1 font-semibold">{t(title)}</label>}
+            <input
+                type="text"
+                className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300 cursor-pointer"
+                value={inputValue}
+                onChange={(e) => {
+                    setInputValue(e.target.value);
+                    setIsOpen(true);
+                    // Convertir a número si es posible
+                    const numValue = Number(e.target.value);
+                    if (!isNaN(numValue)) onValueChange?.(numValue as T);
+                    else onValueChange?.(e.target.value as T);
+                }}
+                placeholder={placeholder || t('seleccionaopcion')}
+                disabled={disabled}
+                onClick={() => setIsOpen(!isOpen)}
+            />
+            {isOpen && (
+                <ul className="absolute z-10 w-full bg-white border rounded shadow max-h-60 overflow-auto mt-1 top-full left-0">
+                    {filteredOptions.length === 0 && <li className="p-2 text-gray-400">{t('No hay opciones')}</li>}
+                    {filteredOptions.map((opt, index) => (
+                        <li key={`${opt}-${index}`} className="p-2 hover:bg-blue-100 cursor-pointer" onClick={() => handleSelect(opt)}>
+                            {opt}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
 interface AttachProps {
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
@@ -282,3 +348,51 @@ export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }:
         </div>
     );
 };
+
+import CreatableSelect from 'react-select/creatable';
+import { SingleValue } from 'react-select';
+interface OptionType {
+    value: string;
+    label: string;
+}
+
+interface MyEditableDropdownProps {
+    options: string[];
+    setOpcion: (value: string) => void;
+    placeholder: string;
+}
+
+export default function MyEditableDropdown({ options, setOpcion, placeholder }: MyEditableDropdownProps) {
+    const [selected, setSelected] = useState<SingleValue<OptionType>>(null);
+    const { t } = useTranslation();
+
+    const handleChange = (valor: SingleValue<OptionType>) => {
+        setSelected(valor);
+        if (valor) {
+            setOpcion(valor.value);
+        }
+    };
+
+    const formattedOptions: OptionType[] = options.map((opt) => ({ value: opt, label: opt }));
+
+    return (
+        <CreatableSelect
+            isClearable
+            onChange={handleChange}
+            value={selected}
+            options={formattedOptions}
+            placeholder={placeholder}
+            formatCreateLabel={(inputValue) => t('anadir') + ` "${inputValue}"`}
+            menuPortalTarget={document.body}
+            noOptionsMessage={() => t('NoHayOpciones')}
+            styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                menuList: (base) => ({
+                    ...base,
+                    maxHeight: 200,
+                    overflowY: 'auto',
+                }),
+            }}
+        />
+    );
+}

@@ -3,6 +3,12 @@ import { DatosAccion } from './TipadoAccion';
 
 export type Year = number;
 
+export interface LineasActuaccion {
+    Id: string;
+    Title: string;
+    Description: string;
+    EjeId: string;
+}
 export interface GeneralOperationADR {
     adrInternalTasks: string;
     operationalIndicators: OperationalIndicators[];
@@ -23,6 +29,7 @@ export interface Ejes {
     IsActive: boolean;
     IsPrioritarios: boolean;
     acciones: DatosAccion[];
+    LineasActuaccion?: LineasActuaccion[];
 }
 
 export interface EjesBBDD {
@@ -32,6 +39,7 @@ export interface EjesBBDD {
     IsActive: boolean;
     IsPrioritarios: boolean;
     acciones: DatosAccion[];
+    LineasActuaccion: LineasActuaccion[];
 }
 export interface EjeBBDD {
     Id: string;

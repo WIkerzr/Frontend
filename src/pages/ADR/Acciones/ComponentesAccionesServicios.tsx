@@ -12,13 +12,17 @@ import { Servicios } from '../../../types/GeneralTypes';
 import { NewModal, formateaConCeroDelante } from '../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
+import MyEditableDropdown from '../../../components/Utils/inputs';
+import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
+import { Loading } from '../../../components/Utils/animations';
+import { EjesBBDD } from '../../../types/tipadoPlan';
 
 export const ModalAccion = () => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
-    // const [accionesEje, setAccionesEje] = useState<DatosAccion[]>(yearData.plan.ejesPrioritarios[0].acciones);
+    const { regionSeleccionada } = useRegionContext();
 
     const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].Id);
     const [nuevaAccion, setNuevaAccion] = useState('');
@@ -27,9 +31,17 @@ export const ModalAccion = () => {
 
     const [inputError, setInputError] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    //Control de acciones totales
+    const [ejes, setEjes] = useState<EjesBBDD[]>();
+
     const [accionesTotales, setAccionesTotales] = useState<number[]>([0, 0, 0]);
+
+    useEffect(() => {
+        if (!showModal) return;
+        LlamadaBBDDEjesRegion(regionSeleccionada, setLoading, setEjes, t, i18n);
+    }, [showModal]);
 
     useEffect(() => {
         const nuevasAccionesTotales = yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length);
@@ -90,6 +102,35 @@ export const ModalAccion = () => {
         }
     }, [accionesTotales, yearData, idEjeSeleccionado, showModal]);
 
+    useEffect(() => {
+        //TODO Temporal
+        if (ejes && idEjeSeleccionado != '') {
+            const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.Id === idEjeSeleccionado);
+            const datosEje = yearData.plan.ejesPrioritarios[index];
+            let lineaActuacion = ejes.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
+            if (!lineaActuacion) {
+                lineaActuacion = ejes.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
+            }
+            if (lineaActuacion) {
+                setLineaActuaciones(lineaActuacion.map((la) => la.Title));
+            } else {
+                setLineaActuaciones([]);
+            }
+        }
+        //TODO Temporal
+        // console.log(ejes.find((e) => `${e.EjeId}` === `${idEjeSeleccionado}`));
+        // console.log(ejes);
+        // console.log(idEjeSeleccionado);
+
+        // const ejePrioritario = yearData.plan.ejesPrioritarios.find((eje) => eje.Id === idEjeSeleccionado);
+        // if (ejePrioritario && ejePrioritario.LineasActuaccion && ejePrioritario.LineasActuaccion.length > 0) {
+        //     const lineasActuaciones = yearData.plan.ejesPrioritarios[0].LineasActuaccion;
+        //     if (lineasActuaciones) {
+        //         setLineaActuaciones(lineasActuaciones.map((la) => la.Title));
+        //     }
+        // }
+    }, [idEjeSeleccionado]);
+
     const handleNuevaAccion = () => {
         if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
             setInputError(true);
@@ -146,16 +187,9 @@ export const ModalAccion = () => {
                     </div>
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
-                        <input
-                            type="text"
-                            className={`w-full p-2 border rounded ${inputError && !nuevaLineaActuaccion.trim() ? 'border-red-400' : ''}`}
-                            value={nuevaLineaActuaccion}
-                            onChange={(e) => {
-                                setNuevaLineaActuaccion(e.target.value);
-                                setInputError(false);
-                            }}
-                            placeholder={t('Introduce línea de actuación')}
-                        />
+                        <div style={{ position: 'relative', minHeight: 40 }}>
+                            {loading ? <Loading /> : <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} />}
+                        </div>
                     </div>
                     <div className="flex">
                         <input

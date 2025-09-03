@@ -405,7 +405,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                             value={searchResultado}
                             onChange={(e) => setSearchResultado(e.target.value)}
                         />
-                        {botonNuevoIndicadorAccion}
                     </div>
                     <TablasIndicadores tipoIndicador="resultado" />
                 </div>

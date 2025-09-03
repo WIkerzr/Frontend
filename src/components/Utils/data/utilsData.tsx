@@ -8,6 +8,12 @@ export type ApiSuccess<T> = {
     message: string;
     data: T;
     CamposFaltantes?: string;
+    LineasActuacion?: {
+        Id: string;
+        Title: string;
+        Description: string;
+        EjeId: string;
+    };
 };
 export type ApiError = {
     success: boolean;

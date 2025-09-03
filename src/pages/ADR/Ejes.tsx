@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Configuracion/Users/componentes';
@@ -10,8 +9,8 @@ import { ErrorMessage, Loading } from '../../components/Utils/animations';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import { useEstadosPorAnioContext, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
-import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { LlamadaBBDDEjesRegion } from '../../components/Utils/data/dataEjes';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -30,33 +29,8 @@ const Index = () => {
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
-    const llamadaBBDDEjesRegion = () => {
-        setErrorMessage('');
-        LlamadasBBDD({
-            method: 'GET',
-            url: `/ejes/${regionSeleccionada}`,
-            setLoading: setLoading,
-            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDD,
-            onSuccess: (data: any) => {
-                const arrayMapeado = data.data.map((ejes: EjesBBDD) => ({
-                    ...ejes,
-                    Id: ejes.EjeId,
-                    NameEs: ejes.NameEs || '',
-                    NameEu: ejes.NameEu || '',
-                    IsActive: ejes.IsActive || false,
-                    IsPrioritarios: ejes.IsPrioritarios || false,
-                }));
-                const datosOrdenados = arrayMapeado.sort((a: { NameEs: any; NameEu: any }, b: { NameEs: any; NameEu: any }) =>
-                    i18n.language === 'es' ? (a?.NameEs ?? '').localeCompare(b.NameEs) : (a?.NameEu ?? '').localeCompare(b.NameEu)
-                );
-                setEjes(datosOrdenados);
-                setFechaUltimoActualizadoBBDD(new Date());
-                setLoading(false);
-                if (data.data.length === 0) {
-                    setErrorMessage(t('error:errorFaltanDatosEjes'));
-                }
-            },
-        });
+    const llamadaEjes = () => {
+        LlamadaBBDDEjesRegion(regionSeleccionada, setLoading, setEjes, t, i18n, setFechaUltimoActualizadoBBDD, setErrorMessage);
     };
 
     const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
@@ -83,12 +57,13 @@ const Index = () => {
                     IsActive: eje.IsActive,
                     IsPrioritarios: eje.IsPrioritarios,
                     acciones: eje.acciones,
+                    LineasActuaccion: eje.LineasActuaccion ? eje.LineasActuaccion : [],
                 }));
 
             setEjes(ordenados);
         } else {
             setLocked(false);
-            llamadaBBDDEjesRegion();
+            llamadaEjes();
         }
     }, [yearData]);
 
@@ -150,7 +125,7 @@ const Index = () => {
                         <div className="flex items-center space-x-2">
                             <PrintFecha date={fechaUltimoActualizadoBBDD} />
                             <Tippy content={t('Actualizar')}>
-                                <button type="button" onClick={() => llamadaBBDDEjesRegion()}>
+                                <button type="button" onClick={() => llamadaEjes()}>
                                     <IconRefresh />
                                 </button>
                             </Tippy>
