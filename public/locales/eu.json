@@ -51,7 +51,7 @@
     "comarcal": "Eskualdekoa",
     "comarcasIncluidasSupracomarcal": "Ekintza suprakomarkalean sartzen diren eskualdeak",
     "completaEjeVacio": "Eje huts bat bete",
-    "completarUltimaFila": "{{tipo}}-ren azken errenkada bete behar duzu berria gehitu baino lehen",
+    "completarXFila": "{{tipo}}-ren azken errenkada bete behar duzu berria gehitu baino lehen",
     "completarUltimaFilaGuardar": "Gorde aurretik, adierazleen fitxan {{tipo}}-ko azken errenkada osatu behar duzu.",
     "configuracion": "Konfigurazioa",
     "confirmacion": "Ziur zaude {{p1}} {{p2}} {{p3}} nahi duzula?",

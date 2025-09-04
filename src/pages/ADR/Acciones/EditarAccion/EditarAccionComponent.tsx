@@ -89,54 +89,96 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
     );
 }
 
-export function VerificarCamposIndicadoresPorRellenar(datosEditandoAccion: DatosAccion, ubicacionDelVerificador: 'NuevoIndicador' | 'GuardadoEdicion', t: (key: string, options?: any) => string) {
-    const invalidIndicesRealizacion: number[] = [];
-    const invalidIndicesResultado: number[] = [];
+export function VerificarCamposIndicadoresPorRellenar(
+    datosEditandoAccion: DatosAccion,
+    statusPlan: boolean,
+    statusMemoria: boolean,
+    ubicacionDelVerificador: 'NuevoIndicador' | 'GuardadoEdicion',
+    t: (key: string, options?: any) => string
+) {
+    const invalidIndicesRealizacion: InvalidIndex[] = [];
+    const invalidIndicesResultado: InvalidIndex[] = [];
 
-    const esValidoRealizacion =
-        datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion?.every((fila, index) => {
-            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0 || fila.metaAnual?.total === '0' || fila.metaFinal?.total === '0';
+    interface InvalidIndex {
+        index: number;
+        camposFaltantes: string[];
+    }
+    function validarIndicadores<T extends { metaAnual?: { total?: number | string }; ejecutado?: { total?: number | string }; metaFinal?: { total?: number | string } }>(
+        filas: T[] | undefined,
+        invalidIndices: InvalidIndex[]
+    ): boolean {
+        if (!filas || filas.length === 0) return false;
 
-            if (isInvalid) {
-                invalidIndicesRealizacion.push(index);
+        return filas.every((fila, index) => {
+            const camposFaltantes: string[] = [];
+
+            if (!fila) {
+                camposFaltantes.push('fila ausente');
+            } else {
+                if (fila.metaAnual?.total === 0 || fila.metaAnual?.total === '0') camposFaltantes.push('metaAnual.total');
+                if (fila.metaFinal?.total === 0 || fila.metaFinal?.total === '0') camposFaltantes.push('metaFinal.total');
+                if (!statusPlan && statusMemoria) {
+                    if (fila.ejecutado?.total === 0 || fila.ejecutado?.total === '0') camposFaltantes.push('ejecutado.total');
+                }
             }
 
-            return !isInvalid;
-        }) ?? false;
-
-    const esValidoResultado =
-        datosEditandoAccion?.indicadorAccion?.indicadoreResultado?.every((fila, index) => {
-            const isInvalid = !fila || fila.metaAnual?.total === 0 || fila.metaFinal?.total === 0 || fila.metaAnual?.total === '0' || fila.metaFinal?.total === '0';
-
-            if (isInvalid) {
-                invalidIndicesResultado.push(index);
+            if (camposFaltantes.length > 0) {
+                invalidIndices.push({ index, camposFaltantes });
             }
 
-            return !isInvalid;
-        }) ?? false;
+            return camposFaltantes.length === 0;
+        });
+    }
 
-    if (!esValidoRealizacion) {
+    interface InvalidIndex {
+        index: number;
+        camposFaltantes: string[];
+    }
+
+    function manejarAlertIndicadores(
+        esValido: boolean,
+        invalidIndices: InvalidIndex[],
+        tipo: string,
+        ubicacionDelVerificador: 'NuevoIndicador' | 'GuardadoEdicion',
+        t: (key: string, params?: Record<string, any>) => string
+    ): boolean {
+        if (esValido) return true;
+
         if (ubicacionDelVerificador === 'NuevoIndicador') {
-            alert(t('completarUltimaFila', { tipo: t('Realizacion') }));
+            if (invalidIndices.length === 0) {
+                return true;
+            } else {
+                const mensaje = t('completarTablaTipo', { tipo }) + '\n' + invalidIndices.map((indice, i) => `Fila ${i + 1}:\n${indice.camposFaltantes.join('\n')}`).join('\n\n');
+                alert(mensaje);
+            }
         } else if (ubicacionDelVerificador === 'GuardadoEdicion') {
-            alert(t('completarUltimaFilaGuardar', { tipo: t('Realizacion') }));
+            if (invalidIndices.length === 0) {
+                alert(t('completarFilaVaciaGuardar', { tipo }));
+            } else {
+                const mensaje = t('completarFilaVaciaGuardar', { tipo }) + '\n' + invalidIndices.map((indice, i) => `Fila ${i + 1}:\n${indice.camposFaltantes.join('\n')}`).join('\n\n');
+                alert(mensaje);
+            }
         }
+
         return false;
     }
-    if (!esValidoResultado) {
-        if (ubicacionDelVerificador === 'NuevoIndicador') {
-            alert(t('completarUltimaFila', { tipo: t('Resultado') }));
-        } else if (ubicacionDelVerificador === 'GuardadoEdicion') {
-            alert(t('completarUltimaFilaGuardar', { tipo: t('Resultado') }));
-        }
-        return false;
+    const esValidoRealizacion = validarIndicadores(datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion, invalidIndicesRealizacion);
+    let esValidoResultado = false;
+    if (esValidoRealizacion) {
+        esValidoResultado = validarIndicadores(datosEditandoAccion?.indicadorAccion?.indicadoreResultado, invalidIndicesResultado);
     }
+
+    if (!manejarAlertIndicadores(esValidoRealizacion, invalidIndicesRealizacion, t('Realizacion'), ubicacionDelVerificador, t)) return false;
+
+    if (!manejarAlertIndicadores(esValidoResultado, invalidIndicesResultado, t('Resultado'), ubicacionDelVerificador, t)) return false;
+
     return true;
 }
 
 export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, yearData: YearData) {
     const statusPlan = yearData.plan.status;
     const statusMemoria = yearData.memoria.status;
+
     if (!datosEditandoAccion.indicadorAccion) {
         return;
     }
@@ -162,13 +204,15 @@ export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, 
     checkData(plan.oAccion, 'OAccion');
     checkData(plan.dAccion, 'DAccion');
 
-    //Memoria
-    checkData(memoria.presupuestoEjecutado.fuenteDeFinanciacion, 'fuenteDeFinanciacion');
-    checkData(memoria.presupuestoEjecutado.cuantia, 'cuantia');
-    checkData(memoria.presupuestoEjecutado.observaciones, 'observaciones');
-    checkData(memoria.ejecucionPresupuestaria.previsto, 'previsto');
-    checkData(memoria.ejecucionPresupuestaria.ejecutado, 'ejecutado');
-    checkData(memoria.ejecucionPresupuestaria.porcentaje, 'porcentaje');
+    if (statusPlan !== 'borrador' && statusMemoria === 'borrador') {
+        //Memoria
+        checkData(memoria.presupuestoEjecutado.fuenteDeFinanciacion, 'fuenteDeFinanciacion');
+        checkData(memoria.presupuestoEjecutado.cuantia, 'cuantia');
+        checkData(memoria.presupuestoEjecutado.observaciones, 'observaciones');
+        checkData(memoria.ejecucionPresupuestaria.previsto, 'previsto');
+        checkData(memoria.ejecucionPresupuestaria.ejecutado, 'ejecutado');
+        checkData(memoria.ejecucionPresupuestaria.porcentaje, 'porcentaje');
+    }
 
     //Indicador Realizacion
     indicadoresRealizacionAccion.forEach((i, idx) => {

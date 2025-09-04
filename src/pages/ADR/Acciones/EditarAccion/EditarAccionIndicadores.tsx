@@ -16,7 +16,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
     const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
-    const { editarPlan } = useEstadosPorAnio();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const [carga, setCarga] = useState<boolean>(false);
 
     const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? []);
@@ -178,7 +178,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     };
 
     const handleOpenModal = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, 'NuevoIndicador', t)) {
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'NuevoIndicador', t)) {
             setOpen(true);
         }
     };

@@ -64,6 +64,7 @@ const Index: React.FC = () => {
             }
         }
     }, [datosEditandoAccion]);
+
     useEffect(() => {
         if (datosVacios) {
             return;
@@ -108,13 +109,14 @@ const Index: React.FC = () => {
     };
 
     const handleSave = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, 'GuardadoEdicion', t)) {
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
             const camposFaltantes = VerificarAccionAntesDeGuardar(datosEditandoAccion, yearData);
             if (camposFaltantes && camposFaltantes.length === 0) {
                 GuardarLaEdicionAccion();
                 setMostrandoAccionConcreta(true);
             } else if (camposFaltantes && camposFaltantes.length > 0) {
-                alert('Faltan estos campos obligatorios:\n' + camposFaltantes.join('\n'));
+                const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
+                alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
             }
         }
     };
