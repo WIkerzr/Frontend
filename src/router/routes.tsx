@@ -24,10 +24,16 @@ const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
 const paginaPorDefectoPorFases: { [key: number]: JSX.Element } = {
     1: <Usuarios />,
     2: <IndicadoresADR />,
-    3: <Acciones />,
-    4: <AccionesAccesorias />,
-    5: <PlanesGestion />,
-    6: <IndicadoresInpacto />,
+    3: <IndicadoresADR />,
+    4: <IndicadoresADR />,
+    5: <IndicadoresADR />,
+    6: <IndicadoresADR />,
+    // 1: <Usuarios />,
+    // 2: <IndicadoresADR />,
+    // 3: <Acciones />,
+    // 4: <AccionesAccesorias />,
+    // 5: <PlanesGestion />,
+    // 6: <IndicadoresInpacto />,
 };
 
 const paginaPorDefectoPorFasesPath: { [key: number]: string } = {
