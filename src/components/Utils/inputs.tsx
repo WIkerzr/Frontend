@@ -379,6 +379,15 @@ export default function MyEditableDropdown({ options, setOpcion, placeholder, va
         }
     };
 
+    if (!selected || selected.value === '') {
+        if (value) {
+            setSelected({
+                value: value,
+                label: value,
+            });
+        }
+    }
+
     const formattedOptions: OptionType[] = options.map((opt) => ({ value: opt, label: opt }));
 
     return (

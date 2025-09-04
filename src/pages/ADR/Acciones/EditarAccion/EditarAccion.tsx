@@ -73,11 +73,18 @@ const Index: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
-            setDatosEditandoAccion({
-                ...datosEditandoAccion!,
-                lineaActuaccion,
-            });
+        if (datosEditandoAccion.id === '0') {
+            return;
+        }
+        if (lineaActuaccion) {
+            if (datosEditandoAccion && datosEditandoAccion.lineaActuaccion && datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
+                setDatosEditandoAccion((prev) => ({
+                    ...prev!,
+                    lineaActuaccion,
+                }));
+            }
+        } else {
+            setLineaActuaccion(datosEditandoAccion.lineaActuaccion);
         }
     }, [lineaActuaccion, datosEditandoAccion]);
 
@@ -165,6 +172,7 @@ const Index: React.FC = () => {
                                                 <DropdownLineaActuacion
                                                     setNuevaLineaActuaccion={setLineaActuaccion}
                                                     idEjeSeleccionado={yearData.plan.ejesPrioritarios.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
+                                                    lineaActuaccion={lineaActuaccion}
                                                 />
                                             ) : (
                                                 <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>

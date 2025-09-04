@@ -576,9 +576,10 @@ export const ErrorFullScreen = ({ mensaje, irA }: ErrorFullScreenProps) => {
 interface DropdownLineaActuacionProps {
     setNuevaLineaActuaccion: (val: string) => void;
     idEjeSeleccionado: string | undefined;
+    lineaActuaccion?: string;
 }
 
-export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado }: DropdownLineaActuacionProps) => {
+export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion }: DropdownLineaActuacionProps) => {
     const { regionSeleccionada } = useRegionContext();
     const { yearData } = useYear();
     const [loading, setLoading] = useState<boolean>(false);
@@ -628,7 +629,7 @@ export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccion
                 <Loading />
             ) : (
                 <div onClick={cargarEjes}>
-                    <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} />
+                    <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} value={lineaActuaccion} />
                 </div>
             )}
         </div>
