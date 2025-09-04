@@ -1,12 +1,14 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState } from 'react';
 import { UserID } from '../types/users';
+import { ModoDevEdicionTotal } from '../components/Utils/data/controlDev';
 
 interface UserContextType {
     user: UserID | null;
     setUser: (user: UserID | null) => void;
     recordarSesion: boolean;
     setRecordarSesion: (value: boolean) => void;
+    lockedHazi: boolean;
 }
 
 const defaultUser = (): UserID | null => {
@@ -24,6 +26,7 @@ const UserContext = createContext<UserContextType>({
     setUser: () => {},
     recordarSesion: false,
     setRecordarSesion: () => {},
+    lockedHazi: false,
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
@@ -38,8 +41,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             localStorage.removeItem('user');
         }
     };
+    const lockedHazi = ModoDevEdicionTotal ? false : !!(user && user.role !== 'ADR');
 
-    return <UserContext.Provider value={{ user, setUser, recordarSesion, setRecordarSesion }}>{children}</UserContext.Provider>;
+    return <UserContext.Provider value={{ user, setUser, recordarSesion, setRecordarSesion, lockedHazi }}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => useContext(UserContext);

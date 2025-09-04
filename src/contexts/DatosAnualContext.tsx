@@ -21,6 +21,7 @@ import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } fr
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 import { useRegionContext } from './RegionContext';
+import { ModoDev } from '../components/Utils/data/controlDev';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -290,6 +291,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
     }, [datosEditandoServicio]);
 
+    useEffect(() => {
+        console.log('loadingYearData ' + loadingYearData);
+    }, [loadingYearData]);
+
     const SeleccionEditarServicio = (idServicio: string | null) => {
         if (idServicio) {
             const servicioSeleccionado = yearData.servicios!.find((servicio) => `${servicio.id}` === idServicio);
@@ -533,9 +538,15 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage,
             setSuccessMessage,
             onSuccess: (data: any) => {
-                const status: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
+                const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
+                const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
                 const ejesPrioritarios: Ejes[] = [];
                 const ejes: Ejes[] = [];
+                if (ModoDev) {
+                    console.log('Llamada Year Data');
+                    console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
+                    console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
+                }
 
                 data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
                     const item = {
@@ -561,7 +572,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ejes.push(item);
                     }
                 });
-                setYearData({
+                const dotosAnio: YearData = {
                     nombreRegion: nombreRegionSeleccionada ? nombreRegionSeleccionada : '',
                     year: data.data.Year,
                     plan: {
@@ -576,15 +587,16 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                             dSeguimiento: '',
                             valFinal: '',
                         },
-                        status: status,
+                        status: planStatus,
                     },
                     memoria: {
                         id: `${data.data.Memoria.Id}`,
-                        status: status,
+                        status: memoriaStatus,
                         dSeguimiento: data.data.Memoria.DSeguimiento,
                         valFinal: data.data.Memoria.ValFinal,
                     },
-                });
+                };
+                setYearData(dotosAnio);
             },
         });
     };

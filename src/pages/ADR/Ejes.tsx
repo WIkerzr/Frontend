@@ -11,6 +11,7 @@ import IconRefresh from '../../components/Icon/IconRefresh';
 import { useEstadosPorAnioContext, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { LlamadaBBDDEjesRegion } from '../../components/Utils/data/dataEjes';
+import { useUser } from '../../contexts/UserContext';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -18,8 +19,10 @@ const Index = () => {
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { regionSeleccionada } = useRegionContext();
     const { anioSeleccionada } = useEstadosPorAnioContext();
+    const { lockedHazi } = useUser();
 
     const [locked, setLocked] = useState(false);
+
     const [ejes, setEjes] = useState<EjesBBDD[]>();
 
     const [loading, setLoading] = useState<boolean>(true);
@@ -62,7 +65,11 @@ const Index = () => {
 
             setEjes(ordenados);
         } else {
-            setLocked(false);
+            if (!lockedHazi) {
+                setLocked(false);
+            } else {
+                setLocked(true);
+            }
             llamadaEjes();
         }
     }, [yearData]);
@@ -105,9 +112,11 @@ const Index = () => {
                     zonaBtn={
                         <>
                             <span className="text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
-                            <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked}>
-                                {t('guardar')}
-                            </button>
+                            {!lockedHazi && (
+                                <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked}>
+                                    {t('guardar')}
+                                </button>
+                            )}
                         </>
                     }
                     zonaExplicativa={
@@ -138,13 +147,16 @@ const Index = () => {
                             <li key={eje.EjeId} className={`flex items-center p-2 rounded transition ${eje.IsPrioritarios ? 'bg-green-100' : ''}`}>
                                 <input
                                     type="checkbox"
-                                    className="form-checkbox h-5 w-5 text-green-600 accent-green-600"
+                                    className={`form-checkbox h-5 w-5 text-green-600 accent-green-600 ${locked && 'cursor-not-allowed'}`}
                                     checked={eje.IsPrioritarios}
                                     onChange={(e) => handleCheck(e, eje.EjeId)}
                                     disabled={locked}
                                     id={`checkbox-${eje.EjeId}`}
                                 />
-                                <label htmlFor={`checkbox-${eje.EjeId}`} className={`mb-0 cursor-pointer w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''}`}>
+                                <label
+                                    htmlFor={`checkbox-${eje.EjeId}`}
+                                    className={`mb-0  w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''} ${locked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                >
                                     {i18n.language === 'es' ? eje.NameEs : eje.NameEu}
                                 </label>
                             </li>

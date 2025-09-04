@@ -233,19 +233,20 @@ export const useEstadosPorAnio = () => {
     const { user } = useUser();
 
     const rolUsuario = (user!.role as string).toUpperCase() as UserRole;
+    const esADR = ModoDevEdicionTotal ? true : rolUsuario === 'ADR';
 
-    const statusPlan = yearData.plan.status === 'borrador';
-    const esADR = rolUsuario === 'ADR';
-    const editarPlan = statusPlan && esADR;
+    const [editarPlan, setEditarPlan] = useState<boolean>(esADR && yearData.plan.status === 'borrador');
+    const [editarMemoria, setEditarMemoria] = useState<boolean>(esADR && yearData.memoria.status === 'borrador');
 
-    const statusMemoria = ['borrador', 'cerrado'].includes(yearData.memoria.status);
-
-    const editarMemoria = statusMemoria && esADR;
+    useEffect(() => {
+        setEditarPlan(esADR && yearData.plan.status === 'borrador');
+        setEditarMemoria(esADR && yearData.memoria.status === 'borrador');
+    }, [yearData]);
 
     return {
         ...ctx,
-        editarPlan: ModoDevEdicionTotal ? true : editarPlan,
-        editarMemoria: ModoDevEdicionTotal ? true : editarMemoria,
+        editarPlan: editarPlan,
+        editarMemoria: editarMemoria,
     };
     return {
         ...ctx,

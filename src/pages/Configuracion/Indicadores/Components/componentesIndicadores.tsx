@@ -16,6 +16,8 @@ import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoR
 import { EjeIndicadorBBDD } from '../../../../types/tipadoPlan';
 import { ErrorMessage } from '../../../../components/Utils/animations';
 import { useRegionContext } from '../../../../contexts/RegionContext';
+import { useUser } from '../../../../contexts/UserContext';
+import IconEye from '../../../../components/Icon/IconEye';
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -38,6 +40,7 @@ const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: Indicador
 export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal }) => {
     const { t, i18n } = useTranslation();
     const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado, ejesIndicador } = useIndicadoresContext();
+    const { lockedHazi } = useUser();
     const indicadorSeleccionadoSinFallo = ControlDeFallosIndicadorSeleccionado();
     const [indicadorRealizacionDeterminado, setIndicadorRealizacionDeterminado] = useState<IndicadorResultado[]>([]);
     const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
@@ -235,13 +238,19 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             <div>
                 <label className="block font-medium ">{t('nombreIndicador')}</label>
                 <div className="flex border rounded bg-gray-200">
-                    <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{<label>{indicador[0]}</label>}</div>
-                    <input type="text" name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'} className="flex-1 p-2 border" value={nombreIndicador ?? ''} onChange={handleChangeNombre} />
+                    {lockedHazi ? (
+                        <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{<label>{indicador[0] + '.' + nombreIndicador}</label>}</div>
+                    ) : (
+                        <>
+                            <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{<label>{indicador[0]}</label>}</div>
+                            <input type="text" name={i18n.language === 'eu' ? 'NameEu' : 'NameEs'} className="flex-1 p-2 border" value={nombreIndicador ?? ''} onChange={handleChangeNombre} />
+                        </>
+                    )}
                 </div>
             </div>
             <div>
                 <label className="block font-medium">{t('unitMed')}</label>
-                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange}>
+                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange} disabled={lockedHazi}>
                     <option value="NUMERO">NUMERO</option>
                     <option value="OTRO">OTRO</option>
                 </select>
@@ -881,6 +890,7 @@ export const TablaIndicadores: React.FC = () => {
         indicadorSeleccionado,
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
+    const { lockedHazi } = useUser();
 
     const esPaginaPorDefecto = location.pathname === '/';
 
@@ -1145,7 +1155,7 @@ export const TablaIndicadores: React.FC = () => {
                                                 </td>
                                                 <td className="text-center">
                                                     <div className="flex justify-end space-x-3">
-                                                        <Tippy content={t('editar')}>
+                                                        <Tippy content={lockedHazi ? t('visualizar') : t('editar')}>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
@@ -1160,14 +1170,16 @@ export const TablaIndicadores: React.FC = () => {
                                                                     });
                                                                 }}
                                                             >
-                                                                <IconPencil />
+                                                                {lockedHazi ? <IconEye /> : <IconPencil />}
                                                             </button>
                                                         </Tippy>
-                                                        <Tippy content={t('borrar')}>
-                                                            <button type="button" onClick={() => eliminarIndicadorRealizacion(data)}>
-                                                                <IconTrash />
-                                                            </button>
-                                                        </Tippy>
+                                                        {!lockedHazi && (
+                                                            <Tippy content={t('borrar')}>
+                                                                <button type="button" onClick={() => eliminarIndicadorRealizacion(data)}>
+                                                                    <IconTrash />
+                                                                </button>
+                                                            </Tippy>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -1228,7 +1240,7 @@ export const TablaIndicadores: React.FC = () => {
                                                 </td>
                                                 <td className="text-center">
                                                     <div className="flex justify-end space-x-3">
-                                                        <Tippy content={t('editar')}>
+                                                        <Tippy content={lockedHazi ? t('visualizar') : t('editar')}>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
@@ -1242,14 +1254,16 @@ export const TablaIndicadores: React.FC = () => {
                                                                     });
                                                                 }}
                                                             >
-                                                                <IconPencil />
+                                                                {lockedHazi ? <IconEye /> : <IconPencil />}
                                                             </button>
                                                         </Tippy>
-                                                        <Tippy content={t('borrar')}>
-                                                            <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
-                                                                <IconTrash />
-                                                            </button>
-                                                        </Tippy>
+                                                        {!lockedHazi && (
+                                                            <Tippy content={t('borrar')}>
+                                                                <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
+                                                                    <IconTrash />
+                                                                </button>
+                                                            </Tippy>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

@@ -25,11 +25,12 @@ import { SideBarList } from '../Utils/utils';
 import { Fases } from '../Utils/data/controlDev';
 import { useEstadosPorAnioContext } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { Loading } from '../Utils/animations';
 
 const Sidebar = () => {
     const { regionSeleccionada, regionData } = useRegionContext();
     const { anioSeleccionada, anios, setEstados, setAnio } = useEstadosPorAnioContext();
-    const { yearData, setYearData } = useYear();
+    const { yearData, setYearData, loadingYearData } = useYear();
     const navigate = useNavigate();
     const { user } = useUser();
     const [role, setRole] = useState<UserRole>();
@@ -170,6 +171,8 @@ const Sidebar = () => {
     };
 
     const MenuADRLateral = () => {
+        if (loadingYearData) return <Loading />;
+
         return (
             <div
                 style={{

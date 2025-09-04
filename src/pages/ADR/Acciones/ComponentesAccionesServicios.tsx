@@ -282,9 +282,10 @@ interface ListadoAccionesProps {
     idEje: string;
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
-    const { yearData, EliminarAccion, SeleccionEditarAccion } = useYear();
+    const { yearData, EliminarAccion, SeleccionEditarAccion, loadingYearData } = useYear();
     const { regionSeleccionada } = useRegionContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { t } = useTranslation();
 
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
     const prevAccionesRef = useRef<DatosAccion[]>([]);
@@ -312,7 +313,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         prevAccionesRef.current = nuevasAcciones;
     }, [yearData]);
 
-    const { t } = useTranslation();
+    if (loadingYearData) return <Loading />;
 
     const handleDelete = (id: string) => {
         const confirmar = window.confirm(t('confirmacionEliminarAccion'));

@@ -28,7 +28,7 @@ const Index = () => {
     } = useIndicadoresContext();
     const [modalNuevo, setModalNuevo] = useState(false);
     const { regionSeleccionada } = useRegionContext();
-    const { user } = useUser();
+    const { user, lockedHazi } = useUser();
     const role: UserRole = user!.role as UserRole;
 
     useEffect(() => {
@@ -55,21 +55,23 @@ const Index = () => {
                     {(role.toUpperCase() !== 'HAZI' || (role.toUpperCase() === 'HAZI' && regionSeleccionada != null)) && (
                         <div className="flex flex-col justify-end mb-5 items-end">
                             <>
-                                <button
-                                    onClick={() => {
-                                        setModalNuevo(true);
-                                        const indicadorConRegion = { ...indicadorInicial, RegionsId: regionSeleccionada ?? '' };
-                                        setIndicadorSeleccionado({
-                                            tipo: 'Realizacion',
-                                            ADR: true,
-                                            indicador: indicadorConRegion,
-                                            accion: 'Crear',
-                                        });
-                                    }}
-                                    className="btn btn-primary w-[300px]"
-                                >
-                                    {t('NuevoIndicador')}
-                                </button>
+                                {!lockedHazi && (
+                                    <button
+                                        onClick={() => {
+                                            setModalNuevo(true);
+                                            const indicadorConRegion = { ...indicadorInicial, RegionsId: regionSeleccionada ?? '' };
+                                            setIndicadorSeleccionado({
+                                                tipo: 'Realizacion',
+                                                ADR: true,
+                                                indicador: indicadorConRegion,
+                                                accion: 'Crear',
+                                            });
+                                        }}
+                                        className="btn btn-primary w-[300px]"
+                                    >
+                                        {t('NuevoIndicador')}
+                                    </button>
+                                )}
                                 {modalNuevo ? (
                                     <ModalNuevoIndicador
                                         isOpen={modalNuevo}
