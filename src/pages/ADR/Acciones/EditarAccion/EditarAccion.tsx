@@ -132,7 +132,7 @@ const Index: React.FC = () => {
                     <div className="ml-auto flex flex-row items-center justify-end gap-4">
                         {!bloqueo && <Boton tipo="guardar" textoBoton={t('guardar')} onClick={handleSave} disabled={servicio ? !datosEditandoServicio?.nombre : !datosEditandoAccion.accion} />}
                         <NavLink to={rutaAnterior} className={() => ''}>
-                            <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={handleSave} />
+                            <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={() => setMostrandoAccionConcreta(false)} />
                         </NavLink>
                     </div>
                 }
