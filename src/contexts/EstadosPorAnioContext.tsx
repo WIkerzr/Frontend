@@ -4,10 +4,11 @@ import { useUser } from './UserContext';
 
 import { useYear } from './DatosAnualContext';
 import { Estado } from '../types/GeneralTypes';
-import { ApiTarget } from '../components/Utils/data/controlDev';
+import { ApiTarget, ModoDevEdicionTotal } from '../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, gestionarErrorServidor } from '../components/Utils/utils';
 import { useAuth } from './AuthContext';
 import { useRegionContext } from './RegionContext';
+import { UserRole } from '../types/users';
 
 export const StatusColorsFonds: Record<Estado, string> = {
     proceso: 'bg-info',
@@ -229,14 +230,26 @@ export const useEstadosPorAnio = () => {
     const ctx = useEstadosPorAnioContext();
     if (!ctx) throw new Error('useEstadosPorAnio debe usarse dentro de RegionEstadosProvider');
     const { yearData } = useYear();
+    const { user } = useUser();
 
-    // Define los flags de edición según tu lógica original
-    const editarPlan = yearData.plan.status === 'borrador';
-    const editarMemoria = ['borrador', 'cerrado'].includes(yearData.memoria.status);
+    const rolUsuario = (user!.role as string).toUpperCase() as UserRole;
+
+    const statusPlan = yearData.plan.status === 'borrador';
+    const esADR = rolUsuario === 'ADR';
+    const editarPlan = statusPlan && esADR;
+
+    const statusMemoria = ['borrador', 'cerrado'].includes(yearData.memoria.status);
+
+    const editarMemoria = statusMemoria && esADR;
 
     return {
         ...ctx,
-        editarPlan,
-        editarMemoria,
+        editarPlan: ModoDevEdicionTotal ? true : editarPlan,
+        editarMemoria: ModoDevEdicionTotal ? true : editarMemoria,
+    };
+    return {
+        ...ctx,
+        editarPlan: editarPlan,
+        editarMemoria: editarMemoria,
     };
 };

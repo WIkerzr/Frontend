@@ -12,10 +12,10 @@ import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionI
 import { ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton, ModalSave } from '../../../../components/Utils/utils';
-import { TextArea } from '../../../../components/Utils/inputs';
 import { Servicios } from '../../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
-import { ErrorFullScreen } from '../ComponentesAccionesServicios';
+import { DropdownLineaActuacion, ErrorFullScreen } from '../ComponentesAccionesServicios';
+import { TextArea } from '../../../../components/Utils/inputs';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -46,12 +46,9 @@ const Index: React.FC = () => {
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [nombreEje, setNombreEje] = useState<string>('');
     const [mostrandoAccionConcreta, setMostrandoAccionConcreta] = useState(false);
+    const [lineaActuaccion, setLineaActuaccion] = useState('');
 
-    const datosVacios = datosEditandoAccion.id === '0';
     useEffect(() => {
-        if (datosVacios) {
-            return;
-        }
         if (!(i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu)) {
             const eje = yearData.plan.ejesPrioritarios.find((r) => r.Id === datosEditandoAccion.ejeId);
             if (eje) {
@@ -66,9 +63,6 @@ const Index: React.FC = () => {
     }, [datosEditandoAccion]);
 
     useEffect(() => {
-        if (datosVacios) {
-            return;
-        }
         if (!editarPlan && !editarMemoria) {
             setBloqueo(true);
         } else {
@@ -77,6 +71,15 @@ const Index: React.FC = () => {
             }
         }
     }, []);
+
+    useEffect(() => {
+        if (datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
+            setDatosEditandoAccion({
+                ...datosEditandoAccion!,
+                lineaActuaccion,
+            });
+        }
+    }, [lineaActuaccion, datosEditandoAccion]);
 
     if (datosEditandoAccion.id === '0') {
         return;
@@ -92,12 +95,6 @@ const Index: React.FC = () => {
         setDatosEditandoAccion({
             ...datosEditandoAccion!,
             accion: `${e.target.value}`,
-        });
-    };
-    const handleLineaActuacionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setDatosEditandoAccion({
-            ...datosEditandoAccion!,
-            lineaActuaccion: `${e.target.value}`,
         });
     };
 
@@ -165,7 +162,10 @@ const Index: React.FC = () => {
                                         </span>
                                         <span className="block  font-semibold">
                                             {editarPlan ? (
-                                                <input type="text" className="form-input w-3/4 text-info" value={datosEditandoAccion.lineaActuaccion} onChange={(e) => handleLineaActuacionChange(e)} />
+                                                <DropdownLineaActuacion
+                                                    setNuevaLineaActuaccion={setLineaActuaccion}
+                                                    idEjeSeleccionado={yearData.plan.ejesPrioritarios.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
+                                                />
                                             ) : (
                                                 <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
                                             )}

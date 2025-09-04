@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
@@ -22,8 +23,6 @@ export const ModalAccion = () => {
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
-    const { regionSeleccionada } = useRegionContext();
-
     const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].Id);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
@@ -31,17 +30,8 @@ export const ModalAccion = () => {
 
     const [inputError, setInputError] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-
-    const [ejes, setEjes] = useState<EjesBBDD[]>();
 
     const [accionesTotales, setAccionesTotales] = useState<number[]>([0, 0, 0]);
-
-    useEffect(() => {
-        if (!showModal) return;
-        LlamadaBBDDEjesRegion(regionSeleccionada, setLoading, setEjes, t, i18n);
-    }, [showModal]);
 
     useEffect(() => {
         const nuevasAccionesTotales = yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length);
@@ -102,35 +92,6 @@ export const ModalAccion = () => {
         }
     }, [accionesTotales, yearData, idEjeSeleccionado, showModal]);
 
-    useEffect(() => {
-        //TODO Temporal
-        if (ejes && idEjeSeleccionado != '') {
-            const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.Id === idEjeSeleccionado);
-            const datosEje = yearData.plan.ejesPrioritarios[index];
-            let lineaActuacion = ejes.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
-            if (!lineaActuacion) {
-                lineaActuacion = ejes.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
-            }
-            if (lineaActuacion) {
-                setLineaActuaciones(lineaActuacion.map((la) => la.Title));
-            } else {
-                setLineaActuaciones([]);
-            }
-        }
-        //TODO Temporal
-        // console.log(ejes.find((e) => `${e.EjeId}` === `${idEjeSeleccionado}`));
-        // console.log(ejes);
-        // console.log(idEjeSeleccionado);
-
-        // const ejePrioritario = yearData.plan.ejesPrioritarios.find((eje) => eje.Id === idEjeSeleccionado);
-        // if (ejePrioritario && ejePrioritario.LineasActuaccion && ejePrioritario.LineasActuaccion.length > 0) {
-        //     const lineasActuaciones = yearData.plan.ejesPrioritarios[0].LineasActuaccion;
-        //     if (lineasActuaciones) {
-        //         setLineaActuaciones(lineasActuaciones.map((la) => la.Title));
-        //     }
-        // }
-    }, [idEjeSeleccionado]);
-
     const handleNuevaAccion = () => {
         if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
             setInputError(true);
@@ -188,7 +149,7 @@ export const ModalAccion = () => {
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            {loading ? <Loading /> : <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} />}
+                            <DropdownLineaActuacion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} />
                         </div>
                     </div>
                     <div className="flex">
@@ -587,6 +548,68 @@ export const ErrorFullScreen = ({ mensaje, irA }: ErrorFullScreenProps) => {
                     {t('volver')}
                 </NavLink>
             </div>
+        </div>
+    );
+};
+
+interface DropdownLineaActuacionProps {
+    setNuevaLineaActuaccion: (val: string) => void;
+    idEjeSeleccionado: string | undefined;
+}
+
+export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado }: DropdownLineaActuacionProps) => {
+    const { regionSeleccionada } = useRegionContext();
+    const { yearData } = useYear();
+    const [loading, setLoading] = useState<boolean>(false);
+    const { t, i18n } = useTranslation();
+    const [ejes, setEjes] = useState<EjesBBDD[]>();
+    const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
+    const [yaCargado, setYaCargado] = useState<boolean>(false);
+
+    const cargarEjes = () => {
+        if (yaCargado) return;
+        LlamadaBBDDEjesRegion(regionSeleccionada, setLoading, setEjes, t, i18n);
+        setYaCargado(true);
+    };
+
+    useEffect(() => {
+        //TODO Temporal
+        if (ejes && idEjeSeleccionado && idEjeSeleccionado != '') {
+            const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.Id === idEjeSeleccionado);
+            const datosEje = yearData.plan.ejesPrioritarios[index];
+            let lineaActuacion = ejes.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
+            if (!lineaActuacion) {
+                lineaActuacion = ejes.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
+            }
+            if (lineaActuacion) {
+                setLineaActuaciones(lineaActuacion.map((la) => la.Title));
+            } else {
+                setLineaActuaciones([]);
+            }
+        }
+        //TODO Temporal
+        // console.log(ejes.find((e) => `${e.EjeId}` === `${idEjeSeleccionado}`));
+        // console.log(ejes);
+        // console.log(idEjeSeleccionado);
+
+        // const ejePrioritario = yearData.plan.ejesPrioritarios.find((eje) => eje.Id === idEjeSeleccionado);
+        // if (ejePrioritario && ejePrioritario.LineasActuaccion && ejePrioritario.LineasActuaccion.length > 0) {
+        //     const lineasActuaciones = yearData.plan.ejesPrioritarios[0].LineasActuaccion;
+        //     if (lineasActuaciones) {
+        //         setLineaActuaciones(lineasActuaciones.map((la) => la.Title));
+        //     }
+        // }
+    }, [idEjeSeleccionado, ejes]);
+
+    return (
+        <div style={{ position: 'relative', minHeight: 40 }}>
+            {loading ? (
+                <Loading />
+            ) : (
+                <div onClick={cargarEjes}>
+                    <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} />
+                </div>
+            )}
         </div>
     );
 };

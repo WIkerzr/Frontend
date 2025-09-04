@@ -360,10 +360,16 @@ interface MyEditableDropdownProps {
     options: string[];
     setOpcion: (value: string) => void;
     placeholder: string;
+    value?: string;
 }
 
-export default function MyEditableDropdown({ options, setOpcion, placeholder }: MyEditableDropdownProps) {
-    const [selected, setSelected] = useState<SingleValue<OptionType>>(null);
+export default function MyEditableDropdown({ options, setOpcion, placeholder, value }: MyEditableDropdownProps) {
+    const optionList: OptionType[] = options.map((opt) => ({
+        value: opt,
+        label: opt.charAt(0).toUpperCase() + opt.slice(1).toLowerCase(),
+    }));
+    const initialSelected: SingleValue<OptionType> = value != null ? optionList.find((o) => o.value === value) || { value, label: value } : null;
+    const [selected, setSelected] = useState<SingleValue<OptionType>>(initialSelected);
     const { t } = useTranslation();
 
     const handleChange = (valor: SingleValue<OptionType>) => {
@@ -384,7 +390,7 @@ export default function MyEditableDropdown({ options, setOpcion, placeholder }: 
             placeholder={placeholder}
             formatCreateLabel={(inputValue) => t('anadir') + ` "${inputValue}"`}
             menuPortalTarget={document.body}
-            noOptionsMessage={() => t('NoHayOpciones')}
+            noOptionsMessage={() => t('seleccionaOpcionesNoHayOpciones')}
             styles={{
                 menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                 menuList: (base) => ({

@@ -72,7 +72,7 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
 
     return (
         <div className="relative w-full max-w-sm -top-[2px]" ref={dropdownRef}>
-            <button type="button" onClick={() => setOpen(!open)} disabled={disabled} className={`w-full text-left p-2 rounded border ${disabled ? 'bg-gray-600' : selected.color}`}>
+            <button type="button" onClick={() => setOpen(!open)} disabled={disabled} className={`w-full text-left p-2 rounded border ${selected.color} ${disabled && 'cursor-not-allowed'}`}>
                 {EstadoLabelTraducidos[ESTADOS.indexOf(selected.label as EstadoLabel)]}
             </button>
 
