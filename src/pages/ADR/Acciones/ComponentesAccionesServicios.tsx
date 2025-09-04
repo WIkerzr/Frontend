@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
@@ -287,9 +287,29 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
+    const prevAccionesRef = useRef<DatosAccion[]>([]);
+    const [accionNueva, setAccionNueva] = useState<string>('');
+    const primeraCargaRef = useRef(true);
 
     useEffect(() => {
-        setAcciones(yearData.plan.ejesPrioritarios[number].acciones);
+        const nuevasAcciones = yearData.plan.ejesPrioritarios[number].acciones;
+
+        if (primeraCargaRef.current) {
+            setAcciones(nuevasAcciones);
+            prevAccionesRef.current = nuevasAcciones;
+            primeraCargaRef.current = false;
+            return;
+        }
+
+        if (prevAccionesRef.current.length < nuevasAcciones.length) {
+            const nuevaFila = nuevasAcciones.find((a) => !prevAccionesRef.current.some((prev) => prev.id === a.id));
+            if (nuevaFila) {
+                setAccionNueva(nuevaFila.id);
+            }
+        }
+
+        setAcciones(nuevasAcciones);
+        prevAccionesRef.current = nuevasAcciones;
     }, [yearData]);
 
     const { t } = useTranslation();
@@ -323,6 +343,9 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                             editable = false;
                         }
                     }
+                    if (accion.id === accionNueva) {
+                        colorAccion = 'bg-green-100';
+                    }
 
                     return (
                         <div key={accion.id} className={`${colorAccion} border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
@@ -348,11 +371,11 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                     )}
                                 </div>
                             </div>
-                            <MostrarAvisoCamposAcciones datos={accion} navegar="/adr/acciones/editando" />
+                            <MostrarAvisoCamposAcciones datos={accion} />
                         </div>
                     );
                 })}
-                {accionesMostradas.length === 0 && <MostrarAvisoCamposAcciones navegar="/adr/acciones/editando" />}
+                {accionesMostradas.length === 0 && <MostrarAvisoCamposAcciones />}
             </div>
         </div>
     );
@@ -417,10 +440,9 @@ interface MostrarAvisoCamposAccionesProps {
     datos?: DatosAccion;
     plurianual?: boolean;
     texto?: boolean;
-    navegar: string;
 }
 
-export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ datos, texto = true, navegar }) => {
+export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ datos, texto = true }) => {
     const { t } = useTranslation();
     const { editarPlan } = useEstadosPorAnio();
 
@@ -462,25 +484,23 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
     }
 
     return (
-        <NavLink to={navegar} className="group">
-            <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
-                {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
-                    <>
-                        <IconInfoCircle />
-                        <span>
-                            <strong>{t('aviso')}:</strong> {t('camposObligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
-                        </span>
-                    </>
-                ) : (
-                    <>
-                        <IconInfoTriangle />
-                        <span>
-                            <strong>{t('aviso')}:</strong> {t('indicadoresOgligatorios')}.
-                        </span>
-                    </>
-                )}
-            </div>
-        </NavLink>
+        <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
+            {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
+                <>
+                    <IconInfoCircle />
+                    <span>
+                        <strong>{t('aviso')}:</strong> {t('camposObligatorios', { zona: editarPlan ? t('plan') : t('memoria') })}.
+                    </span>
+                </>
+            ) : (
+                <>
+                    <IconInfoTriangle />
+                    <span>
+                        <strong>{t('aviso')}:</strong> {t('indicadoresOgligatorios')}.
+                    </span>
+                </>
+            )}
+        </div>
     );
 };
 

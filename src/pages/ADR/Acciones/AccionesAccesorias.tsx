@@ -86,7 +86,7 @@ const Index: React.FC = () => {
                                             </button>
                                         )}
                                     </div>
-                                    <MostrarAvisoCamposAcciones datos={accion} navegar="/adr/accionesYproyectos/editando" />
+                                    <MostrarAvisoCamposAcciones datos={accion} />
                                 </div>
                             );
                         })}
