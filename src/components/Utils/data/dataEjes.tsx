@@ -52,6 +52,8 @@ export const LlamadaBBDDEjesRegion = async (
                     if (setErrorMessage && data.data.length === 0) {
                         setErrorMessage(t('error:errorFaltanDatosEjes'));
                     }
+                    setLoading?.(false);
+                    resolve(datosOrdenados);
                 } catch (err) {
                     setLoading?.(false);
                     reject(err);

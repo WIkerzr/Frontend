@@ -9,7 +9,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import IconEye from '../../../components/Icon/IconEye';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
-import { Servicios } from '../../../types/GeneralTypes';
+import { EstadosLoading, Servicios } from '../../../types/GeneralTypes';
 import { NewModal, PrintFechaTexto, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
@@ -20,6 +20,7 @@ import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
 import React from 'react';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../../components/Icon/IconRefresh';
+import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 
 interface ModalAccionProps {
     acciones: 'acciones' | 'accionesAccesorias';
@@ -205,6 +206,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     const prevAccionesRef = useRef<DatosAccion[]>([]);
     const [accionNueva, setAccionNueva] = useState<string>('');
     const primeraCargaRef = useRef(true);
+    const [loading, setLoading] = useState<EstadosLoading>('idle');
 
     useEffect(() => {
         const nuevasAcciones = yearData.plan.ejesPrioritarios[number].acciones;
@@ -227,6 +229,12 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         prevAccionesRef.current = nuevasAcciones;
     }, [yearData]);
 
+    useEffect(() => {
+        if (loading === 'success') {
+            navigate('/adr/acciones/editando');
+        }
+    }, [loading]);
+
     if (loadingYearData) return <Loading />;
 
     const handleDelete = (id: string) => {
@@ -236,14 +244,15 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     };
 
     const handleEdit = async (id: string) => {
+        setLoading('loading');
         const ejesRegion = localStorage.getItem('ejesRegion');
 
         if (!ejesRegion) {
             await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
         }
+        await SeleccionEditarAccion(idEje, id);
 
-        SeleccionEditarAccion(idEje, id);
-        navigate('/adr/acciones/editando');
+        setLoading('success');
     };
 
     const mostrarInput = acciones.length < 5;
@@ -252,7 +261,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     return (
         <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
             <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
-
+            <LoadingOverlay isLoading={loading} />
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => {
                     let editable = editarPlan || editarMemoria;
@@ -280,7 +289,12 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                 {t('LineaActuaccion')}: {accion.lineaActuaccion}
                             </span>
                             <div className="flex gap-2 justify-end mt-2">
-                                <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => handleEdit(`${accion.id}`)}>
+                                <button
+                                    className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
+                                    onClick={() => {
+                                        handleEdit(`${accion.id}`);
+                                    }}
+                                >
                                     {editable ? <IconPencil /> : <IconEye />}
                                 </button>
                                 <div>

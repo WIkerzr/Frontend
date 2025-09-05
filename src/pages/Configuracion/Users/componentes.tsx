@@ -273,7 +273,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
 
     return (
         <>
-            <LoadingOverlay isLoading={isLoading} message={mensajeAMostrar} onComplete={handleCloseModal} />
+            <LoadingOverlay isLoading={isLoading} enModal={true} message={mensajeAMostrar} onComplete={handleCloseModal} />
             <UserDataForm
                 onSubmit={handleSubmitUser}
                 userData={UserData}
@@ -317,23 +317,35 @@ export const ZonaTitulo: React.FC<PanelEjesProps> = ({ titulo, zonaBtn, zonaExpl
 };
 
 interface LoadingOverlayProps {
-    isLoading: EstadosLoading;
+    isLoading: EstadosLoading | boolean;
+    enModal?: boolean;
     message?: string;
     onComplete?: () => void;
 }
 
-export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, message, onComplete }) => {
+export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, enModal, message, onComplete }) => {
     useEffect(() => {
-        if (isLoading === 'success' || isLoading === 'error') {
-            const timeout = setTimeout(() => {
-                if (onComplete) onComplete();
-            }, 1500);
-            return () => clearTimeout(timeout);
+        if (typeof isLoading === 'boolean') {
+            if (isLoading) {
+                const timeout = setTimeout(() => {
+                    if (onComplete) onComplete();
+                }, 1500);
+                return () => clearTimeout(timeout);
+            }
+        } else {
+            if (isLoading === 'success' || isLoading === 'error') {
+                const timeout = setTimeout(() => {
+                    if (onComplete) onComplete();
+                }, 1500);
+                return () => clearTimeout(timeout);
+            }
         }
     }, [isLoading, onComplete]);
 
-    if (isLoading === 'idle') {
-        return null;
+    if (typeof isLoading === 'boolean') {
+        if (!isLoading) return null;
+    } else {
+        if (isLoading === 'idle') return null;
     }
 
     const Loading = () => {
@@ -389,10 +401,10 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, messa
             break;
     }
     return (
-        <>
+        <div className={`${!enModal ? 'fixed inset-0 backdrop-blur-sm flex items-center justify-center bg-black bg-opacity-50 z-50' : ''}`}>
             {isLoading === 'loading' && <Loading />}
             {isLoading === 'success' && <Success />}
             {isLoading === 'error' && <Error />}
-        </>
+        </div>
     );
 };

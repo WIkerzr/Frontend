@@ -66,21 +66,23 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
         if (regionSeleccionada !== null && regionSeleccionada !== '') {
             const ultimaRegionSesionStorage = sessionStorage.getItem('regionSeleccionada');
             const ultimaRegion = ultimaRegionSesionStorage ? JSON.parse(ultimaRegionSesionStorage) : null;
-            if (ultimaRegion.id !== regionSeleccionada) {
-                sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: regionSeleccionada, nombre: nombreRegionSeleccionada }));
+
+            if (!ultimaRegion || (ultimaRegion && ultimaRegion.id !== regionSeleccionada)) {
                 localStorage.removeItem('ejesRegion');
-
-                const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
-
-                if (regionCompleta) {
-                    setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
-                    setRegionActual(regionCompleta);
-                }
-                setRegionData({
-                    data: [yearIniciadoVacio],
-                    idRegion: regionSeleccionada ?? '',
-                });
             }
+
+            sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: regionSeleccionada, nombre: nombreRegionSeleccionada }));
+
+            const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
+
+            if (regionCompleta) {
+                setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
+                setRegionActual(regionCompleta);
+            }
+            setRegionData({
+                data: [yearIniciadoVacio],
+                idRegion: regionSeleccionada ?? '',
+            });
         }
     }, [regionSeleccionada, regiones, i18n.language, nombreRegionSeleccionada]);
 
