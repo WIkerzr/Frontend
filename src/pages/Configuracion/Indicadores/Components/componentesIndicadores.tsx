@@ -18,6 +18,7 @@ import { ErrorMessage } from '../../../../components/Utils/animations';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
+
 export type TipoIndicador = 'realizacion' | 'resultado';
 
 interface RellenoIndicadorProps {
@@ -41,6 +42,8 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     const { t, i18n } = useTranslation();
     const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado, ejesIndicador } = useIndicadoresContext();
     const { lockedHazi } = useUser();
+    const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
+
     const indicadorSeleccionadoSinFallo = ControlDeFallosIndicadorSeleccionado();
     const [indicadorRealizacionDeterminado, setIndicadorRealizacionDeterminado] = useState<IndicadorResultado[]>([]);
     const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
@@ -238,7 +241,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             <div>
                 <label className="block font-medium ">{t('nombreIndicador')}</label>
                 <div className="flex border rounded bg-gray-200">
-                    {lockedHazi ? (
+                    {bloqueoHazi ? (
                         <div className="flex items-center justify-end rounded mt-2 px-1 font-semibold ">{<label>{indicador[0] + '.' + nombreIndicador}</label>}</div>
                     ) : (
                         <>
@@ -250,7 +253,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             </div>
             <div>
                 <label className="block font-medium">{t('unitMed')}</label>
-                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange} disabled={lockedHazi}>
+                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange} disabled={bloqueoHazi}>
                     <option value="NUMERO">NUMERO</option>
                     <option value="OTRO">OTRO</option>
                 </select>
@@ -266,6 +269,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                             objeto={[...optionsSelect]}
                             preSelected={formData.RelatedAxes ? ejesIndicador.filter((eje) => formData.RelatedAxes?.map((r) => r.EjeId).includes(eje.EjeId)) : []}
                             onChange={handleChangeRelatedAxes}
+                            disabled={bloqueoHazi}
                         />
                     ) : (
                         <div>
@@ -277,17 +281,35 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
 
             <div>
                 <label className="block font-medium">{t('Definicion')}</label>
-                <input type="text" name="Description" className="w-full p-2 border rounded" value={formData.Description ?? ''} onChange={handleChange} />
+                {bloqueoHazi ? (
+                    <div className="flex items-center  rounded mt-2 px-1 font-semibold ">
+                        {<label>{formData.Description && formData.Description.trim() !== '' ? formData.Description : '-'}</label>}
+                    </div>
+                ) : (
+                    <input type="text" name="Description" className="w-full p-2 border rounded" value={formData.Description ?? ''} onChange={handleChange} />
+                )}
             </div>
 
             <div>
                 <label className="block font-medium">{t('VariablesDesagregacion')}</label>
-                <input type="text" name="DisaggregationVariables" className="w-full p-2 border rounded" value={formData.DisaggregationVariables ?? ''} onChange={handleChange} />
+                {bloqueoHazi ? (
+                    <div className="flex items-center  rounded mt-2 px-1 font-semibold ">
+                        {<label>{formData.DisaggregationVariables && formData.DisaggregationVariables.trim() !== '' ? formData.DisaggregationVariables : '-'}</label>}
+                    </div>
+                ) : (
+                    <input type="text" name="DisaggregationVariables" className="w-full p-2 border rounded" value={formData.DisaggregationVariables ?? ''} onChange={handleChange} />
+                )}
             </div>
 
             <div>
                 <label className="block font-medium">{t('MTOCalculo')}</label>
-                <input type="text" name="CalculationMethodology" className="w-full p-2 border rounded" value={formData.CalculationMethodology ?? ''} onChange={handleChange} />
+                {bloqueoHazi ? (
+                    <div className="flex items-center  rounded mt-2 px-1 font-semibold ">
+                        {<label>{formData.CalculationMethodology && formData.CalculationMethodology.trim() !== '' ? formData.CalculationMethodology : '-'}</label>}
+                    </div>
+                ) : (
+                    <input type="text" name="CalculationMethodology" className="w-full p-2 border rounded" value={formData.CalculationMethodology ?? ''} onChange={handleChange} />
+                )}
             </div>
         </div>
     );
@@ -309,6 +331,8 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [filaEditar, setFilaEditar] = useState(0);
     const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
     const { regionSeleccionada } = useRegionContext();
+    const { lockedHazi } = useUser();
+    const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
 
     const [refrescarZona, setRefrescarZona] = useState(0);
 
@@ -501,74 +525,80 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
 
         return (
             <>
-                <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
-                <div className="flex gap-2">
-                    {opcionesFiltradas.length > 0 && (
-                        <select
-                            className="max-w-md w-full flex-1 border p-2 rounded"
-                            value={seleccion}
-                            onChange={(e) => {
-                                const selectedValue = e.target.value;
-                                const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
-                                if (selectedOp) {
-                                    incorporarIndicadorResultado(selectedOp);
-                                }
-                                setSeleccion('');
-                            }}
-                        >
-                            <option value="" disabled>
-                                {t('seleccionaopcion')}
-                            </option>
-                            {opcionesFiltradas.map((op) => (
-                                <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
-                                    {i18n.language === 'eu' ? op.NameEu?.trim() || op.NameEs || '' : op.NameEs?.trim() || op.NameEu || ''}
-                                </option>
-                            ))}
-                        </select>
-                    )}
+                {!bloqueoHazi && (
+                    <>
+                        <label className="block font-bold mb-2">{t('seleccionaopcion')}:</label>
+                        <div className="flex gap-2">
+                            {opcionesFiltradas.length > 0 && (
+                                <select
+                                    className="max-w-md w-full flex-1 border p-2 rounded"
+                                    value={seleccion}
+                                    onChange={(e) => {
+                                        const selectedValue = e.target.value;
+                                        const selectedOp = opciones.find((op) => (i18n.language === 'eu' ? op.NameEu : op.NameEs) === selectedValue);
+                                        if (selectedOp) {
+                                            incorporarIndicadorResultado(selectedOp);
+                                        }
+                                        setSeleccion('');
+                                    }}
+                                >
+                                    <option value="" disabled>
+                                        {t('seleccionaopcion')}
+                                    </option>
+                                    {opcionesFiltradas.map((op) => (
+                                        <option key={op.Id} value={i18n.language === 'eu' ? op.NameEu : op.NameEs}>
+                                            {i18n.language === 'eu' ? op.NameEu?.trim() || op.NameEs || '' : op.NameEs?.trim() || op.NameEu || ''}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
 
-                    <button
-                        className="bg-blue-500 text-white px-3 py-2 rounded"
-                        onClick={() => {
-                            setDescripcionEditable(indicadorInicial);
-                            setModoCrear(true);
-                        }}
-                        type="button"
-                    >
-                        {t('crearNueva')}
-                    </button>
-                </div>
+                            <button
+                                className="bg-blue-500 text-white px-3 py-2 rounded"
+                                onClick={() => {
+                                    setDescripcionEditable(indicadorInicial);
+                                    setModoCrear(true);
+                                }}
+                                type="button"
+                            >
+                                {t('crearNueva')}
+                            </button>
+                        </div>
+                    </>
+                )}
                 <div className="h-full 'w-full">
                     <div className="table-responsive mb-5">
                         <div className="h-full w-full">
                             <div className="flex border-b font-bold pt-3">
-                                <div className="flex-1">{t('Realizacion')}</div>
+                                <div className="flex-1">{t('Resultado')}</div>
                             </div>
 
                             {indicadoresResultadosOrdenadosES.slice().map((data, index) => (
                                 <div key={data.Id + index} className="flex items-center border-b py-3">
                                     <div className="w-[60px] !px-0  flex-shrink-0">
-                                        <div className="flex space-x-[5px]">
-                                            <Tippy content={t('borrar')}>
-                                                <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
-                                                    <IconTrash />
-                                                </button>
-                                            </Tippy>
-                                            {data.Id === 0 && (
-                                                <Tippy content={t('editar')}>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setDescripcionEditable(data);
-                                                            setModoEditar(true);
-                                                            setFilaEditar(index);
-                                                        }}
-                                                    >
-                                                        <IconPencil />
+                                        {!bloqueoHazi && (
+                                            <div className="flex space-x-[5px]">
+                                                <Tippy content={t('borrar')}>
+                                                    <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
+                                                        <IconTrash />
                                                     </button>
                                                 </Tippy>
-                                            )}
-                                        </div>
+                                                {data.Id === 0 && (
+                                                    <Tippy content={t('editar')}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setDescripcionEditable(data);
+                                                                setModoEditar(true);
+                                                                setFilaEditar(index);
+                                                            }}
+                                                        >
+                                                            <IconPencil />
+                                                        </button>
+                                                    </Tippy>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex-1 break-words overflow-hidden">
@@ -645,6 +675,9 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const { regionSeleccionada } = useRegionContext();
     const { indicadorSeleccionado } = useIndicadoresContext();
     const location = useLocation();
+    const { lockedHazi } = useUser();
+    const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
+
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const accion: Acciones = indicadorSeleccionado ? indicadorSeleccionado.accion : 'Editar';
@@ -825,35 +858,46 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             editandoResultadoModal={null}
                         />
 
-                        <BotonResultadosRelacionados />
+                        {!bloqueoHazi && <BotonResultadosRelacionados />}
 
-                        <button
-                            onClick={() => {
-                                let mensajeError = '';
-                                if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
-                                    mensajeError += `${t('errorMissingFields')}`;
-                                }
-                                try {
-                                    if (esNuevo) {
-                                        handleGuardarNuevoRealizacion();
-                                    } else {
-                                        handleEditarIndicador();
+                        {bloqueoHazi ? (
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                }}
+                                className="bg-danger text-white px-4 py-2 rounded hover:bg-red-700 w-full"
+                            >
+                                {t('cerrar')}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    let mensajeError = '';
+                                    if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
+                                        mensajeError += `${t('errorMissingFields')}`;
                                     }
-                                } catch (error) {
-                                    const errorInfo = gestionarErrorServidor(error);
-                                    setErrorMessage(errorInfo.mensaje);
-                                }
+                                    try {
+                                        if (esNuevo) {
+                                            handleGuardarNuevoRealizacion();
+                                        } else {
+                                            handleEditarIndicador();
+                                        }
+                                    } catch (error) {
+                                        const errorInfo = gestionarErrorServidor(error);
+                                        setErrorMessage(errorInfo.mensaje);
+                                    }
 
-                                if (mensajeError && mensajeError?.length > 0) {
-                                    setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + mensajeError : t('errorGuardar') + mensajeError));
-                                    return;
-                                }
-                            }}
-                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
-                        >
-                            {t('guardar')}
-                            {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" icon={false} />}
-                        </button>
+                                    if (mensajeError && mensajeError?.length > 0) {
+                                        setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + mensajeError : t('errorGuardar') + mensajeError));
+                                        return;
+                                    }
+                                }}
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
+                            >
+                                {t('guardar')}
+                                {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" icon={false} />}
+                            </button>
+                        )}
 
                         {mensaje && <p className="text-sm text-center mt-2">{mensaje}</p>}
                     </div>
@@ -891,6 +935,7 @@ export const TablaIndicadores: React.FC = () => {
         setIndicadorSeleccionado,
     } = useIndicadoresContext();
     const { lockedHazi } = useUser();
+    const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
 
     const esPaginaPorDefecto = location.pathname === '/';
 
@@ -1155,7 +1200,7 @@ export const TablaIndicadores: React.FC = () => {
                                                 </td>
                                                 <td className="text-center">
                                                     <div className="flex justify-end space-x-3">
-                                                        <Tippy content={lockedHazi ? t('visualizar') : t('editar')}>
+                                                        <Tippy content={bloqueoHazi ? t('visualizar') : t('editar')}>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
@@ -1170,10 +1215,10 @@ export const TablaIndicadores: React.FC = () => {
                                                                     });
                                                                 }}
                                                             >
-                                                                {lockedHazi ? <IconEye /> : <IconPencil />}
+                                                                {!esADR ? <IconPencil /> : bloqueoHazi ? <IconEye /> : <IconPencil />}{' '}
                                                             </button>
                                                         </Tippy>
-                                                        {!lockedHazi && (
+                                                        {!bloqueoHazi && (
                                                             <Tippy content={t('borrar')}>
                                                                 <button type="button" onClick={() => eliminarIndicadorRealizacion(data)}>
                                                                     <IconTrash />
@@ -1240,7 +1285,7 @@ export const TablaIndicadores: React.FC = () => {
                                                 </td>
                                                 <td className="text-center">
                                                     <div className="flex justify-end space-x-3">
-                                                        <Tippy content={lockedHazi ? t('visualizar') : t('editar')}>
+                                                        <Tippy content={bloqueoHazi ? t('visualizar') : t('editar')}>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => {
@@ -1254,10 +1299,10 @@ export const TablaIndicadores: React.FC = () => {
                                                                     });
                                                                 }}
                                                             >
-                                                                {lockedHazi ? <IconEye /> : <IconPencil />}
+                                                                {!esADR ? <IconPencil /> : bloqueoHazi ? <IconEye /> : <IconPencil />}{' '}
                                                             </button>
                                                         </Tippy>
-                                                        {!lockedHazi && (
+                                                        {!bloqueoHazi && (
                                                             <Tippy content={t('borrar')}>
                                                                 <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
                                                                     <IconTrash />

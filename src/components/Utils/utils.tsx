@@ -391,9 +391,10 @@ interface PropsMultiSelectDOM {
     objeto: EjeIndicadorBBDD[];
     preSelected: EjeIndicadorBBDD[];
     onChange: (selected: EjeIndicadorBBDD[]) => void;
+    disabled?: boolean;
 }
 
-export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelected, onChange }) => {
+export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelected, onChange, disabled = false }) => {
     const [drop, setDrop] = useState<EjeIndicadorBBDD[]>([]);
     const [selected, setSelected] = useState<EjeIndicadorBBDD[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -417,11 +418,11 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
     }, [objeto, selected]);
 
     useEffect(() => {
-        if (prevIsOpen.current && !isOpen) {
+        if (prevIsOpen.current && !isOpen && !disabled) {
             onChange(selected);
         }
         prevIsOpen.current = isOpen;
-    }, [isOpen, selected]);
+    }, [isOpen, selected, disabled]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -434,35 +435,40 @@ export const MultiSelectDOM: React.FC<PropsMultiSelectDOM> = ({ objeto, preSelec
     }, []);
 
     const toggleOption = (eje: EjeIndicadorBBDD) => {
+        if (disabled) return;
         setSelected((prev) => (prev.some((s) => s.EjeId === eje.EjeId) ? prev.filter((s) => s.EjeId !== eje.EjeId) : [...prev, eje]));
     };
 
     const toggleSelectAll = () => {
-        if (selected.length > 0 && selected.length === objeto.length) setSelected([]);
-        else setSelected([...objeto]);
+        if (disabled) return;
+        setSelected(selected.length > 0 && selected.length === objeto.length ? [] : [...objeto]);
     };
 
     return (
         <div className="relative" ref={containerRef}>
-            <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1 mb-1 p-1 border rounded bg-gray-100">
+            <div className={`max-h-24 overflow-y-auto flex flex-wrap gap-1 mb-1 p-1 border rounded ${disabled ? 'bg-gray-200' : 'bg-gray-100'}`}>
                 {mostrarTodos ? (
-                    <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded cursor-pointer" onClick={() => setMostrarTodos(false)}>
-                        {t('TODOS')} ×
+                    <span className={`px-2 py-1 rounded ${disabled ? 'bg-gray-300 text-gray-700' : 'bg-blue-200 text-blue-800 cursor-pointer'}`} onClick={() => !disabled && setMostrarTodos(false)}>
+                        {t('TODOS')} {!disabled && '×'}
                     </span>
                 ) : (
                     selected.map((eje) => (
-                        <span key={eje.EjeId} className="bg-blue-200 text-blue-800 px-2 py-1 rounded cursor-pointer" onClick={() => toggleOption(eje)}>
-                            {i18n.language === 'eu' ? eje.NameEu : eje.NameEs} ×
+                        <span
+                            key={eje.EjeId}
+                            className={`px-2 py-1 rounded ${disabled ? 'bg-gray-300 text-gray-700' : 'bg-blue-200 text-blue-800 cursor-pointer'}`}
+                            onClick={() => !disabled && toggleOption(eje)}
+                        >
+                            {i18n.language === 'eu' ? eje.NameEu : eje.NameEs} {!disabled && '×'}
                         </span>
                     ))
                 )}
             </div>
 
-            <div className="border rounded p-2 cursor-pointer bg-white" onClick={() => setIsOpen((prev) => !prev)}>
+            <div className={`border rounded p-2 bg-white ${disabled ? 'text-gray-500 cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => !disabled && setIsOpen((prev) => !prev)}>
                 {selected.length === 0 ? t('selecionaOpciones') : t('seleccionadosOpciones', { count: selected.length })}
             </div>
 
-            {isOpen && (
+            {!disabled && isOpen && (
                 <div className="absolute w-full max-h-60 overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
                     <div className="p-2 border-b cursor-pointer hover:bg-gray-200 font-semibold" onClick={toggleSelectAll}>
                         {selected.length > 0 && selected.length === objeto.length ? t('deseleccionarTodo') : t('seleccionarTodo')}
