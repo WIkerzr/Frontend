@@ -8,8 +8,8 @@ import { UserID, UserRole } from '../../types/users';
 import { ApiTargetToken } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
-import { HomeComponent } from '../../router/routes';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { DefaultPath } from '../../router/routes';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionContext();
@@ -22,8 +22,6 @@ const useLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
-    const [DefaultPath] = HomeComponent;
 
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();

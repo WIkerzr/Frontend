@@ -1,7 +1,5 @@
-/* eslint-disable no-undef */
 import { lazy } from 'react';
 import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
-import NotFound from './NotFound';
 import { Fases } from '../components/Utils/data/controlDev';
 const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
 const Informes = lazy(() => import('../pages/Configuracion/Informes'));
@@ -21,32 +19,7 @@ const Profile = lazy(() => import('../pages/profile/profile'));
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
 
-const paginaPorDefectoPorFases: { [key: number]: JSX.Element } = {
-    1: <Usuarios />,
-    2: <IndicadoresADR />,
-    3: <IndicadoresADR />,
-    4: <IndicadoresADR />,
-    5: <IndicadoresADR />,
-    6: <IndicadoresADR />,
-    // 1: <Usuarios />,
-    // 2: <IndicadoresADR />,
-    // 3: <Acciones />,
-    // 4: <AccionesAccesorias />,
-    // 5: <PlanesGestion />,
-    // 6: <IndicadoresInpacto />,
-};
-
-const paginaPorDefectoPorFasesPath: { [key: number]: string } = {
-    1: '/configuracion/usuarios',
-    2: '/configuracion/indicadoresADR',
-    3: '/adr/acciones',
-    4: '/adr/accionesYproyectos',
-    5: '/adr/planesGestion',
-    6: '/configuracion/indicadoresInpacto',
-};
-
-export const HomeComponent: [string, JSX.Element] = [paginaPorDefectoPorFasesPath[Fases] || '/configuracion/CuadroMando', paginaPorDefectoPorFases[Fases] || <CuadroMando />];
-const [DefaultPath, DefaultPage] = HomeComponent;
+export const DefaultPath = Fases < 2 ? '/configuracion/usuarios' : '/configuracion/indicadoresADR';
 
 const fase1 = [
     {
@@ -244,13 +217,6 @@ const inicial = [
         ),
         layout: 'blank',
     },
-    {
-        path: DefaultPath,
-        element: <OnlyIfLoggedIn>{DefaultPage}</OnlyIfLoggedIn>,
-        errorElement: <NotFound />,
-        layout: 'default',
-    },
-
     {
         path: '/Authenticacion/Login',
         element: (
