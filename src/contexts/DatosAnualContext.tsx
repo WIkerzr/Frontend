@@ -291,10 +291,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
     }, [datosEditandoServicio]);
 
-    useEffect(() => {
-        console.log('loadingYearData ' + loadingYearData);
-    }, [loadingYearData]);
-
     const SeleccionEditarServicio = (idServicio: string | null) => {
         if (idServicio) {
             const servicioSeleccionado = yearData.servicios!.find((servicio) => `${servicio.id}` === idServicio);

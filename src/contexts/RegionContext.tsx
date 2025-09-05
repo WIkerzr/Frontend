@@ -64,19 +64,24 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (regionSeleccionada !== null && regionSeleccionada !== '') {
-            sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: regionSeleccionada, nombre: nombreRegionSeleccionada }));
-            const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
+            const ultimaRegionSesionStorage = sessionStorage.getItem('regionSeleccionada');
+            const ultimaRegion = ultimaRegionSesionStorage ? JSON.parse(ultimaRegionSesionStorage) : null;
+            if (ultimaRegion.id !== regionSeleccionada) {
+                sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: regionSeleccionada, nombre: nombreRegionSeleccionada }));
+                localStorage.removeItem('ejesRegion');
 
-            if (regionCompleta) {
-                setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
-                setRegionActual(regionCompleta);
+                const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
+
+                if (regionCompleta) {
+                    setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
+                    setRegionActual(regionCompleta);
+                }
+                setRegionData({
+                    data: [yearIniciadoVacio],
+                    idRegion: regionSeleccionada ?? '',
+                });
             }
-            setRegionData({
-                data: [yearIniciadoVacio],
-                idRegion: regionSeleccionada ?? '',
-            });
         }
-        localStorage.removeItem('ejesRegion');
     }, [regionSeleccionada, regiones, i18n.language, nombreRegionSeleccionada]);
 
     useEffect(() => {
