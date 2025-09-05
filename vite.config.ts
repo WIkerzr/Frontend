@@ -14,6 +14,13 @@ export const apiTarget = modoDev
 export default defineConfig({
     build: {
         sourcemap: true,
+        rollupOptions: {
+            output: {
+                entryFileNames: 'assets/[name].[hash].js',
+                chunkFileNames: 'assets/[name].[hash].js',
+                assetFileNames: 'assets/[name].[hash].[ext]',
+            },
+        },
     },
     plugins: [react()],
     resolve: {
@@ -24,6 +31,7 @@ export default defineConfig({
     server: {
         headers: {
             'access-control-allow-origin': '*',
+            'Cache-Control': 'no-cache', //TODO borrar al finalizar el proyecto
         },
         proxy: {
             '/api': {

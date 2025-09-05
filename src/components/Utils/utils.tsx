@@ -251,7 +251,11 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
                 console.error(`401:${t('error:errorNoAutorizado')}`);
                 window.alert(t('error:errorNoAutorizado'));
                 sessionStorage.clear();
-                localStorage.clear();
+                Object.keys(localStorage).forEach((key) => {
+                    if (key !== 'app_version') {
+                        localStorage.removeItem(key);
+                    }
+                });
                 window.location.href = '/Authenticacion/Login';
                 return { mensaje: t('error:errorNoAutorizado'), tipo: 'error' };
             case 403:

@@ -3,11 +3,29 @@ import LoginForm from './LoginForm';
 import LoginLogica from './LoginLogica';
 import PasswordFormLogic from '../profile/passwordFormLogic';
 import { useParams } from 'react-router-dom';
+import { APP_VERSION } from '../../version';
+import { useEffect } from 'react';
 
 const LoginBoxed = () => {
     const { '*': code } = useParams();
     const isRecovering = !!code;
     const { email, setEmail, password, setPassword, submitForm, error } = LoginLogica();
+
+    useEffect(() => {
+        const savedVersion = localStorage.getItem('app_version');
+        if (savedVersion !== APP_VERSION) {
+            localStorage.setItem('app_version', APP_VERSION);
+            document.querySelectorAll('script[src], link[rel="stylesheet"]').forEach((el) => {
+                const srcAttr = el.tagName === 'SCRIPT' ? 'src' : 'href';
+                const url = el.getAttribute(srcAttr);
+                if (url) {
+                    el.setAttribute(srcAttr, url.split('?')[0] + '?v=' + new Date().getTime());
+                }
+            });
+
+            window.location.reload();
+        }
+    }, []);
 
     return (
         <div>
