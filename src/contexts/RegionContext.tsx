@@ -76,6 +76,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
                 idRegion: regionSeleccionada ?? '',
             });
         }
+        localStorage.removeItem('ejesRegion');
     }, [regionSeleccionada, regiones, i18n.language, nombreRegionSeleccionada]);
 
     useEffect(() => {

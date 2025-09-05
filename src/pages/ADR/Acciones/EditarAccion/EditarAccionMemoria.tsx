@@ -135,7 +135,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="px-4 py-2 text-center font-semibold">{t('cuantia')}</th>
-                            <th className="px-4 py-2 text-center font-semibold">{t('autofinanciación')}</th>
+                            <th className="px-4 py-2 text-center font-semibold">{t('fuentesDeFinanciacion')}</th>
                             <th className="px-4 py-2 text-center font-semibold">{t('observaciones')}</th>
                         </tr>
                     </thead>

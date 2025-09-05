@@ -48,9 +48,11 @@ const Index: React.FC = () => {
     const [mostrandoAccionConcreta, setMostrandoAccionConcreta] = useState(false);
     const [lineaActuaccion, setLineaActuaccion] = useState('');
 
+    const ejesPlan = yearData.plan.ejesPrioritarios;
+
     useEffect(() => {
         if (!(i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu)) {
-            const eje = yearData.plan.ejesPrioritarios.find((r) => r.Id === datosEditandoAccion.ejeId);
+            const eje = ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId);
             if (eje) {
                 setNombreEje(i18n.language === 'es' ? eje.NameEs : eje.NameEu);
             }
@@ -171,8 +173,9 @@ const Index: React.FC = () => {
                                             {editarPlan ? (
                                                 <DropdownLineaActuacion
                                                     setNuevaLineaActuaccion={setLineaActuaccion}
-                                                    idEjeSeleccionado={yearData.plan.ejesPrioritarios.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
+                                                    idEjeSeleccionado={ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
                                                     lineaActuaccion={lineaActuaccion}
+                                                    ejesPlan={ejesPlan}
                                                 />
                                             ) : (
                                                 <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>

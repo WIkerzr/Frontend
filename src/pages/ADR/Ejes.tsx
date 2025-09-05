@@ -33,7 +33,7 @@ const Index = () => {
     });
 
     const llamadaEjes = () => {
-        LlamadaBBDDEjesRegion(regionSeleccionada, setLoading, setEjes, t, i18n, setFechaUltimoActualizadoBBDD, setErrorMessage);
+        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, setLoading, setEjes, setFechaUltimoActualizadoBBDD, setErrorMessage);
     };
 
     const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {

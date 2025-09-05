@@ -3,27 +3,37 @@ import { useEffect, useRef, useState } from 'react';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { DatosAccion } from '../../../types/TipadoAccion';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import IconEye from '../../../components/Icon/IconEye';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
 import { Servicios } from '../../../types/GeneralTypes';
-import { NewModal, formateaConCeroDelante } from '../../../components/Utils/utils';
+import { NewModal, PrintFechaTexto, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import MyEditableDropdown from '../../../components/Utils/inputs';
 import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { Loading } from '../../../components/Utils/animations';
-import { EjesBBDD } from '../../../types/tipadoPlan';
+import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
+import React from 'react';
+import Tippy from '@tippyjs/react';
+import IconRefresh from '../../../components/Icon/IconRefresh';
 
-export const ModalAccion = () => {
+interface ModalAccionProps {
+    acciones: 'acciones' | 'accionesAccesorias';
+}
+
+export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(yearData.plan.ejesPrioritarios[0].Id);
+    const ejesPlan = acciones === 'acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
+
+    const { regionSeleccionada } = useRegionContext();
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(ejesPlan[0].Id);
     const [nuevaAccion, setNuevaAccion] = useState('');
     const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
     const [plurianual, setNuevaPlurianual] = useState(false);
@@ -34,13 +44,19 @@ export const ModalAccion = () => {
     const [accionesTotales, setAccionesTotales] = useState<number[]>([0, 0, 0]);
 
     useEffect(() => {
-        const nuevasAccionesTotales = yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length);
+        const nuevasAccionesTotales = ejesPlan.map((eje) => eje.acciones.length);
         setAccionesTotales(nuevasAccionesTotales);
     }, [yearData]);
 
     useEffect(() => {
         if (idEjeSeleccionado === '') {
-            setIdEjeSeleccionado(yearData.plan.ejesPrioritarios[0].Id);
+            setIdEjeSeleccionado(ejesPlan[0].Id);
+        }
+        if (showModal && acciones === 'acciones') {
+            const ejesRegion = localStorage.getItem('ejesRegion');
+            if (!ejesRegion) {
+                LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
+            }
         }
     }, [idEjeSeleccionado, showModal]);
 
@@ -55,7 +71,7 @@ export const ModalAccion = () => {
         disabled: boolean;
     } {
         const maxAccion = accionesTotales[index] >= 5;
-        if (yearData.plan.ejesPrioritarios.length === 1) {
+        if (ejesPlan.length === 1) {
             const otroEjeVacio = false;
             const limiteSiVacio = false;
             const limitarEje = false;
@@ -74,14 +90,14 @@ export const ModalAccion = () => {
     }
 
     useEffect(() => {
-        if (yearData.plan.ejesPrioritarios.length === 1) {
+        if (ejesPlan.length === 1) {
             return;
         }
-        const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.Id === idEjeSeleccionado);
+        const index = ejesPlan.findIndex((eje) => eje.Id === idEjeSeleccionado);
         const { disabled } = validarEstadoEje(index, accionesTotales);
 
         if (disabled) {
-            const nuevoId = yearData.plan.ejesPrioritarios.find((_, i) => {
+            const nuevoId = ejesPlan.find((_, i) => {
                 const { disabled } = validarEstadoEje(i, accionesTotales);
                 return !disabled;
             })?.Id;
@@ -122,7 +138,7 @@ export const ModalAccion = () => {
                     <div>
                         <label className="block font-medium mb-1">{t('Ejes')}</label>
                         <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
-                            {yearData.plan.ejesPrioritarios.map((eje, index) => {
+                            {ejesPlan.map((eje, index) => {
                                 const { maxAccion, limitarEje, disabled } = validarEstadoEje(index, accionesTotales);
                                 const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}${maxAccion ? ` (${t('limiteAlcanzado')})` : limitarEje ? ` (${t('completaEjeVacio')})` : ''}`;
                                 return (
@@ -149,7 +165,7 @@ export const ModalAccion = () => {
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            <DropdownLineaActuacion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} />
+                            <DropdownLineaActuacion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} />
                         </div>
                     </div>
                     <div className="flex">
@@ -173,119 +189,17 @@ export const ModalAccion = () => {
     );
 };
 
-export const ModalAccionAccesorias = () => {
-    const { t, i18n } = useTranslation();
-    const { yearData, AgregarAccion } = useYear();
-    const { editarPlan } = useEstadosPorAnio();
-    const listadoEjesFiltrado = yearData.plan.ejes.filter((eje) => !yearData.plan.ejesPrioritarios.some((prioritario) => prioritario.Id === eje.Id));
-
-    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState<string>(listadoEjesFiltrado[0].Id);
-    const [nuevaAccion, setNuevaAccion] = useState('');
-    const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
-    const [plurianual, setNuevaPlurianual] = useState(false);
-
-    const [inputError, setInputError] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-
-    const handleNuevaAccion = () => {
-        if (!nuevaAccion.trim()) {
-            setInputError(true);
-            return;
-        }
-
-        AgregarAccion('AccionesAccesorias', idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
-
-        //TODO LLamada al servidor con la nueva accionAccesorias
-
-        setIdEjeSeleccionado('');
-        setNuevaAccion('');
-        setNuevaLineaActuaccion('');
-        setNuevaPlurianual(false);
-        setInputError(false);
-        setShowModal(false);
-    };
-
-    return (
-        <>
-            {editarPlan && (
-                <div className="flex justify-center">
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
-                        {t('anadirAccion')}
-                    </button>
-                </div>
-            )}
-            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('newAccion')}>
-                <div className="space-y-5">
-                    <div>
-                        <label className="block font-medium mb-1">{t('Ejes')}</label>
-                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
-                            {listadoEjesFiltrado.map((eje) => {
-                                const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}`;
-                                return (
-                                    <option key={eje.Id} value={eje.Id}>
-                                        {label}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block font-medium mb-1">{t('NombreAccion')}</label>
-                        <input
-                            type="text"
-                            className={`w-full p-2 border rounded ${inputError && !nuevaAccion.trim() ? 'border-red-400' : ''}`}
-                            value={nuevaAccion}
-                            onChange={(e) => {
-                                setNuevaAccion(e.target.value);
-                                setInputError(false);
-                            }}
-                            placeholder={t('Introduce nombre acción')}
-                        />
-                    </div>
-                    <div>
-                        <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
-                        <input
-                            type="text"
-                            className={`w-full p-2 border rounded`}
-                            value={nuevaLineaActuaccion}
-                            onChange={(e) => {
-                                setNuevaLineaActuaccion(e.target.value);
-                                setInputError(false);
-                            }}
-                            placeholder={t('Introduce línea de actuación')}
-                        />
-                    </div>
-                    <div className="flex">
-                        <input
-                            onChange={(e) => setNuevaPlurianual(e.target.checked)}
-                            type="checkbox"
-                            className="form-checkbox h-5 w-5 "
-                            checked={plurianual}
-                            //onChange={() => handleCheck(accion.id)}
-                            //id={`checkbox-${accion.id}`}
-                        />
-                        <label>{t('plurianual')}</label>
-                    </div>
-                    {inputError && <div className="text-xs text-red-500 text-center">{t('rellenarCampo')}</div>}
-                    <button onClick={handleNuevaAccion} className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition}`}>
-                        {t('guardar')}
-                    </button>
-                </div>
-            </NewModal>
-        </>
-    );
-};
-
 interface ListadoAccionesProps {
     eje: string;
     number: number;
     idEje: string;
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
+    const navigate = useNavigate();
     const { yearData, EliminarAccion, SeleccionEditarAccion, loadingYearData } = useYear();
     const { regionSeleccionada } = useRegionContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
     const prevAccionesRef = useRef<DatosAccion[]>([]);
@@ -319,6 +233,17 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         const confirmar = window.confirm(t('confirmacionEliminarAccion'));
         if (!confirmar) return;
         EliminarAccion('Acciones', idEje, id);
+    };
+
+    const handleEdit = async (id: string) => {
+        const ejesRegion = localStorage.getItem('ejesRegion');
+
+        if (!ejesRegion) {
+            await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
+        }
+
+        SeleccionEditarAccion(idEje, id);
+        navigate('/adr/acciones/editando');
     };
 
     const mostrarInput = acciones.length < 5;
@@ -355,11 +280,9 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                 {t('LineaActuaccion')}: {accion.lineaActuaccion}
                             </span>
                             <div className="flex gap-2 justify-end mt-2">
-                                <NavLink to="/adr/acciones/editando" className="group">
-                                    <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => SeleccionEditarAccion(idEje, `${accion.id}`)}>
-                                        {editable ? <IconPencil /> : <IconEye />}
-                                    </button>
-                                </NavLink>
+                                <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => handleEdit(`${accion.id}`)}>
+                                    {editable ? <IconPencil /> : <IconEye />}
+                                </button>
                                 <div>
                                     {editable === true && (
                                         <button
@@ -577,28 +500,41 @@ interface DropdownLineaActuacionProps {
     setNuevaLineaActuaccion: (val: string) => void;
     idEjeSeleccionado: string | undefined;
     lineaActuaccion?: string;
+    ejesPlan: Ejes[];
 }
 
-export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion }: DropdownLineaActuacionProps) => {
+export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan }: DropdownLineaActuacionProps) => {
     const { regionSeleccionada } = useRegionContext();
-    const { yearData } = useYear();
     const [loading, setLoading] = useState<boolean>(false);
     const { t, i18n } = useTranslation();
     const [ejes, setEjes] = useState<EjesBBDD[]>();
     const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
     const [yaCargado, setYaCargado] = useState<boolean>(false);
+    const [textoFecha, setTextoFecha] = useState<string>('');
+
+    const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
+        const fechaStr = obtenerFechaLlamada('users');
+        if (fechaStr) {
+            const ejesRegion = localStorage.getItem('ejesRegion');
+            if (!ejesRegion) return new Date();
+
+            setEjes(JSON.parse(ejesRegion));
+            setYaCargado(true);
+        }
+        return fechaStr ? new Date(fechaStr) : new Date();
+    });
 
     const cargarEjes = () => {
         if (yaCargado) return;
-        LlamadaBBDDEjesRegion(regionSeleccionada, setLoading, setEjes, t, i18n);
+        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, setLoading, setEjes, setFechaUltimoActualizadoBBDD);
         setYaCargado(true);
     };
 
     useEffect(() => {
         //TODO Temporal
         if (ejes && idEjeSeleccionado && idEjeSeleccionado != '') {
-            const index = yearData.plan.ejesPrioritarios.findIndex((eje) => eje.Id === idEjeSeleccionado);
-            const datosEje = yearData.plan.ejesPrioritarios[index];
+            const index = ejesPlan.findIndex((eje) => eje.Id === idEjeSeleccionado);
+            const datosEje = ejesPlan[index];
             let lineaActuacion = ejes.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
             if (!lineaActuacion) {
                 lineaActuacion = ejes.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
@@ -614,22 +550,35 @@ export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccion
         // console.log(ejes);
         // console.log(idEjeSeleccionado);
 
-        // const ejePrioritario = yearData.plan.ejesPrioritarios.find((eje) => eje.Id === idEjeSeleccionado);
+        // const ejePrioritario = ejesPlan.find((eje) => eje.Id === idEjeSeleccionado);
         // if (ejePrioritario && ejePrioritario.LineasActuaccion && ejePrioritario.LineasActuaccion.length > 0) {
-        //     const lineasActuaciones = yearData.plan.ejesPrioritarios[0].LineasActuaccion;
+        //     const lineasActuaciones = ejesPlan[0].LineasActuaccion;
         //     if (lineasActuaciones) {
         //         setLineaActuaciones(lineasActuaciones.map((la) => la.Title));
         //     }
         // }
     }, [idEjeSeleccionado, ejes]);
 
+    useEffect(() => {
+        setTextoFecha(`${t('Actualizar')} ${t('LineasdeActuaccion')} ${PrintFechaTexto({ date: fechaUltimoActualizadoBBDD, idioma: i18n })}`);
+    }, [fechaUltimoActualizadoBBDD, t]);
+
     return (
         <div style={{ position: 'relative', minHeight: 40 }}>
             {loading ? (
                 <Loading />
             ) : (
-                <div onClick={cargarEjes}>
-                    <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} value={lineaActuaccion} />
+                <div className="flex items-center w-full">
+                    <div className="flex-1">
+                        <MyEditableDropdown options={lineaActuaciones} setOpcion={setNuevaLineaActuaccion} placeholder={t('DropdownEditable')} value={lineaActuaccion} />
+                    </div>
+
+                    <Tippy content={textoFecha}>
+                        <button type="button" onClick={() => cargarEjes()} className="p-2">
+                            <IconRefresh />
+                        </button>
+                    </Tippy>
+                    <span className="text-sm text-gray-600">{textoFecha.slice(-5)}</span>
                 </div>
             )}
         </div>

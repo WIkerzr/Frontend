@@ -8,7 +8,7 @@ import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { DatosAccion } from '../../../types/TipadoAccion';
-import { ModalAccionAccesorias, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
+import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -53,7 +53,7 @@ const Index: React.FC = () => {
                         </span>
                     </h2>
                 }
-                zonaBtn={<ModalAccionAccesorias />}
+                zonaBtn={<ModalAccion acciones={'accionesAccesorias'} />}
                 // zonaExplicativa={(editarPlan || editarMemoria) && <></>}
             />
             <div className="w-full mx-auto mt-1 px-2">

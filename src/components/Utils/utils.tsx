@@ -208,7 +208,7 @@ export function Boton({ tipo, disabled = false, textoBoton = '', onClick }: Boto
         </button>
     );
 }
-type ClaveFecha = 'indicadores' | 'users' | 'acciones' | 'ejes' | 'YearData';
+type ClaveFecha = 'indicadores' | 'users' | 'acciones' | 'ejes' | 'YearData' | 'ejesRegion';
 export function actualizarFechaLLamada(clave: ClaveFecha, fecha: Date = new Date()) {
     const keyStorage = 'fechasUltimaLlamada';
     const fechasRaw = localStorage.getItem(keyStorage);
@@ -358,37 +358,61 @@ export async function FetchConRefreshRetry(input: RequestInfo, init?: RequestIni
 
 interface FechaProps {
     date: string | Date | null;
+    solohora?: boolean;
+}
+interface FechaTextoProps {
+    date: string | Date | null;
+    solohora?: boolean;
+    idioma: { language: string; locales?: string }; //idioma pasarle directamente i18n
 }
 const mesesEu = ['urtarrila', 'otsaila', 'martxoa', 'apirila', 'maiatza', 'ekaina', 'uztaila', 'abuztua', 'iraila', 'urria', 'azaroa', 'abendua'];
 
-function formatFechaEu(date: Date) {
-    const day = date.getDate();
-    const month = mesesEu[date.getMonth()];
-    const hour = date.getHours().toString().padStart(2, '0');
-    const minute = date.getMinutes().toString().padStart(2, '0');
-    const second = date.getSeconds().toString().padStart(2, '0');
-    return `${day} ${month} ${hour}:${minute}:${second}`;
-}
-
-export function PrintFecha({ date }: FechaProps) {
-    if (!date) {
-        return <></>;
-    }
-    const { i18n } = useTranslation();
-
-    const locale = i18n.language === 'eu' ? 'eu' : 'es-ES';
+export function PrintFechaTexto({ date, solohora, idioma }: FechaTextoProps): string {
+    if (!date) return '';
 
     const fechaObj = date instanceof Date ? date : new Date(date);
 
-    const formatter = new Intl.DateTimeFormat(locale, {
+    const formatter = new Intl.DateTimeFormat(idioma.language, {
         day: 'numeric',
         month: 'long',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
+    });
+    function formatFechaEu(date: Date) {
+        const day = date.getDate();
+        const month = mesesEu[date.getMonth()];
+        const hour = date.getHours().toString().padStart(2, '0');
+        const minute = date.getMinutes().toString().padStart(2, '0');
+        return `${day} ${month} ${hour}:${minute}`;
+    }
+
+    const formatterHor = new Intl.DateTimeFormat(idioma.language, {
+        hour: '2-digit',
+        minute: '2-digit',
     });
 
-    return <div>{locale === 'eu' ? formatFechaEu(fechaObj) : formatter.format(fechaObj)}</div>;
+    function formatFechaHoraEu(date: Date) {
+        const hour = date.getHours().toString().padStart(2, '0');
+        const minute = date.getMinutes().toString().padStart(2, '0');
+        return `${hour}:${minute}`;
+    }
+
+    if (idioma.language === 'eu') {
+        return solohora ? formatFechaHoraEu(fechaObj) : formatFechaEu(fechaObj);
+    }
+
+    return solohora ? formatterHor.format(fechaObj) : formatter.format(fechaObj);
+}
+
+export function PrintFecha({ date, solohora }: FechaProps) {
+    const { i18n } = useTranslation();
+
+    if (!date) {
+        return <></>;
+    }
+    const texto = PrintFechaTexto({ date, solohora, idioma: i18n });
+    if (!texto) return <></>;
+    return <div>{texto}</div>;
 }
 
 interface PropsMultiSelectDOM {
