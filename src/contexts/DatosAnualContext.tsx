@@ -35,7 +35,6 @@ interface YearContextType {
     setDatosEditandoServicio: React.Dispatch<React.SetStateAction<Servicios | null>>;
     SeleccionEditarServicio: (idServicio: string | null) => void;
     SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
-    SeleccionEditarAccionAccesoria: (idAccion: string) => void;
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
@@ -102,7 +101,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [successMessage]);
 
-    const SeleccionEditarAccion = (idEjePrioritario: string, idAccion: string) => {
+    const SeleccionEditarAccion = (idEje: string, idAccion: string) => {
         LlamadasBBDD({
             method: 'POST',
             url: `actionData/${idAccion}`,
@@ -219,17 +218,17 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     accionCompartida: response.data?.AccionCompartida ?? null,
                     datosPlan: dataPlan,
                     datosMemoria: dataMemoria,
-                    ejeId: idEjePrioritario,
+                    ejeId: idEje,
                 };
 
-                setIdEjeEditado(idEjePrioritario);
+                setIdEjeEditado(idEje);
 
                 setYearData({
                     ...yearData,
                     plan: {
                         ...yearData.plan,
                         ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                            eje.Id === idEjePrioritario ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === idAccion ? { ...accion, ...dataAccion } : accion)) } : eje
+                            eje.Id === idEje ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === idAccion ? { ...accion, ...dataAccion } : accion)) } : eje
                         ),
                     },
                 });
@@ -274,13 +273,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 observaciones: '',
             },
         });
-    };
-
-    const SeleccionEditarAccionAccesoria = (idAccion: string) => {
-        const accionAccesoria = yearData.accionesAccesorias!.find((r) => r.id === idAccion);
-        if (accionAccesoria) {
-            setDatosEditandoAccion(accionAccesoria);
-        }
     };
 
     const [datosEditandoServicio, setDatosEditandoServicio] = useState<Servicios | null>(() => {
@@ -368,62 +360,56 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
         const ejeSeleccionado = fuenteEjes.find((eje) => eje.Id === idEje);
         if (!ejeSeleccionado) return;
+
         setSelectedId(idEje);
-        if (tipo === 'Acciones') {
-            LlamadasBBDD({
-                method: 'POST',
-                url: `yearData/${yearData.plan.id}/${idEje}/newAction`,
-                setLoading: setLoadingYearData,
-                setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-                setErrorMessage,
-                setSuccessMessage,
-                body: {
-                    Nombre: nuevaAccion,
-                    LineaActuaccion: nuevaLineaActuaccion,
-                    Plurianual: plurianual,
-                },
-                onSuccess: (response) => {
-                    const validarNombre = nuevaAccion === response.data.Nombre;
-                    const validarLineaActuaccion = nuevaLineaActuaccion === response.data.LineaActuaccion;
-                    const validarPlurianual = plurianual === response.data.Plurianual;
-                    if (!validarNombre || !validarLineaActuaccion || !validarPlurianual) {
-                        throw new Error('Error al agregar la acción: datos no coinciden');
-                    }
+        LlamadasBBDD({
+            method: 'POST',
+            url: `yearData/${yearData.plan.id}/${idEje}/newAction`,
+            setLoading: setLoadingYearData,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+            setErrorMessage,
+            setSuccessMessage,
+            body: {
+                Nombre: nuevaAccion,
+                LineaActuaccion: nuevaLineaActuaccion,
+                Plurianual: plurianual,
+            },
+            onSuccess: (response) => {
+                const validarNombre = nuevaAccion === response.data.Nombre;
+                const validarLineaActuaccion = nuevaLineaActuaccion === response.data.LineaActuaccion;
+                const validarPlurianual = plurianual === response.data.Plurianual;
+                if (!validarNombre || !validarLineaActuaccion || !validarPlurianual) {
+                    throw new Error('Error al agregar la acción: datos no coinciden');
+                }
 
-                    setYearData({
-                        ...yearData,
-                        plan: {
-                            ...yearData.plan,
-                            ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                                eje.Id === ejeSeleccionado.Id
-                                    ? {
-                                          ...eje,
-                                          acciones: [
-                                              ...eje.acciones,
-                                              {
-                                                  id: response.data.Id,
-                                                  accion: nuevaAccion,
-                                                  ejeEs: ejeSeleccionado.NameEs,
-                                                  ejeEu: ejeSeleccionado.NameEu,
-                                                  lineaActuaccion: nuevaLineaActuaccion,
-                                                  plurianual: plurianual,
-                                              },
-                                          ],
-                                      }
-                                    : eje
-                            ),
-                        },
-                    });
+                setYearData({
+                    ...yearData,
+                    plan: {
+                        ...yearData.plan,
+                        ejesPrioritarios: fuenteEjes.map((eje) =>
+                            eje.Id === ejeSeleccionado.Id
+                                ? {
+                                      ...eje,
+                                      acciones: [
+                                          ...eje.acciones,
+                                          {
+                                              id: response.data.Id,
+                                              accion: nuevaAccion,
+                                              ejeEs: ejeSeleccionado.NameEs,
+                                              ejeEu: ejeSeleccionado.NameEu,
+                                              lineaActuaccion: nuevaLineaActuaccion,
+                                              plurianual: plurianual,
+                                          },
+                                      ],
+                                  }
+                                : eje
+                        ),
+                    },
+                });
 
-                    console.log('Acción agregada:', response);
-                },
-            });
-        } else {
-            setYearData({
-                ...yearData,
-                //accionesAccesorias: [...(yearData.accionesAccesorias || []), datos],
-            });
-        }
+                console.log('Acción agregada:', response);
+            },
+        });
     };
 
     const GuardarLaEdicionAccion = (setLoading: React.Dispatch<React.SetStateAction<EstadosLoading>>) => {
@@ -694,7 +680,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 EliminarAccion,
                 AgregarServicio,
                 SeleccionEditarAccion,
-                SeleccionEditarAccionAccesoria,
                 SeleccionVaciarEditarAccion,
                 SeleccionEditarGuardar,
                 SeleccionEditarGuardarAccesoria,

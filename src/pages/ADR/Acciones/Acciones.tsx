@@ -55,7 +55,7 @@ const Index: React.FC = () => {
                         </span>
                     </h2>
                 }
-                zonaBtn={<ModalAccion acciones="acciones" />}
+                zonaBtn={<ModalAccion acciones="Acciones" />}
                 zonaExplicativa={
                     (editarPlan || editarMemoria) && (
                         <>

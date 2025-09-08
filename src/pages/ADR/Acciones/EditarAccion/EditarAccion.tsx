@@ -38,7 +38,16 @@ const Index: React.FC = () => {
 
     const [lineaActuaccion, setLineaActuaccion] = useState('');
 
-    const ejesPlan = yearData.plan.ejesPrioritarios;
+    let ejesPlan = yearData.plan.ejesPrioritarios;
+    if (datosEditandoAccion.id !== '0') {
+        if (datosEditandoAccion.ejeId) {
+            if (yearData.plan.ejesPrioritarios.some((e) => e.Id === datosEditandoAccion.ejeId)) {
+                ejesPlan = yearData.plan.ejesPrioritarios;
+            } else if (yearData.plan.ejes.some((e) => e.Id === datosEditandoAccion.ejeId)) {
+                ejesPlan = yearData.plan.ejes;
+            }
+        }
+    }
 
     useEffect(() => {
         if (!(i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu)) {

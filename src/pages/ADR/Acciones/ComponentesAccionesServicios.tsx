@@ -5,7 +5,7 @@ import IconTrash from '../../../components/Icon/IconTrash';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { DatosAccion } from '../../../types/TipadoAccion';
-import { useYear } from '../../../contexts/DatosAnualContext';
+import { TiposAccion, useYear } from '../../../contexts/DatosAnualContext';
 import IconEye from '../../../components/Icon/IconEye';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
@@ -23,7 +23,7 @@ import IconRefresh from '../../../components/Icon/IconRefresh';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 
 interface ModalAccionProps {
-    acciones: 'acciones' | 'accionesAccesorias';
+    acciones: TiposAccion;
 }
 
 export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
@@ -31,7 +31,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
-    const ejesPlan = acciones === 'acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
+    const ejesPlan = acciones === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
 
     const { regionSeleccionada } = useRegionContext();
     const [idEjeSeleccionado, setIdEjeSeleccionado] = useState(ejesPlan[0].Id);
@@ -53,7 +53,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
         if (idEjeSeleccionado === '') {
             setIdEjeSeleccionado(ejesPlan[0].Id);
         }
-        if (showModal && acciones === 'acciones') {
+        if (showModal && acciones === 'Acciones') {
             const ejesRegion = localStorage.getItem('ejesRegion');
             if (!ejesRegion) {
                 LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
@@ -115,7 +115,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
             return;
         }
 
-        AgregarAccion('Acciones', idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
+        AgregarAccion(acciones, idEjeSeleccionado, nuevaAccion, nuevaLineaActuaccion, plurianual);
 
         setIdEjeSeleccionado('');
         setNuevaAccion('');
