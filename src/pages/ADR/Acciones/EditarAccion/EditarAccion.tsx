@@ -7,12 +7,12 @@ import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionIndicadores';
-import { ZonaTitulo } from '../../../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { useYear } from '../../../../contexts/DatosAnualContext';
-import { Boton, ModalSave } from '../../../../components/Utils/utils';
-import { Servicios } from '../../../../types/GeneralTypes';
+import { Boton } from '../../../../components/Utils/utils';
+import { EstadosLoading, Servicios } from '../../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { DropdownLineaActuacion, ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { TextArea } from '../../../../components/Utils/inputs';
@@ -28,24 +28,14 @@ const Index: React.FC = () => {
     const tituloCampo = servicio ? t('Servicios') : t('Accion');
     const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : servicio ? '/adr/servicios/' : '/adr/acciones/';
 
-    const {
-        yearData,
-        datosEditandoAccion,
-        setDatosEditandoAccion,
-        SeleccionEditarGuardar,
-        SeleccionEditarGuardarAccesoria,
-        GuardarEdicionServicio,
-        AgregarServicio,
-        block,
-        datosEditandoServicio,
-        setDatosEditandoServicio,
-        GuardarLaEdicionAccion,
-    } = useYear();
+    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block, datosEditandoServicio, setDatosEditandoServicio, GuardarLaEdicionAccion } = useYear();
+    const navigate = useNavigate();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [nombreEje, setNombreEje] = useState<string>('');
-    const [mostrandoAccionConcreta, setMostrandoAccionConcreta] = useState(false);
+    const [loading, setLoading] = useState<EstadosLoading>('idle');
+
     const [lineaActuaccion, setLineaActuaccion] = useState('');
 
     const ejesPlan = yearData.plan.ejesPrioritarios;
@@ -78,8 +68,8 @@ const Index: React.FC = () => {
         if (datosEditandoAccion.id === '0') {
             return;
         }
-        if (lineaActuaccion) {
-            if (datosEditandoAccion && datosEditandoAccion.lineaActuaccion && datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
+        if (lineaActuaccion != '') {
+            if (datosEditandoAccion && datosEditandoAccion.lineaActuaccion != null && datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
                 setDatosEditandoAccion((prev) => ({
                     ...prev!,
                     lineaActuaccion,
@@ -100,6 +90,11 @@ const Index: React.FC = () => {
         }
     }
 
+    const handleFinalize = () => {
+        SeleccionEditarGuardar();
+        navigate(rutaAnterior);
+    };
+
     const handleAccionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoAccion({
             ...datosEditandoAccion!,
@@ -118,8 +113,9 @@ const Index: React.FC = () => {
         if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
             const camposFaltantes = VerificarAccionAntesDeGuardar(datosEditandoAccion, yearData);
             if (camposFaltantes && camposFaltantes.length === 0) {
+                setLoading('loading');
                 GuardarLaEdicionAccion();
-                setMostrandoAccionConcreta(true);
+                setLoading('success');
             } else if (camposFaltantes && camposFaltantes.length > 0) {
                 const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
                 alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
@@ -141,7 +137,7 @@ const Index: React.FC = () => {
                     <div className="ml-auto flex flex-row items-center justify-end gap-4">
                         {!bloqueo && <Boton tipo="guardar" textoBoton={t('guardar')} onClick={handleSave} disabled={servicio ? !datosEditandoServicio?.nombre : !datosEditandoAccion.accion} />}
                         <NavLink to={rutaAnterior} className={() => ''}>
-                            <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={() => setMostrandoAccionConcreta(false)} />
+                            <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={() => navigate(rutaAnterior)} />
                         </NavLink>
                     </div>
                 }
@@ -205,23 +201,7 @@ const Index: React.FC = () => {
                     </div>
                 }
             />
-            {mostrandoAccionConcreta && (
-                <ModalSave onClose={() => setMostrandoAccionConcreta(false)} nav={rutaAnterior}>
-                    {async () => {
-                        if (accionAccesoria) {
-                            await SeleccionEditarGuardarAccesoria();
-                        } else if (servicio) {
-                            if (datosEditandoServicio?.id === 0) {
-                                await AgregarServicio();
-                            } else {
-                                await GuardarEdicionServicio();
-                            }
-                        } else {
-                            await SeleccionEditarGuardar();
-                        }
-                    }}
-                </ModalSave>
-            )}
+            <LoadingOverlay isLoading={loading} onComplete={handleFinalize} />
             <div className="mb-5 flex flex-col sm:flex-row">
                 <TabGroup className="w-full">
                     <TabList className="mx-10 mt-3 flex flex-wrap ">
