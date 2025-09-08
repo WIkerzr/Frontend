@@ -352,8 +352,8 @@ const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaP
 });
 
 export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
-    const { anioSeleccionada } = useEstadosPorAnioContext();
-    const { yearData, setYearData } = useYear();
+    const { anioSeleccionada, cambiarEstadoPlan, cambiarEstadoMemoria } = useEstadosPorAnioContext();
+    const { yearData } = useYear();
     const { user } = useUser();
 
     const zona = t(pantalla.toLowerCase()).toUpperCase();
@@ -367,21 +367,9 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                         if (window.confirm(t('confirmacionAceptar', { zona: zona, fecha: anioSeleccionada }))) {
                             //TODO Cambio de status a aceptado y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
-                                setYearData({
-                                    ...yearData,
-                                    plan: {
-                                        ...yearData.plan,
-                                        status: 'aceptado',
-                                    },
-                                });
+                                cambiarEstadoPlan('aceptado');
                             } else if (pantalla === 'Memoria') {
-                                setYearData({
-                                    ...yearData,
-                                    memoria: {
-                                        ...yearData.memoria,
-                                        status: 'aceptado',
-                                    },
-                                });
+                                cambiarEstadoMemoria('aceptado');
                             }
                         }
                     }}
@@ -392,23 +380,10 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
                     className="px-4 py-2 bg-danger text-white rounded"
                     onClick={() => {
                         if (window.confirm(t('confirmacionRechazar', { zona: zona, fecha: anioSeleccionada }))) {
-                            // Cambio de status a borrador y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
-                                setYearData({
-                                    ...yearData,
-                                    plan: {
-                                        ...yearData.plan,
-                                        status: 'borrador',
-                                    },
-                                });
+                                cambiarEstadoPlan('borrador');
                             } else if (pantalla === 'Memoria') {
-                                setYearData({
-                                    ...yearData,
-                                    memoria: {
-                                        ...yearData.memoria,
-                                        status: 'borrador',
-                                    },
-                                });
+                                cambiarEstadoMemoria('borrador');
                             }
                         }
                     }}
@@ -421,8 +396,8 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
 });
 
 export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
-    const { anioSeleccionada } = useEstadosPorAnioContext();
-    const { yearData, setYearData } = useYear();
+    const { anioSeleccionada, cambiarEstadoPlan, cambiarEstadoMemoria } = useEstadosPorAnioContext();
+    const { yearData } = useYear();
 
     const { user } = useUser();
     const zona = t(pantalla.toLowerCase()).toUpperCase();
@@ -440,21 +415,9 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
                         if (window.confirm(t('confirmacionReabrir', { zona: zona, fecha: anioSeleccionada }))) {
                             // Cambio de status a aceptado y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
-                                setYearData({
-                                    ...yearData,
-                                    plan: {
-                                        ...yearData.plan,
-                                        status: 'borrador',
-                                    },
-                                });
+                                cambiarEstadoPlan('borrador');
                             } else if (pantalla === 'Memoria') {
-                                setYearData({
-                                    ...yearData,
-                                    memoria: {
-                                        ...yearData.memoria,
-                                        status: 'borrador',
-                                    },
-                                });
+                                cambiarEstadoMemoria('borrador');
                             }
                         }
                     }}
