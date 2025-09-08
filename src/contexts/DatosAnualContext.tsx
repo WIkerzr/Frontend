@@ -444,7 +444,18 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ...yearData.plan,
                         ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
                             eje.Id === datosEditandoAccion.ejeId
-                                ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)) }
+                                ? {
+                                      ...eje,
+                                      acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)),
+                                  }
+                                : eje
+                        ),
+                        ejes: yearData.plan.ejes.map((eje) =>
+                            eje.Id === datosEditandoAccion.ejeId
+                                ? {
+                                      ...eje,
+                                      acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)),
+                                  }
                                 : eje
                         ),
                     },
