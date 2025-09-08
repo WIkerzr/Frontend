@@ -9,6 +9,7 @@ import { FetchConRefreshRetry, gestionarErrorServidor } from '../components/Util
 import { useAuth } from './AuthContext';
 import { useRegionContext } from './RegionContext';
 import { UserRole } from '../types/users';
+import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 
 export const StatusColorsFonds: Record<Estado, string> = {
     proceso: 'bg-info',
@@ -43,6 +44,7 @@ type EstadosContextType = {
     cambiarEstadoMemoria: (nuevoEstado: Estado) => void;
     planState: Estado | null;
     memoriaState: Estado | null;
+    loadingChageState: boolean;
 };
 
 const EstadosContext = createContext<EstadosContextType>({
@@ -55,13 +57,14 @@ const EstadosContext = createContext<EstadosContextType>({
     cambiarEstadoMemoria: () => {},
     planState: null,
     memoriaState: null,
+    loadingChageState: false,
 });
 
 export const useEstadosPorAnioContext = () => useContext(EstadosContext);
 
 export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const { yearData, llamadaBBDDYearData } = useYear();
+    const { yearData, setYearData, llamadaBBDDYearData } = useYear();
     const { user } = useUser();
     const { login } = useAuth();
     const token = sessionStorage.getItem('access_token');
@@ -74,6 +77,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     });
     const [planState, setPlanState] = useState<Estado | null>(null);
     const [memoriaState, setMemoriaState] = useState<Estado | null>(null);
+    const [loadingChageState, setLoadingChageState] = useState<boolean>(false);
 
     useEffect(() => {
         if (!token) return;
@@ -118,30 +122,59 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [anios, estados]);
 
+    useEffect(() => {
+        const planStatus = estados[anioActual].plan;
+        const memoriaStatus = estados[anioActual].memoria;
+
+        if (planStatus !== yearData.plan.status || memoriaStatus !== yearData.memoria.status) {
+            setYearData({
+                ...yearData,
+                plan: { ...yearData.plan, status: planStatus! },
+                memoria: { ...yearData.memoria, status: memoriaStatus! },
+            });
+        }
+    }, [estados]);
+
     const cambiarEstadoPlan = (nuevoEstado: Estado) => {
         if (!anioSeleccionada) {
             return;
         }
-        setEstados((estadosPrev) => ({
-            ...estadosPrev,
-            [anioSeleccionada]: {
-                ...estadosPrev[anioSeleccionada],
-                plan: nuevoEstado,
+        LlamadasBBDD({
+            setLoading: setLoadingChageState,
+            method: 'POST',
+            url: `yearData/${regionSeleccionada}/${yearData.year}/updatePlanStatus`,
+            body: { PlanStatus: 'proceso' },
+            onSuccess: () => {
+                setEstados((estadosPrev) => ({
+                    ...estadosPrev,
+                    [anioSeleccionada]: {
+                        ...estadosPrev[anioSeleccionada],
+                        plan: nuevoEstado,
+                    },
+                }));
             },
-        }));
+        });
     };
 
     const cambiarEstadoMemoria = (nuevoEstado: Estado) => {
         if (!anioSeleccionada) {
             return;
         }
-        setEstados((estadosPrev) => ({
-            ...estadosPrev,
-            [anioSeleccionada]: {
-                ...estadosPrev[anioSeleccionada],
-                memoria: nuevoEstado,
+        LlamadasBBDD({
+            setLoading: setLoadingChageState,
+            method: 'POST',
+            url: `yearData/${regionSeleccionada}/${yearData.year}/updateMemoriaStatus`,
+            body: { PlanStatus: 'proceso' },
+            onSuccess: () => {
+                setEstados((estadosPrev) => ({
+                    ...estadosPrev,
+                    [anioSeleccionada]: {
+                        ...estadosPrev[anioSeleccionada],
+                        memoria: nuevoEstado,
+                    },
+                }));
             },
-        }));
+        });
     };
 
     useEffect(() => {
@@ -219,6 +252,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                 cambiarEstadoMemoria,
                 planState,
                 memoriaState,
+                loadingChageState,
             }}
         >
             {children}

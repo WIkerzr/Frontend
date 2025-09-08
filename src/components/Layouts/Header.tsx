@@ -11,9 +11,10 @@ import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
 import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
-import { Fases } from '../Utils/data/controlDev';
+import { Fases, ModoDev } from '../Utils/data/controlDev';
 import { LogoRegion_SUP } from './LayoutsComponents';
 import { useRegionContext } from '../../contexts/RegionContext';
+import { SelectorEstado } from '../Utils/data/controlDevComplementos';
 
 const Header = () => {
     const { setRegionSeleccionada } = useRegionContext();
@@ -63,6 +64,7 @@ const Header = () => {
                             </div>
                         ))}
 
+                    {ModoDev && <SelectorEstado />}
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <div className="flex justify-end w-full overflow-hidden">
                             <LogoRegion_SUP role={role!} />

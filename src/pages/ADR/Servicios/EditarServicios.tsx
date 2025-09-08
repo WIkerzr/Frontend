@@ -8,7 +8,6 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
-//TODO borrar si no se aprobecha
 const Index: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -83,11 +82,13 @@ const Index: React.FC = () => {
             alert(t('porFavorCompletaCamposObligatorios') || 'Por favor, completa todos los campos obligatorios.');
             return;
         }
+        hundleGuardarServicio();
+    };
 
+    const hundleGuardarServicio = () => {
         let nuevosServicios;
 
         if (datosEditandoServicio!.id === 0) {
-            //TODO llamar al servidor y crear nuevo servicio e incorporar el nuevo id que responda en nuevoId
             const nuevoId = Math.max(0, ...(yearData.servicios?.map((s) => s.id) || [0])) + 1;
 
             const nuevoServicio = {
@@ -99,6 +100,7 @@ const Index: React.FC = () => {
         } else {
             nuevosServicios = yearData.servicios!.map((servicio) => (servicio.id === datosEditandoServicio!.id ? datosEditandoServicio! : servicio));
         }
+
         setYearData({
             ...yearData,
             servicios: nuevosServicios,
@@ -179,7 +181,7 @@ const Index: React.FC = () => {
                     </div>
                     {/* INDICADORES */}
                     <div className="bg-[#76923b] p-2 font-bold border-l border-r border-b border-black flex justify-between items-center">
-                        <span>*{t('indicadoresOperativos').toUpperCase()}</span>
+                        <span>*{t('indicadores').toUpperCase()}</span>
                         {editarPlan && (
                             <button type="button" onClick={agregarIndicador} className="px-4 py-1 bg-[#76923b] text-white font-bold border border-black">
                                 {t('agregarFila')}

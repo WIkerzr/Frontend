@@ -6,6 +6,7 @@ const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion/EditarAccion'));
+const EditarServicios = lazy(() => import('../pages/ADR/Servicios/EditarServicios'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/Acciones/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/PlanMemoria/MemoriasAnuales'));
 const IndicadoresInpacto = lazy(() => import('../pages/Configuracion/indicadoresImpacto/IndicadoresInpacto'));
@@ -122,7 +123,7 @@ const fase4 = [
         path: '/adr/servicios/editando',
         element: (
             <OnlyIfLoggedIn>
-                <EditarAccion />
+                <EditarServicios />
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarServicios',
