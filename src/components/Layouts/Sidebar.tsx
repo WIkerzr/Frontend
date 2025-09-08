@@ -156,7 +156,7 @@ const Sidebar = () => {
                     disabled={(anios && anios.length === 0) || !regionSeleccionada}
                 >
                     <option value="" disabled>
-                        {anioSeleccionada ? t('seleccionaAnio') : regionSeleccionada ? t('sinAnosSelect') : t('seleccionaRegion')}
+                        {anioSeleccionada ? t('seleccionaAnio') : regionSeleccionada ? t('sinAnosSelect') : t('seleccionaComarca')}
                     </option>
                     {anios.length > 0
                         ? anios.map((a) => (
