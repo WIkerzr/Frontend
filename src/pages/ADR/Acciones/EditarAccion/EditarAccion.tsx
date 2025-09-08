@@ -113,9 +113,7 @@ const Index: React.FC = () => {
         if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
             const camposFaltantes = VerificarAccionAntesDeGuardar(datosEditandoAccion, yearData);
             if (camposFaltantes && camposFaltantes.length === 0) {
-                setLoading('loading');
-                GuardarLaEdicionAccion();
-                setLoading('success');
+                GuardarLaEdicionAccion(setLoading);
             } else if (camposFaltantes && camposFaltantes.length > 0) {
                 const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
                 alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));

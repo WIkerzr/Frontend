@@ -15,7 +15,7 @@ import {
     IndicadorRealizacionAccionDTO,
     IndicadorResultadoAccionDTO,
 } from '../types/TipadoAccion';
-import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
+import { Estado, EstadosLoading, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
 import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
@@ -43,7 +43,7 @@ interface YearContextType {
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
-    GuardarLaEdicionAccion: () => void;
+    GuardarLaEdicionAccion: (setLoading: React.Dispatch<React.SetStateAction<EstadosLoading>>) => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
     errorMessage: string | null;
@@ -426,7 +426,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const GuardarLaEdicionAccion = () => {
+    const GuardarLaEdicionAccion = (setLoading: React.Dispatch<React.SetStateAction<EstadosLoading>>) => {
         const datos = convertirDatosAccionADatosAccionBackend();
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
@@ -434,14 +434,14 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         LlamadasBBDD<any, DatosAccionDTO>({
             method: 'POST',
             url: `actionData/editAction/${datosEditandoAccion.id}`,
-            setLoading: setLoadingYearData,
+            setLoading: (estado: boolean) => setLoading(estado ? 'loading' : 'success'),
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
             setErrorMessage,
             setSuccessMessage,
             body: {
                 Id: Number(datosEditandoAccion.id),
                 Nombre: datosEditandoAccion.accion,
-                LineaActuaccion: datosEditandoAccion.lineaActuaccion,
+                LineaActuacion: datosEditandoAccion.lineaActuaccion,
                 Plurianual: datosEditandoAccion.plurianual,
                 DatosPlanId: DatosPlan.Id ? Number(DatosPlan.Id) : undefined,
                 DatosPlan: DatosPlan,
@@ -464,6 +464,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     },
                 });
             },
+            onError: () => setLoading('error'),
         });
     };
 
