@@ -567,6 +567,28 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ejes.push(item);
                     }
                 });
+                const servicios: Servicios[] = data.data.Servicios.map((s: any) => ({
+                    id: s.Id,
+                    nombre: s.Nombre,
+                    descripcion: s.Descripcion,
+                    dSeguimiento: s.DSeguimiento,
+                    valFinal: s.ValFinal,
+                    indicadores: s.Indicadores.map(
+                        (i: { Indicador: any; PrevistoHombres: any; PrevistoMujeres: any; PrevistoValor: any; AlcanzadoHombres: any; AlcanzadoMujeres: any; AlcanzadoValor: any }) => ({
+                            indicador: i.Indicador,
+                            previsto: {
+                                hombres: i.PrevistoHombres ?? '',
+                                mujeres: i.PrevistoMujeres ?? '',
+                                valor: i.PrevistoValor ?? '',
+                            },
+                            alcanzado: {
+                                hombres: i.AlcanzadoHombres ?? '',
+                                mujeres: i.AlcanzadoMujeres ?? '',
+                                valor: i.AlcanzadoValor ?? '',
+                            },
+                        })
+                    ),
+                }));
                 const dotosAnio: YearData = {
                     nombreRegion: nombreRegionSeleccionada ? nombreRegionSeleccionada : '',
                     year: data.data.Year,
@@ -590,6 +612,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         dSeguimiento: data.data.Memoria.DSeguimiento,
                         valFinal: data.data.Memoria.ValFinal,
                     },
+                    servicios: servicios,
                 };
                 setYearData(dotosAnio);
             },

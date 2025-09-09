@@ -10,27 +10,43 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { servicioIniciadoVacio } from '../../../types/tipadoPlan';
-import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { MostrarAvisoCamposServicios } from '../Acciones/ComponentesAccionesServicios';
+import { eliminarServicio } from '../../../components/Utils/data/dataServices';
+import { ErrorMessage } from '../../../components/Utils/animations';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const { yearData, setYearData, setDatosEditandoServicio, SeleccionVaciarEditarAccion } = useYear();
     const [serviciosGrup, setServiciosGrup] = useState<Servicios[][]>([]);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
-        setServiciosGrup(grup5(yearData.servicios || [], 4));
     }, []);
 
-    const handleDelete = (id: number) => {
+    useEffect(() => {
+        setServiciosGrup(grup5(yearData.servicios || [], 4));
+    }, [yearData]);
+
+    const handleDelete = async (id: number) => {
         const servicio = yearData.servicios?.filter((item) => item.id === id);
         if (window.confirm(t('confirmacion', { p1: t('eliminar'), p2: `\n${t('Servicio')} ${servicio![0].nombre}`, p3: '' }).trim())) {
-            setYearData({
-                ...yearData,
-                servicios: yearData.servicios?.filter((item) => item.id !== id) || [],
+            const ok = await eliminarServicio({
+                idServicio: id,
+                setLoading,
+                setSuccessMessage,
+                setErrorMessage,
             });
+            if (ok) {
+                setYearData({
+                    ...yearData,
+                    servicios: yearData.servicios?.filter((item) => item.id !== id) || [],
+                });
+            }
         }
     };
 
@@ -42,9 +58,6 @@ const Index: React.FC = () => {
             return acc;
         }, []);
     }
-    useEffect(() => {
-        setServiciosGrup(grup5(yearData.servicios || [], 4));
-    }, [yearData]);
 
     return (
         <div className="panel">
@@ -65,6 +78,15 @@ const Index: React.FC = () => {
                 }
                 // zonaExplicativa={(editarPlan || editarMemoria) && <></>}
             />
+            {successMessage && (
+                <div className={`mt-4 transition-opacity duration-1000 opacity-100}`}>
+                    <p className="text-green-500">{successMessage}</p>
+                </div>
+            )}
+            <div>{errorMessage && <ErrorMessage message={errorMessage} />}</div>
+
+            <LoadingOverlay isLoading={loading} />
+
             <div className="w-full mx-auto mt-1 px-2">
                 {serviciosGrup.map((fila: Servicios[], filaIndex: number) => (
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
@@ -74,7 +96,7 @@ const Index: React.FC = () => {
                                 <div key={servicio.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="text-base">{servicio.nombre}</span>
                                     <div className="flex gap-2 justify-end mt-2">
-                                        <NavLink to="/adr/accionesYproyectos/editando" state={{ tipo: 'servicio' }} className="group">
+                                        <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
                                             <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio(servicio)}>
                                                 {editable ? <IconPencil /> : <IconEye />}
                                             </button>

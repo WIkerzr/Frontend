@@ -166,6 +166,7 @@
     "indicadoresOgligatorios": "Indicadores ogligatorios pendientes por rellenar",
     "indicadoresOperativos": "Indicadores Operativos",
     "indicadoresResultadoRelacionados": "Indicadores de resultado relacionados",
+    "indicadorServicioSinRellenar": "Indicador sin nombre, rellena antes el nombre de indicador",
     "indicadorTipo": "Indicador {{tipo}}",
     "informes": "Informes",
     "IniciaSesion": "Inicio de sesión",

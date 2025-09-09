@@ -60,3 +60,23 @@ export interface IndicadoresServicios {
     previsto: HMTServicios;
     alcanzado?: HMTServicios;
 }
+export interface IndicadoresServiciosDTO {
+    Indicador: string;
+    PrevistoHombres: string;
+    PrevistoMujeres: string;
+    PrevistoValor: string;
+    AlcanzadoHombres: string;
+    AlcanzadoMujeres: string;
+    AlcanzadoValor: string;
+}
+
+export interface ServiciosDTO {
+    Id?: number;
+    Nombre: string;
+    Descripcion: string;
+    IndicadoresServicios: IndicadoresServiciosDTO[];
+    DSeguimiento?: string;
+    ValFinal?: string;
+    RegionId: number;
+    Year: number;
+}

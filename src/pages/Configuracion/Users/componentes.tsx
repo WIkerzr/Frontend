@@ -364,13 +364,13 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, enMod
     const Success = () => {
         return (
             <div role="status" aria-live="polite" aria-busy={'false'} className="backdrop-blur-sm fixed inset-0 flex justify-center items-center cursor-wait z-50 rounded-lg">
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center bg-white p-2">
                     <div className="w-12 h-12 text-green-500">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <p className="mt-2 text-green-600 font-semibold bg-white">{message}</p>
+                    <p className="mt-2 text-green-600 font-semibold ">{message}</p>
                 </div>
             </div>
         );
@@ -378,7 +378,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, enMod
     const Error = () => {
         return (
             <div role="status" aria-live="polite" aria-busy={'false'} className="backdrop-blur-sm bg-opacity-20 fixed inset-0 flex justify-center items-center cursor-wait z-50 rounded-lg">
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center bg-white p-2">
                     <div className="w-12 h-12 text-red-500">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />

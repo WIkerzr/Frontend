@@ -143,7 +143,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
             setLoading: setLoadingChageState,
             method: 'POST',
             url: `yearData/${regionSeleccionada}/${yearData.year}/updatePlanStatus`,
-            body: { PlanStatus: 'proceso' },
+            body: { PlanStatus: nuevoEstado },
             onSuccess: () => {
                 setEstados((estadosPrev) => ({
                     ...estadosPrev,
