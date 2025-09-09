@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { Dispatch, SetStateAction } from 'react';
-import { Servicios, IndicadoresServiciosDTO, ServiciosDTO, EstadosLoading } from '../../../types/GeneralTypes';
+import { Servicios, IndicadoresServiciosDTO, ServiciosDTO } from '../../../types/GeneralTypes';
 import { LlamadasBBDD } from './utilsData';
 
 interface GestionServicioProps {
@@ -8,7 +9,7 @@ interface GestionServicioProps {
     regionSeleccionada: string;
     anioSeleccionada: number;
     method: 'POST' | 'PUT';
-    setLoading?: Dispatch<SetStateAction<EstadosLoading>>;
+    setLoading: (a: boolean) => void;
     setSuccessMessage?: Dispatch<SetStateAction<string>>;
     setErrorMessage?: Dispatch<SetStateAction<string>>;
 }
@@ -52,7 +53,7 @@ export const gestionarServicio = async ({
             method,
             url,
             body: servicioDTO,
-            setLoading: (estado: boolean) => setLoading?.(estado ? 'loading' : 'success'),
+            setLoading: setLoading ?? (() => {}),
             setSuccessMessage,
             setErrorMessage,
             onSuccess(response: { data: ServiciosDTO & { Id: number } }) {
