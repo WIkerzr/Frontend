@@ -15,13 +15,14 @@ import {
     IndicadorRealizacionAccionDTO,
     IndicadorResultadoAccionDTO,
 } from '../types/TipadoAccion';
-import { Estado, EstadosLoading, isEstado, Servicios } from '../types/GeneralTypes';
+import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
 import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 import { useRegionContext } from './RegionContext';
 import { ModoDev } from '../components/Utils/data/controlDev';
+import { MessageSetters } from '../components/Utils/data/dataEjes';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -34,19 +35,21 @@ interface YearContextType {
     datosEditandoServicio: Servicios | null;
     setDatosEditandoServicio: React.Dispatch<React.SetStateAction<Servicios | null>>;
     SeleccionEditarServicio: (idServicio: string | null) => void;
-    SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string) => void;
+    SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void) => void;
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
-    llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean) => void;
+    llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean, message: MessageSetters) => void;
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
-    GuardarLaEdicionAccion: (setLoading: React.Dispatch<React.SetStateAction<EstadosLoading>>) => void;
+    GuardarLaEdicionAccion: (setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
-    errorMessage: string | null;
-    successMessage: string | null;
+    errorMessageYearData: string;
+    setErrorMessageYearData?: (a: string) => void;
+    successMessageYearData: string;
+    setSuccessMessageYearData?: (a: string) => void;
     selectedId: string | null;
 }
 
@@ -55,8 +58,8 @@ const YearContext = createContext<YearContextType | undefined>(undefined);
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessageYearData, setErrorMessageYearData] = useState<string>('');
+    const [successMessageYearData, setSuccessMessageYearData] = useState<string>('');
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
@@ -85,31 +88,31 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     }, [datosEditandoAccion]);
 
     useEffect(() => {
-        if (errorMessage) {
+        if (errorMessageYearData) {
             setTimeout(() => {
-                setErrorMessage(null);
+                setErrorMessageYearData('');
                 setSelectedId(null);
             }, 5000);
         }
-    }, [errorMessage]);
+    }, [errorMessageYearData]);
 
     useEffect(() => {
-        if (setSuccessMessage) {
+        if (setSuccessMessageYearData) {
             setTimeout(() => {
-                setSuccessMessage(null);
+                setSuccessMessageYearData('');
                 setSelectedId(null);
             }, 5000);
         }
-    }, [successMessage]);
+    }, [successMessageYearData]);
 
-    const SeleccionEditarAccion = (idEje: string, idAccion: string) => {
+    const SeleccionEditarAccion = (idEje: string, idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void) => {
         LlamadasBBDD({
             method: 'POST',
             url: `actionData/${idAccion}`,
-            setLoading: setLoadingYearData,
+            setLoading: setLoading,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-            setErrorMessage,
-            setSuccessMessage,
+            setErrorMessage: message.setErrorMessage,
+            setSuccessMessage: message.setSuccessMessage,
             onSuccess: (response) => {
                 const responseDataPlan: DatosPlanBack = response.data.DatosPlan;
                 const responseDataMemoria: DatosMemoriaBack = response.data.DatosMemoria;
@@ -368,52 +371,46 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             url: `yearData/${yearData.plan.id}/${idEje}/newAction`,
             setLoading: setLoadingYearData,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-            setErrorMessage,
-            setSuccessMessage,
+            setErrorMessage: setErrorMessageYearData,
+            setSuccessMessage: setSuccessMessageYearData,
             body: {
                 Nombre: nuevaAccion,
                 LineaActuaccion: nuevaLineaActuaccion,
                 Plurianual: plurianual,
             },
             onSuccess: (response) => {
-                const validarNombre = nuevaAccion === response.data.Nombre;
-                const validarLineaActuaccion = nuevaLineaActuaccion === response.data.LineaActuaccion;
-                const validarPlurianual = plurianual === response.data.Plurianual;
-                if (!validarNombre || !validarLineaActuaccion || !validarPlurianual) {
+                const { Nombre, LineaActuaccion, Plurianual, Id } = response.data;
+
+                if (Nombre !== nuevaAccion || LineaActuaccion !== nuevaLineaActuaccion || Plurianual !== plurianual) {
                     throw new Error('Error al agregar la acción: datos no coinciden');
                 }
+
+                const actualizarEjes = (ejes: typeof yearData.plan.ejesPrioritarios | typeof yearData.plan.ejes) =>
+                    ejes.map((eje) =>
+                        eje.Id === ejeSeleccionado.Id
+                            ? {
+                                  ...eje,
+                                  acciones: [
+                                      ...(eje.acciones || []),
+                                      { id: Id, accion: nuevaAccion, ejeEs: ejeSeleccionado.NameEs, ejeEu: ejeSeleccionado.NameEu, lineaActuaccion: nuevaLineaActuaccion, plurianual },
+                                  ],
+                              }
+                            : eje
+                    );
 
                 setYearData({
                     ...yearData,
                     plan: {
                         ...yearData.plan,
-                        ejesPrioritarios: fuenteEjes.map((eje) =>
-                            eje.Id === ejeSeleccionado.Id
-                                ? {
-                                      ...eje,
-                                      acciones: [
-                                          ...eje.acciones,
-                                          {
-                                              id: response.data.Id,
-                                              accion: nuevaAccion,
-                                              ejeEs: ejeSeleccionado.NameEs,
-                                              ejeEu: ejeSeleccionado.NameEu,
-                                              lineaActuaccion: nuevaLineaActuaccion,
-                                              plurianual: plurianual,
-                                          },
-                                      ],
-                                  }
-                                : eje
-                        ),
+                        ejesPrioritarios: tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesPrioritarios) : yearData.plan.ejesPrioritarios,
+                        ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
                     },
                 });
-
-                console.log('Acción agregada:', response);
             },
         });
     };
 
-    const GuardarLaEdicionAccion = (setLoading: React.Dispatch<React.SetStateAction<EstadosLoading>>) => {
+    const GuardarLaEdicionAccion = (setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => {
         const datos = convertirDatosAccionADatosAccionBackend();
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
@@ -421,10 +418,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         LlamadasBBDD<any, DatosAccionDTO>({
             method: 'POST',
             url: `actionData/editAction/${datosEditandoAccion.id}`,
-            setLoading: (estado: boolean) => setLoading(estado ? 'loading' : 'success'),
+            setLoading,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-            setErrorMessage,
-            setSuccessMessage,
+            setErrorMessage: message.setErrorMessage,
+            setSuccessMessage: message.setSuccessMessage,
             body: {
                 Id: Number(datosEditandoAccion.id),
                 Nombre: datosEditandoAccion.accion,
@@ -462,7 +459,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     },
                 });
             },
-            onError: () => setLoading('error'),
+            onError: () => setLoading(false),
         });
     };
 
@@ -477,8 +474,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 url: `yearData/${yearData.plan.id}/${idEje}/deleteAction/${idAccion}`,
                 setLoading: setLoadingYearData,
                 setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-                setErrorMessage,
-                setSuccessMessage,
+                setErrorMessage: setErrorMessageYearData,
+                setSuccessMessage: setSuccessMessageYearData,
                 onSuccess: () => {
                     setYearData({
                         ...yearData,
@@ -530,8 +527,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             url: `yearData/${Number(regionSeleccionada)}/${Number(anioSeleccionada)}`,
             setLoading: setLoadingYearData,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-            setErrorMessage,
-            setSuccessMessage,
+            setErrorMessage: setErrorMessageYearData,
+            setSuccessMessage: setSuccessMessageYearData,
             onSuccess: (data: any) => {
                 const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
                 const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
@@ -724,8 +721,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 loadingYearData,
                 setDatosEditandoServicio,
                 GuardarEdicionServicio,
-                errorMessage,
-                successMessage,
+                errorMessageYearData,
+                setErrorMessageYearData,
+                successMessageYearData,
+                setSuccessMessageYearData,
                 selectedId,
             }}
         >
@@ -737,7 +736,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 export const useYear = (): YearContextType => {
     const context = useContext(YearContext);
     if (!context) {
-        throw new Error('');
+        throw new Error('useYear debe usarse dentro de un YearContext.Provider');
     }
     return context;
 };

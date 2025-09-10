@@ -101,7 +101,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                             'Content-Type': 'application/json',
                         },
                     });
-                    const data = await res.json();
+                    const data = await res.data;
                     if (!res.ok) {
                         const errorInfo = gestionarErrorServidor(res, data);
                         setErrorMessage(errorInfo.mensaje);

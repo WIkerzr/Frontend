@@ -9,7 +9,7 @@ import { TiposAccion, useYear } from '../../../contexts/DatosAnualContext';
 import IconEye from '../../../components/Icon/IconEye';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
-import { EstadosLoading, Servicios } from '../../../types/GeneralTypes';
+import { Servicios } from '../../../types/GeneralTypes';
 import { NewModal, PrintFechaTexto, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
@@ -42,6 +42,10 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
     const [inputError, setInputError] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
     const [accionesTotales, setAccionesTotales] = useState<number[]>([0, 0, 0]);
 
     useEffect(() => {
@@ -56,7 +60,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
         if (showModal && acciones === 'Acciones') {
             const ejesRegion = localStorage.getItem('ejesRegion');
             if (!ejesRegion) {
-                LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
+                LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading);
             }
         }
     }, [idEjeSeleccionado, showModal]);
@@ -127,6 +131,17 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
 
     return (
         <>
+            <LoadingOverlay
+                isLoading={loading}
+                enModal={true}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+            />
+
             {editarPlan && accionesTotales.reduce((sum, n) => sum + n, 0) < 5 && (
                 <div className="flex justify-center">
                     <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
@@ -206,7 +221,9 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     const prevAccionesRef = useRef<DatosAccion[]>([]);
     const [accionNueva, setAccionNueva] = useState<string>('');
     const primeraCargaRef = useRef(true);
-    const [loading, setLoading] = useState<EstadosLoading>('idle');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     useEffect(() => {
         const nuevasAcciones = yearData.plan.ejesPrioritarios[number].acciones;
@@ -229,14 +246,6 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         prevAccionesRef.current = nuevasAcciones;
     }, [yearData]);
 
-    useEffect(() => {
-        if (loading === 'success') {
-            navigate('/adr/acciones/editando');
-        }
-    }, [loading]);
-
-    if (loadingYearData) return <Loading />;
-
     const handleDelete = (id: string) => {
         const confirmar = window.confirm(t('confirmacionEliminarAccion'));
         if (!confirmar) return;
@@ -244,24 +253,33 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     };
 
     const handleEdit = async (id: string) => {
-        setLoading('loading');
+        setLoading(true);
         const ejesRegion = localStorage.getItem('ejesRegion');
 
         if (!ejesRegion) {
-            await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
+            await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
         }
-        await SeleccionEditarAccion(idEje, id);
-
-        setLoading('success');
+        await SeleccionEditarAccion(idEje, id, { setErrorMessage, setSuccessMessage }, setLoading);
     };
 
     const mostrarInput = acciones.length < 5;
     const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
+    if (loadingYearData) return <Loading />;
 
     return (
         <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
             <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
-            <LoadingOverlay isLoading={loading} />
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+                onComplete={() => navigate('/adr/acciones/editando')}
+            />
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => {
                     let editable = editarPlan || editarMemoria;
@@ -519,29 +537,28 @@ interface DropdownLineaActuacionProps {
 
 export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan }: DropdownLineaActuacionProps) => {
     const { regionSeleccionada } = useRegionContext();
-    const [loading, setLoading] = useState<boolean>(false);
     const { t, i18n } = useTranslation();
     const [ejes, setEjes] = useState<EjesBBDD[]>();
     const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
-    const [yaCargado, setYaCargado] = useState<boolean>(false);
     const [textoFecha, setTextoFecha] = useState<string>('');
 
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
-        const fechaStr = obtenerFechaLlamada('users');
+        const fechaStr = obtenerFechaLlamada('ejesRegion');
         if (fechaStr) {
             const ejesRegion = localStorage.getItem('ejesRegion');
             if (!ejesRegion) return new Date();
 
             setEjes(JSON.parse(ejesRegion));
-            setYaCargado(true);
         }
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
     const cargarEjes = () => {
-        if (yaCargado) return;
-        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, setLoading, setEjes, setFechaUltimoActualizadoBBDD);
-        setYaCargado(true);
+        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjes, setFechaUltimoActualizadoBBDD);
     };
 
     useEffect(() => {
@@ -579,6 +596,16 @@ export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccion
 
     return (
         <div style={{ position: 'relative', minHeight: 40 }}>
+            <LoadingOverlay
+                isLoading={loading}
+                enModal={true}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+            />
             {loading ? (
                 <Loading />
             ) : (

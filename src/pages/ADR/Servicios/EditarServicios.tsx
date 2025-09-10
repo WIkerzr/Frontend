@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { InputField, TextArea } from '../../../components/Utils/inputs';
 import { useRef, useState } from 'react';
@@ -13,12 +13,12 @@ import { gestionarServicio } from '../../../components/Utils/data/dataServices';
 
 const Index: React.FC = () => {
     const { t } = useTranslation();
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
     const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData } = useYear();
-    // const [successMessage, setSuccessMessage] = useState<string>('');
-    // const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const { regionSeleccionada } = useRegionContext();
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -143,13 +143,22 @@ const Index: React.FC = () => {
 
     const handleFinalize = () => {
         setTimeout(() => {
-            // navigate('/adr/servicios');
+            navigate('/adr/servicios');
         }, 1500);
     };
 
     return (
         <>
-            <LoadingOverlay isLoading={loading} message={'mensajeAMostrar'} onComplete={handleFinalize} />
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    errorMessage,
+                    setErrorMessage,
+                    successMessage,
+                    setSuccessMessage,
+                }}
+                onComplete={handleFinalize}
+            />
 
             <div className="panel">
                 <ZonaTitulo

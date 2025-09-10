@@ -58,7 +58,7 @@ export const LlamadasBBDD = async <T = any, TBody = any>({
                 },
                 body: body ? JSON.stringify(body) : undefined,
             });
-            const data = await res.json();
+            const data = res.data;
 
             if (!res.ok) {
                 const errorInfo = gestionarErrorServidor(res, data);

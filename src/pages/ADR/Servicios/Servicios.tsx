@@ -20,8 +20,8 @@ const Index: React.FC = () => {
     const { t } = useTranslation();
     const { yearData, setYearData, setDatosEditandoServicio, SeleccionVaciarEditarAccion } = useYear();
     const [serviciosGrup, setServiciosGrup] = useState<Servicios[][]>([]);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -85,7 +85,7 @@ const Index: React.FC = () => {
             )}
             <div>{errorMessage && <ErrorMessage message={errorMessage} />}</div>
 
-            <LoadingOverlay isLoading={loading} />
+            <LoadingOverlay isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
 
             <div className="w-full mx-auto mt-1 px-2">
                 {serviciosGrup.map((fila: Servicios[], filaIndex: number) => (

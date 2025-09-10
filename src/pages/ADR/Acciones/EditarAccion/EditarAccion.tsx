@@ -12,7 +12,7 @@ import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionI
 import { LoadingOverlay, ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton } from '../../../../components/Utils/utils';
-import { EstadosLoading, Servicios } from '../../../../types/GeneralTypes';
+import { Servicios } from '../../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { DropdownLineaActuacion, ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { TextArea } from '../../../../components/Utils/inputs';
@@ -34,9 +34,12 @@ const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
     const [nombreEje, setNombreEje] = useState<string>('');
-    const [loading, setLoading] = useState<EstadosLoading>('idle');
 
     const [lineaActuaccion, setLineaActuaccion] = useState('');
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     let ejesPlan = yearData.plan.ejesPrioritarios;
     if (datosEditandoAccion.id !== '0') {
@@ -122,7 +125,7 @@ const Index: React.FC = () => {
         if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
             const camposFaltantes = VerificarAccionAntesDeGuardar(datosEditandoAccion, yearData);
             if (camposFaltantes && camposFaltantes.length === 0) {
-                GuardarLaEdicionAccion(setLoading);
+                GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
             } else if (camposFaltantes && camposFaltantes.length > 0) {
                 const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
                 alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
@@ -208,7 +211,16 @@ const Index: React.FC = () => {
                     </div>
                 }
             />
-            <LoadingOverlay isLoading={loading} onComplete={handleFinalize} />
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    errorMessage,
+                    setErrorMessage,
+                    successMessage,
+                    setSuccessMessage,
+                }}
+                onComplete={handleFinalize}
+            />
             <div className="mb-5 flex flex-col sm:flex-row">
                 <TabGroup className="w-full">
                     <TabList className="mx-10 mt-3 flex flex-wrap ">

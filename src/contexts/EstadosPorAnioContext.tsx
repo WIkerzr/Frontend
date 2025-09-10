@@ -64,7 +64,7 @@ export const useEstadosPorAnioContext = () => useContext(EstadosContext);
 
 export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const { yearData, setYearData, llamadaBBDDYearData } = useYear();
+    const { yearData, setYearData, llamadaBBDDYearData, setErrorMessageYearData, setSuccessMessageYearData } = useYear();
     const { user } = useUser();
     const { login } = useAuth();
     const token = sessionStorage.getItem('access_token');
@@ -179,7 +179,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-            llamadaBBDDYearData(anioSeleccionada, false);
+            llamadaBBDDYearData(anioSeleccionada, false, { setErrorMessage: setErrorMessageYearData!, setSuccessMessage: setSuccessMessageYearData! });
         }
     }, [anioSeleccionada, nombreRegionSeleccionada]);
 
@@ -194,7 +194,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                         'Content-Type': 'application/json',
                     },
                 });
-                const data = await res.json();
+                const data = await res.data;
                 if (!res.ok) {
                     const errorInfo = gestionarErrorServidor(res, data);
                     console.log(errorInfo.mensaje);
@@ -223,7 +223,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                         'Content-Type': 'application/json',
                     },
                 });
-                const data = await res.json();
+                const data = await res.data;
                 if (!res.ok) {
                     const errorInfo = gestionarErrorServidor(res, data);
                     console.log(errorInfo.mensaje);

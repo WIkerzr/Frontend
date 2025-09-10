@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -9,7 +9,6 @@ import IconTrash from '../../../components/Icon/IconTrash';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { DatosAccion } from '../../../types/TipadoAccion';
 import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
-import { EstadosLoading } from '../../../types/GeneralTypes';
 import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { useRegionContext } from '../../../contexts/RegionContext';
 
@@ -20,7 +19,10 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { yearData, setYearData, SeleccionEditarAccion, SeleccionVaciarEditarAccion } = useYear();
     const [accionesGrup, setAccionesGrup] = useState<DatosAccion[][]>([]);
-    const [loading, setLoading] = useState<EstadosLoading>('idle');
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
@@ -34,12 +36,6 @@ const Index: React.FC = () => {
 
         setAccionesGrup(grup5(data, 4));
     }, [yearData]);
-
-    useEffect(() => {
-        if (loading === 'success') {
-            navigate('/adr/acciones/editando');
-        }
-    }, [loading]);
 
     const handleDelete = (id: string) => {
         const data = yearData.plan.ejes.flatMap((eje) => eje.acciones);
@@ -63,17 +59,19 @@ const Index: React.FC = () => {
     };
 
     const handleEdit = async (accion: DatosAccion) => {
-        setLoading('loading');
+        setLoading(true);
         const ejesRegion = localStorage.getItem('ejesRegion');
 
-        if (accion.ejeId) {
-            await SeleccionEditarAccion(accion.ejeId, accion.id);
+        try {
+            if (accion.ejeId) {
+                await SeleccionEditarAccion(accion.ejeId, accion.id, { setErrorMessage, setSuccessMessage });
+            }
+            if (!ejesRegion) {
+                await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
+            }
+        } finally {
+            setLoading(false);
         }
-        if (!ejesRegion) {
-            await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n);
-        }
-
-        setLoading('success');
     };
 
     function grup5<T>(array: T[], size: number): T[][] {
@@ -87,6 +85,8 @@ const Index: React.FC = () => {
 
     return (
         <div className="panel">
+            <LoadingOverlay isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} onComplete={() => navigate('/adr/acciones/editando')} />
+
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">

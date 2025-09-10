@@ -235,7 +235,21 @@ interface ErrorTraducido {
     mensaje: string;
     tipo: 'error' | 'warning' | 'info';
 }
+export interface BackendError {
+    Message: string;
+    ExceptionMessage: string;
+    ExceptionType?: string;
+    StackTrace?: string;
+}
 
+export interface Message {
+    Message: string;
+}
+export interface FetchErrorResult {
+    ok: boolean;
+    status: number;
+    data: BackendError | Message | null;
+}
 export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraducido {
     if (error instanceof Response) {
         switch (error.status) {
@@ -295,6 +309,25 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
         };
     }
 
+    if (error) {
+        const errorProcesando = error as FetchErrorResult;
+        if (errorProcesando.data && 'ExceptionMessage' in errorProcesando.data) {
+            const ExceptionMessage = errorProcesando.data?.ExceptionMessage;
+            console.error(ExceptionMessage);
+            return {
+                mensaje: t('error:errorGenericoConMensaje', { mensaje: ExceptionMessage }),
+                tipo: 'error',
+            };
+        } else if (errorProcesando.data && 'Message' in errorProcesando.data) {
+            const Message = errorProcesando.data?.Message;
+            console.error(Message);
+            return {
+                mensaje: t('error:errorGenericoConMensaje', { mensaje: Message }),
+                tipo: 'error',
+            };
+        }
+    }
+
     console.error(t('error:errorGenerico'));
     return {
         mensaje: t('error:errorGenerico'),
@@ -302,58 +335,64 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
     };
 }
 
-export async function FetchConRefreshRetry(input: RequestInfo, init?: RequestInit): Promise<Response> {
+export interface FetchResult<T> {
+    ok: boolean;
+    status: number;
+    data: T | null;
+}
+
+export async function FetchConRefreshRetry<T = any>(input: RequestInfo, init?: RequestInit): Promise<FetchResult<T>> {
     const accessToken = sessionStorage.getItem('access_token');
     const refreshToken = sessionStorage.getItem('refresh_token');
 
-    // Añadimos Authorization
+    // Construimos headers
     const headers = new Headers(init?.headers);
-    if (accessToken) {
-        headers.set('Authorization', `Bearer ${accessToken}`);
+    if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+
+    let response = await fetch(input, { ...init, headers });
+
+    // Si 401 y tenemos refresh token, intentamos refrescar
+    if (response.status === 401 && refreshToken) {
+        const refreshResponse = await fetch(`${ApiTargetToken}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken,
+                client_id: 'webApp',
+            }),
+        });
+
+        if (refreshResponse.ok) {
+            const datosRefresh = await refreshResponse.json();
+            console.log('%c✅ Sesión recuperada correctamente', 'color: green; font-weight: bold;');
+
+            // Guardamos tokens nuevos
+            sessionStorage.setItem('access_token', datosRefresh.access_token);
+            if (datosRefresh.refresh_token) {
+                sessionStorage.setItem('refresh_token', datosRefresh.refresh_token);
+            }
+
+            // Reintentamos la petición original con token nuevo
+            headers.set('Authorization', `Bearer ${datosRefresh.access_token}`);
+            response = await fetch(input, { ...init, headers });
+        } else {
+            // No se pudo refrescar token, devolvemos la 401 original
+            return { ok: response.ok, status: response.status, data: null };
+        }
     }
 
-    const response = await fetch(input, { ...init, headers });
-
-    if (response.status !== 401) {
-        return response;
+    // Leemos y parseamos el body una sola vez
+    let data: T | null = null;
+    try {
+        const raw = await response.text();
+        console.debug('📄 Respuesta cruda del servidor:', raw);
+        data = raw ? (JSON.parse(raw) as T) : null;
+    } catch (err) {
+        console.error('❌ Error parseando JSON en FetchConRefreshRetry:', err);
     }
 
-    if (!refreshToken) {
-        return response;
-    }
-
-    // Intentamos refrescar token
-    const refreshResponse = await fetch(`${ApiTargetToken}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken,
-            client_id: 'webApp',
-        }),
-    });
-
-    if (!refreshResponse.ok) {
-        // No se pudo refrescar token, devolver 401 original
-        return response;
-    }
-    if (refreshResponse.ok) {
-        console.log('%c✅ Sesión recuperada correctamente', 'color: green; font-weight: bold;');
-    }
-    const datosRefresh = await refreshResponse.json();
-
-    // Guardamos tokens nuevos
-    sessionStorage.setItem('access_token', datosRefresh.access_token);
-    if (datosRefresh.refresh_token) {
-        sessionStorage.setItem('refresh_token', datosRefresh.refresh_token);
-    }
-
-    // Reintentamos la petición original con token nuevo
-    headers.set('Authorization', `Bearer ${datosRefresh.access_token}`);
-
-    const retryResponse = await fetch(input, { ...init, headers });
-
-    return retryResponse;
+    return { ok: response.ok, status: response.status, data };
 }
 
 interface FechaProps {

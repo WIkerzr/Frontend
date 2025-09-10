@@ -18,6 +18,7 @@ import { ErrorMessage } from '../../../../components/Utils/animations';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
+import { LoadingOverlay } from '../../Users/componentes';
 
 export type TipoIndicador = 'realizacion' | 'resultado';
 
@@ -678,7 +679,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const { lockedHazi } = useUser();
     const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string>('');
 
     const accion: Acciones = indicadorSeleccionado ? indicadorSeleccionado.accion : 'Editar';
     const datosIndicador = indicadorSeleccionado ? indicadorSeleccionado.indicador : structuredClone(indicadorInicial);
@@ -694,6 +695,8 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const [mensaje, setMensaje] = useState('');
     const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
     const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(esNuevo ? false : hayResultados);
+
+    const [loading, setLoading] = useState(false);
 
     const { setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, setIndicadoresRealizacionADR, indicadoresResultadoADR, setIndicadoresResultadoADR, ejesIndicador } =
         useIndicadoresContext();
@@ -729,57 +732,84 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         }, 1000);
     };
 
-    const validadorRespuestasBBDD = async (response: any, data: any) => {
-        if (response.ok) {
-            const indicador: IndicadorRealizacion = {
-                ...descripcionEditable,
-                Id: data.data.Id,
-                RegionsId: data.data.RegionsId ? `${data.data.RegionsId}` : regionSeleccionada ?? undefined,
-                Resultados: data.data.Resultados,
-            };
-            setMensaje(t('correctoIndicadorGuardado'));
-            if (accion === 'Crear') {
-                alctualizarEstadoNuevo(indicador);
-            } else if (accion === 'Editar') {
-                setTimeout(() => {
-                    if (onSave) {
-                        onSave(indicador);
-                    }
-                }, 200);
-            }
-            setTimeout(() => {
-                setDescripcionEditable(indicadorInicial);
-                setMostrarResultadoRelacionado(false);
-                setMensaje('');
-                onClose();
-            }, 1000);
-        } else {
-            setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + data.message : t('errorGuardar') + data.message));
-        }
-    };
-
     const handleGuardarNuevoRealizacion = async () => {
-        const { indicadorNuevo, response } = await guardarNuevoRealizacionBack(esADR, descripcionEditable, regionSeleccionada);
-        validadorRespuestasBBDD(response, indicadorNuevo);
+        guardarNuevoRealizacionBack({
+            esADR,
+            indicador: descripcionEditable,
+            regionSeleccionada,
+            setLoading,
+            onSucces: (data: IndicadorRealizacion) => {
+                const indicador: IndicadorRealizacion = {
+                    ...descripcionEditable,
+                    Id: data.Id,
+                    RegionsId: data.RegionsId ? `${data.RegionsId}` : regionSeleccionada ?? undefined,
+                    Resultados: data.Resultados,
+                };
+                setMensaje(t('correctoIndicadorGuardado'));
+                if (accion === 'Crear') {
+                    alctualizarEstadoNuevo(indicador);
+                } else if (accion === 'Editar') {
+                    setTimeout(() => {
+                        if (onSave) {
+                            onSave(indicador);
+                        }
+                    }, 200);
+                }
+                setTimeout(() => {
+                    setDescripcionEditable(indicadorInicial);
+                    setMostrarResultadoRelacionado(false);
+                    setMensaje('');
+                    onClose();
+                }, 1000);
+            },
+            onError(message: string) {
+                setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + message : t('errorGuardar') + message));
+            },
+        });
     };
 
     const handleEditarIndicador = async () => {
         try {
             if (tipoIndicador === 'realizacion') {
                 const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
-                const indicadorRE = await editIndicadorRealizacionBack(descripcionEditable, ejesIndicador);
+                const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
 
-                setRealizacion((prev) => {
-                    const updated = prev.map((el) => (el.Id === indicadorRE.Id ? indicadorRE : el));
-                    return updated;
+                editIndicadorRealizacionBack({
+                    indicadorModificado: descripcionEditable,
+                    ejesIndicador,
+                    setLoading,
+                    onSucces: (indicadorRE: IndicadorRealizacion) => {
+                        setRealizacion((prev) => {
+                            const updated = prev.map((el) => (el.Id === indicadorRE.Id ? indicadorRE : el));
+                            return updated;
+                        });
+                        if (descripcionEditable.Resultados) {
+                            descripcionEditable.Resultados.forEach((resultado) => {
+                                if (resultado.Id === 0) {
+                                    if (indicadorRE.Resultados) {
+                                        indicadorRE.Resultados.forEach((resultadoRS) => {
+                                            if (resultado.NameEs === resultadoRS.NameEs || resultado.NameEu === resultadoRS.NameEu) {
+                                                setResultado((prev) => [...prev, resultadoRS]);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    },
                 });
             } else if (tipoIndicador === 'resultado') {
                 const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
-                const indicadorRS = await editIndicadorResultadoBack(descripcionEditable, ejesIndicador);
-
-                setResultado((prev) => {
-                    const updated = prev.map((el) => (el.Id === indicadorRS.Id ? indicadorRS : el));
-                    return updated;
+                editIndicadorResultadoBack({
+                    indicadorModificado: descripcionEditable,
+                    ejesIndicador,
+                    setLoading,
+                    onSucces: (indicadorRS: IndicadorResultado) => {
+                        setResultado((prev) => {
+                            const updated = prev.map((el) => (el.Id === indicadorRS.Id ? indicadorRS : el));
+                            return updated;
+                        });
+                    },
                 });
             }
             finalizadaLlamadaBBDD();
@@ -844,6 +874,14 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className={`flex-1 transition-all duration-300 ${mostrarResultadoRelacionado ? 'pr-8' : ''}`}>
+                    <LoadingOverlay
+                        isLoading={loading}
+                        enModal
+                        message={{
+                            errorMessage,
+                            successMessage: mensaje,
+                        }}
+                    />
                     <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
                         ×
                     </button>
@@ -1355,7 +1393,7 @@ export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRe
             },
         });
 
-        const data = await res.json();
+        const data = res.data;
 
         // const datosIndicador: IndicadorRealizacion[] = data.data;
         const datosIndicador: IndicadorRealizacion[] = data.data.map(transformarIndicador);

@@ -14,9 +14,9 @@ interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
     userData: UserID | User;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-    errorMessage?: string | null;
-    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
-    successMessage?: string | null;
+    errorMessage?: string;
+    setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+    successMessage?: string;
     fadeOut: boolean;
     roleDisabled?: boolean;
     isNewUser?: boolean;
@@ -103,7 +103,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
         if (otrosEmails.includes(value)) {
             setErrorMessage(t('emailYaRegistrado'));
         } else {
-            setErrorMessage(null);
+            setErrorMessage('');
         }
         const customEvent = {
             ...e,

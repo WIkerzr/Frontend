@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
 import { EjeIndicadorBBDD } from '../../../types/tipadoPlan';
-import { FetchConRefreshRetry, gestionarErrorServidor } from '../utils';
-import { ApiTarget } from './controlDev';
+import { LlamadasBBDD } from './utilsData';
 
 interface IndicadoresResponse<T> {
     success: boolean;
@@ -74,78 +74,90 @@ const transformarBORRARIndicadorArrayAString = (indicador: IndicadorRealizacion 
     };
 };
 
-export async function editIndicadorRealizacionBack(indicadorModificado: IndicadorRealizacion, ejesIndicador: EjeIndicadorBBDD[]): Promise<IndicadorRealizacion> {
-    const token = sessionStorage.getItem('access_token');
+export async function editIndicadorRealizacionBack({
+    indicadorModificado,
+    setLoading,
+    ejesIndicador,
+    onSucces,
+}: {
+    indicadorModificado: IndicadorRealizacion;
+    setLoading: (a: boolean) => void;
+    ejesIndicador: EjeIndicadorBBDD[];
+    onSucces: (indicador: IndicadorRealizacion) => void;
+}) {
     const borrar = transformarBORRARIndicadorArrayAString(indicadorModificado);
-
-    const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorRealizacion`, {
+    LlamadasBBDD({
         method: 'PUT',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+        url: `editarIndicadorRealizacion`,
+        setLoading: setLoading ?? (() => {}),
+        body: borrar,
+        //setErrorMessage,
+        //setSuccessMessage,
+        async onSuccess(response) {
+            const json: IndicadoresResponse<IndicadorRealizacion> = await response.data;
+
+            const indicadorPreFinal: IndicadorRealizacion = {
+                ...indicadorModificado,
+                ...json,
+            };
+            const indicadorFinal = transformarIndicadorStringAArray(indicadorPreFinal, ejesIndicador);
+            onSucces(indicadorFinal);
         },
-        body: JSON.stringify(borrar),
     });
-
-    if (!response.ok) {
-        const errorInfo = gestionarErrorServidor(response);
-        throw new Error(errorInfo.mensaje);
-    }
-
-    const json: IndicadoresResponse<IndicadorRealizacion> = await response.json();
-
-    if (!json.success) {
-        throw new Error('Error al editar indicador: ' + json.message);
-    }
-
-    const indicadorPreFinal: IndicadorRealizacion = {
-        ...indicadorModificado,
-        ...json.data,
-    };
-    const indicadorFinal = transformarIndicadorStringAArray(indicadorPreFinal, ejesIndicador);
-    return indicadorFinal;
 }
 
-export async function editIndicadorResultadoBack(indicadorModificado: IndicadorResultado, ejesIndicador: EjeIndicadorBBDD[]): Promise<IndicadorResultado> {
-    const token = sessionStorage.getItem('access_token');
+export async function editIndicadorResultadoBack({
+    indicadorModificado,
+    setLoading,
+    ejesIndicador,
+    onSucces,
+}: {
+    indicadorModificado: IndicadorResultado;
+    setLoading: (a: boolean) => void;
+    ejesIndicador: EjeIndicadorBBDD[];
+    onSucces: (indicador: IndicadorResultado) => void;
+}) {
     const borrar = transformarBORRARIndicadorArrayAString(indicadorModificado);
 
-    const response = await FetchConRefreshRetry(`${ApiTarget}/editarIndicadorResultado`, {
+    LlamadasBBDD({
         method: 'PUT',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+        url: `editarIndicadorResultado`,
+        setLoading: setLoading ?? (() => {}),
+        body: borrar,
+        //setErrorMessage,
+        //setSuccessMessage,
+        async onSuccess(response) {
+            const json: IndicadoresResponse<IndicadorResultado> = await response.data;
+
+            if (!json.success) {
+                throw new Error('Error al editar indicador: ' + json.message);
+            }
+
+            const indicadorPreFinal: IndicadorResultado = {
+                ...indicadorModificado,
+                ...json.data,
+            };
+            const indicadorFinal = transformarIndicadorStringAArray(indicadorPreFinal, ejesIndicador);
+            onSucces(indicadorFinal);
         },
-        body: JSON.stringify(borrar),
     });
-
-    if (!response.ok) {
-        const errorInfo = gestionarErrorServidor(response);
-        throw new Error(errorInfo.mensaje);
-    }
-
-    const json: IndicadoresResponse<IndicadorResultado> = await response.json();
-
-    if (!json.success) {
-        throw new Error('Error al editar indicador: ' + json.message);
-    }
-
-    const indicadorPreFinal: IndicadorResultado = {
-        ...indicadorModificado,
-        ...json.data,
-    };
-    const indicadorFinal = transformarIndicadorStringAArray(indicadorPreFinal, ejesIndicador);
-    return indicadorFinal;
 }
 
-export async function guardarNuevoRealizacionBack(
-    esADR: boolean,
-    indicador: IndicadorRealizacion,
-    regionSeleccionada: string | null
-): Promise<{ indicadorNuevo: IndicadorRealizacion; response: Response }> {
-    const token = sessionStorage.getItem('access_token');
+export async function guardarNuevoRealizacionBack({
+    esADR,
+    indicador,
+    regionSeleccionada,
+    setLoading,
+    onSucces,
+    onError,
+}: {
+    esADR: boolean;
+    indicador: IndicadorRealizacion;
+    regionSeleccionada: string | null;
+    setLoading: (a: boolean) => void;
+    onSucces: (data: IndicadorRealizacion) => void;
+    onError: (data: string) => void;
+}) {
     const datosRealizacion: IndicadorRealizacion = {
         ...indicador,
         RegionsId: regionSeleccionada ?? undefined,
@@ -155,7 +167,6 @@ export async function guardarNuevoRealizacionBack(
         })),
     };
 
-    //TODO: Borrar
     const idsString = datosRealizacion.RelatedAxes ? datosRealizacion.RelatedAxes.map((eje) => `'${eje.EjeId}'`).join(',') : '';
     const datosBorrar = {
         ...datosRealizacion,
@@ -166,63 +177,61 @@ export async function guardarNuevoRealizacionBack(
         ...indicador,
         RelatedAxes: idsStringEditable ?? '',
     };
-    //TODO: Borrar
+
     const indicadorIntermedio = esADR ? datosBorrar : datosBorrarIndicador;
     if (indicadorIntermedio.Resultados) {
         indicadorIntermedio.Resultados.forEach((resultado, i, arr) => {
             arr[i] = transformarBORRARIndicadorArrayAString(resultado);
         });
     }
-    const response = await FetchConRefreshRetry(`${ApiTarget}/nuevoIndicadores`, {
+    LlamadasBBDD({
         method: 'POST',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        // body: JSON.stringify(esADR ? datosRealizacion : indicador),
-        body: JSON.stringify(indicadorIntermedio),
-    });
-    if (response && !response.ok) {
-        const errorInfo = gestionarErrorServidor(response);
-        throw new Error(errorInfo.mensaje);
-        //setErrorMessage(errorInfo.mensaje);
-        //return;
-    }
-    const indicadorNuevo = await response.json();
+        url: `nuevoIndicadores`,
+        setLoading: setLoading ?? (() => {}),
+        body: indicadorIntermedio,
+        //setErrorMessage,
+        //setSuccessMessage,
+        onSuccess(response) {
+            const indicadorNuevo = response.data;
 
-    let realizaciones: IndicadorRealizacion[] = [];
-    const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-    if (storedRealizacion) {
-        realizaciones = JSON.parse(storedRealizacion);
-    }
-    realizaciones.push({
-        ...indicador,
-        Id: indicadorNuevo.data.Id,
-        RegionsId: regionSeleccionada ?? undefined,
-    });
+            let realizaciones: IndicadorRealizacion[] = [];
+            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
+            if (storedRealizacion) {
+                realizaciones = JSON.parse(storedRealizacion);
+            }
+            realizaciones.push({
+                ...indicador,
+                Id: indicadorNuevo.Id,
+                RegionsId: regionSeleccionada ?? undefined,
+            });
 
-    if (indicadorNuevo.data.Resultados && indicadorNuevo.data.Resultados.length > 0) {
-        let resultados: IndicadorRealizacion[] = [];
-        const storedResultado = localStorage.getItem('indicadoresResultado');
-        if (storedResultado) {
-            resultados = JSON.parse(storedResultado);
-        }
-        const idsEnresultados = new Set(resultados.map((obj) => obj.Id));
-        indicadorNuevo.data.Resultados.forEach((obj: IndicadorRealizacion) => {
-            if (!idsEnresultados.has(obj.Id)) {
-                resultados.push({
-                    Id: obj.Id,
-                    NameEs: obj.NameEs,
-                    CalculationMethodology: obj.CalculationMethodology,
-                    Description: obj.Description,
-                    NameEu: obj.NameEu,
-                    RegionsId: obj.RegionsId,
-                    RelatedAxes: obj.RelatedAxes,
-                    Resultados: obj.Resultados,
+            if (indicadorNuevo.Resultados && indicadorNuevo.Resultados.length > 0) {
+                let resultados: IndicadorRealizacion[] = [];
+                const storedResultado = localStorage.getItem('indicadoresResultado');
+                if (storedResultado) {
+                    resultados = JSON.parse(storedResultado);
+                }
+                const idsEnresultados = new Set(resultados.map((obj) => obj.Id));
+                indicadorNuevo.Resultados.forEach((obj: IndicadorRealizacion) => {
+                    if (!idsEnresultados.has(obj.Id)) {
+                        resultados.push({
+                            Id: obj.Id,
+                            NameEs: obj.NameEs,
+                            CalculationMethodology: obj.CalculationMethodology,
+                            Description: obj.Description,
+                            NameEu: obj.NameEu,
+                            RegionsId: obj.RegionsId,
+                            RelatedAxes: obj.RelatedAxes,
+                            Resultados: obj.Resultados,
+                        });
+                    }
                 });
             }
-        });
-    }
-    return { indicadorNuevo, response };
+            if (response.success) {
+                onSucces(indicadorNuevo);
+            } else {
+                onError(response.message);
+            }
+        },
+    });
 }

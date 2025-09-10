@@ -30,7 +30,7 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { yearData, errorMessage, successMessage, selectedId, SeleccionVaciarEditarAccion } = useYear();
+    const { yearData, errorMessageYearData, successMessageYearData, selectedId, SeleccionVaciarEditarAccion } = useYear();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const navigate = useNavigate();
@@ -73,14 +73,14 @@ const Index: React.FC = () => {
                             <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
                                 {selectedId === eje.Id && (
                                     <>
-                                        {successMessage && (
+                                        {successMessageYearData && (
                                             <div className={`mt-4 transition-opacity duration-1000 opacity-100}`}>
-                                                <p className="text-green-500">{successMessage}</p>
+                                                <p className="text-green-500">{successMessageYearData}</p>
                                             </div>
                                         )}
-                                        {errorMessage && (
+                                        {errorMessageYearData && (
                                             <div>
-                                                <span className="text-red-500 hover:text-red-700">{errorMessage}</span>
+                                                <span className="text-red-500 hover:text-red-700">{errorMessageYearData}</span>
                                             </div>
                                         )}
                                     </>

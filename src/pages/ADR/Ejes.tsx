@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../Configuracion/Users/componentes';
 import { EjesBBDD } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
-import { ApiTarget } from '../../components/Utils/data/controlDev';
-import { FetchConRefreshRetry, gestionarErrorServidor, obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
-import { ErrorMessage, Loading } from '../../components/Utils/animations';
+import { obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
+import { ErrorMessage } from '../../components/Utils/animations';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../components/Icon/IconRefresh';
 import { useEstadosPorAnioContext, useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { LlamadaBBDDEjesRegion } from '../../components/Utils/data/dataEjes';
 import { useUser } from '../../contexts/UserContext';
+import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
-    const { yearData, llamadaBBDDYearData } = useYear();
+    const { yearData, llamadaBBDDYearData, loadingYearData } = useYear();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { regionSeleccionada } = useRegionContext();
     const { anioSeleccionada } = useEstadosPorAnioContext();
@@ -26,14 +26,16 @@ const Index = () => {
     const [ejes, setEjes] = useState<EjesBBDD[]>();
 
     const [loading, setLoading] = useState<boolean>(true);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('ejes');
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
     const llamadaEjes = () => {
-        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, setLoading, setEjes, setFechaUltimoActualizadoBBDD, setErrorMessage);
+        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjes, setFechaUltimoActualizadoBBDD);
     };
 
     const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
@@ -75,37 +77,25 @@ const Index = () => {
     }, [yearData]);
 
     const handleSave = () => {
-        const fetchAxes = async () => {
-            const token = sessionStorage.getItem('access_token');
-            try {
-                const res = await FetchConRefreshRetry(`${ApiTarget}/yearData/${Number(regionSeleccionada)}/${anioSeleccionada}/axes`, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ` + token,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(ejes),
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    const errorInfo = gestionarErrorServidor(res, data);
-                    console.log(errorInfo.mensaje);
-                    return;
-                }
-                llamadaBBDDYearData(anioSeleccionada!, true);
-            } catch (err: unknown) {
-                const errorInfo = gestionarErrorServidor(err);
-                console.log(errorInfo.mensaje);
-                return;
-            }
-        };
-        fetchAxes();
-        setLocked(true);
+        LlamadasBBDD({
+            method: 'POST',
+            url: `yearData/${Number(regionSeleccionada)}/${anioSeleccionada}/axes`,
+            setLoading,
+            setErrorMessage,
+            setSuccessMessage,
+            body: ejes,
+            async onSuccess() {
+                setLocked(true);
+
+                await llamadaBBDDYearData(anioSeleccionada!, true, { setErrorMessage, setSuccessMessage });
+            },
+        });
     };
 
-    if (loading) return <Loading />;
     return (
         <div className="panel">
+            <LoadingOverlay isLoading={loading || loadingYearData} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
+
             <div className="w-full mx-auto mt-1 px-2">
                 <ZonaTitulo
                     titulo={<h2 className="text-xl font-bold">{t('ejesTitulo')}</h2>}

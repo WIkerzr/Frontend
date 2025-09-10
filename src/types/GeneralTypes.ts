@@ -6,8 +6,6 @@ export function isEstado(value: any): value is Estado {
     return validEstados.includes(value);
 }
 
-export type EstadosLoading = 'idle' | 'loading' | 'success' | 'error';
-
 export const opcionesComarcal = [
     'Sin tratamiento territorial comarcal',
     'Zonas de especial atención',

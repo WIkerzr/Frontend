@@ -92,8 +92,8 @@ export const gestionarServicio = async ({
 interface EliminarServicioProps {
     idServicio: number;
     setLoading?: Dispatch<SetStateAction<boolean>>;
-    setSuccessMessage?: Dispatch<SetStateAction<string | null>>;
-    setErrorMessage?: Dispatch<SetStateAction<string | null>>;
+    setSuccessMessage?: Dispatch<SetStateAction<string>>;
+    setErrorMessage?: Dispatch<SetStateAction<string>>;
 }
 
 export const eliminarServicio = async ({ idServicio, setLoading, setSuccessMessage, setErrorMessage }: EliminarServicioProps): Promise<boolean> => {
