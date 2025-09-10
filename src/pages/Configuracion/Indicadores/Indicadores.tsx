@@ -9,6 +9,7 @@ import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 import { PrintFecha } from '../../../components/Utils/utils';
 import { indicadorInicial } from '../../../types/Indicadores';
 import { useLocation } from 'react-router-dom';
+import { useAvisoSalirEditando } from '../../../components/Layouts/DefaultLayout';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -27,6 +28,7 @@ const Index = () => {
     const location = useLocation();
 
     const [modalNuevo, setModalNuevo] = useState(false);
+    const AvisoSalirEditando = useAvisoSalirEditando();
 
     useEffect(() => {
         if (location.pathname === '/configuracion/indicadores') {
@@ -58,7 +60,16 @@ const Index = () => {
                         {modalNuevo ? (
                             <ModalNuevoIndicador
                                 isOpen={modalNuevo}
-                                onClose={() => setModalNuevo(false)}
+                                onClose={(save: boolean) => {
+                                    if (!save) {
+                                        const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                        if (confirmar) {
+                                            setModalNuevo(false);
+                                        }
+                                    } else {
+                                        setModalNuevo(false);
+                                    }
+                                }}
                                 onSave={(nuevoIndicadorRealizacion) => {
                                     setIndicadoresRealizacion((prev) => [...prev, nuevoIndicadorRealizacion]);
                                     if (!nuevoIndicadorRealizacion.Resultados) {
@@ -68,6 +79,9 @@ const Index = () => {
                                     if (nuevosResultados.length > 0) {
                                         setIndicadoresResultado((prev) => [...prev, ...nuevosResultados]);
                                     }
+                                    setTimeout(() => {
+                                        setModalNuevo(false);
+                                    }, 1000);
                                 }}
                             />
                         ) : (

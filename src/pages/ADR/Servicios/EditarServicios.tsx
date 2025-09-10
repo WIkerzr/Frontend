@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { InputField, TextArea } from '../../../components/Utils/inputs';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
@@ -16,12 +16,18 @@ const Index: React.FC = () => {
     const navigate = useNavigate();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
-    const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData } = useYear();
+    const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData, controlguardado, setControlguardado } = useYear();
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const { regionSeleccionada } = useRegionContext();
 
     const [loading, setLoading] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (controlguardado) {
+            navigate('/adr/servicios');
+        }
+    }, [controlguardado]);
 
     if (!datosEditandoServicio) {
         return <Loading />;
@@ -110,8 +116,8 @@ const Index: React.FC = () => {
                 regionSeleccionada: regionSeleccionada!,
                 anioSeleccionada: anioSeleccionada!,
                 setLoading,
-                // setSuccessMessage,
-                // setErrorMessage,
+                setSuccessMessage,
+                setErrorMessage,
                 method: 'POST',
             });
 
@@ -128,8 +134,8 @@ const Index: React.FC = () => {
                 regionSeleccionada: regionSeleccionada!,
                 anioSeleccionada: anioSeleccionada!,
                 setLoading,
-                // setSuccessMessage,
-                // setErrorMessage,
+                setSuccessMessage,
+                setErrorMessage,
                 method: 'PUT',
             });
             if (editadoServicio) {
@@ -142,9 +148,7 @@ const Index: React.FC = () => {
     };
 
     const handleFinalize = () => {
-        setTimeout(() => {
-            navigate('/adr/servicios');
-        }, 1500);
+        setControlguardado(true);
     };
 
     return (
@@ -157,6 +161,7 @@ const Index: React.FC = () => {
                     successMessage,
                     setSuccessMessage,
                 }}
+                timeDelay={false}
                 onComplete={handleFinalize}
             />
 

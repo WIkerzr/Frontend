@@ -19,6 +19,7 @@ import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
 import { LoadingOverlay } from '../../Users/componentes';
+import { useAvisoSalirEditando } from '../../../../components/Layouts/DefaultLayout';
 
 export type TipoIndicador = 'realizacion' | 'resultado';
 
@@ -663,15 +664,12 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
 
 type ModalNuevoIndicadorProps = {
     isOpen: boolean;
-    onClose: () => void;
+    onClose: (save: boolean) => void;
     onSave?: (indicadorActualizado: IndicadorRealizacion) => void;
     tipoIndicador?: TipoIndicador;
 };
 
 export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen, onClose, onSave, tipoIndicador }) => {
-    if (!isOpen) {
-        return null;
-    }
     const { t, i18n } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
     const { indicadorSeleccionado } = useIndicadoresContext();
@@ -708,7 +706,9 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             }));
         }
     }, []);
-
+    if (!isOpen) {
+        return null;
+    }
     const alctualizarEstadoNuevo = async (indicador: IndicadorRealizacion | IndicadorRealizacion) => {
         const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
         const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
@@ -728,7 +728,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             setDescripcionEditable(indicadorInicial);
             setMostrarResultadoRelacionado(false);
             setMensaje('');
-            onClose();
+            onClose(true);
         }, 1000);
     };
 
@@ -759,7 +759,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                     setDescripcionEditable(indicadorInicial);
                     setMostrarResultadoRelacionado(false);
                     setMensaje('');
-                    onClose();
+                    onClose(true);
                 }, 1000);
             },
             onError(message: string) {
@@ -863,10 +863,8 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         );
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => onClose(false)}>
             <div
                 className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex
             ${mostrarResultadoRelacionado ? 'w-full max-w-4xl' : 'w-full max-w-md'}
@@ -882,7 +880,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             successMessage: mensaje,
                         }}
                     />
-                    <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={onClose}>
+                    <button className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl" onClick={() => onClose(false)}>
                         ×
                     </button>
 
@@ -901,7 +899,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                         {bloqueoHazi ? (
                             <button
                                 onClick={() => {
-                                    onClose();
+                                    onClose(false);
                                 }}
                                 className="bg-danger text-white px-4 py-2 rounded hover:bg-red-700 w-full"
                             >
@@ -976,6 +974,7 @@ export const TablaIndicadores: React.FC = () => {
     const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
 
     const esPaginaPorDefecto = location.pathname === '/';
+    const AvisoSalirEditando = useAvisoSalirEditando();
 
     const esADR = esPaginaPorDefecto || location.pathname.includes('ADR');
     const { regionSeleccionada } = useRegionContext();
@@ -1274,9 +1273,17 @@ export const TablaIndicadores: React.FC = () => {
                     {modalEditarRealizacion && indicadorSeleccionado?.tipo === 'Realizacion' ? (
                         <ModalNuevoIndicador
                             isOpen={modalEditarRealizacion}
-                            onClose={() => {
-                                setModalEditarRealizacion(false);
-                                setIndicadorSeleccionado(null);
+                            onClose={(save: boolean) => {
+                                if (!save) {
+                                    const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                    if (confirmar) {
+                                        setModalEditarRealizacion(false);
+                                        setIndicadorSeleccionado(null);
+                                    }
+                                } else {
+                                    setModalEditarRealizacion(false);
+                                    setIndicadorSeleccionado(null);
+                                }
                             }}
                             tipoIndicador={'realizacion'}
                             onSave={(indicadorActualizado) => {
@@ -1358,9 +1365,17 @@ export const TablaIndicadores: React.FC = () => {
                     {modalEditarResultado && indicadorSeleccionado?.tipo === 'Resultado' ? (
                         <ModalNuevoIndicador
                             isOpen={modalEditarResultado}
-                            onClose={() => {
-                                setModalEditarResultado(false);
-                                setIndicadorSeleccionado(null);
+                            onClose={(save: boolean) => {
+                                if (!save) {
+                                    const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                    if (confirmar) {
+                                        setModalEditarResultado(false);
+                                        setIndicadorSeleccionado(null);
+                                    }
+                                } else {
+                                    setModalEditarResultado(false);
+                                    setIndicadorSeleccionado(null);
+                                }
                             }}
                             tipoIndicador={'resultado'}
                             onSave={(indicadorActualizado) => {

@@ -50,6 +50,8 @@ interface YearContextType {
     setErrorMessageYearData?: (a: string) => void;
     successMessageYearData: string;
     setSuccessMessageYearData?: (a: string) => void;
+    controlguardado: boolean;
+    setControlguardado: (a: boolean) => void;
     selectedId: string | null;
 }
 
@@ -78,6 +80,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         return fechaStr ? new Date(fechaStr) : new Date();
     });
     const [loadingYearData, setLoadingYearData] = useState<boolean>(false);
+    const [controlguardado, setControlguardado] = useState<boolean>(false);
 
     useEffect(() => {
         localStorage.setItem('DataYear', JSON.stringify(yearData));
@@ -719,6 +722,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 successMessageYearData,
                 setSuccessMessageYearData,
                 selectedId,
+                controlguardado,
+                setControlguardado,
             }}
         >
             {children}

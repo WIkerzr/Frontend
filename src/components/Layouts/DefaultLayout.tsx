@@ -7,8 +7,36 @@ import Header from './Header';
 import Setting from './Setting';
 import Sidebar from './Sidebar';
 import Portals from '../../components/Portals';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useRegionContext } from '../../contexts/RegionContext';
+import { useTranslation } from 'react-i18next';
+import { useYear } from '../../contexts/DatosAnualContext';
+
+export const useAvisoSalirEditando = () => {
+    const { t } = useTranslation();
+
+    return t('object:AvisoSalirEditando', { returnObjects: true }) as Record<string, string>;
+};
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { controlguardado, setControlguardado } = useYear();
+    const { regionSeleccionada, setRegionSeleccionada } = useRegionContext();
+    const [regionAnterior, setRegionAnterior] = useState<string | null>(() => {
+        const savedRegion = sessionStorage.getItem('regionSeleccionada');
+        const parsedRegion = savedRegion ? JSON.parse(savedRegion) : null;
+        return parsedRegion ? parsedRegion.id : null;
+    });
+    const [rutaAnterior, setRutaAnterior] = useState<string | null>(() => {
+        const savedRute = sessionStorage.getItem('rutaActual');
+        const parsedRute = savedRute ? JSON.parse(savedRute) : null;
+        return parsedRute;
+    });
+
+    const [confirmado, setConfirmado] = useState(false);
+    const AvisoSalirEditando = useAvisoSalirEditando();
+
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
 
@@ -43,6 +71,51 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
             window.removeEventListener('onscroll', onScrollHandler);
         };
     }, []);
+
+    useEffect(() => {
+        if (regionSeleccionada != regionAnterior) {
+            if (!regionSeleccionada) {
+                const rutaAceptada = `/configuracion/`;
+                if (location.pathname.includes(rutaAceptada)) {
+                    navigate('/configuracion/indicadoresADR');
+                }
+            } else {
+                const partesRuta = location.pathname.split('/').filter(Boolean);
+                if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
+                    const confirmar = window.confirm(AvisoSalirEditando.cambioRegion);
+                    if (confirmar) {
+                        navigate(`/${partesRuta[0]}/${partesRuta[1]}`);
+                    } else {
+                        setRegionSeleccionada(regionAnterior ? Number(regionAnterior) : null);
+                    }
+                }
+            }
+        }
+        setRegionAnterior(regionSeleccionada);
+    }, [regionSeleccionada, regionAnterior]);
+
+    useEffect(() => {
+        const partesRuta = location.pathname.split('/').filter(Boolean);
+        if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
+            setRutaAnterior(location.pathname);
+            setConfirmado(false);
+        } else if (partesRuta.length <= 2 && rutaAnterior && !confirmado) {
+            if (controlguardado) {
+                setControlguardado(false);
+                setConfirmado(true);
+            } else {
+                const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
+                if (confirmar) {
+                    setRutaAnterior(null);
+                    setConfirmado(true);
+                    sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
+                } else {
+                    sessionStorage.setItem('rutaActual', JSON.stringify(rutaAnterior));
+                    navigate(rutaAnterior);
+                }
+            }
+        }
+    }, [location, confirmado, rutaAnterior]);
 
     return (
         <App>

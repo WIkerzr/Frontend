@@ -51,6 +51,12 @@
     "Elaboración de la memoria recapitulativa anual analizando el grado de ejecución de las actuaciones previstas.",
     "Labores propias de la gestión administrativa interna de la asociación: convocatoria de juntas directivas, elaboración de actas y memorias, gestión del presupuesto, etc.",
     "Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa, etc.)"
-  ]
+  ],
+
+   "AvisoSalirEditando": {
+    "cambioRegion": "Ha cambiado de región. Los cambios no guardados se perderán y será redirigido a la página principal de su ubicación. ¿Desea continuar?",
+    "cambioPagina": "Se dispone a navegar a otra página sin guardar los cambios. Los datos no guardados se perderán. ¿Desea continuar?",
+    "cierreVentanaFlotante": "Se dispone a cerrar la ventana flotante. Los datos no guardados se perderán. ¿Desea continuar?"
+  }
 
 }

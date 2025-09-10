@@ -91,7 +91,7 @@ const Index: React.FC = () => {
                 {serviciosGrup.map((fila: Servicios[], filaIndex: number) => (
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((servicio: Servicios) => {
-                            const editable = editarPlan && editarMemoria;
+                            const editable = editarPlan || editarMemoria;
                             return (
                                 <div key={servicio.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="text-base">{servicio.nombre}</span>

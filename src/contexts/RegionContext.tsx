@@ -41,6 +41,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
     const [regionData, setRegionData] = useState<InitialDataResponse>();
     const { i18n } = useTranslation();
     const { user } = useUser();
+
     const token = sessionStorage.getItem('access_token');
     const [regionActual, setRegionActual] = useState<RegionInterface>();
     const [codRegiones, setCodRegiones] = useState<CodRegiones>({});

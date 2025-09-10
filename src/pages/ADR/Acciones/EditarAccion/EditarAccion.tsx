@@ -28,7 +28,18 @@ const Index: React.FC = () => {
     const tituloCampo = servicio ? t('Servicios') : t('Accion');
     const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : servicio ? '/adr/servicios/' : '/adr/acciones/';
 
-    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, block, datosEditandoServicio, setDatosEditandoServicio, GuardarLaEdicionAccion } = useYear();
+    const {
+        yearData,
+        datosEditandoAccion,
+        setDatosEditandoAccion,
+        SeleccionEditarGuardar,
+        controlguardado,
+        setControlguardado,
+        block,
+        datosEditandoServicio,
+        setDatosEditandoServicio,
+        GuardarLaEdicionAccion,
+    } = useYear();
     const navigate = useNavigate();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -92,6 +103,12 @@ const Index: React.FC = () => {
         }
     }, [lineaActuaccion, datosEditandoAccion]);
 
+    useEffect(() => {
+        if (controlguardado) {
+            navigate(rutaAnterior);
+        }
+    }, [controlguardado]);
+
     if (datosEditandoAccion.id === '0') {
         return;
     }
@@ -103,8 +120,8 @@ const Index: React.FC = () => {
     }
 
     const handleFinalize = () => {
+        setControlguardado(true);
         SeleccionEditarGuardar();
-        navigate(rutaAnterior);
     };
 
     const handleAccionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
