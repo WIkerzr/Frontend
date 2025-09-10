@@ -17,7 +17,7 @@ const Index: React.FC = () => {
     const { regionSeleccionada } = useRegionContext();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
-    const { yearData, setYearData, SeleccionEditarAccion, SeleccionVaciarEditarAccion } = useYear();
+    const { yearData, EliminarAccion, SeleccionEditarAccion, SeleccionVaciarEditarAccion } = useYear();
     const [accionesGrup, setAccionesGrup] = useState<DatosAccion[][]>([]);
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -37,10 +37,15 @@ const Index: React.FC = () => {
         setAccionesGrup(grup5(data, 4));
     }, [yearData]);
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: string, idEje: string | undefined) => {
         const data = yearData.plan.ejes.flatMap((eje) => eje.acciones);
-        const accionAccesoria = data.find((item) => item.id === String(id));
+        const accionAccesoria = data.find((item) => String(item.id) === String(id));
 
+        if (!idEje) {
+            console.log('Sin idEje');
+
+            return;
+        }
         if (
             accionAccesoria &&
             window.confirm(
@@ -51,10 +56,7 @@ const Index: React.FC = () => {
                 }).trim()
             )
         ) {
-            setYearData({
-                ...yearData,
-                accionesAccesorias: data.filter((item) => item.id !== String(id)),
-            });
+            EliminarAccion('AccionesAccesorias', idEje, id);
         }
     };
 
@@ -64,7 +66,7 @@ const Index: React.FC = () => {
 
         try {
             if (accion.ejeId) {
-                await SeleccionEditarAccion(accion.ejeId, accion.id, { setErrorMessage, setSuccessMessage });
+                await SeleccionEditarAccion(accion.ejeId, accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
             }
             if (!ejesRegion) {
                 await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
@@ -122,7 +124,7 @@ const Index: React.FC = () => {
                                             <button
                                                 aria-label={`Eliminar acción ${accion.id}`}
                                                 className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
-                                                onClick={() => handleDelete(accion.id)}
+                                                onClick={() => handleDelete(accion.id, accion.ejeId)}
                                             >
                                                 <IconTrash />
                                             </button>

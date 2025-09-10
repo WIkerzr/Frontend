@@ -379,12 +379,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 Plurianual: plurianual,
             },
             onSuccess: (response) => {
-                const { Nombre, LineaActuaccion, Plurianual, Id } = response.data;
-
-                if (Nombre !== nuevaAccion || LineaActuaccion !== nuevaLineaActuaccion || Plurianual !== plurianual) {
-                    throw new Error('Error al agregar la acción: datos no coinciden');
-                }
-
                 const actualizarEjes = (ejes: typeof yearData.plan.ejesPrioritarios | typeof yearData.plan.ejes) =>
                     ejes.map((eje) =>
                         eje.Id === ejeSeleccionado.Id
@@ -392,7 +386,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                                   ...eje,
                                   acciones: [
                                       ...(eje.acciones || []),
-                                      { id: Id, accion: nuevaAccion, ejeEs: ejeSeleccionado.NameEs, ejeEu: ejeSeleccionado.NameEu, lineaActuaccion: nuevaLineaActuaccion, plurianual },
+                                      { id: response.data.Id, accion: nuevaAccion, ejeEs: ejeSeleccionado.NameEs, ejeEu: ejeSeleccionado.NameEu, lineaActuaccion: nuevaLineaActuaccion, plurianual },
                                   ],
                               }
                             : eje
@@ -468,37 +462,36 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const ejeSeleccionado = fuenteEjes.find((eje) => eje.Id === idEje);
         if (!ejeSeleccionado) return;
         setSelectedId(idEje);
-        if (tipo === 'Acciones') {
-            LlamadasBBDD({
-                method: 'POST',
-                url: `yearData/${yearData.plan.id}/${idEje}/deleteAction/${idAccion}`,
-                setLoading: setLoadingYearData,
-                setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-                setErrorMessage: setErrorMessageYearData,
-                setSuccessMessage: setSuccessMessageYearData,
-                onSuccess: () => {
+        LlamadasBBDD({
+            method: 'POST',
+            url: `yearData/${yearData.plan.id}/${idEje}/deleteAction/${idAccion}`,
+            setLoading: setLoadingYearData,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+            setErrorMessage: setErrorMessageYearData,
+            setSuccessMessage: setSuccessMessageYearData,
+            onSuccess: () => {
+                const actualizarEjes = (ejes: typeof yearData.plan.ejesPrioritarios | typeof yearData.plan.ejes) =>
+                    ejes.map((eje) => (eje.Id === ejeSeleccionado.Id ? { ...eje, acciones: eje.acciones.filter((accion) => accion.id !== idAccion) } : eje));
+
+                if (tipo === 'Acciones') {
                     setYearData({
                         ...yearData,
                         plan: {
                             ...yearData.plan,
-                            ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                                eje.Id === ejeSeleccionado.Id
-                                    ? {
-                                          ...eje,
-                                          acciones: eje.acciones.filter((accion) => accion.id !== idAccion),
-                                      }
-                                    : eje
-                            ),
+                            ejesPrioritarios: actualizarEjes(yearData.plan.ejesPrioritarios),
                         },
                     });
-                },
-            });
-        } else {
-            setYearData({
-                ...yearData,
-                //accionesAccesorias: [...(yearData.accionesAccesorias || []), datos],
-            });
-        }
+                } else if (tipo === 'AccionesAccesorias') {
+                    setYearData({
+                        ...yearData,
+                        plan: {
+                            ...yearData.plan,
+                            ejes: actualizarEjes(yearData.plan.ejes),
+                        },
+                    });
+                }
+            },
+        });
     };
 
     const AgregarServicio = () => {
