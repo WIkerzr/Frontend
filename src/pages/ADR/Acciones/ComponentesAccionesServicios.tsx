@@ -336,43 +336,43 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         </div>
     );
 };
-interface ResultadoValidacionAcciones {
-    faltanIndicadoresPlan: boolean;
-    faltanIndicadoresMemoria: boolean;
-    faltanCamposPlan: boolean;
-    faltanCamposMemoria: boolean;
-}
+// interface ResultadoValidacionAcciones {
+//     faltanIndicadoresPlan: boolean;
+//     faltanIndicadoresMemoria: boolean;
+//     faltanCamposPlan: boolean;
+//     faltanCamposMemoria: boolean;
+// }
 
-export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoValidacionAcciones {
-    const faltanIndicadoresPlan =
-        (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
-        (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
-        datos.indicadorAccion?.indicadoreRealizacion.length === 0 ||
-        datos.indicadorAccion?.indicadoreResultado.length === 0;
+// export function validarCamposObligatoriosAccion(datos: DatosAccion): ResultadoValidacionAcciones {
+//     const faltanIndicadoresPlan =
+//         (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
+//         (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.descripcion || !item.metaAnual?.total || !item.metaFinal?.total) ?? false) ||
+//         datos.indicadorAccion?.indicadoreRealizacion.length === 0 ||
+//         datos.indicadorAccion?.indicadoreResultado.length === 0;
 
-    const faltanIndicadoresMemoria =
-        (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.ejecutado?.total) ?? false) || (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.ejecutado?.total) ?? false);
+//     const faltanIndicadoresMemoria =
+//         (datos.indicadorAccion?.indicadoreRealizacion.some((item) => !item.ejecutado?.total) ?? false) || (datos.indicadorAccion?.indicadoreResultado.some((item) => !item.ejecutado?.total) ?? false);
 
-    const faltanCamposPlan =
-        !datos.datosPlan?.ejecutora ||
-        !datos.datosPlan?.implicadas ||
-        !datos.datosPlan?.comarcal ||
-        !datos.datosPlan?.supracomarcal ||
-        (datos.plurianual === true && !datos.datosPlan?.rangoAnios) ||
-        !datos.datosPlan?.oAccion ||
-        !datos.datosPlan?.dAccion;
+//     const faltanCamposPlan =
+//         !datos.datosPlan?.ejecutora ||
+//         !datos.datosPlan?.implicadas ||
+//         !datos.datosPlan?.comarcal ||
+//         !datos.datosPlan?.supracomarcal ||
+//         (datos.plurianual === true && !datos.datosPlan?.rangoAnios) ||
+//         !datos.datosPlan?.oAccion ||
+//         !datos.datosPlan?.dAccion;
 
-    const faltanCamposMemoria =
-        !datos.datosMemoria?.sActual ||
-        //!datos.datosMemoria?.dAccionAvances ||
-        !datos.datosMemoria?.presupuestoEjecutado?.cuantia ||
-        datos.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion.length === 0 ||
-        !datos.datosMemoria?.ejecucionPresupuestaria?.previsto ||
-        !datos.datosMemoria?.ejecucionPresupuestaria?.ejecutado ||
-        !datos.datosMemoria?.ejecucionPresupuestaria?.porcentaje;
+//     const faltanCamposMemoria =
+//         !datos.datosMemoria?.sActual ||
+//         //!datos.datosMemoria?.dAccionAvances ||
+//         !datos.datosMemoria?.presupuestoEjecutado?.cuantia ||
+//         datos.datosMemoria?.presupuestoEjecutado?.fuenteDeFinanciacion.length === 0 ||
+//         !datos.datosMemoria?.ejecucionPresupuestaria?.previsto ||
+//         !datos.datosMemoria?.ejecucionPresupuestaria?.ejecutado ||
+//         !datos.datosMemoria?.ejecucionPresupuestaria?.porcentaje;
 
-    return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
-}
+//     return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
+// }
 
 interface ResultadoValidacionServicios {
     faltanIndicadoresPlan: boolean;

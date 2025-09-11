@@ -11,7 +11,6 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
-import { YearData } from '../../../../types/tipadoPlan';
 interface TabCardProps {
     icon: string;
     label: string;
@@ -94,7 +93,8 @@ export function VerificarCamposIndicadoresPorRellenar(
     statusPlan: boolean,
     statusMemoria: boolean,
     ubicacionDelVerificador: 'NuevoIndicador' | 'GuardadoEdicion',
-    t: (key: string, options?: any) => string
+    t: (key: string, options?: any) => string,
+    sinAlerts?: boolean
 ) {
     const invalidIndicesRealizacion: InvalidIndex[] = [];
     const invalidIndicesResultado: InvalidIndex[] = [];
@@ -117,7 +117,7 @@ export function VerificarCamposIndicadoresPorRellenar(
             } else {
                 if (fila.metaAnual?.total === 0 || fila.metaAnual?.total === '0') camposFaltantes.push('metaAnual.total');
                 if (fila.metaFinal?.total === 0 || fila.metaFinal?.total === '0') camposFaltantes.push('metaFinal.total');
-                if (!statusPlan && statusMemoria) {
+                if ((!statusPlan && statusMemoria) || (sinAlerts && statusMemoria)) {
                     if (fila.ejecutado?.total === 0 || fila.ejecutado?.total === '0') camposFaltantes.push('ejecutado.total');
                 }
             }
@@ -149,14 +149,20 @@ export function VerificarCamposIndicadoresPorRellenar(
                 return true;
             } else {
                 const mensaje = t('completarTablaTipo', { tipo }) + '\n' + invalidIndices.map((indice, i) => `Fila ${i + 1}:\n${indice.camposFaltantes.join('\n')}`).join('\n\n');
-                alert(mensaje);
+                if (!sinAlerts) {
+                    alert(mensaje);
+                }
             }
         } else if (ubicacionDelVerificador === 'GuardadoEdicion') {
             if (invalidIndices.length === 0) {
-                alert(t('completarFilaVaciaGuardar', { tipo }));
+                if (!sinAlerts) {
+                    alert(t('completarFilaVaciaGuardar', { tipo }));
+                }
             } else {
-                const mensaje = t('completarFilaVaciaGuardar', { tipo }) + '\n' + invalidIndices.map((indice, i) => `Fila ${i + 1}:\n${indice.camposFaltantes.join('\n')}`).join('\n\n');
-                alert(mensaje);
+                if (!sinAlerts) {
+                    const mensaje = t('completarFilaVaciaGuardar', { tipo }) + '\n' + invalidIndices.map((indice, i) => `Fila ${i + 1}:\n${indice.camposFaltantes.join('\n')}`).join('\n\n');
+                    alert(mensaje);
+                }
             }
         }
 
@@ -175,10 +181,7 @@ export function VerificarCamposIndicadoresPorRellenar(
     return true;
 }
 
-export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, yearData: YearData) {
-    const statusPlan = yearData.plan.status;
-    const statusMemoria = yearData.memoria.status;
-
+export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPlan: boolean, editarMemoria: boolean, validacionMemoriaSeguimientoAnual?: boolean) {
     if (!datosEditandoAccion.indicadorAccion) {
         return;
     }
@@ -204,7 +207,7 @@ export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, 
     checkData(plan.oAccion, 'OAccion');
     checkData(plan.dAccion, 'DAccion');
 
-    if (statusPlan !== 'borrador' && statusMemoria === 'borrador') {
+    if ((!editarPlan && editarMemoria) || (editarMemoria && validacionMemoriaSeguimientoAnual)) {
         //Memoria
         checkData(memoria.presupuestoEjecutado.fuenteDeFinanciacion, 'fuenteDeFinanciacion');
         checkData(memoria.presupuestoEjecutado.cuantia, 'cuantia');
@@ -217,7 +220,7 @@ export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, 
     //Indicador Realizacion
     indicadoresRealizacionAccion.forEach((i, idx) => {
         checkData(i.metaAnual!.total, `Realización #${idx + 1}: MetaAnual_Total`);
-        if (statusPlan !== 'borrador' && statusMemoria === 'borrador') {
+        if (!editarPlan && editarMemoria) {
             checkData(i.ejecutado!.total, `Realización #${idx + 1}: Ejecutado_Total`);
         }
         checkData(i.metaFinal!.total, `Realización #${idx + 1}: MetaFinal_Total`);
@@ -226,7 +229,7 @@ export function VerificarAccionAntesDeGuardar(datosEditandoAccion: DatosAccion, 
     //Indicador Resultado
     indicadoresResultadoAccion.forEach((i, idx) => {
         checkData(i.metaAnual!.total, `Resultado #${idx + 1}: MetaAnual_Total`);
-        if (statusPlan !== 'borrador' && statusMemoria === 'borrador') {
+        if (!editarPlan && editarMemoria) {
             checkData(i.ejecutado!.total, `Resultado #${idx + 1}: Ejecutado_Total`);
         }
         checkData(i.metaFinal!.total, `Resultado #${idx + 1}: MetaFinal_Total`);

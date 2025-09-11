@@ -1,7 +1,9 @@
-import { forwardRef, useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { GeneralOperationADR, OperationalIndicators, Plan } from '../../../types/tipadoPlan';
+import { Ejes, GeneralOperationADR, Memoria, MemoriaLlamadaGestion, OperationalIndicators, Plan, YearData } from '../../../types/tipadoPlan';
 import Tippy from '@tippyjs/react';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { useSelector } from 'react-redux';
@@ -13,7 +15,12 @@ import { Input } from '../../../components/Utils/inputs';
 import { nanoid } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import { useUser } from '../../../contexts/UserContext';
-import { useEstadosPorAnioContext } from '../../../contexts/EstadosPorAnioContext';
+import { useEstadosPorAnio, useEstadosPorAnioContext } from '../../../contexts/EstadosPorAnioContext';
+import { LlamadaBBDDActualizarMemoria, LlamadaBBDDActualizarPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { Servicios } from '../../../types/GeneralTypes';
+import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal } from '../Acciones/EditarAccion/EditarAccionComponent';
+import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 
 interface CamposProps {
     campo?: {
@@ -23,61 +30,51 @@ interface CamposProps {
         [K in keyof GeneralOperationADR]: Extract<GeneralOperationADR[K], string> extends never ? never : K;
     }[keyof GeneralOperationADR];
     mostrar: boolean;
+    plan: { data: Plan; set: React.Dispatch<React.SetStateAction<Plan>> };
+    memoria: { data: Memoria; set: React.Dispatch<React.SetStateAction<Memoria>> };
+    t: (key: string) => string;
 }
 
-interface CamposPlanMemoriaProps {
-    pantalla: 'Plan' | 'Memoria';
-}
-const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
-    const { t } = useTranslation();
-    const { yearData, setYearData } = useYear();
-
+const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar, plan, memoria, t }) => {
+    const { data: dataPlan, set: setDataPlan } = plan;
+    const { data: dataMemoria, set: setDataMemoria } = memoria;
     if (!mostrar) {
         return null;
     }
     if (campo) {
         const handleChangeCampos = (campo: keyof Plan, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-            setYearData({
-                ...yearData,
-                plan: {
-                    ...yearData.plan,
-                    [campo]: e.target.value || '',
-                },
+            setDataPlan({
+                ...dataPlan,
+                [campo]: e.target.value || '',
             });
         };
         return (
             <div className="panel flex w-[100%] flex-col">
                 <label htmlFor={campo}>*{t(campo)}</label>
-                <textarea required name={campo} className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.plan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
+                <textarea required name={campo} className="w-full border rounded p-2 h-[114px] resize-y" value={dataPlan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
             </div>
         );
     } else if (campo2) {
         if (campo2 === 'dSeguimiento' || campo2 === 'valFinal') {
             const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-                setYearData({
-                    ...yearData,
-                    memoria: {
-                        ...yearData.memoria,
-                        [campo]: e.target.value || '',
-                    },
+                setDataMemoria({
+                    ...dataMemoria,
+                    [campo]: e.target.value || '',
                 });
             };
             return (
                 <div>
                     <label htmlFor={campo2}>*{t(campo2)}</label>
-                    <textarea name={campo2} className="w-full border rounded p-2 h-[114px] resize-y" value={yearData.memoria[campo2]} onChange={(e) => handleChangeCampos(campo2, e)} />
+                    <textarea name={campo2} className="w-full border rounded p-2 h-[114px] resize-y" value={dataMemoria[campo2]} onChange={(e) => handleChangeCampos(campo2, e)} />
                 </div>
             );
         } else {
             const handleChangeCampos = (campo: keyof GeneralOperationADR, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-                setYearData({
-                    ...yearData,
-                    plan: {
-                        ...yearData.plan,
-                        generalOperationADR: {
-                            ...yearData.plan.generalOperationADR,
-                            [campo]: e.target.value || '',
-                        },
+                setDataPlan({
+                    ...dataPlan,
+                    generalOperationADR: {
+                        ...dataPlan.generalOperationADR,
+                        [campo]: e.target.value || '',
                     },
                 });
             };
@@ -87,7 +84,7 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
                     <textarea
                         name="introduccion"
                         className="w-full border rounded p-2 h-[114px] resize-y"
-                        value={yearData.plan.generalOperationADR[campo2]}
+                        value={dataPlan.generalOperationADR[campo2]}
                         onChange={(e) => handleChangeCampos(campo2, e)}
                     />
                 </div>
@@ -95,14 +92,82 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar }) => {
         }
     }
 };
+interface PantallaProps {
+    pantalla: 'Plan' | 'Memoria';
+}
 
-export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
+interface CamposPlanMemoriaProps {
+    pantalla: 'Plan' | 'Memoria';
+    guardadoProps: {
+        value: boolean;
+        set: React.Dispatch<React.SetStateAction<boolean>>;
+    };
+    setSuccessMessageSuperior: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla, guardadoProps, setSuccessMessageSuperior }, ref) => {
     const { t } = useTranslation();
     const TareasInternasTraduciones = t('object:tareasInternas', { returnObjects: true }) as string[];
+    const { yearData, setYearData } = useYear();
+    const { regionSeleccionada } = useRegionContext();
+    const { anioSeleccionada } = useEstadosPorAnio();
+
+    const { value: guardado, set: setGuardado } = guardadoProps;
+
+    const [dataPlan, setDataPlan] = useState<Plan>(yearData.plan);
+    const [dataMemoria, setDataMemoria] = useState<Memoria>(yearData.memoria);
+
+    const planProps = useMemo(() => ({ data: dataPlan, set: setDataPlan }), [dataPlan, setDataPlan]);
+    const memoriaProps = useMemo(() => ({ data: dataMemoria, set: setDataMemoria }), [dataMemoria, setDataMemoria]);
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
+    useEffect(() => {
+        setSuccessMessageSuperior(successMessage);
+    }, [successMessage]);
+
+    useEffect(() => {
+        if (guardado) {
+            if (pantalla === 'Plan') {
+                LlamadaBBDDActualizarPlan(Number(regionSeleccionada), anioSeleccionada!, setLoading, { setErrorMessage, setSuccessMessage }, dataPlan);
+                setYearData({
+                    ...yearData,
+                    plan: dataPlan,
+                });
+                setGuardado(false);
+            } else if (pantalla === 'Memoria') {
+                const dataMemoriaConGOADR: MemoriaLlamadaGestion = {
+                    id: dataMemoria.id,
+                    dSeguimiento: dataMemoria.dSeguimiento,
+                    valFinal: dataMemoria.dSeguimiento,
+                    generalOperationADR: dataPlan.generalOperationADR,
+                };
+                LlamadaBBDDActualizarMemoria(Number(regionSeleccionada), anioSeleccionada!, setLoading, { setErrorMessage, setSuccessMessage }, dataPlan.generalOperationADR, dataMemoriaConGOADR);
+                setYearData({
+                    ...yearData,
+                    plan: dataPlan,
+                    memoria: dataMemoria,
+                });
+                setGuardado(false);
+            }
+        }
+    }, [guardado]);
+
     return (
         <div className=" flex flex-col gap-4" ref={ref}>
-            {/* <Campos campo="introduccion" mostrar={pantalla === 'Plan'} /> */}
-            <Campos campo="proceso" mostrar={pantalla === 'Plan'} />
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
+            <Campos campo="proceso" mostrar={pantalla === 'Plan'} plan={planProps} memoria={memoriaProps} t={t} />
             <div className="panel">
                 <span className="text-xl  font-semibold text-gray-700 tracking-wide block mb-2">{t('funcionamientoGeneral')}</span>
                 <div className="mb-[10px]">
@@ -118,12 +183,12 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                         {TareasInternasTraduciones[4]}
                     </span>
                 </div>
-                <Campos campo2="adrInternalTasks" mostrar={pantalla === 'Plan'} />
+                <Campos campo2="adrInternalTasks" mostrar={pantalla === 'Plan'} plan={planProps} memoria={memoriaProps} t={t} />
                 <div>
-                    <IndicadoresOperativosTable pantalla={pantalla} />
+                    <IndicadoresOperativosTable pantalla={pantalla} plan={planProps} />
                 </div>
-                <Campos campo2="dSeguimiento" mostrar={pantalla === 'Memoria'} />
-                <Campos campo2="valFinal" mostrar={pantalla === 'Memoria'} />
+                <Campos campo2="dSeguimiento" mostrar={pantalla === 'Memoria'} plan={planProps} memoria={memoriaProps} t={t} />
+                <Campos campo2="valFinal" mostrar={pantalla === 'Memoria'} plan={planProps} memoria={memoriaProps} t={t} />
             </div>
         </div>
     );
@@ -134,13 +199,14 @@ interface ModalIndicadorOperativo {
     idModal: string;
     onClose: () => void;
     pantalla: 'Plan' | 'Memoria';
+    plan: { data: Plan; set: React.Dispatch<React.SetStateAction<Plan>> };
 }
 
-const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ open, idModal, onClose, pantalla }, ref) => {
+const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ open, idModal, onClose, pantalla, plan }, ref) => {
     const { t, i18n } = useTranslation();
-    const { yearData, setYearData } = useYear();
+    const { data: dataPlan, set: setDataPlan } = plan;
 
-    const datosBuscados = { ...yearData.plan.generalOperationADR.operationalIndicators.find((item) => item.id === idModal) };
+    const datosBuscados = { ...dataPlan.generalOperationADR.operationalIndicators.find((item) => item.id === idModal) };
     if (!datosBuscados) {
         return <span>{t('datosNoEncontrados')}</span>;
     }
@@ -159,28 +225,22 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
     }, [open]);
 
     const handleEdit = () => {
-        setYearData({
-            ...yearData,
-            plan: {
-                ...yearData.plan,
-                generalOperationADR: {
-                    ...yearData.plan.generalOperationADR,
-                    operationalIndicators: yearData.plan.generalOperationADR.operationalIndicators.map((item) => (item.id === idModal ? indicator : item)),
-                },
+        setDataPlan({
+            ...dataPlan,
+            generalOperationADR: {
+                ...dataPlan.generalOperationADR,
+                operationalIndicators: dataPlan.generalOperationADR.operationalIndicators.map((item) => (item.id === idModal ? indicator : item)),
             },
         });
         onClose();
     };
 
     const handleNew = () => {
-        setYearData({
-            ...yearData,
-            plan: {
-                ...yearData.plan,
-                generalOperationADR: {
-                    ...yearData.plan.generalOperationADR,
-                    operationalIndicators: [...yearData.plan.generalOperationADR.operationalIndicators, indicator],
-                },
+        setDataPlan({
+            ...dataPlan,
+            generalOperationADR: {
+                ...dataPlan.generalOperationADR,
+                operationalIndicators: [...dataPlan.generalOperationADR.operationalIndicators, indicator],
             },
         });
         onClose();
@@ -255,19 +315,25 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
     );
 });
 
-const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
+interface IndicadoresOperativosTableProps {
+    pantalla: 'Plan' | 'Memoria';
+    plan: { data: Plan; set: React.Dispatch<React.SetStateAction<Plan>> };
+}
+
+const IndicadoresOperativosTable = forwardRef<HTMLDivElement, IndicadoresOperativosTableProps>(({ pantalla, plan }, ref) => {
     const { t, i18n } = useTranslation();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
+    const { data: dataPlan, set: setDataPlan } = plan;
+
     const PAGE_SIZES = [10, 15, 20, 30, 50, 100];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'id', direction: 'asc' });
-    const { yearData, setYearData } = useYear();
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [idModal, setIdModal] = useState<string>('');
 
-    let tableRecords: Record<string, unknown>[] = yearData.plan.generalOperationADR.operationalIndicators.map((item) => ({
+    let tableRecords: Record<string, unknown>[] = dataPlan.generalOperationADR.operationalIndicators.map((item) => ({
         id: item.id,
         indicadoresOperativos: i18n.language === 'es' ? item.nameEs : item.nameEu,
         valorPrevisto: item.value,
@@ -275,24 +341,21 @@ const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaP
     }));
 
     useEffect(() => {
-        tableRecords = yearData.plan.generalOperationADR.operationalIndicators.map((item) => ({
+        tableRecords = dataPlan.generalOperationADR.operationalIndicators.map((item) => ({
             id: item.id,
             indicadoresOperativos: i18n.language === 'es' ? item.nameEs : item.nameEu,
             valorPrevisto: item.value,
             valueAchieved: item.valueAchieved,
         }));
-    }, [yearData]);
+    }, [plan]);
 
     const handleDelete = (id: string) => {
         if (window.confirm(t('¿Estás seguro de que quieres borrar este indicador?'))) {
-            setYearData({
-                ...yearData,
-                plan: {
-                    ...yearData.plan,
-                    generalOperationADR: {
-                        ...yearData.plan.generalOperationADR,
-                        operationalIndicators: yearData.plan.generalOperationADR.operationalIndicators.filter((item) => item.id !== id),
-                    },
+            setDataPlan({
+                ...dataPlan,
+                generalOperationADR: {
+                    ...dataPlan.generalOperationADR,
+                    operationalIndicators: dataPlan.generalOperationADR.operationalIndicators.filter((item) => item.id !== id),
                 },
             });
         }
@@ -345,13 +408,13 @@ const IndicadoresOperativosTable = forwardRef<HTMLDivElement, CamposPlanMemoriaP
                         recordsPerPageLabel={t('recorsPerPage')}
                     />
                 </div>
-                <ModalIndicador open={modalOpen} idModal={idModal} onClose={() => setModalOpen(false)} pantalla={pantalla} />
+                <ModalIndicador open={modalOpen} idModal={idModal} onClose={() => setModalOpen(false)} pantalla={pantalla} plan={plan} />
             </div>
         </div>
     );
 });
 
-export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
+export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, PantallaProps>(({ pantalla }, ref) => {
     const { anioSeleccionada, cambiarEstadoPlan, cambiarEstadoMemoria } = useEstadosPorAnioContext();
     const { yearData } = useYear();
     const { user } = useUser();
@@ -395,7 +458,7 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, CamposPlanMe
     }
 });
 
-export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps>(({ pantalla }, ref) => {
+export const BotonReapertura = forwardRef<HTMLDivElement, PantallaProps>(({ pantalla }, ref) => {
     const { anioSeleccionada, cambiarEstadoPlan, cambiarEstadoMemoria } = useEstadosPorAnioContext();
     const { yearData } = useYear();
 
@@ -427,3 +490,62 @@ export const BotonReapertura = forwardRef<HTMLDivElement, CamposPlanMemoriaProps
         );
     }
 });
+
+export function validarCamposPlanGestionAnual(yearData: YearData): boolean {
+    const plan = yearData.plan;
+
+    if (!plan.proceso || plan.proceso.trim() === '') return false;
+
+    if (!plan.generalOperationADR || !plan.generalOperationADR.adrInternalTasks || plan.generalOperationADR.adrInternalTasks.trim() === '') return false;
+
+    if (!plan.generalOperationADR.operationalIndicators) return false;
+
+    const existeIndicadorValido = plan.generalOperationADR.operationalIndicators.some(
+        (OI) => ((OI.nameEs && OI.nameEs.trim() !== '') || (OI.nameEu && OI.nameEu.trim() !== '')) && OI.value.trim() !== ''
+    );
+
+    return existeIndicadorValido;
+}
+
+export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, t: (key: string, options?: any) => string): boolean {
+    return ejes.every((eje) =>
+        eje.acciones.every((accion) => {
+            if (VerificarCamposIndicadoresPorRellenar(accion, editarPlan, editarMemoria, 'GuardadoEdicion', t, true)) {
+                const camposFaltantes = VerificarAccionFinal(accion, editarPlan, editarMemoria, true);
+                return camposFaltantes && camposFaltantes.length === 0;
+            }
+            return true;
+        })
+    );
+}
+
+export function validarServicios(servicios: Servicios[], editarMemoria: boolean, t: (key: string, options?: any) => string): boolean {
+    const camposPendientes: string[] = [];
+
+    const checkData = (value: any, name: string) => {
+        if (value === null || value === undefined || value === '') {
+            camposPendientes.push(name);
+            return false;
+        }
+        return true;
+    };
+    servicios.forEach((servicio) => {
+        checkData(servicio.nombre, t('Servicio'));
+        checkData(servicio.descripcion, t('Descripcion'));
+        servicio.indicadores.forEach((indicador) => {
+            checkData(indicador.indicador, t('indicadorNombre'));
+            checkData(indicador.previsto, t('valorPrevisto'));
+            if (editarMemoria) {
+                checkData(indicador.alcanzado, t('valorReal'));
+            }
+        });
+        if (editarMemoria) {
+            checkData(servicio.dSeguimiento, t('dSeguimiento'));
+            checkData(servicio.valFinal, t('valFinal'));
+        }
+    });
+    if (camposPendientes.length > 0) {
+        return false;
+    }
+    return true;
+}

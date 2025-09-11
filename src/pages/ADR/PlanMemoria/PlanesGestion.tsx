@@ -3,13 +3,12 @@ import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria } from './PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, validarAccionesEjes, validarCamposPlanGestionAnual, validarServicios } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { YearData } from '../../../types/tipadoPlan';
 import { useEffect, useState } from 'react';
 import { generarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { validarCamposObligatoriosAccion } from '../Acciones/ComponentesAccionesServicios';
+
 interface Archivo {
     nombre: string;
     url: string;
@@ -27,55 +26,45 @@ const Index = () => {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
+    const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
 
+    const [guardado, setGuardado] = useState<boolean>(false);
+    const guardadoProps = { value: guardado, set: setGuardado };
     const { t } = useTranslation();
-
-    function validarCamposPlan(yearData: YearData): boolean {
-        const plan = yearData.plan;
-        setMensajeError('');
-        const camposTextoLlenos = (plan.introduccion?.trim() || '') !== '' && (plan.proceso?.trim() || '') !== '' && (plan.generalOperationADR?.adrInternalTasks?.trim() || '') !== '';
-
-        if (camposTextoLlenos === false) {
-            setMensajeError(t('rellenaLosCamposVaciosObligatorios') + '\n');
-            return false;
-        }
-        const indicadores = plan.generalOperationADR.operationalIndicators;
-        const primerIndicador = indicadores[0];
-
-        const indicadorLleno =
-            primerIndicador &&
-            primerIndicador.id?.trim() !== '' &&
-            primerIndicador.nameEs?.trim() !== '' &&
-            primerIndicador.nameEu?.trim() !== '' &&
-            primerIndicador.value?.trim() !== '' &&
-            primerIndicador.valueAchieved?.trim() !== '';
-
-        if (indicadorLleno === false) {
-            setMensajeError(t('rellenaLosCamposVaciosObligatorios') + '\n');
-            return false;
-        }
-        return true;
-    }
-    function validarPlan(yearData: YearData): boolean {
-        for (let index = 0; index < yearData.plan.ejesPrioritarios.length; index++) {
-            const ejesPrioritarios = yearData.plan.ejesPrioritarios[index];
-            for (let index = 0; index < ejesPrioritarios.acciones.length; index++) {
-                const acciones = ejesPrioritarios.acciones[index];
-                const { faltanIndicadoresPlan, faltanCamposPlan } = validarCamposObligatoriosAccion(acciones);
-                if (faltanIndicadoresPlan || faltanCamposPlan) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+    const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
 
     useEffect(() => {
-        if (validarCamposPlan(yearData) && validarPlan(yearData)) {
-            setCamposRellenos(true);
+        if (successMessageSuperior) {
+            setVisibleMessageSuperior(successMessageSuperior);
         } else {
-            setCamposRellenos(false);
+            const timer = setTimeout(() => setVisibleMessageSuperior(''), 5000);
+            return () => clearTimeout(timer);
         }
+    }, [successMessageSuperior]);
+
+    useEffect(() => {
+        if (!validarCamposPlanGestionAnual(yearData)) {
+            setMensajeError(t('faltanCamposPlanGestion'));
+            setCamposRellenos(false);
+            return;
+        }
+        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, false, t)) {
+            setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
+            setCamposRellenos(false);
+            return;
+        }
+        if (!validarAccionesEjes(yearData.plan.ejes, editarPlan, false, t)) {
+            setMensajeError(t('faltanCamposAccionesEjes'));
+            setCamposRellenos(false);
+            return;
+        }
+        if (!validarServicios(yearData.servicios!, false, t)) {
+            setMensajeError(t('faltanCamposServicios'));
+            setCamposRellenos(false);
+            return;
+        }
+        setMensajeError('');
+        setCamposRellenos(true);
     }, [yearData]);
 
     return (
@@ -94,7 +83,9 @@ const Index = () => {
                         {editarPlan && (
                             <div className="flex flex-col items-center gap-4 justify-end ">
                                 <div className="flex items-center gap-4 justify-end ">
-                                    <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]">{t('guardar')}</button>
+                                    <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={() => setGuardado(true)}>
+                                        {t('guardar')}
+                                    </button>
                                     <button
                                         disabled={!camposRellenos}
                                         onClick={() => {
@@ -128,6 +119,7 @@ const Index = () => {
                                     </NavLink>
                                 </div>
                                 {mensajeError && <div className="text-red-500">{mensajeError}</div>}
+                                {visibleMessageSuperior && <div className="w-full flex flex-col  text-success bg-warning-ligh p-3.5">{visibleMessageSuperior}</div>}
                             </div>
                         )}
                         <BotonesAceptacionYRechazo pantalla="Plan" />
@@ -143,7 +135,7 @@ const Index = () => {
                     )
                 }
             />
-            {editarPlan && <CamposPlanMemoria pantalla="Plan" />}
+            {editarPlan && <CamposPlanMemoria pantalla="Plan" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />}
             {(yearData.plan.status === 'proceso' || yearData.plan.status === 'aceptado') && (
                 <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
                     <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>

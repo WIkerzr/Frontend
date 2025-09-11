@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { EjeBBDD, Ejes, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { EjeBBDD, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import {
     DatosAccion,
     DatosAccionDTO,
@@ -535,6 +535,20 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
                     console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
                 }
+                const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
+                const convertirOperationalIndicators: OperationalIndicators[] = generalOperationADRDTO.OperationalIndicators?.map((OI) => ({
+                    id: `${OI.Id}`,
+                    nameEs: OI.NameEs,
+                    nameEu: OI.NameEu,
+                    value: OI.Value,
+                    valueAchieved: OI.ValueAchieved,
+                }));
+                const generalOperationADR: GeneralOperationADR = {
+                    adrInternalTasks: generalOperationADRDTO.AdrInternalTasks ?? '',
+                    operationalIndicators: convertirOperationalIndicators ?? [],
+                    dSeguimiento: generalOperationADRDTO.DSeguimiento ?? '',
+                    valFinal: generalOperationADRDTO.ValFinal ?? '',
+                };
 
                 data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
                     const item = {
@@ -590,13 +604,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ejes: ejes,
                         ejesPrioritarios: ejesPrioritarios,
                         introduccion: data.data.Plan.Introduccion,
-                        proceso: data.data.Plan.Procesos,
-                        generalOperationADR: data.data.Plan.GeneralOperationADR || {
-                            adrInternalTasks: '',
-                            operationalIndicators: [],
-                            dSeguimiento: '',
-                            valFinal: '',
-                        },
+                        proceso: data.data.Plan.Proceso,
+                        generalOperationADR: generalOperationADR,
                         status: planStatus,
                     },
                     memoria: {
@@ -607,6 +616,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     },
                     servicios: servicios,
                 };
+                if (ModoDev) {
+                    console.log('dotosAnio');
+                    console.log('dotosAnio');
+                }
                 setYearData(dotosAnio);
             },
         });

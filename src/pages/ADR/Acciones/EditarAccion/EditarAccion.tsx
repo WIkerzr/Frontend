@@ -1,7 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useState } from 'react';
-import { TabCard, VerificarAccionAntesDeGuardar, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
+import { TabCard, VerificarAccionFinal, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
@@ -140,7 +140,7 @@ const Index: React.FC = () => {
 
     const handleSave = () => {
         if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
-            const camposFaltantes = VerificarAccionAntesDeGuardar(datosEditandoAccion, yearData);
+            const camposFaltantes = VerificarAccionFinal(datosEditandoAccion, editarPlan, editarMemoria);
             if (camposFaltantes && camposFaltantes.length === 0) {
                 GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
             } else if (camposFaltantes && camposFaltantes.length > 0) {

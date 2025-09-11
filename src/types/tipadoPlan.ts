@@ -15,6 +15,22 @@ export interface GeneralOperationADR {
     dSeguimiento?: string;
     valFinal?: string;
 }
+export interface GeneralOperationADRDTO {
+    AdrInternalTasks: string;
+    OperationalIndicators: OperationalIndicatorsDTO[];
+}
+export interface GeneralOperationADRDTOMemoria {
+    DSeguimiento: string;
+    ValFinal: string;
+    OperationalIndicators: OperationalIndicatorsDTO[];
+}
+export interface GeneralOperationADRDTOCompleto {
+    AdrInternalTasks: string;
+    OperationalIndicators: OperationalIndicatorsDTO[];
+    DSeguimiento: string;
+    ValFinal: string;
+}
+
 export interface OperationalIndicators {
     id: string;
     value: string;
@@ -22,6 +38,15 @@ export interface OperationalIndicators {
     nameEu: string;
     valueAchieved: string;
 }
+
+export interface OperationalIndicatorsDTO {
+    Id: number;
+    Value: string;
+    NameEs: string;
+    NameEu: string;
+    ValueAchieved: string;
+}
+
 export interface Ejes {
     Id: string;
     NameEs: string;
@@ -64,11 +89,29 @@ export interface Plan {
     generalOperationADR: GeneralOperationADR;
     status: Estado;
 }
+export interface PlanDTO {
+    Id: string;
+    Introduccion: string;
+    Proceso: string;
+    GeneralOperationADR: GeneralOperationADRDTO;
+}
 export interface Memoria {
     id: string;
     status: Estado;
     dSeguimiento: string;
     valFinal: string;
+}
+export interface MemoriaLlamadaGestion {
+    id: string;
+    dSeguimiento: string;
+    valFinal: string;
+    generalOperationADR: GeneralOperationADR;
+}
+export interface MemoriaDTO {
+    Id: string;
+    DSeguimiento: string;
+    ValFinal: string;
+    GeneralOperationADR: GeneralOperationADRDTOMemoria;
 }
 
 export interface YearData {
