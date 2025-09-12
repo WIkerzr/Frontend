@@ -14,7 +14,7 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton } from '../../../../components/Utils/utils';
 import { Servicios } from '../../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
-import { DropdownLineaActuacion, ErrorFullScreen } from '../ComponentesAccionesServicios';
+import { DropdownLineaActuaccion, ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { TextArea } from '../../../../components/Utils/inputs';
 
 const Index: React.FC = () => {
@@ -194,7 +194,7 @@ const Index: React.FC = () => {
                                         </span>
                                         <span className="block  font-semibold">
                                             {editarPlan ? (
-                                                <DropdownLineaActuacion
+                                                <DropdownLineaActuaccion
                                                     setNuevaLineaActuaccion={setLineaActuaccion}
                                                     idEjeSeleccionado={ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
                                                     lineaActuaccion={lineaActuaccion}

@@ -181,7 +181,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            <DropdownLineaActuacion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} />
+                            <DropdownDropdownLineaActuaccion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} />
                         </div>
                     </div>
                     <div className="flex">
@@ -535,7 +535,7 @@ interface DropdownLineaActuacionProps {
     ejesPlan: Ejes[];
 }
 
-export const DropdownLineaActuacion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan }: DropdownLineaActuacionProps) => {
+export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan }: DropdownLineaActuacionProps) => {
     const { regionSeleccionada } = useRegionContext();
     const { t, i18n } = useTranslation();
     const [ejes, setEjes] = useState<EjesBBDD[]>();

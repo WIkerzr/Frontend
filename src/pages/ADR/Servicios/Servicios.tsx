@@ -65,7 +65,7 @@ const Index: React.FC = () => {
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
                         <span>
-                            {t('listadoAcciones')} {anioSeleccionada}
+                            {t('listadoServicios')} {anioSeleccionada}
                         </span>
                     </h2>
                 }
