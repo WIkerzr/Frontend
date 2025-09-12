@@ -1,5 +1,5 @@
-import { Estado, Servicios } from './GeneralTypes';
-import { DatosAccion } from './TipadoAccion';
+import { Estado, Servicios, ServiciosDTO } from './GeneralTypes';
+import { DatosAccion, DatosAccionDTO } from './TipadoAccion';
 
 export type Year = number;
 
@@ -58,6 +58,7 @@ export interface Ejes {
 }
 
 export interface EjesBBDD {
+    AccionesDTO: never[];
     EjeId: string;
     NameEs: string;
     NameEu: string;
@@ -72,7 +73,7 @@ export interface EjeBBDD {
     NameEu: string;
     IsActive: boolean;
     IsPrioritarios: boolean;
-    Acciones: DatosAccion[];
+    Acciones: DatosAccionDTO[];
 }
 export interface EjeIndicadorBBDD {
     EjeId: string;
@@ -91,9 +92,12 @@ export interface Plan {
 }
 export interface PlanDTO {
     Id: string;
+    Ejes?: EjesBBDD[];
+    EjesPrioritarios?: EjesBBDD[];
     Introduccion: string;
     Proceso: string;
     GeneralOperationADR: GeneralOperationADRDTO;
+    Status?: boolean;
 }
 export interface Memoria {
     id: string;
@@ -112,6 +116,7 @@ export interface MemoriaDTO {
     DSeguimiento: string;
     ValFinal: string;
     GeneralOperationADR: GeneralOperationADRDTOMemoria;
+    Status?: boolean;
 }
 
 export interface YearData {
@@ -121,6 +126,16 @@ export interface YearData {
     memoria: Memoria;
     accionesAccesorias?: DatosAccion[];
     servicios?: Servicios[];
+}
+export interface YearDataDTO {
+    RegionId: number;
+    Year: number;
+    PlanId: number;
+    MemoriaId: number;
+
+    Plan: PlanDTO;
+    Memoria: MemoriaDTO;
+    Servicios: ServiciosDTO[];
 }
 
 export interface InitialDataResponse {

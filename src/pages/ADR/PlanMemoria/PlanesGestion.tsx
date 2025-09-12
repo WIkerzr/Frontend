@@ -6,7 +6,7 @@ import { ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, validarAccionesEjes, validarCamposPlanGestionAnual, validarServicios } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEffect, useState } from 'react';
-import { generarDocumentoWord } from '../../../components/Utils/genWORD';
+import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 interface Archivo {
@@ -22,7 +22,7 @@ const archivos: Archivo[] = [
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
-    const { yearData } = useYear();
+    const { yearData, llamadaBBDDYearDataAll } = useYear();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
@@ -86,19 +86,12 @@ const Index = () => {
                                     <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={() => setGuardado(true)}>
                                         {t('guardar')}
                                     </button>
-                                    <button
-                                        disabled={!camposRellenos}
-                                        onClick={() => {
-                                            if (!camposRellenos) return;
-                                            generarDocumentoWord(yearData, 'Plan');
-                                        }}
-                                        className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
-                                        ${camposRellenos ? 'bg-gray-400 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
-                                        `}
-                                    >
-                                        <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
-                                        {t('descargarBorrador')}
-                                    </button>
+                                    <BtnExportarDocumentoWord
+                                        camposRellenos={camposRellenos}
+                                        yearData={yearData}
+                                        t={t}
+                                        llamadaBBDDYearDataAll={() => llamadaBBDDYearDataAll(anioSeleccionada!, true)}
+                                    />
                                     <NavLink
                                         to={camposRellenos ? '/adr/planesGestion/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Plan' }}

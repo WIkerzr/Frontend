@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars */
 import { AlignmentType, Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, VerticalAlign, WidthType } from 'docx';
 import { saveAs } from 'file-saver';
-import React from 'react';
-import { OperationalIndicators, Plan, YearData } from '../../types/tipadoPlan';
-import { useYear } from '../../contexts/DatosAnualContext';
+import { Ejes, OperationalIndicators, Plan, YearData } from '../../types/tipadoPlan';
 import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
 import { DatosAccion } from '../../types/TipadoAccion';
+import PizZip from 'pizzip';
+import Docxtemplater from 'docxtemplater';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
+import IconDownloand from '../../components/Icon/IconDownloand.svg';
 
 export const generarDocumentoWord = (datos: YearData, pantalla: 'Plan' | 'Memoria') => {
     const sizeTitulo = 32;
@@ -634,18 +637,134 @@ export const generarDocumentoWord = (datos: YearData, pantalla: 'Plan' | 'Memori
     });
 };
 
-const ExportarWordBtn: React.FC = () => {
-    const { yearData } = useYear();
+export const GeneracionDelDocumentoWord = async (datos: YearData) => {
+    try {
+        // 1. Cargar la plantilla desde /public
+        const response = await fetch('/plantillaPlan.docx');
+        const arrayBuffer = await response.arrayBuffer();
 
-    const handleExportar = () => {
-        generarDocumentoWord(yearData, 'Plan');
+        // 2. Cargar en PizZip
+        const zip = new PizZip(arrayBuffer);
+
+        // 3. Crear instancia de docxtemplater
+        const doc = new Docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+        });
+
+        console.log(datos.plan.ejesPrioritarios);
+
+        // 4. Datos a sustituir
+        let contAccion = 1;
+        const data = {
+            resumenAccion: datos.plan.ejesPrioritarios?.flatMap((item: Ejes) =>
+                item.acciones.map((accion: DatosAccion) => ({
+                    accion: `${contAccion++}: ${accion.accion}`,
+                    eje: item.NameEs,
+                    lineaActuaccion: accion.lineaActuaccion,
+                    ejecutora: accion.datosPlan?.ejecutora,
+                    implicadas: accion.datosPlan?.implicadas,
+                    comarcal: accion.datosPlan?.comarcal,
+                    supracomarcal: accion.datosPlan?.supracomarcal,
+                    plurianual: accion.plurianual,
+                    oAccion: accion.datosPlan?.oAccion,
+                    dAccion: accion.datosPlan?.dAccion,
+                    iMujHom: accion.datosPlan?.iMujHom,
+                    uEuskera: accion.datosPlan?.uEuskera,
+                    sostenibilidad: accion.datosPlan?.sostenibilidad,
+                    dInteligent: accion.datosPlan?.dInteligent,
+                    ods: accion.datosPlan?.ods,
+                    presupuesto: accion.datosPlan?.presupuesto,
+                    indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
+                        descripcion: iR.descripcion,
+                        unitMed: 'unitMed', //TODO
+                        metaAnual: iR.metaAnual,
+                        metaFinal: iR.metaFinal,
+                        anualidadMetaFinal: '', //TODO
+                    })),
+                    indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
+                        descripcion: iR.descripcion,
+                        unitMed: 'unitMed', //TODO
+                        metaAnual: iR.metaAnual,
+                        metaFinal: iR.metaFinal,
+                        anualidadMetaFinal: '', //TODO
+                    })),
+                    observaciones: accion.datosPlan?.observaciones,
+                }))
+            ),
+            acciones: datos.plan.ejesPrioritarios?.flatMap((item: Ejes) =>
+                item.acciones.map((accion: DatosAccion) => ({
+                    nombre: item.NameEs,
+                    lineaActuaccion: accion.lineaActuaccion,
+                    accion: accion.accion,
+                }))
+            ),
+            fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
+                nombre: `S. ${index + 1}.- ${item.nombre}`,
+                descripcion: item.descripcion,
+                indicadoresRealizacion: item.indicadores.map((iR: IndicadoresServicios) => ({
+                    indicador: iR.indicador,
+                    previsto: iR.previsto.valor,
+                })),
+            })),
+            //Plan de gestion
+            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
+            indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
+                nombre: item.nameEs,
+                value: item.value,
+            })),
+        };
+
+        // 5. Renderizar documento con datos
+        doc.render(data);
+
+        // 6. Generar blob final
+        const out = doc.getZip().generate({
+            type: 'blob',
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+
+        // 7. Descargar
+        const url = URL.createObjectURL(out);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado.docx';
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error generando el Word', error);
+    }
+};
+interface BtnExportarDocumentoWordProps {
+    camposRellenos: boolean;
+    yearData: YearData;
+    disabled?: boolean;
+    t: (key: string) => string;
+    llamadaBBDDYearDataAll: () => Promise<YearData | undefined>;
+}
+
+export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, t, llamadaBBDDYearDataAll }) => {
+    const handleClick = async () => {
+        const dataYear = await llamadaBBDDYearDataAll();
+        if (!dataYear) return;
+
+        GeneracionDelDocumentoWord(dataYear);
     };
-
     return (
-        <button onClick={handleExportar} className="bg-blue-500 text-white px-4 py-2 rounded">
-            Exportar a Word
+        <button
+            disabled={!camposRellenos}
+            onClick={() => {
+                if (!camposRellenos) return;
+                handleClick();
+
+                //generarDocumentoWord(yearData, 'Plan');
+            }}
+            className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
+                                                ${camposRellenos ? 'bg-gray-400 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                                                `}
+        >
+            <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
+            {t('descargarBorrador')}
         </button>
     );
 };
-
-export default ExportarWordBtn;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { EjeBBDD, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { EjeBBDD, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import {
     DatosAccion,
     DatosAccionDTO,
@@ -23,6 +23,8 @@ import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/I
 import { useRegionContext } from './RegionContext';
 import { ModoDev } from '../components/Utils/data/controlDev';
 import { MessageSetters } from '../components/Utils/data/dataEjes';
+import { accionesTransformadasBackAFront, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
+import { useIndicadoresContext } from './IndicadoresContext';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -39,7 +41,9 @@ interface YearContextType {
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
-    llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean, message: MessageSetters) => void;
+    llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean) => void;
+    llamadaBBDDYearDataAll: (anioSeleccionada: number, retornarDatos: boolean) => Promise<YearData | undefined>;
+
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
@@ -59,6 +63,7 @@ const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
+    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
 
     const [errorMessageYearData, setErrorMessageYearData] = useState<string>('');
     const [successMessageYearData, setSuccessMessageYearData] = useState<string>('');
@@ -422,7 +427,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             body: {
                 Id: Number(datosEditandoAccion.id),
                 Nombre: datosEditandoAccion.accion,
-                LineaActuacion: datosEditandoAccion.lineaActuaccion,
+                LineaActuaccion: datosEditandoAccion.lineaActuaccion,
                 Plurianual: datosEditandoAccion.plurianual,
                 DatosPlanId: DatosPlan.Id ? Number(DatosPlan.Id) : undefined,
                 DatosPlan: DatosPlan,
@@ -536,19 +541,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
                 }
                 const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
-                const convertirOperationalIndicators: OperationalIndicators[] = generalOperationADRDTO.OperationalIndicators?.map((OI) => ({
-                    id: `${OI.Id}`,
-                    nameEs: OI.NameEs,
-                    nameEu: OI.NameEu,
-                    value: OI.Value,
-                    valueAchieved: OI.ValueAchieved,
-                }));
-                const generalOperationADR: GeneralOperationADR = {
-                    adrInternalTasks: generalOperationADRDTO.AdrInternalTasks ?? '',
-                    operationalIndicators: convertirOperationalIndicators ?? [],
-                    dSeguimiento: generalOperationADRDTO.DSeguimiento ?? '',
-                    valFinal: generalOperationADRDTO.ValFinal ?? '',
-                };
+                const generalOperationADR: GeneralOperationADR = convertirGeneralOperationADR(generalOperationADRDTO);
 
                 data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
                     const item = {
@@ -574,54 +567,65 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ejes.push(item);
                     }
                 });
-                const servicios: Servicios[] = data.data.Servicios.map((s: any) => ({
-                    id: s.Id,
-                    nombre: s.Nombre,
-                    descripcion: s.Descripcion,
-                    dSeguimiento: s.DSeguimiento,
-                    valFinal: s.ValFinal,
-                    indicadores: s.Indicadores.map(
-                        (i: { Indicador: any; PrevistoHombres: any; PrevistoMujeres: any; PrevistoValor: any; AlcanzadoHombres: any; AlcanzadoMujeres: any; AlcanzadoValor: any }) => ({
-                            indicador: i.Indicador,
-                            previsto: {
-                                hombres: i.PrevistoHombres ?? '',
-                                mujeres: i.PrevistoMujeres ?? '',
-                                valor: i.PrevistoValor ?? '',
-                            },
-                            alcanzado: {
-                                hombres: i.AlcanzadoHombres ?? '',
-                                mujeres: i.AlcanzadoMujeres ?? '',
-                                valor: i.AlcanzadoValor ?? '',
-                            },
-                        })
-                    ),
-                }));
-                const dotosAnio: YearData = {
-                    nombreRegion: nombreRegionSeleccionada ? nombreRegionSeleccionada : '',
-                    year: data.data.Year,
-                    plan: {
-                        id: `${data.data.Plan.Id}`,
-                        ejes: ejes,
-                        ejesPrioritarios: ejesPrioritarios,
-                        introduccion: data.data.Plan.Introduccion,
-                        proceso: data.data.Plan.Proceso,
-                        generalOperationADR: generalOperationADR,
-                        status: planStatus,
-                    },
-                    memoria: {
-                        id: `${data.data.Memoria.Id}`,
-                        status: memoriaStatus,
-                        dSeguimiento: data.data.Memoria.DSeguimiento,
-                        valFinal: data.data.Memoria.ValFinal,
-                    },
-                    servicios: servicios,
-                };
+
+                const dotosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejes, ejesPrioritarios);
                 if (ModoDev) {
                     console.log('dotosAnio');
                     console.log('dotosAnio');
                 }
                 setYearData(dotosAnio);
             },
+        });
+    };
+
+    const llamadaBBDDYearDataAll = async (anioSeleccionada: number, retornarDatos: boolean): Promise<YearData | undefined> => {
+        return new Promise((resolve) => {
+            LlamadasBBDD({
+                method: 'GET',
+                url: `yearData/${Number(regionSeleccionada)}/${Number(anioSeleccionada)}/all`,
+                setLoading: setLoadingYearData,
+                setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+                setErrorMessage: setErrorMessageYearData,
+                setSuccessMessage: setSuccessMessageYearData,
+                onSuccess: (data: any) => {
+                    const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
+                    const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
+                    if (ModoDev) {
+                        console.log('Llamada Year Data');
+                        console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
+                        console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
+                    }
+
+                    const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
+                    const generalOperationADR: GeneralOperationADR = convertirGeneralOperationADR(generalOperationADRDTO);
+
+                    const ejesPrioritarios: Ejes[] = [];
+                    const ejes: Ejes[] = [];
+                    data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
+                        const item = {
+                            Id: `${eje.Id}`,
+                            NameEs: `${eje.NameEs}`,
+                            NameEu: `${eje.NameEu}`,
+                            IsActive: eje.IsActive,
+                            IsPrioritarios: eje.IsPrioritarios,
+                            acciones: accionesTransformadasBackAFront(eje, ListadoNombresIdicadoresSegunADR('realizacion'), ListadoNombresIdicadoresSegunADR('resultado')),
+                        };
+
+                        if (eje.IsPrioritarios) {
+                            ejesPrioritarios.push(item);
+                        } else {
+                            ejes.push(item);
+                        }
+                    });
+
+                    const datosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejes, ejesPrioritarios);
+
+                    setYearData(datosAnio);
+
+                    if (retornarDatos) resolve(datosAnio);
+                    return undefined;
+                },
+            });
         });
     };
 
@@ -726,6 +730,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 SeleccionEditarGuardarAccesoria,
                 SeleccionEditarServicio,
                 llamadaBBDDYearData,
+                llamadaBBDDYearDataAll,
                 datosEditandoServicio,
                 loadingYearData,
                 setDatosEditandoServicio,

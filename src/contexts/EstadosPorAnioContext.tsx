@@ -64,7 +64,7 @@ export const useEstadosPorAnioContext = () => useContext(EstadosContext);
 
 export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const { yearData, setYearData, llamadaBBDDYearData, setErrorMessageYearData, setSuccessMessageYearData } = useYear();
+    const { yearData, setYearData, llamadaBBDDYearData } = useYear();
     const { user } = useUser();
     const { login } = useAuth();
     const token = sessionStorage.getItem('access_token');
@@ -179,7 +179,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-            llamadaBBDDYearData(anioSeleccionada, false, { setErrorMessage: setErrorMessageYearData!, setSuccessMessage: setSuccessMessageYearData! });
+            llamadaBBDDYearData(anioSeleccionada, false);
         }
     }, [anioSeleccionada, nombreRegionSeleccionada]);
 
