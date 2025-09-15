@@ -88,7 +88,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [controlguardado, setControlguardado] = useState<boolean>(false);
 
     useEffect(() => {
-        sessionStorage.sessionStorage('DataYear', JSON.stringify(yearData));
+        sessionStorage.setItem('DataYear', JSON.stringify(yearData));
     }, [yearData]);
 
     useEffect(() => {

@@ -1274,7 +1274,7 @@ export const TablaIndicadores: React.FC = () => {
                         <ModalNuevoIndicador
                             isOpen={modalEditarRealizacion}
                             onClose={(save: boolean) => {
-                                if (!save) {
+                                if (!save && !bloqueoHazi) {
                                     const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
                                     if (confirmar) {
                                         setModalEditarRealizacion(false);

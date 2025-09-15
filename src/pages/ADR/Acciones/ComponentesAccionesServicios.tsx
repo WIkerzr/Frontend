@@ -384,7 +384,10 @@ interface ResultadoValidacionServicios {
 export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoValidacionServicios {
     const faltanIndicadoresPlan = datos.indicadores.some((item) => !item.indicador || !item.previsto?.valor) || datos.indicadores.length === 0;
 
-    const faltanIndicadoresMemoria = !datos.indicadores[0].alcanzado?.valor;
+    let faltanIndicadoresMemoria = true;
+    if (!faltanIndicadoresPlan) {
+        faltanIndicadoresMemoria = datos.indicadores[0].alcanzado ? !datos.indicadores[0].alcanzado.valor : false;
+    }
 
     const faltanCamposPlan = !datos.nombre || !datos.descripcion;
 

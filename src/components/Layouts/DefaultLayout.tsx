@@ -11,6 +11,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { useTranslation } from 'react-i18next';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
 
 export const useAvisoSalirEditando = () => {
     const { t } = useTranslation();
@@ -23,6 +24,8 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
     const navigate = useNavigate();
     const { controlguardado, setControlguardado } = useYear();
     const { regionSeleccionada, setRegionSeleccionada } = useRegionContext();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
+
     const [regionAnterior, setRegionAnterior] = useState<string | null>(() => {
         const savedRegion = sessionStorage.getItem('regionSeleccionada');
         const parsedRegion = savedRegion ? JSON.parse(savedRegion) : null;
@@ -73,20 +76,22 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
     }, []);
 
     useEffect(() => {
-        if (regionSeleccionada != regionAnterior) {
-            if (!regionSeleccionada) {
-                const rutaAceptada = `/configuracion/`;
-                if (location.pathname.includes(rutaAceptada)) {
-                    navigate('/configuracion/indicadoresADR');
-                }
-            } else {
-                const partesRuta = location.pathname.split('/').filter(Boolean);
-                if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
-                    const confirmar = window.confirm(AvisoSalirEditando.cambioRegion);
-                    if (confirmar) {
-                        navigate(`/${partesRuta[0]}/${partesRuta[1]}`);
-                    } else {
-                        setRegionSeleccionada(regionAnterior ? Number(regionAnterior) : null);
+        if (editarPlan || editarMemoria) {
+            if (regionSeleccionada != regionAnterior) {
+                if (!regionSeleccionada) {
+                    const rutaAceptada = `/configuracion/`;
+                    if (location.pathname.includes(rutaAceptada)) {
+                        navigate('/configuracion/indicadoresADR');
+                    }
+                } else {
+                    const partesRuta = location.pathname.split('/').filter(Boolean);
+                    if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
+                        const confirmar = window.confirm(AvisoSalirEditando.cambioRegion);
+                        if (confirmar) {
+                            navigate(`/${partesRuta[0]}/${partesRuta[1]}`);
+                        } else {
+                            setRegionSeleccionada(regionAnterior ? Number(regionAnterior) : null);
+                        }
                     }
                 }
             }
@@ -96,22 +101,24 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
 
     useEffect(() => {
         const partesRuta = location.pathname.split('/').filter(Boolean);
-        if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
-            setRutaAnterior(location.pathname);
-            setConfirmado(false);
-        } else if (partesRuta.length <= 2 && rutaAnterior && !confirmado) {
-            if (controlguardado) {
-                setControlguardado(false);
-                setConfirmado(true);
-            } else {
-                const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
-                if (confirmar) {
-                    setRutaAnterior(null);
+        if (editarPlan || editarMemoria) {
+            if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
+                setRutaAnterior(location.pathname);
+                setConfirmado(false);
+            } else if (partesRuta.length <= 2 && rutaAnterior && !confirmado) {
+                if (controlguardado) {
+                    setControlguardado(false);
                     setConfirmado(true);
-                    sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
                 } else {
-                    sessionStorage.setItem('rutaActual', JSON.stringify(rutaAnterior));
-                    navigate(rutaAnterior);
+                    const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
+                    if (confirmar) {
+                        setRutaAnterior(null);
+                        setConfirmado(true);
+                        sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
+                    } else {
+                        sessionStorage.setItem('rutaActual', JSON.stringify(rutaAnterior));
+                        navigate(rutaAnterior);
+                    }
                 }
             }
         }
