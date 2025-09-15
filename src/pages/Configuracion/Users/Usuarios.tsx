@@ -40,7 +40,7 @@ const Index = () => {
 
     useEffect(() => {
         if (users.length > 0) {
-            localStorage.setItem('users', JSON.stringify(users));
+            sessionStorage.setItem('users', JSON.stringify(users));
         }
     }, [users]);
 

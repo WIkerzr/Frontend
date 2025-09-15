@@ -325,7 +325,7 @@ interface RellenoIndicadorResultadoProps {
 
 export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorRealizacion, setDescripcionEditable: setIndicadorRealizacion, isOpen }) => {
     const { t, i18n } = useTranslation();
-    const indicadoresResultados: IndicadorResultado[] = JSON.parse(localStorage.getItem('indicadoresResultado') || '[]');
+    const indicadoresResultados: IndicadorResultado[] = JSON.parse(sessionStorage.getItem('indicadoresResultado') || '[]');
     const [opciones] = useState(indicadoresResultados);
     const [seleccion, setSeleccion] = useState('');
     const [modoCrear, setModoCrear] = useState(false);
@@ -1418,7 +1418,7 @@ export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRe
             throw new Error(data.Message || t('errorObtenerIndicadores'));
         }
         setIndicadoresRealizacion(datosIndicador);
-        localStorage.setItem('indicadoresRealizacion', JSON.stringify(datosIndicador));
+        sessionStorage.setItem('indicadoresRealizacion', JSON.stringify(datosIndicador));
 
         const indicadoresResultado: IndicadorResultado[] = datosIndicador
             .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
@@ -1427,7 +1427,7 @@ export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRe
 
         setIndicadoresResultado(indicadoresResultado);
         setFechaUltimoActualizadoBBDD(new Date());
-        localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+        sessionStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
 
         const datosFiltradosBorrar = datosIndicador.filter((di) => di.RegionsId === '1');
         const resultadosFiltrados = datosIndicador.flatMap((realizacion) => realizacion.Resultados || []).filter((resultado) => resultado.RegionsId === '1');

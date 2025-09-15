@@ -172,8 +172,8 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const actualizarIndicadoresADR = () => {
-        const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-        const storedResultado = localStorage.getItem('indicadoresResultado');
+        const storedRealizacion = sessionStorage.getItem('indicadoresRealizacion');
+        const storedResultado = sessionStorage.getItem('indicadoresResultado');
         if (storedRealizacion && storedResultado) {
             const indicadoresRealizacionPreFiltrado: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
             const realizacionADR = transformarRealizacionPorRegion(indicadoresRealizacionPreFiltrado);
@@ -181,18 +181,18 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             const resultadoADR = transformarResultadoPorRegion(indicadoresResultadoPreFiltrado);
             if (!regionSeleccionada) {
                 setIndicadoresRealizacionADR([]);
-                localStorage.setItem('indicadoresRealizacionFiltrado', '[]');
+                sessionStorage.setItem('indicadoresRealizacionFiltrado', '[]');
             } else {
                 const realizacionRegionSelec = realizacionADR[Number(regionSeleccionada)];
                 setIndicadoresRealizacionADR(realizacionRegionSelec ?? []);
-                localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(realizacionRegionSelec ?? []));
+                sessionStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(realizacionRegionSelec ?? []));
             }
             if (!regionSeleccionada) {
                 setIndicadoresResultadoADR([]);
-                localStorage.setItem('indicadoresResultadoFiltrado', '[]');
+                sessionStorage.setItem('indicadoresResultadoFiltrado', '[]');
             } else {
                 const resultadoRegionSelec = resultadoADR[Number(regionSeleccionada)];
-                localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(resultadoRegionSelec ?? []));
+                sessionStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(resultadoRegionSelec ?? []));
                 setIndicadoresResultadoADR(resultadoRegionSelec ?? []);
             }
             setLoading(false);
@@ -205,8 +205,8 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
             setLoading(true);
-            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
-            const storedResultado = localStorage.getItem('indicadoresResultado');
+            const storedRealizacion = sessionStorage.getItem('indicadoresRealizacion');
+            const storedResultado = sessionStorage.getItem('indicadoresResultado');
 
             if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]' && regionSeleccionada === regionSeleccionada) {
                 const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
@@ -239,7 +239,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // }, [regionSeleccionada, PrimeraLlamada]);
 
     const SegundaLlamadaEjes = () => {
-        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
+        const ejes = sessionStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
         if (ejes) {
             setEjesIndicador(JSON.parse(ejes));
             return;
@@ -258,13 +258,13 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                     NameEu: ejes.NameEu || '',
                 }));
                 setEjesIndicador(arrayMapeado);
-                for (let i = localStorage.length - 1; i >= 0; i--) {
-                    const key = localStorage.key(i);
+                for (let i = sessionStorage.length - 1; i >= 0; i--) {
+                    const key = sessionStorage.key(i);
                     if (key && key.startsWith('EjesIndicador_')) {
-                        localStorage.removeItem(key);
+                        sessionStorage.removeItem(key);
                     }
                 }
-                localStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
+                sessionStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
             },
         });
     };
@@ -354,7 +354,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 const nuevosIndicadores = [...indicadoresRealizacion.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresRealizacionADR];
                 setIndicadoresRealizacion(nuevosIndicadores);
             }
-            localStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
+            sessionStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
         }
     }, [indicadoresRealizacionADR]);
 
@@ -367,7 +367,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 const nuevosIndicadores = [...indicadoresResultado.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresResultadoADR];
                 setIndicadoresResultado(nuevosIndicadores);
             }
-            localStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
+            sessionStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
         }
     }, [indicadoresResultadoADR]);
 
@@ -375,7 +375,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!indicadoresRealizacion) {
             setIndicadoresRealizacion([]);
         } else {
-            localStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
+            sessionStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
         }
     }, [indicadoresRealizacion]);
 
@@ -383,7 +383,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!indicadoresResultado) {
             setIndicadoresResultado([]);
         } else {
-            localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+            sessionStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
         }
     }, [indicadoresResultado]);
 

@@ -100,7 +100,7 @@ const Index = () => {
     const [mostrarDrop, setMostrarDrop] = useState<number>(0);
 
     useEffect(() => {
-        const indicadoresInpacto = localStorage.getItem('indicadoresInpacto');
+        const indicadoresInpacto = sessionStorage.getItem('indicadoresInpacto');
         if (indicadoresInpacto && indicadoresInpacto?.length > 0) {
             setIndicadores(JSON.parse(indicadoresInpacto));
         }
@@ -325,7 +325,7 @@ const Index = () => {
                 indicado.push(indicador);
             }
         }
-        localStorage.setItem('indicadoresInpacto', JSON.stringify(indicado));
+        sessionStorage.setItem('indicadoresInpacto', JSON.stringify(indicado));
     };
 
     return (

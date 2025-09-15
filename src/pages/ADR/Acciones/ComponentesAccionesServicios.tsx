@@ -58,7 +58,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
             setIdEjeSeleccionado(ejesPlan[0].Id);
         }
         if (showModal && acciones === 'Acciones') {
-            const ejesRegion = localStorage.getItem('ejesRegion');
+            const ejesRegion = sessionStorage.getItem('ejesRegion');
             if (!ejesRegion) {
                 LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading);
             }
@@ -181,7 +181,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            <DropdownDropdownLineaActuaccion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} />
+                            <DropdownLineaActuaccion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} />
                         </div>
                     </div>
                     <div className="flex">
@@ -254,7 +254,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 
     const handleEdit = async (id: string) => {
         setLoading(true);
-        const ejesRegion = localStorage.getItem('ejesRegion');
+        const ejesRegion = sessionStorage.getItem('ejesRegion');
 
         if (!ejesRegion) {
             await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
@@ -549,7 +549,7 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('ejesRegion');
         if (fechaStr) {
-            const ejesRegion = localStorage.getItem('ejesRegion');
+            const ejesRegion = sessionStorage.getItem('ejesRegion');
             if (!ejesRegion) return new Date();
 
             setEjes(JSON.parse(ejesRegion));

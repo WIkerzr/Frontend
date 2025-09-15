@@ -27,9 +27,9 @@ interface BaseProps {
     recargeToSave?: () => void;
 }
 
-export const updateUserInLocalStorage = (updatedUser: UserID, accion: 'editar' | 'nuevo' | 'eliminar') => {
+export const updateUserInSessionStorage = (updatedUser: UserID, accion: 'editar' | 'nuevo' | 'eliminar') => {
     try {
-        const usersRaw = localStorage.getItem('users');
+        const usersRaw = sessionStorage.getItem('users');
         const users: UserID[] = usersRaw ? JSON.parse(usersRaw) : [];
 
         let updatedUsers: UserID[] = [...users];
@@ -65,9 +65,9 @@ export const updateUserInLocalStorage = (updatedUser: UserID, accion: 'editar' |
             default:
                 throw new Error(`Acción no reconocida: ${accion}`);
         }
-        localStorage.setItem('users', JSON.stringify(updatedUsers));
+        sessionStorage.setItem('users', JSON.stringify(updatedUsers));
     } catch (e) {
-        console.error('Error en updateUserInLocalStorage:', e);
+        console.error('Error en updateUserInSessionStorage:', e);
     }
 };
 
@@ -89,7 +89,7 @@ type UserDataProps = EditarProps | NuevoProps;
 
 export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion, onClose, title = true }) => {
     const getInitialUserData = (): UserID => {
-        const usersRaw = localStorage.getItem('users');
+        const usersRaw = sessionStorage.getItem('users');
         try {
             const users: UserID[] = JSON.parse(usersRaw!);
 
@@ -107,7 +107,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 };
             }
         } catch (e) {
-            console.error('Error parsing localStorage user:', e);
+            console.error('Error parsing sessionStorage user:', e);
         }
 
         return {

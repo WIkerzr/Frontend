@@ -69,7 +69,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
             const ultimaRegion = ultimaRegionSesionStorage ? JSON.parse(ultimaRegionSesionStorage) : null;
 
             if (!ultimaRegion || (ultimaRegion && ultimaRegion.id !== regionSeleccionada)) {
-                localStorage.removeItem('ejesRegion');
+                sessionStorage.removeItem('ejesRegion');
             }
 
             sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: regionSeleccionada, nombre: nombreRegionSeleccionada }));

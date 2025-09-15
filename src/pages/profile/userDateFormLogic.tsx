@@ -8,7 +8,7 @@ import { FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } 
 
 const UserDateFormLogic: React.FC = () => {
     const getInitialUserData = (): UserID => {
-        const stored = localStorage.getItem('user');
+        const stored = sessionStorage.getItem('user');
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
@@ -23,7 +23,7 @@ const UserDateFormLogic: React.FC = () => {
                     id: parsed.id || 9999,
                 };
             } catch (e) {
-                console.error('Error parsing localStorage user:', e);
+                console.error('Error parsing sessionStorage user:', e);
             }
         }
         return {
@@ -40,8 +40,8 @@ const UserDateFormLogic: React.FC = () => {
 
     const initialData = getInitialUserData();
     const [UserData, setUserData] = useState(initialData);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
     const [fadeOut, setFadeOut] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { t } = useTranslation();
@@ -53,16 +53,16 @@ const UserDateFormLogic: React.FC = () => {
             [name]: value,
         }));
         if (isSubmitting) {
-            setErrorMessage(null);
-            setSuccessMessage(null);
+            setErrorMessage('');
+            setSuccessMessage('');
         }
     };
 
     const handleSubmitUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setErrorMessage(null);
-        setSuccessMessage(null);
+        setErrorMessage('');
+        setSuccessMessage('');
         const token = sessionStorage.getItem('access_token');
 
         try {
@@ -84,14 +84,14 @@ const UserDateFormLogic: React.FC = () => {
                     status: UserData.status,
                 }),
             });
-            const data = await response.json();
+            const data = await response.data;
             if (response && !response.ok) {
                 const errorInfo = gestionarErrorServidor(response, data);
                 setErrorMessage(errorInfo.mensaje);
                 return;
             }
 
-            localStorage.setItem(
+            sessionStorage.setItem(
                 'user',
                 JSON.stringify({
                     name: UserData.name,
@@ -109,7 +109,7 @@ const UserDateFormLogic: React.FC = () => {
             setTimeout(() => {
                 setFadeOut(true);
                 setTimeout(() => {
-                    setSuccessMessage(null);
+                    setSuccessMessage('');
                     setFadeOut(false);
                 }, 1000);
             }, 5000);

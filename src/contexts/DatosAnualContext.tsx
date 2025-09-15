@@ -71,12 +71,12 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [idEjeEditado, setIdEjeEditado] = useState<string>('');
     const [yearData, setYearData] = useState<YearData>(() => {
-        const stored = localStorage.getItem('DataYear');
+        const stored = sessionStorage.getItem('DataYear');
         return stored ? JSON.parse(stored) : yearIniciadoVacio;
     });
 
     const [datosEditandoAccion, setDatosEditandoAccion] = useState<DatosAccion>(() => {
-        const stored = localStorage.getItem('datosAccionModificado');
+        const stored = sessionStorage.getItem('datosAccionModificado');
         return JSON.parse(stored!);
     });
 
@@ -88,11 +88,11 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [controlguardado, setControlguardado] = useState<boolean>(false);
 
     useEffect(() => {
-        localStorage.setItem('DataYear', JSON.stringify(yearData));
+        sessionStorage.sessionStorage('DataYear', JSON.stringify(yearData));
     }, [yearData]);
 
     useEffect(() => {
-        localStorage.setItem('datosAccionModificado', JSON.stringify(datosEditandoAccion));
+        sessionStorage.setItem('datosAccionModificado', JSON.stringify(datosEditandoAccion));
     }, [datosEditandoAccion]);
 
     useEffect(() => {
@@ -259,7 +259,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const SeleccionVaciarEditarAccion = () => {
-        localStorage.removeItem('datosAccionModificado');
+        sessionStorage.removeItem('datosAccionModificado');
         setDatosEditandoAccion({
             id: '0',
             accion: '',
@@ -288,11 +288,11 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const [datosEditandoServicio, setDatosEditandoServicio] = useState<Servicios | null>(() => {
-        const stored = localStorage.getItem('datosEditandoServicio');
+        const stored = sessionStorage.getItem('datosEditandoServicio');
         return stored ? JSON.parse(stored) : null;
     });
     useEffect(() => {
-        localStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
+        sessionStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
     }, [datosEditandoServicio]);
 
     const SeleccionEditarServicio = (idServicio: string | null) => {
@@ -515,7 +515,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [block, setBlock] = useState<boolean>(false);
 
     const llamadaBBDDYearData = (anioSeleccionada: number, ignorarStorage: boolean) => {
-        const stored = localStorage.getItem('DataYear');
+        const stored = sessionStorage.getItem('DataYear');
         if (stored && !ignorarStorage) {
             const data: YearData = JSON.parse(stored);
             if (data.year === anioSeleccionada && data.nombreRegion === nombreRegionSeleccionada) {

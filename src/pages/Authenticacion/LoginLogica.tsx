@@ -25,7 +25,7 @@ const useLogin = () => {
 
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
-        localStorage.removeItem('users');
+        sessionStorage.removeItem('users');
         try {
             const response = await fetch(ApiTargetToken, {
                 method: 'POST',

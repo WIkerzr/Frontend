@@ -46,7 +46,7 @@ export const LlamadaBBDDEjesRegion = async (
                     if (setFechaUltimoActualizadoBBDD) {
                         setFechaUltimoActualizadoBBDD(new Date());
                     }
-                    localStorage.setItem('ejesRegion', JSON.stringify(datosOrdenados));
+                    sessionStorage.setItem('ejesRegion', JSON.stringify(datosOrdenados));
 
                     actualizarFechaLLamada('ejesRegion');
                     if (setLoading) {

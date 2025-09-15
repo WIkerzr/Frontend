@@ -43,7 +43,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('users');
+        const saved = sessionStorage.getItem('users');
         setUsers(saved ? JSON.parse(saved) : []);
     }, []);
 
@@ -65,14 +65,14 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                 }
             }
         });
-        localStorage.setItem('users', JSON.stringify(nuevoUsers));
+        sessionStorage.setItem('users', JSON.stringify(nuevoUsers));
         setUsers(nuevoUsers);
     };
 
     const agregarUsuario = (nuevo: UserIDList) => {
         setUsers((prevUsers) => {
             const nuevaLista = [...prevUsers, nuevo];
-            localStorage.setItem('users', JSON.stringify(nuevaLista));
+            sessionStorage.setItem('users', JSON.stringify(nuevaLista));
             return nuevaLista;
         });
     };
@@ -84,7 +84,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const llamadaBBDDUsers = (primeraLLamada?: boolean) => {
-        const storedUsers = localStorage.getItem('users');
+        const storedUsers = sessionStorage.getItem('users');
 
         if (primeraLLamada) {
             setErrorMessage(null);
@@ -120,7 +120,7 @@ export const UsersProvider = ({ children }: { children: ReactNode }) => {
                     setFechaUltimoActualizadoBBDD(new Date());
                     const dataArray: UserIDList[] = Array.isArray(usuariosConRegion) ? usuariosConRegion : Object.values(usuariosConRegion);
                     listadoUsuarios(dataArray);
-                    localStorage.setItem('users', JSON.stringify(dataArray));
+                    sessionStorage.setItem('users', JSON.stringify(dataArray));
                 } catch (err: unknown) {
                     const errorInfo = gestionarErrorServidor(err);
                     setErrorMessage(errorInfo.mensaje);

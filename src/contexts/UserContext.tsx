@@ -13,10 +13,10 @@ interface UserContextType {
 
 const defaultUser = (): UserID | null => {
     try {
-        const stored = localStorage.getItem('user');
+        const stored = sessionStorage.getItem('user');
         return stored ? JSON.parse(stored) : null;
     } catch (error) {
-        console.error('Error al leer usuario de localStorage', error);
+        console.error('Error al leer usuario de sessionStorage', error);
         return null;
     }
 };
@@ -36,9 +36,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const setUser = (newUser: UserID | null) => {
         setUserState(newUser);
         if (newUser) {
-            localStorage.setItem('user', JSON.stringify(newUser));
+            sessionStorage.setItem('user', JSON.stringify(newUser));
         } else {
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('user');
         }
     };
     const lockedHazi = ModoDevEdicionTotal ? false : !!(user && user.role !== 'ADR');

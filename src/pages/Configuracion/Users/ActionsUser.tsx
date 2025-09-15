@@ -5,7 +5,7 @@ import IconTrash from '../../../components/Icon/IconTrash';
 import { ApiTarget } from '../../../components/Utils/data/controlDev';
 import { FetchConRefreshRetry, gestionarErrorServidor, NewModal } from '../../../components/Utils/utils';
 import { UserID } from '../../../types/users';
-import { UsersDateModalLogic, updateUserInLocalStorage } from './componentes';
+import { UsersDateModalLogic, updateUserInSessionStorage } from './componentes';
 import { useUser } from '../../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -156,7 +156,7 @@ export const ChangeStatus: React.FC<ChangeStatusProps> = ({ value, onSuccess, se
                 setErrorMessage(errorInfo.mensaje);
                 return;
             }
-            updateUserInLocalStorage(datosUsuario, 'editar');
+            updateUserInSessionStorage(datosUsuario, 'editar');
             onSuccess?.();
             if (user?.id === value.id) {
                 logout();

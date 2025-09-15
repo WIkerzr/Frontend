@@ -63,6 +63,7 @@ const Index = () => {
                     IsPrioritarios: eje.IsPrioritarios,
                     acciones: eje.acciones,
                     LineasActuaccion: eje.LineasActuaccion ? eje.LineasActuaccion : [],
+                    AccionesDTO: [],
                 }));
 
             setEjes(ordenados);
@@ -87,7 +88,7 @@ const Index = () => {
             async onSuccess() {
                 setLocked(true);
 
-                await llamadaBBDDYearData(anioSeleccionada!, true, { setErrorMessage, setSuccessMessage });
+                await llamadaBBDDYearData(anioSeleccionada!, true);
             },
         });
     };
