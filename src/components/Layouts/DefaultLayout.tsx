@@ -32,6 +32,11 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
         return parsedRegion ? parsedRegion.id : null;
     });
     const [rutaAnterior, setRutaAnterior] = useState<string | null>(() => {
+        const savedRute = sessionStorage.getItem('rutaAnterior');
+        const parsedRute = savedRute ? JSON.parse(savedRute) : null;
+        return parsedRute;
+    });
+    const [rutaRutaActual, setRutaActual] = useState<string>(() => {
         const savedRute = sessionStorage.getItem('rutaActual');
         const parsedRute = savedRute ? JSON.parse(savedRute) : null;
         return parsedRute;
@@ -110,18 +115,22 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
                     setControlguardado(false);
                     setConfirmado(true);
                 } else {
-                    const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
-                    if (confirmar) {
-                        setRutaAnterior(null);
-                        setConfirmado(true);
-                        sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
-                    } else {
-                        sessionStorage.setItem('rutaActual', JSON.stringify(rutaAnterior));
-                        navigate(rutaAnterior);
+                    if (rutaRutaActual != location.pathname) {
+                        const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
+                        if (confirmar) {
+                            setRutaAnterior(null);
+                            setConfirmado(true);
+                            sessionStorage.setItem('rutaAnterior', JSON.stringify(location.pathname));
+                        } else {
+                            sessionStorage.setItem('rutaAnterior', JSON.stringify(rutaAnterior));
+                            navigate(rutaAnterior);
+                        }
                     }
                 }
             }
         }
+        sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
+        setRutaActual(location.pathname);
     }, [location, confirmado, rutaAnterior]);
 
     return (

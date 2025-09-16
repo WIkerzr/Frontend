@@ -1,7 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useState } from 'react';
-import { TabCard, VerificarAccionFinal, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
+import { TabCard } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
@@ -139,15 +139,22 @@ const Index: React.FC = () => {
     };
 
     const handleSave = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
-            const camposFaltantes = VerificarAccionFinal(datosEditandoAccion, editarPlan, editarMemoria);
-            if (camposFaltantes && camposFaltantes.length === 0) {
-                GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
-            } else if (camposFaltantes && camposFaltantes.length > 0) {
-                const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
-                alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
-            }
-        }
+        // if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
+        //     const camposFaltantes = VerificarAccionFinal(datosEditandoAccion, editarPlan, editarMemoria);
+        //     if (camposFaltantes && camposFaltantes.length === 0) {
+        //         GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
+        //     } else if (camposFaltantes && camposFaltantes.length > 0) {
+        //         const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
+        //         alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
+        //     }
+        // }
+        // if (datosEditandoAccion.accion !== '') {
+        //     GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
+        // } else {
+        //     // alert(t('nombreDelServicioNoVacio'));
+        //     alert(t('nombreDeLaAccionNoVacio'));
+        // }
+        GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
     };
 
     return (
@@ -162,7 +169,15 @@ const Index: React.FC = () => {
                 }
                 zonaBtn={
                     <div className="ml-auto flex flex-row items-center justify-end gap-4">
-                        {!bloqueo && <Boton tipo="guardar" textoBoton={t('guardar')} onClick={handleSave} disabled={servicio ? !datosEditandoServicio?.nombre : !datosEditandoAccion.accion} />}
+                        {!bloqueo && (
+                            <Boton
+                                tipo="guardar"
+                                textoBoton={t('guardar')}
+                                onClick={handleSave}
+                                disabled={!datosEditandoAccion.accion}
+                                title={!datosEditandoAccion.accion ? t('nombreDeLaAccionNoVacio') : ''}
+                            />
+                        )}
                         <NavLink to={rutaAnterior} className={() => ''}>
                             <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={() => navigate(rutaAnterior)} />
                         </NavLink>
@@ -170,9 +185,10 @@ const Index: React.FC = () => {
                 }
                 zonaExtra={
                     <div className="w-full">
+                        <small style={{ color: '#666' }}>{t('camposObligatoriosLeyenda')}</small>
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
-                                <label className="block text-sm font-medium mb-1">{tituloCampo}</label>
+                                <label className="block text-sm font-medium mb-1">{'*' + tituloCampo}</label>
                                 {editarPlan ? (
                                     <input
                                         type="text"
@@ -199,6 +215,7 @@ const Index: React.FC = () => {
                                                     idEjeSeleccionado={ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
                                                     lineaActuaccion={lineaActuaccion}
                                                     ejesPlan={ejesPlan}
+                                                    tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
                                                 />
                                             ) : (
                                                 <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>

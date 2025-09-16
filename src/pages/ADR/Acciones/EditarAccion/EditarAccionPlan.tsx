@@ -120,23 +120,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                     {!opcionesComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.comarcal || '') && (
                         <InputField nombreInput="tratamientoComarcal" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.comarcal} onChange={(e) => handleChangeCampos('comarcal', e)} />
                     )}
-                    <DropdownTraducido
-                        title={'supracomarcal'}
-                        disabled={bloqueo}
-                        value={opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal) ? datosEditandoAccion.datosPlan?.supracomarcal : 'Otros'}
-                        options={opcionesSupraComarcal}
-                        visualOptions={opcionesSupraComarcalSegunIdioma}
-                        onChange={(e) => handleChangeCampos('supracomarcal', e)}
-                    />
-                    {!opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal || '') && (
-                        <InputField
-                            nombreInput="supracomarcal"
-                            required
-                            disabled={bloqueo}
-                            value={datosEditandoAccion.datosPlan.supracomarcal}
-                            onChange={(e) => handleChangeCampos('supracomarcal', e)}
-                        />
-                    )}
+
                     <div className="flex flex-col items-center">
                         <label>{t('esSupracomarcal')}</label>
                         <Checkbox checked={regionesSupracomarcal} disabled={bloqueo} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
@@ -144,6 +128,31 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 </div>
                 {regionesSupracomarcal && (
                     <div className="w-full resize-y">
+                        <div className="flex gap-4">
+                            <DropdownTraducido
+                                title={'supracomarcal'}
+                                disabled={bloqueo}
+                                value={
+                                    regionesSupracomarcal
+                                        ? opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal)
+                                            ? datosEditandoAccion.datosPlan?.supracomarcal
+                                            : 'Otros'
+                                        : 'Sin tratamiento territorial supracomarcal'
+                                }
+                                options={opcionesSupraComarcal}
+                                visualOptions={opcionesSupraComarcalSegunIdioma}
+                                onChange={(e) => handleChangeCampos('supracomarcal', e)}
+                            />
+                            {!opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal || '') && (
+                                <InputField
+                                    nombreInput="supracomarcal"
+                                    required
+                                    disabled={bloqueo}
+                                    value={datosEditandoAccion.datosPlan.supracomarcal}
+                                    onChange={(e) => handleChangeCampos('supracomarcal', e)}
+                                />
+                            )}
+                        </div>
                         <label>{t('comarcasIncluidasSupracomarcal')} </label>
                         <Multiselect
                             placeholder={t('seleccionaMultiOpcion')}
