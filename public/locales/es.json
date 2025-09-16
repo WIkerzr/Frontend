@@ -272,7 +272,7 @@
     "seleccionaOpciones": "Opciones",
     "seleccionaOpcionesNoHayOpciones": "No hay opciones disponibles",
     "seleccionar3Ejes": "Se deben seleccionar de uno a tres ejes",
-    "seleccionarCheckbox3Ejes": "Una vez creado una acción PCDR, no se podrán modificar",
+    "seleccionarCheckbox3Ejes": "Los ejes prioritarios que contengan al menos una acción quedarán bloqueados.",
     "seleccionarTodo": "Seleccionar todo",
     "SeleccionarTodo": "Seleccionar todo",
     "selecionaOpciones": "Selecciona opciones...",

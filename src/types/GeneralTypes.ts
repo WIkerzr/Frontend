@@ -36,7 +36,7 @@ export const opcionesODS = [
 
 export type Comarcal = (typeof opcionesComarcal)[number];
 
-export const opcionesSupraComarcal = ['Sin tratamiento territorial supracomarcal', 'Territorio histórico', 'Euskadi', 'Otros'];
+export const opcionesSupraComarcal = ['Territorio histórico', 'Euskadi', 'Otros'];
 
 export type SupraComarcal = (typeof opcionesSupraComarcal)[number];
 

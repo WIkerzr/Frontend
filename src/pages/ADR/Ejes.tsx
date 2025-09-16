@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingOverlay, ZonaTitulo } from '../Configuracion/Users/componentes';
-import { EjesBBDD } from '../../types/tipadoPlan';
+import { EjesBBDD, EjeSeleccion } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
 import { ErrorMessage } from '../../components/Utils/animations';
@@ -21,9 +21,9 @@ const Index = () => {
     const { anioSeleccionada } = useEstadosPorAnioContext();
     const { lockedHazi } = useUser();
 
-    const [locked, setLocked] = useState(false);
+    const [locked] = useState<boolean>(false);
 
-    const [ejes, setEjes] = useState<EjesBBDD[]>();
+    const [ejesEstrategicos, setEjesEstrategicos] = useState<EjesBBDD[]>();
 
     const [loading, setLoading] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -34,23 +34,8 @@ const Index = () => {
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
-    const llamadaEjes = () => {
-        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjes, setFechaUltimoActualizadoBBDD);
-    };
-
-    const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
-        if (locked) return;
-        if (!ejes) return;
-        const contadorPrioritarios = ejes.filter((i) => i.IsPrioritarios).length;
-        const checked = e.target.checked;
-        if (!checked || contadorPrioritarios < 3) {
-            setEjes((prev) => prev!.map((i) => (i.EjeId === id ? { ...i, IsPrioritarios: checked } : i)));
-        }
-    };
-
     useEffect(() => {
         if (yearData && yearData.plan.ejesPrioritarios.length >= 1) {
-            setLocked(true);
             setLoading(false);
             const combinados = [...yearData.plan.ejesPrioritarios, ...yearData.plan.ejes];
             const ordenados: EjesBBDD[] = combinados
@@ -66,28 +51,50 @@ const Index = () => {
                     AccionesDTO: [],
                 }));
 
-            setEjes(ordenados);
+            setEjesEstrategicos(ordenados);
         } else {
-            if (!lockedHazi) {
-                setLocked(false);
-            } else {
-                setLocked(true);
-            }
             llamadaEjes();
         }
     }, [yearData]);
 
+    const llamadaEjes = () => {
+        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesEstrategicos, setFechaUltimoActualizadoBBDD);
+    };
+
+    const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, id: string, seleccionados: boolean) => {
+        if (!ejesEstrategicos) return;
+        const checked = e.target.checked;
+        setEjesEstrategicos((prev) =>
+            prev!.map((i) => {
+                if (i.EjeId !== id) return i;
+                if (seleccionados && checked) return i;
+                return { ...i, IsPrioritarios: checked };
+            })
+        );
+    };
+
     const handleSave = () => {
+        if (!ejesEstrategicos) {
+            return;
+        }
+        const body: EjeSeleccion[] = ejesEstrategicos
+            .sort((a, b) => Number(a.EjeId) - Number(b.EjeId))
+            .map((eje) => ({
+                Id: Number(eje.EjeId),
+                NameEs: eje.NameEs,
+                NameEu: eje.NameEu,
+                IsActive: eje.IsActive,
+                PlanId: Number(yearData.plan.id),
+                IsPrioritarios: eje.IsPrioritarios,
+            }));
         LlamadasBBDD({
             method: 'POST',
             url: `yearData/${Number(regionSeleccionada)}/${anioSeleccionada}/axes`,
             setLoading,
             setErrorMessage,
             setSuccessMessage,
-            body: ejes,
+            body: body,
             async onSuccess() {
-                setLocked(true);
-
                 await llamadaBBDDYearData(anioSeleccionada!, true);
             },
         });
@@ -102,7 +109,6 @@ const Index = () => {
                     titulo={<h2 className="text-xl font-bold">{t('ejesTitulo')}</h2>}
                     zonaBtn={
                         <>
-                            <span className="text-red-600 font-semibold">{t('seleccionarCheckbox3Ejes')}</span>
                             {!lockedHazi && (
                                 <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked}>
                                     {t('guardar')}
@@ -132,26 +138,37 @@ const Index = () => {
                         </div>
                     )}
                 </div>
+                <div className=" p-2">
+                    <label className=" font-semibold">{t('seleccionarCheckbox3Ejes')}</label>
+                </div>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-2 w-full">
-                    {ejes &&
-                        ejes.map((eje) => (
-                            <li key={eje.EjeId} className={`flex items-center p-2 rounded transition ${eje.IsPrioritarios ? 'bg-green-100' : ''}`}>
-                                <input
-                                    type="checkbox"
-                                    className={`form-checkbox h-5 w-5 text-green-600 accent-green-600 ${locked && 'cursor-not-allowed'}`}
-                                    checked={eje.IsPrioritarios}
-                                    onChange={(e) => handleCheck(e, eje.EjeId)}
-                                    disabled={locked}
-                                    id={`checkbox-${eje.EjeId}`}
-                                />
-                                <label
-                                    htmlFor={`checkbox-${eje.EjeId}`}
-                                    className={`mb-0  w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''} ${locked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                >
-                                    {i18n.language === 'es' ? eje.NameEs : eje.NameEu}
-                                </label>
-                            </li>
-                        ))}
+                    {ejesEstrategicos &&
+                        ejesEstrategicos.map((eje) => {
+                            const contieneAcciones = eje.IsPrioritarios ? eje.acciones?.length > 0 : false;
+                            const seleccionados = ejesEstrategicos.filter((e) => e.IsPrioritarios).length >= 3;
+                            const disabled = contieneAcciones || (eje.IsPrioritarios ? false : seleccionados);
+                            if (eje.NameEs == 'Oferta de vivienda') {
+                                console.log(eje.NameEs);
+                            }
+                            return (
+                                <li key={eje.EjeId} className={`flex items-center p-2 rounded transition ${eje.IsPrioritarios ? 'bg-green-100' : ''}`}>
+                                    <input
+                                        type="checkbox"
+                                        className={`form-checkbox h-5 w-5 text-green-600 accent-green-600 ${disabled && 'cursor-not-allowed'}`}
+                                        checked={eje.IsPrioritarios}
+                                        onChange={(e) => handleCheck(e, eje.EjeId, seleccionados)}
+                                        disabled={disabled}
+                                        id={`checkbox-${eje.EjeId}`}
+                                    />
+                                    <label
+                                        htmlFor={`checkbox-${eje.EjeId}`}
+                                        className={`mb-0  w-full ${eje.IsPrioritarios ? 'text-green-700 font-semibold' : ''} ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                    >
+                                        {i18n.language === 'es' ? eje.NameEs : eje.NameEu}
+                                    </label>
+                                </li>
+                            );
+                        })}
                 </ul>
             </div>
         </div>

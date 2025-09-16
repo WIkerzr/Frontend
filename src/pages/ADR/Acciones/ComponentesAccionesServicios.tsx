@@ -58,7 +58,8 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
             setIdEjeSeleccionado(ejesPlan[0].Id);
         }
         if (showModal && acciones === 'Acciones') {
-            const ejesRegion = sessionStorage.getItem('ejesRegion');
+            const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+            const ejesRegion = ejes.ejesEstrategicos;
             if (!ejesRegion) {
                 LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading);
             }
@@ -181,7 +182,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones }) => {
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            <DropdownLineaActuaccion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} />
+                            <DropdownLineaActuaccion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={idEjeSeleccionado} ejesPlan={ejesPlan} tipoAccion={acciones} />
                         </div>
                     </div>
                     <div className="flex">
@@ -254,8 +255,8 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 
     const handleEdit = async (id: string) => {
         setLoading(true);
-        const ejesRegion = sessionStorage.getItem('ejesRegion');
-
+        const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+        const ejesRegion = ejes.ejesEstrategicos;
         if (!ejesRegion) {
             await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
         }
@@ -536,12 +537,17 @@ interface DropdownLineaActuacionProps {
     idEjeSeleccionado: string | undefined;
     lineaActuaccion?: string;
     ejesPlan: Ejes[];
+    tipoAccion: TiposAccion;
 }
 
-export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan }: DropdownLineaActuacionProps) => {
+export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan, tipoAccion }: DropdownLineaActuacionProps) => {
     const { regionSeleccionada } = useRegionContext();
     const { t, i18n } = useTranslation();
-    const [ejes, setEjes] = useState<EjesBBDD[]>();
+    const [ejesEstrategicos, setEjesEstrategico] = useState<EjesBBDD[]>();
+    const [ejesGlobales, setEjesGlobales] = useState<EjesBBDD[]>();
+
+    const [ejesEnDropdown, setEjesEnDropdown] = useState<EjesBBDD[]>();
+
     const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
     const [textoFecha, setTextoFecha] = useState<string>('');
 
@@ -552,26 +558,35 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
     const [fechaUltimoActualizadoBBDD, setFechaUltimoActualizadoBBDD] = useState<Date>(() => {
         const fechaStr = obtenerFechaLlamada('ejesRegion');
         if (fechaStr) {
-            const ejesRegion = sessionStorage.getItem('ejesRegion');
+            const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+            const ejesRegion = tipoAccion === 'Acciones' ? ejes.ejesEstrategicos : ejes.ejesGlobales;
             if (!ejesRegion) return new Date();
 
-            setEjes(JSON.parse(ejesRegion));
+            setEjesEnDropdown(JSON.parse(ejesRegion));
         }
         return fechaStr ? new Date(fechaStr) : new Date();
     });
 
     const cargarEjes = () => {
-        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjes, setFechaUltimoActualizadoBBDD);
+        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesEstrategico, setFechaUltimoActualizadoBBDD, setEjesGlobales);
     };
 
     useEffect(() => {
+        if (tipoAccion != 'Acciones') {
+            setEjesEnDropdown(ejesGlobales);
+        } else {
+            setEjesEnDropdown(ejesEstrategicos);
+        }
+    }, []);
+
+    useEffect(() => {
         //TODO Temporal
-        if (ejes && idEjeSeleccionado && idEjeSeleccionado != '') {
+        if (ejesEnDropdown && idEjeSeleccionado && idEjeSeleccionado != '') {
             const index = ejesPlan.findIndex((eje) => eje.Id === idEjeSeleccionado);
             const datosEje = ejesPlan[index];
-            let lineaActuacion = ejes.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
+            let lineaActuacion = ejesEnDropdown.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
             if (!lineaActuacion) {
-                lineaActuacion = ejes.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
+                lineaActuacion = ejesEnDropdown.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
             }
             if (lineaActuacion) {
                 setLineaActuaciones(lineaActuacion.map((la) => la.Title));
@@ -591,7 +606,7 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
         //         setLineaActuaciones(lineasActuaciones.map((la) => la.Title));
         //     }
         // }
-    }, [idEjeSeleccionado, ejes]);
+    }, [idEjeSeleccionado, ejesEnDropdown]);
 
     useEffect(() => {
         setTextoFecha(`${t('Actualizar')} ${t('LineasdeActuaccion')} ${PrintFechaTexto({ date: fechaUltimoActualizadoBBDD, idioma: i18n })}`);

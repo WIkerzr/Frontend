@@ -62,7 +62,8 @@ const Index: React.FC = () => {
 
     const handleEdit = async (accion: DatosAccion) => {
         setLoading(true);
-        const ejesRegion = sessionStorage.getItem('ejesRegion');
+        const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+        const ejesRegion = ejes.ejesEstrategicos;
 
         try {
             if (accion.ejeId) {

@@ -75,6 +75,14 @@ export interface EjeBBDD {
     IsPrioritarios: boolean;
     Acciones: DatosAccionDTO[];
 }
+export interface EjeSeleccion {
+    Id: number;
+    NameEs: string;
+    NameEu: string;
+    IsActive: boolean;
+    PlanId: number;
+    IsPrioritarios: boolean;
+}
 export interface EjeIndicadorBBDD {
     EjeId: string;
     NameEs: string;
