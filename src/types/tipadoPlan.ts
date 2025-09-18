@@ -59,7 +59,6 @@ export interface Ejes {
 }
 
 export interface EjesBBDD {
-    AccionesDTO: never[];
     EjeId: string;
     NameEs: string;
     NameEu: string;
@@ -104,6 +103,7 @@ export interface EjeIndicadorBBDD {
 export interface Plan {
     id: string;
     ejes: Ejes[];
+    ejesRestantes?: Ejes[];
     ejesPrioritarios: Ejes[];
     introduccion: string;
     proceso: string;
@@ -113,6 +113,7 @@ export interface Plan {
 export interface PlanDTO {
     Id: string;
     Ejes?: EjesBBDD[];
+    EjesRestantes?: EjesBBDD[];
     EjesPrioritarios?: EjesBBDD[];
     Introduccion: string;
     Proceso: string;

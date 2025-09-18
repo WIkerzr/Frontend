@@ -16,11 +16,12 @@ import { useRegionContext } from '../../../contexts/RegionContext';
 import MyEditableDropdown from '../../../components/Utils/inputs';
 import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { Loading } from '../../../components/Utils/animations';
-import { EjesBBDD } from '../../../types/tipadoPlan';
+import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
 import React from 'react';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../../components/Icon/IconRefresh';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
+import { EjesBBDDToEjes } from '../EjesHelpers';
 
 interface ModalAccionProps {
     acciones: TiposAccion;
@@ -29,7 +30,7 @@ interface ModalAccionProps {
 
 export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones }) => {
     const { t, i18n } = useTranslation();
-    const { yearData, AgregarAccion, AgregarAccionAccesoria } = useYear();
+    const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
@@ -55,14 +56,14 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     };
 
     useEffect(() => {
-        let rellenarEjes: EjesBBDD[] = [];
         if (!loading && condicionalReturn(ejesPlan)) {
+            let rellenarEjes: EjesBBDD[] = [];
             const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
             const ejes = acciones === 'Acciones' ? (ejesStore.ejesEstrategicos ? ejesStore.ejesEstrategicos.filter((e) => e.IsPrioritarios) : []) : ejesStore.ejesGlobales;
             setEjesPlan(ejes ?? []);
             rellenarEjes = ejes ?? [];
 
-            if (condicionalReturn(rellenarEjes) || (acciones === 'AccionesAccesorias' && ejesPlan.length < yearData.plan.ejes.length) || (acciones === 'Acciones' && ejesPlan.length > 3)) {
+            if (condicionalReturn(rellenarEjes) || (acciones === 'AccionesAccesorias' && rellenarEjes.length < yearData.plan.ejes.length) || (acciones === 'Acciones' && rellenarEjes.length > 3)) {
                 if (acciones === 'Acciones') {
                     LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan);
                 } else {
@@ -109,6 +110,16 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         return accionesPorEje.map(() => false);
     }
 
+    useEffect(() => {
+        if (acciones != 'Acciones') {
+            const idsPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((eje: Ejes) => eje.Id);
+            const nuevoDropdown = ejesPlan.filter((eje: EjesBBDD) => !idsPrioritarios.includes(`${eje.EjeId}`));
+            if (JSON.stringify(nuevoDropdown) !== JSON.stringify(ejesPlan)) {
+                setEjesPlan(nuevoDropdown);
+            }
+        }
+    }, [ejesPlan]);
+
     //limites Acciones
     useEffect(() => {
         if (acciones === 'AccionesAccesorias') {
@@ -153,16 +164,14 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }, [yearData]);
 
     const handleNuevaAccion = () => {
+        console.log(nuevaLineaActuaccion);
+
         if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
             setInputError(true);
             return;
         }
 
-        if (acciones === 'Acciones') {
-            AgregarAccion(acciones, `${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual);
-        } else {
-            AgregarAccionAccesoria(`${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual);
-        }
+        AgregarAccion(acciones, `${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual);
 
         setIdEjeSeleccionado('');
         setNuevaAccion('');
@@ -226,7 +235,12 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
                     <div>
                         <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
                         <div style={{ position: 'relative', minHeight: 40 }}>
-                            <DropdownLineaActuaccion setNuevaLineaActuaccion={setNuevaLineaActuaccion} idEjeSeleccionado={`${idEjeSeleccionado}`} ejesPlan={ejesPlan} tipoAccion={acciones} />
+                            <DropdownLineaActuaccion
+                                setNuevaLineaActuaccion={setNuevaLineaActuaccion}
+                                idEjeSeleccionado={`${idEjeSeleccionado}`}
+                                ejesPlan={EjesBBDDToEjes(ejesPlan)}
+                                tipoAccion={acciones}
+                            />
                         </div>
                     </div>
                     <div className="flex">
@@ -580,18 +594,22 @@ interface DropdownLineaActuacionProps {
     setNuevaLineaActuaccion: (val: string) => void;
     idEjeSeleccionado: string | undefined;
     lineaActuaccion?: string;
-    ejesPlan: EjesBBDD[];
+    ejesPlan: Ejes[];
     tipoAccion: TiposAccion;
 }
 
 export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccionado, lineaActuaccion, ejesPlan, tipoAccion }: DropdownLineaActuacionProps) => {
     const { regionSeleccionada } = useRegionContext();
+
     const { t, i18n } = useTranslation();
+    const esAccion = tipoAccion === 'Acciones';
+    const esAccionAccesoria = tipoAccion === 'AccionesAccesorias';
 
-    const [ejesEnDropdown, setEjesEnDropdown] = useState<EjesBBDD[]>(ejesPlan);
+    const [ejesEnDropdown, setEjesEnDropdown] = useState<Ejes[]>(ejesPlan);
 
-    const setAccion = tipoAccion === 'Acciones' ? setEjesEnDropdown : undefined;
-    const setAccionAccesoria = tipoAccion === 'AccionesAccesorias' ? setEjesEnDropdown : undefined;
+    const setAccion: ((data: EjesBBDD[]) => void) | undefined = esAccion ? (data: EjesBBDD[]) => setEjesEnDropdown(EjesBBDDToEjes(data)) : undefined;
+
+    const setAccionAccesoria: ((data: EjesBBDD[]) => void) | undefined = esAccionAccesoria ? (data: EjesBBDD[]) => setEjesEnDropdown(EjesBBDDToEjes(data)) : undefined;
 
     const [lineaActuaciones, setLineaActuaciones] = useState<string[]>([]);
     const [textoFecha, setTextoFecha] = useState<string>('');
@@ -611,7 +629,7 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
 
     useEffect(() => {
         if (ejesEnDropdown && idEjeSeleccionado && idEjeSeleccionado != '') {
-            const index = ejesPlan.findIndex((eje) => `${eje.EjeId}` === idEjeSeleccionado);
+            const index = ejesPlan.findIndex((eje) => `${eje.Id}` === `${idEjeSeleccionado}`);
             const datosEje = ejesPlan[index];
 
             let lineaActuacion = ejesEnDropdown.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;

@@ -234,7 +234,7 @@ export const accionesTransformadasBackAFront = (
         return {
             id: checkData(accion?.Id, 'Id', '0'),
             accion: checkData(accion?.Nombre, 'Nombre'),
-            lineaActuaccion: checkData(accion?.LineaActuaccion, 'LineaActuaccion'),
+            lineaActuaccion: checkData(accion?.LineaAcctuacion, 'LineaAcctuacion'),
             plurianual: checkData(accion?.Plurianual, 'Plurianual', 'false'),
             indicadorAccion: {
                 indicadoreRealizacion: indicadorRealizacionAccion,
@@ -301,34 +301,15 @@ export const convertirEje = (eje: EjeBBDD2, listadoRealizacion: { id: number; no
     acciones: accionesTransformadasBackAFront(eje, listadoRealizacion, listadoResultado),
 });
 
-export const clasificarEjes = (
-    ejesBBDD: EjeBBDD2[],
-    listadoRealizacion: { id: number; nombre: string }[],
-    listadoResultado: { id: number; nombre: string }[]
-): { ejes: Ejes[]; ejesPrioritarios: Ejes[] } => {
-    const ejes: Ejes[] = [];
-    const ejesPrioritarios: Ejes[] = [];
-
-    ejesBBDD.forEach((eje) => {
-        const item = convertirEje(eje, listadoRealizacion, listadoResultado);
-        if (eje.IsPrioritario) {
-            ejesPrioritarios.push(item);
-        } else {
-            ejes.push(item);
-        }
-    });
-
-    return { ejes, ejesPrioritarios };
-};
-
 export const construirYearData = (
     data: YearDataDTO,
     nombreRegionSeleccionada: string,
     planStatus: string,
     memoriaStatus: string,
     generalOperationADR: GeneralOperationADR,
-    ejes: Ejes[],
-    ejesPrioritarios: Ejes[]
+    ejesRestantes: Ejes[],
+    ejesPrioritarios: Ejes[],
+    ejes: Ejes[]
 ): YearData => {
     const servicios: Servicios[] = convertirServicios(data.Servicios);
 
@@ -337,7 +318,8 @@ export const construirYearData = (
         year: data.Year,
         plan: {
             id: `${data.Plan.Id}`,
-            ejes,
+            ejes: ejes,
+            ejesRestantes: ejesRestantes,
             ejesPrioritarios,
             introduccion: data.Plan.Introduccion,
             proceso: data.Plan.Proceso,

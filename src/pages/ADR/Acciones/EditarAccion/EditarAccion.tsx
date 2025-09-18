@@ -109,6 +109,13 @@ const Index: React.FC = () => {
         }
     }, [controlguardado]);
 
+    useEffect(() => {
+        setDatosEditandoAccion({
+            ...datosEditandoAccion!,
+            lineaActuaccion: lineaActuaccion,
+        });
+    }, [lineaActuaccion]);
+
     if (datosEditandoAccion.id === '0') {
         return;
     }
@@ -154,6 +161,7 @@ const Index: React.FC = () => {
         //     // alert(t('nombreDelServicioNoVacio'));
         //     alert(t('nombreDeLaAccionNoVacio'));
         // }
+
         GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
     };
 

@@ -235,7 +235,7 @@ export interface DatosMemoriaBack {
 export interface DatosAccionDTO {
     Id: number;
     Nombre: string;
-    LineaActuaccion: string;
+    LineaAcctuacion: string;
     Plurianual?: boolean;
     DatosPlanId?: number;
     DatosPlan?: DatosPlanDTO;

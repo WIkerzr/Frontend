@@ -37,7 +37,7 @@ const Index = () => {
     useEffect(() => {
         if (yearData && yearData.plan.ejesPrioritarios.length >= 1) {
             setLoading(false);
-            const combinados = [...yearData.plan.ejesPrioritarios, ...yearData.plan.ejes];
+            const combinados = [...yearData.plan.ejesPrioritarios, ...(yearData.plan.ejesRestantes ?? [])];
             const ordenados: EjesBBDD[] = combinados
                 .sort((a, b) => Number(a.Id) - Number(b.Id))
                 .map((eje) => ({
@@ -48,7 +48,6 @@ const Index = () => {
                     IsPrioritarios: eje.IsPrioritarios,
                     acciones: eje.acciones,
                     LineasActuaccion: eje.LineasActuaccion ? eje.LineasActuaccion : [],
-                    AccionesDTO: [],
                 }));
 
             setEjesEstrategicos(ordenados);

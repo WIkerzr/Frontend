@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { EjeBBDD, EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import {
     DatosAccion,
     DatosAccionDTO,
@@ -47,7 +47,6 @@ interface YearContextType {
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
-    AgregarAccionAccesoria: (ejeId: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
     GuardarLaEdicionAccion: (setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
@@ -377,7 +376,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         setSelectedId(idEje);
         LlamadasBBDD({
             method: 'POST',
-            url: `yearData/${yearData.plan.id}/${idEje}/newAction`,
+            url: `yearData/${yearData.plan.id}/${idEje}/newAction/${tipo === 'AccionesAccesorias' ? 'proyectos' : ''}`,
             setLoading: setLoadingYearData,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
             setErrorMessage: setErrorMessageYearData,
@@ -388,7 +387,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 Plurianual: plurianual,
             },
             onSuccess: (response) => {
-                const actualizarEjes = (ejes: typeof yearData.plan.ejesPrioritarios | typeof yearData.plan.ejes) =>
+                const actualizarEjes = (ejes: Ejes[]) =>
                     ejes.map((eje) =>
                         eje.Id === ejeSeleccionado.Id
                             ? {
@@ -406,31 +405,9 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     plan: {
                         ...yearData.plan,
                         ejesPrioritarios: tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesPrioritarios) : yearData.plan.ejesPrioritarios,
+                        ejesRestantes: yearData.plan.ejesRestantes ? (tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesRestantes) : yearData.plan.ejesRestantes) : [],
                         ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
                     },
-                });
-            },
-        });
-    };
-
-    const AgregarAccionAccesoria = (ejeId: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
-        LlamadasBBDD({
-            method: 'POST',
-            url: `yearData/${yearData.plan.id}/${ejeId}/newAction`,
-            setLoading: setLoadingYearData,
-            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-            setErrorMessage: setErrorMessageYearData,
-            setSuccessMessage: setSuccessMessageYearData,
-            body: {
-                Nombre: nuevaAccion,
-                LineaActuaccion: nuevaLineaActuaccion,
-                Plurianual: plurianual,
-            },
-            onSuccess: (response) => {
-                const datosAccion: DatosAccionDTO = response.data;
-                setYearData({
-                    ...yearData,
-                    accionesAccesorias: [{ id: `${datosAccion.Id}`, accion: nuevaAccion, lineaActuaccion: nuevaLineaActuaccion, plurianual }],
                 });
             },
         });
@@ -451,7 +428,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             body: {
                 Id: Number(datosEditandoAccion.id),
                 Nombre: datosEditandoAccion.accion,
-                LineaActuaccion: datosEditandoAccion.lineaActuaccion,
+                LineaAcctuacion: datosEditandoAccion.lineaActuaccion,
                 Plurianual: datosEditandoAccion.plurianual,
                 DatosPlanId: DatosPlan.Id ? Number(DatosPlan.Id) : undefined,
                 DatosPlan: DatosPlan,
@@ -542,6 +519,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
         const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
         const ejesPrioritarios: Ejes[] = [];
+        const ejesRestantes: Ejes[] = [];
         const ejes: Ejes[] = [];
         if (ModoDev) {
             console.log('Llamada Year Data');
@@ -576,15 +554,27 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 IsAccessory: eje.IsAccessory,
                 acciones: acciones,
             };
-
             if (eje.IsPrioritario) {
                 ejesPrioritarios.push(nuevoEje);
             } else {
-                ejes.push(nuevoEje);
+                ejesRestantes.push(nuevoEje);
             }
         });
+        data.data.EjesGlobales.forEach((eje: EjeBBDD) => {
+            const nuevoEje: Ejes = {
+                Id: `${eje.Id}`,
+                NameEs: eje.NameEs,
+                NameEu: eje.NameEu,
+                IsActive: eje.IsActive,
+                IsAccessory: true,
+                IsPrioritarios: false,
+                acciones: [],
+            };
 
-        const dotosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejes, ejesPrioritarios);
+            ejes.push(nuevoEje);
+        });
+
+        const dotosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejesRestantes, ejesPrioritarios, ejes);
         if (ModoDev) {
             console.log('dotosAnio');
             console.log('dotosAnio');
@@ -729,7 +719,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 fechaUltimoActualizadoBBDDYearData,
                 setDatosEditandoAccion,
                 AgregarAccion,
-                AgregarAccionAccesoria,
                 GuardarLaEdicionAccion,
                 EliminarAccion,
                 AgregarServicio,

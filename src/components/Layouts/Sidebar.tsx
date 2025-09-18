@@ -22,7 +22,7 @@ import { UserRole } from '../../types/users';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccion/EditarAccionComponent';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
-import { Fases } from '../Utils/data/controlDev';
+import { Fases, ModoDev } from '../Utils/data/controlDev';
 import { useEstadosPorAnioContext } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { Loading } from '../Utils/animations';
@@ -256,6 +256,32 @@ const Sidebar = () => {
                             {Fases >= 2 && <SelectorAnio />}
                             <MenuADRLateral />
                         </ul>
+                        {ModoDev && (
+                            <div className="flex flex-col items-center justify-center gap-2">
+                                <label>ejesRestantes {yearData.plan.ejesRestantes ? yearData.plan.ejesRestantes.length : 0}</label>
+                                <select>
+                                    {yearData.plan.ejesRestantes
+                                        ? yearData.plan.ejesRestantes.length > 0
+                                            ? yearData.plan.ejesRestantes.map((a) => (
+                                                  <option key={a.Id} value={a.Id}>
+                                                      {a.Id}
+                                                  </option>
+                                              ))
+                                            : null
+                                        : []}
+                                </select>
+                                <label>ejes {yearData.plan.ejes.length}</label>
+                                <select>
+                                    {yearData.plan.ejes.length > 0
+                                        ? yearData.plan.ejes.map((a) => (
+                                              <option key={a.Id} value={a.Id}>
+                                                  {a.Id}
+                                              </option>
+                                          ))
+                                        : null}
+                                </select>
+                            </div>
+                        )}
                     </PerfectScrollbar>
                 </div>
             </nav>
