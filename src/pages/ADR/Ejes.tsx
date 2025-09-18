@@ -77,19 +77,18 @@ const Index = () => {
         if (!ejesEstrategicos) {
             return;
         }
-        const body: EjeSeleccion[] = ejesEstrategicos
-            .sort((a, b) => Number(a.EjeId) - Number(b.EjeId))
-            .map((eje) => ({
-                Id: Number(eje.EjeId),
-                NameEs: eje.NameEs,
-                NameEu: eje.NameEu,
-                IsActive: eje.IsActive,
-                PlanId: Number(yearData.plan.id),
-                IsPrioritarios: eje.IsPrioritarios,
-            }));
+        const body: EjeSeleccion = {
+            PlanId: Number(yearData.plan.id),
+            ejesGlobales: ejesEstrategicos
+                .sort((a, b) => Number(a.EjeId) - Number(b.EjeId))
+                .map((eje) => ({
+                    Id: Number(eje.EjeId),
+                    IsPrioritarios: eje.IsPrioritarios,
+                })),
+        };
         LlamadasBBDD({
             method: 'POST',
-            url: `yearData/${Number(regionSeleccionada)}/${anioSeleccionada}/axes`,
+            url: `yearData/saveAxes`,
             setLoading,
             setErrorMessage,
             setSuccessMessage,
@@ -126,7 +125,7 @@ const Index = () => {
                     }
                 />
                 <div className="flex justify-between items-center mb-2">
-                    <div>{errorMessage && <ErrorMessage message={errorMessage} />}</div>
+                    <div>{(!ejesEstrategicos || ejesEstrategicos.length === 0) && errorMessage && <ErrorMessage message={errorMessage} />}</div>
                     {!locked && (
                         <div className="flex items-center space-x-2">
                             <PrintFecha date={fechaUltimoActualizadoBBDD} />
@@ -147,9 +146,6 @@ const Index = () => {
                             const contieneAcciones = eje.IsPrioritarios ? eje.acciones?.length > 0 : false;
                             const seleccionados = ejesEstrategicos.filter((e) => e.IsPrioritarios).length >= 3;
                             const disabled = contieneAcciones || (eje.IsPrioritarios ? false : seleccionados);
-                            if (eje.NameEs == 'Oferta de vivienda') {
-                                console.log(eje.NameEs);
-                            }
                             return (
                                 <li key={eje.EjeId} className={`flex items-center p-2 rounded transition ${eje.IsPrioritarios ? 'bg-green-100' : ''}`}>
                                     <input

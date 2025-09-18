@@ -53,6 +53,7 @@ export interface Ejes {
     NameEu: string;
     IsActive: boolean;
     IsPrioritarios: boolean;
+    IsAccessory: boolean;
     acciones: DatosAccion[];
     LineasActuaccion?: LineasActuaccion[];
 }
@@ -75,13 +76,24 @@ export interface EjeBBDD {
     IsPrioritarios: boolean;
     Acciones: DatosAccionDTO[];
 }
-export interface EjeSeleccion {
+export interface EjeBBDD2 {
     Id: number;
-    NameEs: string;
-    NameEu: string;
-    IsActive: boolean;
+    EjeGlobal: {
+        Id: number;
+        NameEs: string;
+        NameEu: string;
+        IsActive: boolean;
+    };
+    IsPrioritario: boolean;
+    IsAccessory: boolean;
+    Acciones: DatosAccionDTO[];
+}
+export interface EjeSeleccion {
     PlanId: number;
-    IsPrioritarios: boolean;
+    ejesGlobales: {
+        Id: number;
+        IsPrioritarios: boolean;
+    }[];
 }
 export interface EjeIndicadorBBDD {
     EjeId: string;

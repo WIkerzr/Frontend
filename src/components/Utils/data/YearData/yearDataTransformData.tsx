@@ -11,7 +11,7 @@ import {
     IndicadorRealizacionAccionDTO,
     IndicadorResultadoAccionDTO,
 } from '../../../../types/TipadoAccion';
-import { EjeBBDD, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, OperationalIndicatorsDTO, YearData, YearDataDTO } from '../../../../types/tipadoPlan';
+import { EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, OperationalIndicatorsDTO, YearData, YearDataDTO } from '../../../../types/tipadoPlan';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const checkData = (value: any, name: string, defaultValue = ''): any => {
@@ -221,7 +221,7 @@ export const transformIndicadoresResultado = (listadoNombresIndicadoresResultado
     }));
 
 export const accionesTransformadasBackAFront = (
-    eje: EjeBBDD,
+    eje: EjeBBDD2,
     listadoNombresIndicadoresRealizacion: { id: number; nombre: string }[],
     listadoNombresIndicadoresResultado: { id: number; nombre: string }[]
 ): DatosAccion[] =>
@@ -240,13 +240,13 @@ export const accionesTransformadasBackAFront = (
                 indicadoreRealizacion: indicadorRealizacionAccion,
                 indicadoreResultado: indicadorResultadoAccion,
             },
-            ejeEs: eje.NameEs,
-            ejeEu: eje.NameEu,
+            ejeEs: eje.EjeGlobal.NameEs,
+            ejeEu: eje.EjeGlobal.NameEu,
             DatosPlanId: `${accion.DatosPlanId}`,
             DatosMemoriaId: `${accion.DatosMemoriaId}`,
             datosPlan: dataPlan,
             datosMemoria: dataMemoria,
-            ejeId: eje.Id,
+            ejeId: `${eje.EjeGlobal.Id}`,
         };
     });
 
@@ -291,17 +291,18 @@ export const convertirServicios = (serviciosDTO: ServiciosDTO[]): Servicios[] =>
         indicadores: convertirIndicadoresServicios(s.IndicadoresServicios ?? []),
     }));
 
-export const convertirEje = (eje: EjeBBDD, listadoRealizacion: { id: number; nombre: string }[], listadoResultado: { id: number; nombre: string }[]): Ejes => ({
+export const convertirEje = (eje: EjeBBDD2, listadoRealizacion: { id: number; nombre: string }[], listadoResultado: { id: number; nombre: string }[]): Ejes => ({
     Id: `${eje.Id}`,
-    NameEs: `${eje.NameEs}`,
-    NameEu: `${eje.NameEu}`,
-    IsActive: eje.IsActive,
-    IsPrioritarios: eje.IsPrioritarios,
+    NameEs: eje.EjeGlobal.NameEs,
+    NameEu: eje.EjeGlobal.NameEu,
+    IsActive: eje.EjeGlobal.IsActive,
+    IsPrioritarios: eje.IsPrioritario,
+    IsAccessory: eje.IsAccessory,
     acciones: accionesTransformadasBackAFront(eje, listadoRealizacion, listadoResultado),
 });
 
 export const clasificarEjes = (
-    ejesBBDD: EjeBBDD[],
+    ejesBBDD: EjeBBDD2[],
     listadoRealizacion: { id: number; nombre: string }[],
     listadoResultado: { id: number; nombre: string }[]
 ): { ejes: Ejes[]; ejesPrioritarios: Ejes[] } => {
@@ -310,7 +311,7 @@ export const clasificarEjes = (
 
     ejesBBDD.forEach((eje) => {
         const item = convertirEje(eje, listadoRealizacion, listadoResultado);
-        if (eje.IsPrioritarios) {
+        if (eje.IsPrioritario) {
             ejesPrioritarios.push(item);
         } else {
             ejes.push(item);

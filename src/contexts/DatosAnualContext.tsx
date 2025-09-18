@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { EjeBBDD, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import {
     DatosAccion,
     DatosAccionDTO,
@@ -47,6 +47,7 @@ interface YearContextType {
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
+    AgregarAccionAccesoria: (ejeId: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
     GuardarLaEdicionAccion: (setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
@@ -370,7 +371,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
         const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
-        const ejeSeleccionado = fuenteEjes.find((eje) => eje.Id === idEje);
+        const ejeSeleccionado = fuenteEjes.find((eje) => `${eje.Id}` === idEje);
         if (!ejeSeleccionado) return;
 
         setSelectedId(idEje);
@@ -407,6 +408,29 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ejesPrioritarios: tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesPrioritarios) : yearData.plan.ejesPrioritarios,
                         ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
                     },
+                });
+            },
+        });
+    };
+
+    const AgregarAccionAccesoria = (ejeId: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
+        LlamadasBBDD({
+            method: 'POST',
+            url: `yearData/${yearData.plan.id}/${ejeId}/newAction`,
+            setLoading: setLoadingYearData,
+            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+            setErrorMessage: setErrorMessageYearData,
+            setSuccessMessage: setSuccessMessageYearData,
+            body: {
+                Nombre: nuevaAccion,
+                LineaActuaccion: nuevaLineaActuaccion,
+                Plurianual: plurianual,
+            },
+            onSuccess: (response) => {
+                const datosAccion: DatosAccionDTO = response.data;
+                setYearData({
+                    ...yearData,
+                    accionesAccesorias: [{ id: `${datosAccion.Id}`, accion: nuevaAccion, lineaActuaccion: nuevaLineaActuaccion, plurianual }],
                 });
             },
         });
@@ -514,6 +538,63 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
+    const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean) => {
+        const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
+        const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
+        const ejesPrioritarios: Ejes[] = [];
+        const ejes: Ejes[] = [];
+        if (ModoDev) {
+            console.log('Llamada Year Data');
+            console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
+            console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
+        }
+        const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
+        const generalOperationADR: GeneralOperationADR = convertirGeneralOperationADR(generalOperationADRDTO);
+
+        data.data.Plan.Ejes.forEach((eje: EjeBBDD2) => {
+            let acciones: DatosAccion[] = [];
+            if (todasLasAcciones) {
+                acciones = accionesTransformadasBackAFront(eje, ListadoNombresIdicadoresSegunADR('realizacion'), ListadoNombresIdicadoresSegunADR('resultado'));
+            } else {
+                acciones = eje.Acciones.map((accion: any) => ({
+                    id: `${accion.Id}`,
+                    accion: accion.Nombre,
+                    ejeEs: eje.EjeGlobal.NameEs,
+                    ejeEu: eje.EjeGlobal.NameEu,
+                    lineaActuaccion: accion.LineaActuaccion,
+                    plurianual: accion.Plurianual,
+                    camposFaltantes: accion.CamposFaltantes,
+                }));
+            }
+
+            const nuevoEje = {
+                Id: `${eje.Id}`,
+                NameEs: eje.EjeGlobal.NameEs,
+                NameEu: eje.EjeGlobal.NameEu,
+                IsActive: eje.EjeGlobal.IsActive,
+                IsPrioritarios: eje.IsPrioritario,
+                IsAccessory: eje.IsAccessory,
+                acciones: acciones,
+            };
+
+            if (eje.IsPrioritario) {
+                ejesPrioritarios.push(nuevoEje);
+            } else {
+                ejes.push(nuevoEje);
+            }
+        });
+
+        const dotosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejes, ejesPrioritarios);
+        if (ModoDev) {
+            console.log('dotosAnio');
+            console.log('dotosAnio');
+        }
+        setYearData(dotosAnio);
+        if (retornarDatos) {
+            return dotosAnio;
+        }
+        return undefined;
+    };
     const llamadaBBDDYearData = (anioSeleccionada: number, ignorarStorage: boolean) => {
         const stored = sessionStorage.getItem('DataYear');
         if (stored && !ignorarStorage) {
@@ -531,49 +612,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage: setErrorMessageYearData,
             setSuccessMessage: setSuccessMessageYearData,
             onSuccess: (data: any) => {
-                const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
-                const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
-                const ejesPrioritarios: Ejes[] = [];
-                const ejes: Ejes[] = [];
-                if (ModoDev) {
-                    console.log('Llamada Year Data');
-                    console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
-                    console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
-                }
-                const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
-                const generalOperationADR: GeneralOperationADR = convertirGeneralOperationADR(generalOperationADRDTO);
-
-                data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
-                    const item = {
-                        Id: `${eje.Id}`,
-                        NameEs: `${eje.NameEs}`,
-                        NameEu: `${eje.NameEu}`,
-                        IsActive: eje.IsActive,
-                        IsPrioritarios: eje.IsPrioritarios,
-                        acciones: eje.Acciones.map((accion: any) => ({
-                            id: `${accion.Id}`,
-                            accion: accion.Nombre,
-                            ejeEs: eje.NameEs,
-                            ejeEu: eje.NameEu,
-                            lineaActuaccion: accion.LineaActuaccion,
-                            plurianual: accion.Plurianual,
-                            camposFaltantes: accion.CamposFaltantes,
-                        })),
-                    };
-
-                    if (eje.IsPrioritarios) {
-                        ejesPrioritarios.push(item);
-                    } else {
-                        ejes.push(item);
-                    }
-                });
-
-                const dotosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejes, ejesPrioritarios);
-                if (ModoDev) {
-                    console.log('dotosAnio');
-                    console.log('dotosAnio');
-                }
-                setYearData(dotosAnio);
+                onSuccessYearData(data, false, false);
             },
         });
     };
@@ -588,41 +627,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 setErrorMessage: setErrorMessageYearData,
                 setSuccessMessage: setSuccessMessageYearData,
                 onSuccess: (data: any) => {
-                    const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
-                    const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
-                    if (ModoDev) {
-                        console.log('Llamada Year Data');
-                        console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
-                        console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
+                    const datosAnio: YearData | undefined = onSuccessYearData(data, true, true);
+                    if (datosAnio) {
+                        if (retornarDatos) resolve(datosAnio);
                     }
-
-                    const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
-                    const generalOperationADR: GeneralOperationADR = convertirGeneralOperationADR(generalOperationADRDTO);
-
-                    const ejesPrioritarios: Ejes[] = [];
-                    const ejes: Ejes[] = [];
-                    data.data.Plan.Ejes.forEach((eje: EjeBBDD) => {
-                        const item = {
-                            Id: `${eje.Id}`,
-                            NameEs: `${eje.NameEs}`,
-                            NameEu: `${eje.NameEu}`,
-                            IsActive: eje.IsActive,
-                            IsPrioritarios: eje.IsPrioritarios,
-                            acciones: accionesTransformadasBackAFront(eje, ListadoNombresIdicadoresSegunADR('realizacion'), ListadoNombresIdicadoresSegunADR('resultado')),
-                        };
-
-                        if (eje.IsPrioritarios) {
-                            ejesPrioritarios.push(item);
-                        } else {
-                            ejes.push(item);
-                        }
-                    });
-
-                    const datosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejes, ejesPrioritarios);
-
-                    setYearData(datosAnio);
-
-                    if (retornarDatos) resolve(datosAnio);
                     return undefined;
                 },
             });
@@ -721,6 +729,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 fechaUltimoActualizadoBBDDYearData,
                 setDatosEditandoAccion,
                 AgregarAccion,
+                AgregarAccionAccesoria,
                 GuardarLaEdicionAccion,
                 EliminarAccion,
                 AgregarServicio,

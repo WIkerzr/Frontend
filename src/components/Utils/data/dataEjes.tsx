@@ -74,8 +74,8 @@ export const LlamadaBBDDEjesRegion = async (
                     sessionStorage.setItem(
                         'ejesRegion',
                         JSON.stringify({
-                            ejesEstrategicos: JSON.stringify(datosEstrategicosOrdenados),
-                            ejesGlobales: JSON.stringify(datosOrdenadosTodosLosEjes),
+                            ejesEstrategicos: datosEstrategicosOrdenados,
+                            ejesGlobales: datosOrdenadosTodosLosEjes,
                         })
                     );
 
@@ -101,6 +101,7 @@ export const LlamadaBBDDEjesRegion = async (
     });
 };
 
+//TODO sin utilizar temporalmente planeado para plan y/o memoria
 export const LlamadaBBDDTodosEjes = async (
     regionSeleccionada: string | null,
     t: (key: string) => string,
