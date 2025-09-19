@@ -218,29 +218,37 @@ const Index: React.FC = () => {
     const validarAntesDeGuardar = () => {
         if (!datosEditandoServicio) return;
 
-        const nuevosErroresIndicadores = datosEditandoServicio.indicadores.map((ind) => [
-            editarPlan && !ind.indicador.trim(),
-            editarPlan && !ind.previsto.valor.trim(),
-            !editarPlan && editarMemoria && !ind.alcanzado?.valor.trim(),
-        ]);
+        //TODO Sin validacion servicios hasta nuevo aviso
+        setErroresGenerales({
+            nombre: false,
+            descripcion: false,
+            dSeguimiento: false,
+            valFinal: false,
+        });
+        setErroresIndicadores([]);
+        // const nuevosErroresIndicadores = datosEditandoServicio.indicadores.map((ind) => [
+        //     editarPlan && !ind.indicador.trim(),
+        //     editarPlan && !ind.previsto.valor.trim(),
+        //     !editarPlan && editarMemoria && !ind.alcanzado?.valor.trim(),
+        // ]);
 
-        const nuevosErroresGenerales = {
-            nombre: !datosEditandoServicio.nombre.trim(),
-            descripcion: !datosEditandoServicio.descripcion.trim(),
-            dSeguimiento: !editarPlan && editarMemoria && !datosEditandoServicio.dSeguimiento?.trim(),
-            valFinal: !editarPlan && editarMemoria && !datosEditandoServicio.valFinal?.trim(),
-        };
+        // const nuevosErroresGenerales = {
+        //     nombre: !datosEditandoServicio.nombre.trim(),
+        //     descripcion: !datosEditandoServicio.descripcion.trim(),
+        //     dSeguimiento: !editarPlan && editarMemoria && !datosEditandoServicio.dSeguimiento?.trim(),
+        //     valFinal: !editarPlan && editarMemoria && !datosEditandoServicio.valFinal?.trim(),
+        // };
 
-        setErroresIndicadores(nuevosErroresIndicadores);
-        setErroresGenerales(nuevosErroresGenerales);
+        // setErroresIndicadores(nuevosErroresIndicadores);
+        // setErroresGenerales(nuevosErroresGenerales);
 
-        const hayErroresIndicadores = nuevosErroresIndicadores.some((fila) => fila.includes(true));
-        const hayErroresGenerales = Object.values(nuevosErroresGenerales).some((v) => v);
+        // const hayErroresIndicadores = nuevosErroresIndicadores.some((fila) => fila.includes(true));
+        // const hayErroresGenerales = Object.values(nuevosErroresGenerales).some((v) => v);
 
-        if (hayErroresIndicadores || hayErroresGenerales) {
-            alert(t('porFavorCompletaCamposObligatorios') || 'Por favor, completa todos los campos obligatorios.');
-            return;
-        }
+        // if (hayErroresIndicadores || hayErroresGenerales) {
+        //     alert(t('porFavorCompletaCamposObligatorios') || 'Por favor, completa todos los campos obligatorios.');
+        //     return;
+        // }
         hundleGuardarServicio();
     };
 

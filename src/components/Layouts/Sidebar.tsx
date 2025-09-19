@@ -257,30 +257,59 @@ const Sidebar = () => {
                             <MenuADRLateral />
                         </ul>
                         {ModoDev && (
-                            <div className="flex flex-col items-center justify-center gap-2">
-                                <label>ejesRestantes {yearData.plan.ejesRestantes ? yearData.plan.ejesRestantes.length : 0}</label>
-                                <select>
-                                    {yearData.plan.ejesRestantes
-                                        ? yearData.plan.ejesRestantes.length > 0
-                                            ? yearData.plan.ejesRestantes.map((a) => (
+                            <>
+                                <div className="flex flex-col items-center justify-center gap-2">
+                                    <label>ejesRestantes {yearData.plan.ejesRestantes ? yearData.plan.ejesRestantes.length : 0}</label>
+                                    <select>
+                                        {yearData.plan.ejesRestantes
+                                            ? yearData.plan.ejesRestantes.length > 0
+                                                ? yearData.plan.ejesRestantes.map((a) => (
+                                                      <option key={a.Id} value={a.Id}>
+                                                          {a.Id}
+                                                      </option>
+                                                  ))
+                                                : null
+                                            : []}
+                                    </select>
+                                    <label>ejes {yearData.plan.ejes.length}</label>
+                                    <select>
+                                        {yearData.plan.ejes.length > 0
+                                            ? yearData.plan.ejes.map((a) => (
                                                   <option key={a.Id} value={a.Id}>
                                                       {a.Id}
                                                   </option>
                                               ))
-                                            : null
-                                        : []}
-                                </select>
-                                <label>ejes {yearData.plan.ejes.length}</label>
-                                <select>
-                                    {yearData.plan.ejes.length > 0
-                                        ? yearData.plan.ejes.map((a) => (
-                                              <option key={a.Id} value={a.Id}>
-                                                  {a.Id}
-                                              </option>
-                                          ))
-                                        : null}
-                                </select>
-                            </div>
+                                            : null}
+                                    </select>
+                                </div>
+                                <div style={{ fontFamily: 'monospace' }}>
+                                    <h2>YearData Inspector</h2>
+
+                                    <details open>
+                                        <summary>Plan</summary>
+                                        <pre>{JSON.stringify(yearData.plan, null, 2)}</pre>
+                                    </details>
+
+                                    <details open>
+                                        <summary>Memoria</summary>
+                                        <pre>{JSON.stringify(yearData.memoria, null, 2)}</pre>
+                                    </details>
+
+                                    {yearData.accionesAccesorias && yearData.accionesAccesorias.length > 0 && (
+                                        <details>
+                                            <summary>Acciones Accesorias ({yearData.accionesAccesorias.length})</summary>
+                                            <pre>{JSON.stringify(yearData.accionesAccesorias, null, 2)}</pre>
+                                        </details>
+                                    )}
+
+                                    {yearData.servicios && yearData.servicios.length > 0 && (
+                                        <details>
+                                            <summary>Servicios ({yearData.servicios.length})</summary>
+                                            <pre>{JSON.stringify(yearData.servicios, null, 2)}</pre>
+                                        </details>
+                                    )}
+                                </div>
+                            </>
                         )}
                     </PerfectScrollbar>
                 </div>
