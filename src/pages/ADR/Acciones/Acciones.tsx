@@ -55,7 +55,7 @@ const Index: React.FC = () => {
                         </span>
                     </h2>
                 }
-                zonaBtn={<ModalAccion acciones="Acciones" numAcciones={yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length)} />}
+                zonaBtn={editarPlan ? <ModalAccion acciones="Acciones" numAcciones={yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length)} /> : <></>}
                 zonaExplicativa={
                     (editarPlan || editarMemoria) && (
                         <>

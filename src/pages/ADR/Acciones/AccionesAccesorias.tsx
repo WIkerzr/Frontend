@@ -106,7 +106,7 @@ const Index: React.FC = () => {
                         </span>
                     </h2>
                 }
-                zonaBtn={<ModalAccion acciones={'AccionesAccesorias'} />}
+                zonaBtn={editarPlan ? <ModalAccion acciones={'AccionesAccesorias'} /> : <></>}
                 // zonaExplicativa={(editarPlan || editarMemoria) && <></>}
             />
             <div className="w-full mx-auto mt-1 px-2">
