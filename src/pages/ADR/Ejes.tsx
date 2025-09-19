@@ -81,7 +81,7 @@ const Index = () => {
         const body: EjeSeleccion = {
             PlanId: Number(yearData.plan.id),
             ejesGlobales: ejesEstrategicos
-                .sort((a, b) => Number(a.EjeId) - Number(b.EjeId))
+                .sort((a, b) => a.NameEs.localeCompare(b.NameEs))
                 .map((eje) => ({
                     Id: Number(eje.EjeId),
                     IsPrioritarios: eje.IsPrioritarios,
