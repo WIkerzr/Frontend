@@ -146,22 +146,6 @@ const Index: React.FC = () => {
     };
 
     const handleSave = () => {
-        // if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
-        //     const camposFaltantes = VerificarAccionFinal(datosEditandoAccion, editarPlan, editarMemoria);
-        //     if (camposFaltantes && camposFaltantes.length === 0) {
-        //         GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
-        //     } else if (camposFaltantes && camposFaltantes.length > 0) {
-        //         const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
-        //         alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
-        //     }
-        // }
-        // if (datosEditandoAccion.accion !== '') {
-        //     GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
-        // } else {
-        //     // alert(t('nombreDelServicioNoVacio'));
-        //     alert(t('nombreDeLaAccionNoVacio'));
-        // }
-
         GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
     };
 

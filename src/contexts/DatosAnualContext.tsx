@@ -369,14 +369,14 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
-        const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
+        const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejesRestantes ?? [];
         const ejeSeleccionado = fuenteEjes.find((eje) => `${eje.Id}` === idEje);
         if (!ejeSeleccionado) return;
 
         setSelectedId(idEje);
         LlamadasBBDD({
             method: 'POST',
-            url: `yearData/${yearData.plan.id}/${idEje}/newAction/${tipo === 'AccionesAccesorias' ? 'proyectos' : ''}`,
+            url: `yearData/${yearData.plan.id}/${idEje}/newAction/${tipo === 'AccionesAccesorias' ? 'proyectos' : 'accion'}`,
             setLoading: setLoadingYearData,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
             setErrorMessage: setErrorMessageYearData,
@@ -405,8 +405,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     plan: {
                         ...yearData.plan,
                         ejesPrioritarios: tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesPrioritarios) : yearData.plan.ejesPrioritarios,
-                        ejesRestantes: yearData.plan.ejesRestantes ? (tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesRestantes) : yearData.plan.ejesRestantes) : [],
-                        ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
+                        ejesRestantes: yearData.plan.ejesRestantes ? actualizarEjes(yearData.plan.ejesRestantes) : [],
+                        //ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
                     },
                 });
             },

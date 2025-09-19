@@ -11,6 +11,7 @@ import { DatosAccion } from '../../../types/TipadoAccion';
 import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { useRegionContext } from '../../../contexts/RegionContext';
+import { Ejes } from '../../../types/tipadoPlan';
 
 const Index: React.FC = () => {
     const navigate = useNavigate();
@@ -26,8 +27,15 @@ const Index: React.FC = () => {
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
-
-        const data = yearData.plan.ejes.flatMap((eje) =>
+        const ejesRestantes = yearData.plan.ejesRestantes;
+        if (!ejesRestantes) {
+            return;
+        }
+        const ejesFiltrados: Ejes[] | undefined = ejesRestantes.filter((r) => r.IsAccessory === true);
+        if (!ejesFiltrados) {
+            return;
+        }
+        const data = ejesFiltrados.flatMap((eje) =>
             eje.acciones.map((accion) => ({
                 ...accion,
                 ejeId: eje.Id,

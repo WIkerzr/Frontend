@@ -21,7 +21,7 @@ import React from 'react';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../../components/Icon/IconRefresh';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
-import { EjesBBDDToEjes } from '../EjesHelpers';
+import { EjesBBDDToEjes, EjesToEjesBBDD } from '../EjesHelpers';
 
 interface ModalAccionProps {
     acciones: TiposAccion;
@@ -55,19 +55,27 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         return typeof ejesReturn === 'string' || ejesReturn.length === 0;
     };
 
+    const isFetchingRef = useRef(false);
     useEffect(() => {
-        if (!loading && condicionalReturn(ejesPlan)) {
+        if (!loading && !isFetchingRef.current && condicionalReturn(ejesPlan)) {
             let rellenarEjes: EjesBBDD[] = [];
             const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
-            const ejes = acciones === 'Acciones' ? (ejesStore.ejesEstrategicos ? ejesStore.ejesEstrategicos.filter((e) => e.IsPrioritarios) : []) : ejesStore.ejesGlobales;
+
+            const ejes = acciones === 'Acciones' ? (ejesStore.ejesEstrategicos ? ejesStore.ejesEstrategicos : []) : ejesStore.ejesGlobales;
+
             setEjesPlan(ejes ?? []);
             rellenarEjes = ejes ?? [];
 
-            if (condicionalReturn(rellenarEjes) || (acciones === 'AccionesAccesorias' && rellenarEjes.length < yearData.plan.ejes.length) || (acciones === 'Acciones' && rellenarEjes.length > 3)) {
+            if (condicionalReturn(rellenarEjes)) {
+                isFetchingRef.current = true;
                 if (acciones === 'Acciones') {
-                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan);
+                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
+                        isFetchingRef.current = false;
+                    });
                 } else {
-                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan);
+                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
+                        isFetchingRef.current = false;
+                    });
                 }
             }
         }
@@ -78,9 +86,18 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
             return;
         }
         if (acciones === 'Acciones' && ejesPlan.length != yearData.plan.ejesPrioritarios.length) {
-            const idsPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((e) => e.Id);
-            const ejesPrioritarios = ejesPlan.filter((eje) => idsPrioritarios.includes(`${eje.EjeId}`));
-            setEjesPlan(ejesPrioritarios);
+            const prioritarios: EjesBBDD[] = EjesToEjesBBDD(yearData.plan.ejesPrioritarios);
+
+            const ejesPrioritariosConLineas: EjesBBDD[] = prioritarios.map((prioritario) => {
+                const match = ejesPlan.find((e) => e.EjeId === prioritario.EjeId);
+
+                return {
+                    ...prioritario,
+                    LineasActuaccion: match?.LineasActuaccion ?? [],
+                };
+            });
+            setEjesPlan(ejesPrioritariosConLineas);
+
             return;
         }
         setIdEjeSeleccionado(ejesPlan[0].EjeId);
@@ -164,8 +181,6 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }, [yearData]);
 
     const handleNuevaAccion = () => {
-        console.log(nuevaLineaActuaccion);
-
         if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
             setInputError(true);
             return;

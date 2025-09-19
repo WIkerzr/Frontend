@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingOverlay, ZonaTitulo } from '../Configuracion/Users/componentes';
-import { EjesBBDD, EjeSeleccion } from '../../types/tipadoPlan';
+import { Ejes, EjesBBDD, EjeSeleccion } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
 import { ErrorMessage } from '../../components/Utils/animations';
@@ -37,9 +37,11 @@ const Index = () => {
     useEffect(() => {
         if (yearData && yearData.plan.ejesPrioritarios.length >= 1) {
             setLoading(false);
-            const combinados = [...yearData.plan.ejesPrioritarios, ...(yearData.plan.ejesRestantes ?? [])];
+            const ejesNoAccesorios: Ejes[] = (yearData.plan.ejesRestantes ?? []).filter((eje: Ejes) => !eje.IsAccessory);
+
+            const combinados = [...yearData.plan.ejesPrioritarios, ...ejesNoAccesorios];
             const ordenados: EjesBBDD[] = combinados
-                .sort((a, b) => Number(a.Id) - Number(b.Id))
+                .sort((a, b) => a.NameEs.localeCompare(b.NameEs))
                 .map((eje) => ({
                     EjeId: eje.Id,
                     NameEs: eje.NameEs,
