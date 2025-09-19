@@ -585,6 +585,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
         return undefined;
     };
+
     const llamadaBBDDYearData = (anioSeleccionada: number, ignorarStorage: boolean) => {
         const stored = sessionStorage.getItem('DataYear');
         if (stored && !ignorarStorage) {

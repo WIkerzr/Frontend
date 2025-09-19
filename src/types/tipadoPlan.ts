@@ -1,4 +1,4 @@
-import { Estado, Servicios, ServiciosDTO } from './GeneralTypes';
+import { Estado, Servicios, ServiciosDTO, ServiciosDTOConvertIndicadores } from './GeneralTypes';
 import { DatosAccion, DatosAccionDTO } from './TipadoAccion';
 
 export type Year = number;
@@ -156,7 +156,7 @@ export interface YearDataDTO {
 
     Plan: PlanDTO;
     Memoria: MemoriaDTO;
-    Servicios: ServiciosDTO[];
+    Servicios: ServiciosDTO[] | ServiciosDTOConvertIndicadores[];
 }
 
 export interface InitialDataResponse {

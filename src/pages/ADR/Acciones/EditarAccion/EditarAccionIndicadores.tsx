@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../../../components/Utils/utils';
 import { TablaIndicadorAccion, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import React from 'react';
 import { useYear } from '../../../../contexts/DatosAnualContext';
-import { Servicios } from '../../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
@@ -354,144 +353,5 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                 </button>
             </div>
         </NewModal>
-    );
-});
-
-export const PestanaIndicadoresServicios = React.forwardRef<HTMLButtonElement>(() => {
-    const { t } = useTranslation();
-    const { editarPlan, editarMemoria } = useEstadosPorAnio();
-    const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
-    const { datosEditandoServicio, setDatosEditandoServicio } = useYear();
-
-    if (!datosEditandoServicio) {
-        return <p>{t('cargando')}</p>;
-    }
-
-    const setServicio = (callback: (prev: Servicios) => Servicios) => {
-        if (!datosEditandoServicio) return;
-        const actualizado = callback(datosEditandoServicio);
-        setDatosEditandoServicio(actualizado);
-    };
-
-    const agregarIndicador = () => {
-        setServicio((prev) => ({
-            ...prev,
-            indicadores: [
-                ...prev.indicadores,
-                {
-                    indicador: '',
-                    previsto: { valor: '' },
-                    alcanzado: { valor: '' },
-                },
-            ],
-        }));
-    };
-
-    const eliminarIndicador = (index: number) => {
-        setServicio((prev) => ({
-            ...prev,
-            indicadores: prev.indicadores.filter((_, i) => i !== index),
-        }));
-    };
-
-    return (
-        <div className="panel">
-            <div className="bg-[#76923b] p-2 font-bold border-l border border-black flex justify-between items-center">
-                <span>*{t('indicadoresOperativos').toUpperCase()}</span>
-                {editarPlan && (
-                    <button type="button" onClick={agregarIndicador} className="px-4 py-1 bg-[#76923b] text-white font-bold border border-black">
-                        {t('agregarFila')}
-                    </button>
-                )}
-            </div>
-
-            <table className="w-full border-collapse border-l border-r border-b border-black text-sm">
-                <thead>
-                    <tr>
-                        <th className="border border-black bg-[#d3e1b4] p-1">{t('indicadores')}</th>
-                        <th className="border border-black bg-[#d3e1b4] p-1">{t('valorPrevisto')}</th>
-                        <th className="border border-black bg-[#b6c48e] p-1">{t('valorReal')}</th>
-                        {editarPlan && <th className="border border-black bg-[#b6c48e] p-1 text-center">✖</th>}
-                    </tr>
-                </thead>
-                <tbody>
-                    {(datosEditandoServicio!.indicadores || []).map((indicador, index) => (
-                        <tr key={index}>
-                            {/* Indicador */}
-                            <td className={`border border-black align-top p-1 ${editarPlan ? 'cursor-text' : ''}}`} onClick={() => inputRefs.current[index]?.[0]?.focus()}>
-                                <input
-                                    disabled={!editarPlan}
-                                    ref={(el) => {
-                                        if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                        inputRefs.current[index][0] = el;
-                                    }}
-                                    type="text"
-                                    value={indicador.indicador}
-                                    onChange={(e) => {
-                                        const nuevos = [...datosEditandoServicio.indicadores];
-                                        nuevos[index] = { ...nuevos[index], indicador: e.target.value };
-                                        setServicio((prev) => ({ ...prev, indicadores: nuevos }));
-                                    }}
-                                    className={`text-left w-full`}
-                                />
-                            </td>
-
-                            {/* Valor previsto */}
-                            <td className={`border border-black align-top p-1 ${editarPlan ? 'cursor-text' : ''}`} onClick={() => inputRefs.current[index]?.[1]?.focus()}>
-                                <input
-                                    disabled={!editarPlan}
-                                    ref={(el) => {
-                                        if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                        inputRefs.current[index][1] = el;
-                                    }}
-                                    type="text"
-                                    value={indicador.previsto?.valor || ''}
-                                    onChange={(e) => {
-                                        const nuevos = [...datosEditandoServicio.indicadores];
-                                        nuevos[index] = {
-                                            ...nuevos[index],
-                                            previsto: { valor: e.target.value },
-                                        };
-                                        setServicio((prev) => ({ ...prev, indicadores: nuevos }));
-                                    }}
-                                    className={`text-center w-full`}
-                                />
-                            </td>
-
-                            {/* Valor real */}
-                            <td className={`border border-black align-top p-1 ${editarPlan || editarMemoria ? 'cursor-text' : ''} }`} onClick={() => inputRefs.current[index]?.[2]?.focus()}>
-                                <input
-                                    ref={(el) => {
-                                        if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                        inputRefs.current[index][2] = el;
-                                    }}
-                                    disabled={!editarPlan && !editarMemoria}
-                                    type="text"
-                                    value={indicador.alcanzado?.valor || ''}
-                                    onChange={(e) => {
-                                        const nuevos = [...datosEditandoServicio.indicadores];
-                                        nuevos[index] = {
-                                            ...nuevos[index],
-                                            alcanzado: { valor: e.target.value },
-                                        };
-                                        setServicio((prev) => ({ ...prev, indicadores: nuevos }));
-                                    }}
-                                    className={`text-center w-full`}
-                                />
-                            </td>
-
-                            {/* Botón eliminar */}
-                            {editarPlan && (
-                                <td className="border border-black text-center align-top p-1">
-                                    <button type="button" onClick={() => eliminarIndicador(index)} className="text-red-600 font-bold" title="Eliminar fila">
-                                        ✖
-                                    </button>
-                                </td>
-                            )}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
     );
 });

@@ -11,9 +11,9 @@ import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { servicioIniciadoVacio } from '../../../types/tipadoPlan';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { MostrarAvisoCamposServicios } from '../Acciones/ComponentesAccionesServicios';
 import { eliminarServicio } from '../../../components/Utils/data/dataServices';
 import { ErrorMessage } from '../../../components/Utils/animations';
+import { MostrarAvisoCamposServicios } from './ComponentesServicios';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();

@@ -3,13 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { InputField, TextArea } from '../../../components/Utils/inputs';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Loading } from '../../../components/Utils/animations';
 import { gestionarServicio } from '../../../components/Utils/data/dataServices';
+import React from 'react';
+import { Tab, TabList, TabGroup, TabPanel, TabPanels } from '@headlessui/react';
+import { TabCard } from '../Acciones/EditarAccion/EditarAccionComponent';
+import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
+import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
+import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
 
 const Index: React.FC = () => {
     const { t } = useTranslation();
@@ -48,24 +54,6 @@ const Index: React.FC = () => {
 
     const [erroresindicadores, setErroresIndicadores] = useState<boolean[][]>([]);
 
-    const agregarIndicador = () => {
-        if (datosEditandoServicio.indicadores?.some((ind) => !ind.indicador?.trim())) {
-            alert(t('indicadorServicioSinRellenar'));
-            return;
-        }
-        setServicio((prev) => ({
-            ...prev,
-            indicadores: [
-                ...prev.indicadores,
-                {
-                    indicador: '',
-                    previsto: { valor: '' },
-                    alcanzado: { valor: '' },
-                },
-            ],
-        }));
-    };
-
     const handleChangeCampos = (campo: keyof Servicios, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoServicio({
             ...datosEditandoServicio,
@@ -73,149 +61,33 @@ const Index: React.FC = () => {
         });
     };
 
-    const eliminarIndicador = async (index: number) => {
-        setServicio((prev) => ({
-            ...prev,
-            indicadores: prev.indicadores.filter((_, i) => i !== index),
-        }));
-    };
-
-    const validarAntesDeGuardar = () => {
-        if (!datosEditandoServicio) return;
-
-        const nuevosErroresIndicadores = datosEditandoServicio.indicadores.map((ind) => [
-            editarPlan && !ind.indicador.trim(),
-            editarPlan && !ind.previsto.valor.trim(),
-            !editarPlan && editarMemoria && !ind.alcanzado?.valor.trim(),
-        ]);
-
-        const nuevosErroresGenerales = {
-            nombre: !datosEditandoServicio.nombre.trim(),
-            descripcion: !datosEditandoServicio.descripcion.trim(),
-            dSeguimiento: !editarPlan && editarMemoria && !datosEditandoServicio.dSeguimiento?.trim(),
-            valFinal: !editarPlan && editarMemoria && !datosEditandoServicio.valFinal?.trim(),
+    const PestanaIndicadoresServicios = React.forwardRef<HTMLButtonElement>(() => {
+        const agregarIndicador = () => {
+            if (datosEditandoServicio.indicadores?.some((ind) => !ind.indicador?.trim())) {
+                alert(t('indicadorServicioSinRellenar'));
+                return;
+            }
+            setServicio((prev) => ({
+                ...prev,
+                indicadores: [
+                    ...prev.indicadores,
+                    {
+                        indicador: '',
+                        previsto: { valor: '' },
+                        alcanzado: { valor: '' },
+                    },
+                ],
+            }));
         };
-
-        setErroresIndicadores(nuevosErroresIndicadores);
-        setErroresGenerales(nuevosErroresGenerales);
-
-        const hayErroresIndicadores = nuevosErroresIndicadores.some((fila) => fila.includes(true));
-        const hayErroresGenerales = Object.values(nuevosErroresGenerales).some((v) => v);
-
-        if (hayErroresIndicadores || hayErroresGenerales) {
-            alert(t('porFavorCompletaCamposObligatorios') || 'Por favor, completa todos los campos obligatorios.');
-            return;
-        }
-        hundleGuardarServicio();
-    };
-
-    const hundleGuardarServicio = async () => {
-        if (datosEditandoServicio.id === 0) {
-            const nuevoServicio = await gestionarServicio({
-                datosEditandoServicio,
-                regionSeleccionada: regionSeleccionada!,
-                anioSeleccionada: anioSeleccionada!,
-                setLoading,
-                setSuccessMessage,
-                setErrorMessage,
-                method: 'POST',
-            });
-
-            if (nuevoServicio) {
-                setYearData({
-                    ...yearData,
-                    servicios: [...(yearData.servicios || []), nuevoServicio],
-                });
-            }
-        } else {
-            const editadoServicio = await gestionarServicio({
-                idServicio: datosEditandoServicio.id,
-                datosEditandoServicio,
-                regionSeleccionada: regionSeleccionada!,
-                anioSeleccionada: anioSeleccionada!,
-                setLoading,
-                setSuccessMessage,
-                setErrorMessage,
-                method: 'PUT',
-            });
-            if (editadoServicio) {
-                setYearData({
-                    ...yearData,
-                    servicios: [...(yearData.servicios?.filter((s) => s.id !== editadoServicio.id) || []), editadoServicio],
-                });
-            }
-        }
-    };
-
-    const handleFinalize = () => {
-        setControlguardado(true);
-    };
-
-    return (
-        <>
-            <LoadingOverlay
-                isLoading={loading}
-                message={{
-                    errorMessage,
-                    setErrorMessage,
-                    successMessage,
-                    setSuccessMessage,
-                }}
-                timeDelay={false}
-                onComplete={handleFinalize}
-            />
-
-            <div className="panel">
-                <ZonaTitulo
-                    titulo={
-                        <h2 className="text-xl font-bold flex items-center space-x-2">
-                            <span>
-                                {t('servicioTituloEditado')} {anioSeleccionada}
-                            </span>
-                        </h2>
-                    }
-                    zonaBtn={
-                        (editarPlan || editarMemoria) && (
-                            <div className="ml-auto flex gap-4 items-center justify-end">
-                                <button className="px-4 py-2 bg-primary text-white rounded" onClick={validarAntesDeGuardar}>
-                                    {t('guardar')}{' '}
-                                </button>
-                                <NavLink to="/adr/servicios" className="group">
-                                    <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
-                                </NavLink>
-                            </div>
-                        )
-                    }
-                />
-                <div className="panel">
-                    <div className="p-2 flex gap-4">
-                        <InputField
-                            nombreInput="Servicio"
-                            className={`${erroresGenerales.nombre && 'border-red-500 border-2'}`}
-                            required
-                            disabled={!editarPlan}
-                            value={datosEditandoServicio.nombre}
-                            onChange={(e) => handleChangeCampos('nombre', e)}
-                        />
-                        {erroresGenerales.nombre && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                    </div>
-
-                    {/* DESCRIPCIÓN */}
-                    <div className="p-2 flex-1 gap-4">
-                        <span>*{t('Descripcion').toUpperCase()}</span>
-                        <TextArea
-                            nombreInput="Descripcion"
-                            className={`h-[114px] w-full ${erroresGenerales.descripcion ? 'border-red-500 border-2' : ''}`}
-                            required
-                            noTitle
-                            disabled={!editarPlan}
-                            value={datosEditandoServicio.descripcion}
-                            onChange={(e) => handleChangeCampos('descripcion', e)}
-                        />
-                        {erroresGenerales.descripcion && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                    </div>
-
-                    {/* INDICADORES */}
+        const eliminarIndicador = async (index: number) => {
+            setServicio((prev) => ({
+                ...prev,
+                indicadores: prev.indicadores.filter((_, i) => i !== index),
+            }));
+        };
+        return (
+            <div className="p-5 flex flex-col gap-4 w-full">
+                <div className="flex-grow gap-4 panel">
                     <div className="p-2 flex justify-between items-center">
                         <span>*{t('indicadores').toUpperCase()}</span>
                         {editarPlan && (
@@ -338,38 +210,236 @@ const Index: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div className="p-2 flex-1">
-                        <span>
-                            {!editarPlan ? '*' : ''}
-                            {t('dSeguimiento').toUpperCase()}
-                        </span>
-                        <TextArea
-                            nombreInput="dSeguimiento"
-                            disabled={!editarPlan && !editarMemoria}
-                            className={`h-[114px] w-full ${erroresGenerales.dSeguimiento ? 'border-red-500 border-2' : ''}`}
-                            value={datosEditandoServicio!.dSeguimiento}
-                            noTitle
-                            onChange={(e) => handleChangeCampos('dSeguimiento', e)}
-                        />
-                        {erroresGenerales.dSeguimiento && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                    </div>
-
-                    <div className="p-2 flex-1">
-                        <span>
-                            {!editarPlan ? '*' : ''}
-                            {t('valFinal').toUpperCase()}
-                        </span>
-                        <TextArea
-                            nombreInput="valFinal"
-                            disabled={!editarPlan && !editarMemoria}
-                            className={`h-[114px] w-full ${erroresGenerales.valFinal ? 'border-red-500 border-2' : ''}`}
-                            value={datosEditandoServicio!.valFinal}
-                            noTitle
-                            onChange={(e) => handleChangeCampos('valFinal', e)}
-                        />
-                        {erroresGenerales.valFinal && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                    </div>
                 </div>
+            </div>
+        );
+    });
+
+    const validarAntesDeGuardar = () => {
+        if (!datosEditandoServicio) return;
+
+        const nuevosErroresIndicadores = datosEditandoServicio.indicadores.map((ind) => [
+            editarPlan && !ind.indicador.trim(),
+            editarPlan && !ind.previsto.valor.trim(),
+            !editarPlan && editarMemoria && !ind.alcanzado?.valor.trim(),
+        ]);
+
+        const nuevosErroresGenerales = {
+            nombre: !datosEditandoServicio.nombre.trim(),
+            descripcion: !datosEditandoServicio.descripcion.trim(),
+            dSeguimiento: !editarPlan && editarMemoria && !datosEditandoServicio.dSeguimiento?.trim(),
+            valFinal: !editarPlan && editarMemoria && !datosEditandoServicio.valFinal?.trim(),
+        };
+
+        setErroresIndicadores(nuevosErroresIndicadores);
+        setErroresGenerales(nuevosErroresGenerales);
+
+        const hayErroresIndicadores = nuevosErroresIndicadores.some((fila) => fila.includes(true));
+        const hayErroresGenerales = Object.values(nuevosErroresGenerales).some((v) => v);
+
+        if (hayErroresIndicadores || hayErroresGenerales) {
+            alert(t('porFavorCompletaCamposObligatorios') || 'Por favor, completa todos los campos obligatorios.');
+            return;
+        }
+        hundleGuardarServicio();
+    };
+
+    const hundleGuardarServicio = async () => {
+        if (datosEditandoServicio.id === 0) {
+            const nuevoServicio = await gestionarServicio({
+                datosEditandoServicio,
+                regionSeleccionada: regionSeleccionada!,
+                anioSeleccionada: anioSeleccionada!,
+                setLoading,
+                setSuccessMessage,
+                setErrorMessage,
+                method: 'POST',
+            });
+
+            if (nuevoServicio) {
+                setYearData({
+                    ...yearData,
+                    servicios: [...(yearData.servicios || []), nuevoServicio],
+                });
+            }
+        } else {
+            const editadoServicio = await gestionarServicio({
+                idServicio: datosEditandoServicio.id,
+                datosEditandoServicio,
+                regionSeleccionada: regionSeleccionada!,
+                anioSeleccionada: anioSeleccionada!,
+                setLoading,
+                setSuccessMessage,
+                setErrorMessage,
+                method: 'PUT',
+            });
+            if (editadoServicio) {
+                setYearData({
+                    ...yearData,
+                    servicios: [...(yearData.servicios?.filter((s) => s.id !== editadoServicio.id) || []), editadoServicio],
+                });
+            }
+        }
+    };
+
+    const handleFinalize = () => {
+        setControlguardado(true);
+    };
+
+    return (
+        <>
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    errorMessage,
+                    setErrorMessage,
+                    successMessage,
+                    setSuccessMessage,
+                }}
+                timeDelay={false}
+                onComplete={handleFinalize}
+            />
+
+            <div className="panel">
+                <ZonaTitulo
+                    titulo={
+                        <h2 className="text-xl font-bold flex items-center space-x-2">
+                            <span>
+                                {t('servicioTituloEditado')} {anioSeleccionada}
+                            </span>
+                        </h2>
+                    }
+                    zonaBtn={
+                        (editarPlan || editarMemoria) && (
+                            <div className="ml-auto flex gap-4 items-center justify-end">
+                                <button className="px-4 py-2 bg-primary text-white rounded" onClick={validarAntesDeGuardar}>
+                                    {t('guardar')}{' '}
+                                </button>
+                                <NavLink to="/adr/servicios" className="group">
+                                    <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
+                                </NavLink>
+                            </div>
+                        )
+                    }
+                    zonaExtra={
+                        <div className="p-2 flex gap-4">
+                            <InputField
+                                nombreInput="Servicio"
+                                className={`${erroresGenerales.nombre && 'border-red-500 border-2'}`}
+                                required
+                                disabled={!editarPlan}
+                                value={datosEditandoServicio.nombre}
+                                onChange={(e) => handleChangeCampos('nombre', e)}
+                            />
+                            {erroresGenerales.nombre && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
+                        </div>
+                    }
+                />
+                <TabGroup className="w-full">
+                    <TabList className="mx-10 mt-3 flex flex-wrap ">
+                        <Tab as={Fragment}>
+                            {({ selected }) => (
+                                <button
+                                    className={`${
+                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
+                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
+                                >
+                                    <div className={`flex items-center`}>
+                                        <div className="relative">
+                                            <img src={IconCuadroMando} alt={t(`${'Indicadores'}`)} className="w-6 h-6" />
+                                        </div>
+                                        <span className={`font-semibold`}>{t(`${'Indicadores'}`)}</span>
+                                    </div>
+                                </button>
+                            )}
+                        </Tab>
+                        <Tab as={Fragment}>
+                            {({ selected }) => (
+                                <button
+                                    className={`flex items-center ${
+                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
+                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
+                                >
+                                    <TabCard icon={IconPlan} label="tabPlan" status={yearData.plan.status} />
+                                </button>
+                            )}
+                        </Tab>
+                        <Tab as={Fragment}>
+                            {({ selected }) => (
+                                <button
+                                    className={`flex items-center ${
+                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
+                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
+                                >
+                                    <TabCard icon={IconMemoria} label="tabMemoria" status={yearData.memoria.status} />
+                                </button>
+                            )}
+                        </Tab>
+                    </TabList>
+                    <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
+                        <TabPanels>
+                            <TabPanel>
+                                <PestanaIndicadoresServicios />
+                            </TabPanel>
+                            <TabPanel>
+                                <div className="p-5 flex flex-col gap-4 w-full">
+                                    <div className="panel">
+                                        <div className="p-2 flex-1 gap-4">
+                                            <span>*{t('Descripcion').toUpperCase()}</span>
+                                            <TextArea
+                                                nombreInput="Descripcion"
+                                                className={`h-[114px] w-full ${erroresGenerales.descripcion ? 'border-red-500 border-2' : ''}`}
+                                                required
+                                                noTitle
+                                                disabled={!editarPlan}
+                                                value={datosEditandoServicio.descripcion}
+                                                onChange={(e) => handleChangeCampos('descripcion', e)}
+                                            />
+                                            {erroresGenerales.descripcion && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </TabPanel>
+                            <TabPanel>
+                                <div className="p-5 flex flex-col gap-4 w-full">
+                                    <div className="panel">
+                                        <div className="p-2 flex-1">
+                                            <span>
+                                                {!editarPlan ? '*' : ''}
+                                                {t('dSeguimiento').toUpperCase()}
+                                            </span>
+                                            <TextArea
+                                                nombreInput="dSeguimiento"
+                                                disabled={!editarPlan && !editarMemoria}
+                                                className={`h-[114px] w-full ${erroresGenerales.dSeguimiento ? 'border-red-500 border-2' : ''}`}
+                                                value={datosEditandoServicio!.dSeguimiento}
+                                                noTitle
+                                                onChange={(e) => handleChangeCampos('dSeguimiento', e)}
+                                            />
+                                            {erroresGenerales.dSeguimiento && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
+                                        </div>
+
+                                        <div className="p-2 flex-1">
+                                            <span>
+                                                {!editarPlan ? '*' : ''}
+                                                {t('valFinal').toUpperCase()}
+                                            </span>
+                                            <TextArea
+                                                nombreInput="valFinal"
+                                                disabled={!editarPlan && !editarMemoria}
+                                                className={`h-[114px] w-full ${erroresGenerales.valFinal ? 'border-red-500 border-2' : ''}`}
+                                                value={datosEditandoServicio!.valFinal}
+                                                noTitle
+                                                onChange={(e) => handleChangeCampos('valFinal', e)}
+                                            />
+                                            {erroresGenerales.valFinal && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </TabPanel>
+                        </TabPanels>
+                    </div>
+                </TabGroup>
             </div>
         </>
     );

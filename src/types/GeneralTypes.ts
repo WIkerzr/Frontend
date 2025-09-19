@@ -78,3 +78,13 @@ export interface ServiciosDTO {
     RegionId: number;
     Year: number;
 }
+export interface ServiciosDTOConvertIndicadores {
+    Id?: number;
+    Nombre: string;
+    Descripcion: string;
+    Indicadores: IndicadoresServiciosDTO[];
+    DSeguimiento?: string;
+    ValFinal?: string;
+    RegionId: number;
+    Year: number;
+}

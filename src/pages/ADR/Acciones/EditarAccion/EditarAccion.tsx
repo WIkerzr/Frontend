@@ -8,14 +8,12 @@ import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { PestanaIndicadores, PestanaIndicadoresServicios } from './EditarAccionIndicadores';
+import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { LoadingOverlay, ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton } from '../../../../components/Utils/utils';
-import { Servicios } from '../../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { DropdownLineaActuaccion, ErrorFullScreen } from '../ComponentesAccionesServicios';
-import { TextArea } from '../../../../components/Utils/inputs';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -23,23 +21,11 @@ const Index: React.FC = () => {
     const tipo = location.state?.tipo;
 
     const accionAccesoria = tipo === 'accesoria';
-    const servicio = tipo === 'servicio';
-    const titulo = servicio ? t('servicioTituloEditado') : t('accionTituloEditado');
-    const tituloCampo = servicio ? t('Servicios') : t('Accion');
-    const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : servicio ? '/adr/servicios/' : '/adr/acciones/';
+    const titulo = t('accionTituloEditado');
+    const tituloCampo = t('Accion');
+    const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : '/adr/acciones/';
 
-    const {
-        yearData,
-        datosEditandoAccion,
-        setDatosEditandoAccion,
-        SeleccionEditarGuardar,
-        controlguardado,
-        setControlguardado,
-        block,
-        datosEditandoServicio,
-        setDatosEditandoServicio,
-        GuardarLaEdicionAccion,
-    } = useYear();
+    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, controlguardado, setControlguardado, block, GuardarLaEdicionAccion } = useYear();
     const navigate = useNavigate();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -121,9 +107,7 @@ const Index: React.FC = () => {
     }
 
     if (!datosEditandoAccion) {
-        if (!servicio) {
-            return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
-        }
+        return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
     }
 
     const handleFinalize = () => {
@@ -138,14 +122,22 @@ const Index: React.FC = () => {
         });
     };
 
-    const handleServicioChange = (campo: keyof Servicios, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setDatosEditandoServicio((prev) => ({
-            ...prev!,
-            [campo]: `${e.target.value}`,
-        }));
-    };
-
     const handleSave = () => {
+        // if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'GuardadoEdicion', t)) {
+        //     const camposFaltantes = VerificarAccionFinal(datosEditandoAccion, editarPlan, editarMemoria);
+        //     if (camposFaltantes && camposFaltantes.length === 0) {
+        //         GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
+        //     } else if (camposFaltantes && camposFaltantes.length > 0) {
+        //         const camposFaltantesTraducidos = camposFaltantes.map((campo) => t(campo.charAt(0).toLowerCase() + campo.slice(1)));
+        //         alert('Faltan estos campos obligatorios:\n' + camposFaltantesTraducidos.join('\n'));
+        //     }
+        // }
+        // if (datosEditandoAccion.accion !== '') {
+        //     GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
+        // } else {
+        //     alert(t('nombreDeLaAccionNoVacio'));
+        // }
+
         GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
     };
 
@@ -182,57 +174,51 @@ const Index: React.FC = () => {
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{'*' + tituloCampo}</label>
                                 {editarPlan ? (
-                                    <input
-                                        type="text"
-                                        className="form-input w-full"
-                                        value={servicio ? datosEditandoServicio?.nombre : datosEditandoAccion.accion}
-                                        onChange={(e) => (servicio ? handleServicioChange('nombre', e) : handleAccionChange(e))}
-                                    />
+                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={(e) => handleAccionChange(e)} />
                                 ) : (
                                     <span className="block  font-semibold">
-                                        <span className="font-normal text-col">{servicio ? datosEditandoServicio?.nombre : datosEditandoAccion.accion}</span>
+                                        <span className="font-normal text-col">{datosEditandoAccion.accion}</span>
                                     </span>
                                 )}
                             </div>
-                            {!servicio && (
-                                <>
-                                    <div className="w-1/2 flex flex-col gap-2 justify-center">
-                                        <span className="block  font-semibold mb-1">
-                                            <span className="font-normal text-lg">{nombreEje}</span>
-                                        </span>
-                                        <span className="block  font-semibold">
-                                            {editarPlan ? (
-                                                <DropdownLineaActuaccion
-                                                    setNuevaLineaActuaccion={setLineaActuaccion}
-                                                    idEjeSeleccionado={ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
-                                                    lineaActuaccion={lineaActuaccion}
-                                                    ejesPlan={ejesPlan}
-                                                    tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
-                                                />
-                                            ) : (
-                                                <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
-                                            )}
-                                        </span>
-                                    </div>
-                                    <div className="flex">
-                                        <input
-                                            onChange={(e) => {
-                                                if (editarPlan) {
-                                                    setDatosEditandoAccion({
-                                                        ...datosEditandoAccion!,
-                                                        plurianual: e.target.checked,
-                                                    });
-                                                }
-                                            }}
-                                            type="checkbox"
-                                            className="form-checkbox h-5 w-5 "
-                                            checked={datosEditandoAccion.plurianual}
-                                            disabled={!editarPlan}
-                                        />
-                                        <label>{t('plurianual')}</label>
-                                    </div>
-                                </>
-                            )}
+
+                            <>
+                                <div className="w-1/2 flex flex-col gap-2 justify-center">
+                                    <span className="block  font-semibold mb-1">
+                                        <span className="font-normal text-lg">{nombreEje}</span>
+                                    </span>
+                                    <span className="block  font-semibold">
+                                        {editarPlan ? (
+                                            <DropdownLineaActuaccion
+                                                setNuevaLineaActuaccion={setLineaActuaccion}
+                                                idEjeSeleccionado={ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
+                                                lineaActuaccion={lineaActuaccion}
+                                                ejesPlan={ejesPlan}
+                                                tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
+                                            />
+                                        ) : (
+                                            <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
+                                        )}
+                                    </span>
+                                </div>
+                                <div className="flex">
+                                    <input
+                                        onChange={(e) => {
+                                            if (editarPlan) {
+                                                setDatosEditandoAccion({
+                                                    ...datosEditandoAccion!,
+                                                    plurianual: e.target.checked,
+                                                });
+                                            }
+                                        }}
+                                        type="checkbox"
+                                        className="form-checkbox h-5 w-5 "
+                                        checked={datosEditandoAccion.plurianual}
+                                        disabled={!editarPlan}
+                                    />
+                                    <label>{t('plurianual')}</label>
+                                </div>
+                            </>
                         </div>
                     </div>
                 }
@@ -290,58 +276,17 @@ const Index: React.FC = () => {
                         </Tab>
                     </TabList>
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
-                        {servicio ? (
-                            <TabPanels>
-                                <TabPanel>
-                                    <PestanaIndicadoresServicios />
-                                </TabPanel>
-                                <TabPanel>
-                                    <div className="p-5 flex flex-col gap-4 w-full">
-                                        <div className="panel">
-                                            <TextArea
-                                                disabled={!editarPlan}
-                                                nombreInput="Descripcion"
-                                                className={`h-[30%] w-full`}
-                                                value={datosEditandoServicio?.descripcion}
-                                                onChange={(e) => handleServicioChange('descripcion', e)}
-                                            />
-                                        </div>
-                                    </div>
-                                </TabPanel>
-                                <TabPanel>
-                                    <div className="p-5 flex flex-col gap-4 w-full">
-                                        <div className="panel">
-                                            <TextArea
-                                                disabled={!editarMemoria}
-                                                nombreInput="dSeguimiento"
-                                                className={`w-full`}
-                                                value={datosEditandoServicio?.dSeguimiento}
-                                                onChange={(e) => handleServicioChange('dSeguimiento', e)}
-                                            />
-                                            <TextArea
-                                                disabled={!editarMemoria}
-                                                nombreInput="valFinal"
-                                                className={`w-full`}
-                                                value={datosEditandoServicio?.valFinal}
-                                                onChange={(e) => handleServicioChange('valFinal', e)}
-                                            />
-                                        </div>
-                                    </div>
-                                </TabPanel>
-                            </TabPanels>
-                        ) : (
-                            <TabPanels>
-                                <TabPanel>
-                                    <PestanaIndicadores />
-                                </TabPanel>
-                                <TabPanel>
-                                    <PestanaPlan />
-                                </TabPanel>
-                                <TabPanel>
-                                    <PestanaMemoria />
-                                </TabPanel>
-                            </TabPanels>
-                        )}
+                        <TabPanels>
+                            <TabPanel>
+                                <PestanaIndicadores />
+                            </TabPanel>
+                            <TabPanel>
+                                <PestanaPlan />
+                            </TabPanel>
+                            <TabPanel>
+                                <PestanaMemoria />
+                            </TabPanel>
+                        </TabPanels>
                     </div>
                 </TabGroup>
             </div>

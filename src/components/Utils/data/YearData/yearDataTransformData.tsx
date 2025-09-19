@@ -1,4 +1,4 @@
-import { Estado, IndicadoresServicios, IndicadoresServiciosDTO, Servicios, ServiciosDTO } from '../../../../types/GeneralTypes';
+import { Estado, IndicadoresServicios, IndicadoresServiciosDTO, Servicios, ServiciosDTO, ServiciosDTOConvertIndicadores } from '../../../../types/GeneralTypes';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../../types/Indicadores';
 import {
     DatosPlanDTO,
@@ -281,14 +281,14 @@ export const convertirIndicadoresServicios = (indicadores: IndicadoresServiciosD
         },
     }));
 
-export const convertirServicios = (serviciosDTO: ServiciosDTO[]): Servicios[] =>
+export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[]): Servicios[] =>
     (serviciosDTO ?? []).map((s) => ({
         id: s.Id ?? 0,
         nombre: s.Nombre,
         descripcion: s.Descripcion,
         dSeguimiento: s.DSeguimiento ?? '',
         valFinal: s.ValFinal ?? '',
-        indicadores: convertirIndicadoresServicios(s.IndicadoresServicios ?? []),
+        indicadores: convertirIndicadoresServicios(s.Indicadores ?? []),
     }));
 
 export const convertirEje = (eje: EjeBBDD2, listadoRealizacion: { id: number; nombre: string }[], listadoResultado: { id: number; nombre: string }[]): Ejes => ({
@@ -301,6 +301,24 @@ export const convertirEje = (eje: EjeBBDD2, listadoRealizacion: { id: number; no
     acciones: accionesTransformadasBackAFront(eje, listadoRealizacion, listadoResultado),
 });
 
+export const normalizarServicios = (servicios: ServiciosDTO[] | ServiciosDTOConvertIndicadores[]): ServiciosDTOConvertIndicadores[] => {
+    return (servicios ?? []).map((s) => {
+        if ('Indicadores' in s) {
+            return s as ServiciosDTOConvertIndicadores;
+        }
+        return {
+            Id: s.Id,
+            Nombre: s.Nombre,
+            Descripcion: s.Descripcion,
+            Indicadores: s.IndicadoresServicios,
+            DSeguimiento: s.DSeguimiento,
+            ValFinal: s.ValFinal,
+            RegionId: s.RegionId,
+            Year: s.Year,
+        };
+    });
+};
+
 export const construirYearData = (
     data: YearDataDTO,
     nombreRegionSeleccionada: string,
@@ -311,7 +329,8 @@ export const construirYearData = (
     ejesPrioritarios: Ejes[],
     ejes: Ejes[]
 ): YearData => {
-    const servicios: Servicios[] = convertirServicios(data.Servicios);
+    const serviciosConvertidos: ServiciosDTOConvertIndicadores[] = normalizarServicios(data.Servicios);
+    const servicios: Servicios[] = convertirServicios(serviciosConvertidos);
 
     return {
         nombreRegion: nombreRegionSeleccionada ?? '',
