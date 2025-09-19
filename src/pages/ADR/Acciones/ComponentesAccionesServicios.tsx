@@ -21,6 +21,7 @@ import Tippy from '@tippyjs/react';
 import IconRefresh from '../../../components/Icon/IconRefresh';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../EjesHelpers';
+import { ModoDev } from '../../../components/Utils/data/controlDev';
 
 interface ModalAccionProps {
     acciones: TiposAccion;
@@ -127,9 +128,17 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }
 
     useEffect(() => {
-        if (acciones != 'Acciones') {
-            const idsPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((eje: Ejes) => eje.Id);
-            const nuevoDropdown = ejesPlan.filter((eje: EjesBBDD) => !idsPrioritarios.includes(`${eje.EjeId}`));
+        if (acciones != 'Acciones' && ejesPlan.length > 0) {
+            const namesPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((eje: Ejes) => eje.NameEs);
+            const nuevoDropdown = ejesPlan.filter((eje: EjesBBDD) => !namesPrioritarios.includes(`${eje.NameEs}`));
+            if (yearData.plan.ejes.length - yearData.plan.ejesPrioritarios.length != nuevoDropdown.length) {
+                const fallo = `BTN añadir accion | dropdown | listado de ejes incompleto:${nuevoDropdown.length} Todos los ejes:${yearData.plan.ejes.length} - ${yearData.plan.ejesPrioritarios.length} ejesPrioritarios`;
+                if (ModoDev) {
+                    throw new Error(fallo);
+                } else {
+                    console.error(fallo);
+                }
+            }
             if (JSON.stringify(nuevoDropdown) !== JSON.stringify(ejesPlan)) {
                 setEjesPlan(nuevoDropdown);
             }
