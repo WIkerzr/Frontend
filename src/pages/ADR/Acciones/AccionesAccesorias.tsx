@@ -41,12 +41,11 @@ const Index: React.FC = () => {
                 ejeId: eje.Id,
             }))
         );
-
         setAccionesGrup(grup5(data, 4));
     }, [yearData]);
 
     const handleDelete = (id: string, idEje: string | undefined) => {
-        const data = yearData.plan.ejes.flatMap((eje) => eje.acciones);
+        const data = yearData.plan.ejesRestantes!.flatMap((eje) => eje.acciones);
         const accionAccesoria = data.find((item) => String(item.id) === String(id));
 
         if (!idEje) {

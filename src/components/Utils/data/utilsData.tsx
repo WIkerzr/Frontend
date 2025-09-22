@@ -14,6 +14,7 @@ export type ApiSuccess<T> = {
         Description: string;
         EjeId: string;
     };
+    IdEje?: number;
 };
 export type ApiError = {
     success: boolean;

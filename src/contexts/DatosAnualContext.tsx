@@ -369,9 +369,14 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
-        const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejesRestantes ?? [];
-        const ejeSeleccionado = fuenteEjes.find((eje) => `${eje.Id}` === idEje);
-        if (!ejeSeleccionado) return;
+        let ejeSeleccionado: Ejes | undefined = undefined;
+        if (tipo === 'AccionesAccesorias') {
+            ejeSeleccionado = yearData.plan.ejes.find((e) => `${e.Id}` === idEje);
+        } else {
+            const eje = yearData.plan.ejesPrioritarios.find((eje) => `${eje.Id}` === idEje);
+            ejeSeleccionado = eje ? eje : undefined;
+        }
+        if (ejeSeleccionado === undefined) return;
 
         setSelectedId(idEje);
         LlamadasBBDD({
@@ -387,28 +392,73 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 Plurianual: plurianual,
             },
             onSuccess: (response) => {
-                const actualizarEjes = (ejes: Ejes[]) =>
-                    ejes.map((eje) =>
-                        eje.Id === ejeSeleccionado.Id
-                            ? {
-                                  ...eje,
-                                  acciones: [
-                                      ...(eje.acciones || []),
-                                      { id: response.data.Id, accion: nuevaAccion, ejeEs: ejeSeleccionado.NameEs, ejeEu: ejeSeleccionado.NameEu, lineaActuaccion: nuevaLineaActuaccion, plurianual },
-                                  ],
-                              }
-                            : eje
-                    );
+                const nuevaAccionObj: DatosAccion = {
+                    id: response.data.Id,
+                    accion: nuevaAccion,
+                    ejeEs: ejeSeleccionado.NameEs,
+                    ejeEu: ejeSeleccionado.NameEu,
+                    lineaActuaccion: nuevaLineaActuaccion,
+                    plurianual,
+                };
+                if (tipo === 'Acciones') {
+                    const actualizarEjes = (ejes: Ejes[]) =>
+                        ejes.map((eje) =>
+                            eje.Id === ejeSeleccionado.Id
+                                ? {
+                                      ...eje,
+                                      acciones: [...(eje.acciones || []), nuevaAccionObj],
+                                  }
+                                : eje
+                        );
+                    setYearData({
+                        ...yearData,
+                        plan: {
+                            ...yearData.plan,
+                            ejesPrioritarios: actualizarEjes(yearData.plan.ejesPrioritarios),
+                            ejesRestantes: yearData.plan.ejesRestantes ? actualizarEjes(yearData.plan.ejesRestantes) : [],
+                            //ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
+                        },
+                    });
+                } else {
+                    const actualizarEjesAccesoria = (ejes: Ejes[]) =>
+                        ejes.map((eje) =>
+                            eje.Id === `${response.IdEje}`
+                                ? {
+                                      ...eje,
+                                      IsAccessory: true,
+                                      acciones: [...(eje.acciones || []), nuevaAccionObj],
+                                  }
+                                : eje
+                        );
+                    let nuevosEjesRestantes: Ejes[];
+                    if (yearData.plan.ejesRestantes!.find((e) => `${e.NameEs}` === ejeSeleccionado.NameEs)) {
+                        setYearData({
+                            ...yearData,
+                            plan: {
+                                ...yearData.plan,
+                                ejesRestantes: yearData.plan.ejesRestantes ? actualizarEjesAccesoria(yearData.plan.ejesRestantes) : [],
+                            },
+                        });
+                    } else {
+                        const nuevoEje: Ejes = {
+                            ...ejeSeleccionado,
+                            Id: `${response.IdEje}`,
+                            IsAccessory: true,
+                            acciones: [nuevaAccionObj],
+                            LineasActuaccion: ejeSeleccionado.LineasActuaccion ?? [],
+                        };
 
-                setYearData({
-                    ...yearData,
-                    plan: {
-                        ...yearData.plan,
-                        ejesPrioritarios: tipo === 'Acciones' ? actualizarEjes(yearData.plan.ejesPrioritarios) : yearData.plan.ejesPrioritarios,
-                        ejesRestantes: yearData.plan.ejesRestantes ? actualizarEjes(yearData.plan.ejesRestantes) : [],
-                        //ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
-                    },
-                });
+                        nuevosEjesRestantes = [...(yearData.plan.ejesRestantes || []), nuevoEje];
+
+                        setYearData({
+                            ...yearData,
+                            plan: {
+                                ...yearData.plan,
+                                ejesRestantes: nuevosEjesRestantes,
+                            },
+                        });
+                    }
+                }
             },
         });
     };
@@ -467,7 +517,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const EliminarAccion = (tipo: TiposAccion, idEje: string, idAccion: string) => {
-        const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejes;
+        const fuenteEjes = tipo === 'Acciones' ? yearData.plan.ejesPrioritarios : yearData.plan.ejesRestantes!;
         const ejeSeleccionado = fuenteEjes.find((eje) => eje.Id === idEje);
         if (!ejeSeleccionado) return;
         setSelectedId(idEje);
@@ -479,8 +529,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage: setErrorMessageYearData,
             setSuccessMessage: setSuccessMessageYearData,
             onSuccess: () => {
-                const actualizarEjes = (ejes: typeof yearData.plan.ejesPrioritarios | typeof yearData.plan.ejes) =>
-                    ejes.map((eje) => (eje.Id === ejeSeleccionado.Id ? { ...eje, acciones: eje.acciones.filter((accion) => accion.id !== idAccion) } : eje));
+                const actualizarEjes = (ejes: Ejes[]) => ejes.map((eje) => (eje.Id === ejeSeleccionado.Id ? { ...eje, acciones: eje.acciones.filter((accion) => accion.id !== idAccion) } : eje));
 
                 if (tipo === 'Acciones') {
                     setYearData({
@@ -495,7 +544,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         ...yearData,
                         plan: {
                             ...yearData.plan,
-                            ejes: actualizarEjes(yearData.plan.ejes),
+                            ejesRestantes: actualizarEjes(yearData.plan.ejesRestantes!),
                         },
                     });
                 }
