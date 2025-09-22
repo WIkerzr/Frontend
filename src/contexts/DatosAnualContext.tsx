@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, JSX } from 'react';
 import { EjeBBDD, EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import {
     DatosAccion,
@@ -23,8 +23,10 @@ import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/I
 import { useRegionContext } from './RegionContext';
 import { ModoDev } from '../components/Utils/data/controlDev';
 import { MessageSetters } from '../components/Utils/data/dataEjes';
-import { accionesTransformadasBackAFront, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
+import { accionesTransformadasBackAFront, accionTransformadaBackAFront, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
 import { useIndicadoresContext } from './IndicadoresContext';
+import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
+import { LoadingOverlay } from '../pages/Configuracion/Users/componentes';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -42,12 +44,12 @@ interface YearContextType {
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
     llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean) => void;
-    llamadaBBDDYearDataAll: (anioSeleccionada: number, retornarDatos: boolean) => Promise<YearData | undefined>;
+    llamadaBBDDYearDataAll: (anioSeleccionada: number, retornarDatos: boolean, ignorarStorage?: boolean) => Promise<YearData | undefined>;
 
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
-    GuardarLaEdicionAccion: (setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => void;
+    GuardarLaEdicionAccion: (tipo: TiposAccion, setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
     errorMessageYearData: string;
@@ -57,6 +59,7 @@ interface YearContextType {
     controlguardado: boolean;
     setControlguardado: (a: boolean) => void;
     selectedId: string | null;
+    LoadingYearData: () => JSX.Element;
 }
 
 const YearContext = createContext<YearContextType | undefined>(undefined);
@@ -113,148 +116,169 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [successMessageYearData]);
 
-    const SeleccionEditarAccion = (idEje: string, idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void) => {
-        LlamadasBBDD({
-            method: 'POST',
-            url: `actionData/${idAccion}`,
-            setLoading: setLoading,
-            setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
-            setErrorMessage: message.setErrorMessage,
-            setSuccessMessage: message.setSuccessMessage,
-            onSuccess: (response) => {
-                const responseDataPlan: DatosPlanBack = response.data.DatosPlan;
-                const responseDataMemoria: DatosMemoriaBack = response.data.DatosMemoria;
-                const indicadoresRealizacionAccion: IndicadorRealizacionAccionDTO[] = response.data?.IndicadoresRealizacionAccion ?? [];
-                const indicadoresResultadoAccion: IndicadorResultadoAccionDTO[] = response.data.IndicadoresResultadoAccion ?? [];
-                const checkData = (value: any, name: string, defaultValue = '') => {
-                    if (value === null || value === undefined) {
-                        console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
-                        return defaultValue;
-                    }
-                    return value;
-                };
-
-                const dataPlan: DatosPlan = {
-                    id: checkData(responseDataPlan?.Id, 'Id', '0'),
-                    ejecutora: checkData(responseDataPlan?.Ejecutora, 'Ejecutora'),
-                    implicadas: checkData(responseDataPlan?.Implicadas, 'Implicadas'),
-                    comarcal: checkData(responseDataPlan?.Comarcal, 'Comarcal'),
-                    supracomarcal: checkData(responseDataPlan?.Supracomarcal, 'Supracomarcal'),
-                    rangoAnios: checkData(responseDataPlan?.RangoAnios, 'RangoAnios'),
-                    oAccion: checkData(responseDataPlan?.OAccion, 'OAccion'),
-                    ods: checkData(responseDataPlan?.Ods, 'Ods'),
-                    dAccion: checkData(responseDataPlan?.DAccion, 'DAccion'),
-                    presupuesto: checkData(responseDataPlan?.Presupuesto, 'Presupuesto'),
-                    iMujHom: checkData(responseDataPlan?.IMujHom, 'IMujHom'),
-                    uEuskera: checkData(responseDataPlan?.UEuskera, 'UEuskera'),
-                    sostenibilidad: checkData(responseDataPlan?.Sostenibilidad, 'Sostenibilidad'),
-                    dInteligent: checkData(responseDataPlan?.DInteligent, 'DInteligent'),
-                    observaciones: checkData(responseDataPlan?.Observaciones, 'Observaciones'),
-                };
-                const dataMemoria: DatosMemoriaBackF = {
-                    id: checkData(responseDataMemoria?.Id, 'Id', '0'),
-                    dAccionAvances: checkData(responseDataMemoria?.DAccionAvances, 'DAccionAvances'),
-                    presupuestoEjecutado: {
-                        fuenteDeFinanciacion: checkData(responseDataMemoria?.PresupuestoEjecutado_fuenteDeFinanciacion, 'PresupuestoEjecutado_fuenteDeFinanciacion', '')
-                            .split(',')
-                            .map((f: string) => f.trim() as FuenteFinanciacion),
-                        cuantia: checkData(responseDataMemoria?.PresupuestoEjecutado_cuantia, 'PresupuestoEjecutado_cuantia'),
-                        observaciones: checkData(responseDataMemoria?.PresupuestoEjecutado_observaciones, 'PresupuestoEjecutado_observaciones'),
-                    },
-                    ejecucionPresupuestaria: {
-                        previsto: checkData(responseDataMemoria?.EjecucionPresupuestaria_previsto, 'EjecucionPresupuestaria_previsto'),
-                        ejecutado: checkData(responseDataMemoria?.EjecucionPresupuestaria_ejecutado, 'EjecucionPresupuestaria_ejecutado'),
-                        porcentaje: checkData(responseDataMemoria?.EjecucionPresupuestaria_porcentaje, 'EjecucionPresupuestaria_porcentaje'),
-                    },
-                    observaciones: checkData(responseDataMemoria?.Observaciones, 'Observaciones'),
-                    valFinal: checkData(responseDataMemoria?.ValFinal, 'ValFinal'),
-                    dSeguimiento: checkData(responseDataMemoria?.DSeguimiento, 'DSeguimiento'),
-                    sActual: checkData(responseDataMemoria?.SActual, 'SActual'),
-                };
-                const indicadorRealizacionAccion: IndicadorRealizacionAccion[] = (indicadoresRealizacionAccion ?? []).map((item: any) => ({
-                    id: checkData(item.IndicadorRealizacionId, 'Id', '0'),
-                    descripcion: '',
-                    metaAnual: {
-                        hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
-                        mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
-                        total: checkData(item.MetaAnual_Total, 'MetaAnual_Total'),
-                    },
-                    ejecutado: {
-                        hombres: checkData(item.Ejecutado_Hombre, 'Ejecutado_Hombre'),
-                        mujeres: checkData(item.Ejecutado_Mujer, 'Ejecutado_Mujer'),
-                        total: checkData(item.Ejecutado_Total, 'Ejecutado_Total'),
-                    },
-                    metaFinal: {
-                        hombres: checkData(item.MetaFinal_Hombre, 'MetaFinal_Hombre'),
-                        mujeres: checkData(item.MetaFinal_Mujer, 'MetaFinal_Mujer'),
-                        total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
-                    },
-                    hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
-                    idsResultados: checkData(item.IdsResultados, 'IdsResultados', '')
-                        .split(',')
-                        .map((id: string) => id.trim()),
-                    indicadorRealizacionId: checkData(item.IndicadorRealizacionId, 'IndicadorRealizacionId', undefined) as number | undefined,
-                }));
-
-                const indicadorResultadoAccion: IndicadorResultadoAccion[] = (indicadoresResultadoAccion ?? []).map((item: any) => ({
-                    id: checkData(item.IndicadorResultadoId, 'Id', '0'),
-                    descripcion: '',
-                    metaAnual: {
-                        hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
-                        mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
-                        total: checkData(item.MetaAnual_Total, 'MetaAnual_Total'),
-                    },
-                    ejecutado: {
-                        hombres: checkData(item.Ejecutado_Hombre, 'Ejecutado_Hombre'),
-                        mujeres: checkData(item.Ejecutado_Mujer, 'Ejecutado_Mujer'),
-                        total: checkData(item.Ejecutado_Total, 'Ejecutado_Total'),
-                    },
-                    metaFinal: {
-                        hombres: checkData(item.MetaFinal_Hombre, 'MetaFinal_Hombre'),
-                        mujeres: checkData(item.MetaFinal_Mujer, 'MetaFinal_Mujer'),
-                        total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
-                    },
-                    hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
-                    indicadorResultadoId: checkData(item.IndicadorResultadoId, 'IndicadorResultadoId', undefined) as number | undefined,
-                }));
-
-                const dataAccion: DatosAccion = {
-                    id: checkData(response.data?.Id, 'Id', '0'),
-                    accion: checkData(response.data?.Nombre, 'Nombre'),
-                    lineaActuaccion: checkData(response.data?.LineaActuaccion, 'LineaActuaccion'),
-                    plurianual: checkData(response.data?.Plurianual, 'Plurianual', 'false'),
-                    indicadorAccion: {
-                        indicadoreRealizacion: indicadorRealizacionAccion,
-                        indicadoreResultado: indicadorResultadoAccion,
-                    },
-                    accionCompartida: response.data?.AccionCompartida ?? null,
-                    datosPlan: dataPlan,
-                    datosMemoria: dataMemoria,
-                    ejeId: idEje,
-                };
-
+    const SeleccionEditarAccion = (idEje: string, idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void): Promise<DatosAccion> => {
+        return new Promise<DatosAccion>((resolve, reject) => {
+            const accionEje = ObtenerAccionDeEje(yearData, idEje, idAccion);
+            if (accionEje && accionEje.indicadorAccion) {
                 setIdEjeEditado(idEje);
-
-                setYearData({
-                    ...yearData,
-                    plan: {
-                        ...yearData.plan,
-                        ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                            eje.Id === idEje ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === idAccion ? { ...accion, ...dataAccion } : accion)) } : eje
-                        ),
-                    },
-                });
-
-                setDatosEditandoAccion(dataAccion);
-                if (dataAccion.accionCompartida && Array.isArray(dataAccion.accionCompartida.regiones)) {
-                    const regionCompleta = dataAccion.accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === (regionSeleccionada ?? ''));
+                setDatosEditandoAccion(accionEje);
+                setLoading(false);
+                if (accionEje.accionCompartida && Array.isArray(accionEje.accionCompartida.regiones)) {
+                    const regionCompleta = accionEje.accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === (regionSeleccionada ?? ''));
                     if (regionCompleta) {
                         setBlock(true);
                     }
                 } else {
                     setBlock(false);
                 }
-            },
+                resolve(accionEje);
+                return;
+            } else {
+                LlamadasBBDD({
+                    method: 'POST',
+                    url: `actionData/${idAccion}`,
+                    setLoading: setLoading,
+                    setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
+                    setErrorMessage: message.setErrorMessage,
+                    setSuccessMessage: message.setSuccessMessage,
+                    onSuccess: (response) => {
+                        const responseDataPlan: DatosPlanBack = response.data.DatosPlan;
+                        const responseDataMemoria: DatosMemoriaBack = response.data.DatosMemoria;
+                        const indicadoresRealizacionAccion: IndicadorRealizacionAccionDTO[] = response.data?.IndicadoresRealizacionAccion ?? [];
+                        const indicadoresResultadoAccion: IndicadorResultadoAccionDTO[] = response.data.IndicadoresResultadoAccion ?? [];
+                        const checkData = (value: any, name: string, defaultValue = '') => {
+                            if (value === null || value === undefined) {
+                                console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
+                                return defaultValue;
+                            }
+                            return value;
+                        };
+
+                        const dataPlan: DatosPlan = {
+                            id: checkData(responseDataPlan?.Id, 'Id', '0'),
+                            ejecutora: checkData(responseDataPlan?.Ejecutora, 'Ejecutora'),
+                            implicadas: checkData(responseDataPlan?.Implicadas, 'Implicadas'),
+                            comarcal: checkData(responseDataPlan?.Comarcal, 'Comarcal'),
+                            supracomarcal: checkData(responseDataPlan?.Supracomarcal, 'Supracomarcal'),
+                            rangoAnios: checkData(responseDataPlan?.RangoAnios, 'RangoAnios'),
+                            oAccion: checkData(responseDataPlan?.OAccion, 'OAccion'),
+                            ods: checkData(responseDataPlan?.Ods, 'Ods'),
+                            dAccion: checkData(responseDataPlan?.DAccion, 'DAccion'),
+                            presupuesto: checkData(responseDataPlan?.Presupuesto, 'Presupuesto'),
+                            iMujHom: checkData(responseDataPlan?.IMujHom, 'IMujHom'),
+                            uEuskera: checkData(responseDataPlan?.UEuskera, 'UEuskera'),
+                            sostenibilidad: checkData(responseDataPlan?.Sostenibilidad, 'Sostenibilidad'),
+                            dInteligent: checkData(responseDataPlan?.DInteligent, 'DInteligent'),
+                            observaciones: checkData(responseDataPlan?.Observaciones, 'Observaciones'),
+                        };
+                        const dataMemoria: DatosMemoriaBackF = {
+                            id: checkData(responseDataMemoria?.Id, 'Id', '0'),
+                            dAccionAvances: checkData(responseDataMemoria?.DAccionAvances, 'DAccionAvances'),
+                            presupuestoEjecutado: {
+                                fuenteDeFinanciacion: checkData(responseDataMemoria?.PresupuestoEjecutado_fuenteDeFinanciacion, 'PresupuestoEjecutado_fuenteDeFinanciacion', '')
+                                    .split(',')
+                                    .map((f: string) => f.trim() as FuenteFinanciacion),
+                                cuantia: checkData(responseDataMemoria?.PresupuestoEjecutado_cuantia, 'PresupuestoEjecutado_cuantia'),
+                                observaciones: checkData(responseDataMemoria?.PresupuestoEjecutado_observaciones, 'PresupuestoEjecutado_observaciones'),
+                            },
+                            ejecucionPresupuestaria: {
+                                previsto: checkData(responseDataMemoria?.EjecucionPresupuestaria_previsto, 'EjecucionPresupuestaria_previsto'),
+                                ejecutado: checkData(responseDataMemoria?.EjecucionPresupuestaria_ejecutado, 'EjecucionPresupuestaria_ejecutado'),
+                                porcentaje: checkData(responseDataMemoria?.EjecucionPresupuestaria_porcentaje, 'EjecucionPresupuestaria_porcentaje'),
+                            },
+                            observaciones: checkData(responseDataMemoria?.Observaciones, 'Observaciones'),
+                            valFinal: checkData(responseDataMemoria?.ValFinal, 'ValFinal'),
+                            dSeguimiento: checkData(responseDataMemoria?.DSeguimiento, 'DSeguimiento'),
+                            sActual: checkData(responseDataMemoria?.SActual, 'SActual'),
+                        };
+                        const indicadorRealizacionAccion: IndicadorRealizacionAccion[] = (indicadoresRealizacionAccion ?? []).map((item: any) => ({
+                            id: checkData(item.IndicadorRealizacionId, 'Id', '0'),
+                            descripcion: '',
+                            metaAnual: {
+                                hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
+                                mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
+                                total: checkData(item.MetaAnual_Total, 'MetaAnual_Total'),
+                            },
+                            ejecutado: {
+                                hombres: checkData(item.Ejecutado_Hombre, 'Ejecutado_Hombre'),
+                                mujeres: checkData(item.Ejecutado_Mujer, 'Ejecutado_Mujer'),
+                                total: checkData(item.Ejecutado_Total, 'Ejecutado_Total'),
+                            },
+                            metaFinal: {
+                                hombres: checkData(item.MetaFinal_Hombre, 'MetaFinal_Hombre'),
+                                mujeres: checkData(item.MetaFinal_Mujer, 'MetaFinal_Mujer'),
+                                total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
+                            },
+                            hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
+                            idsResultados: checkData(item.IdsResultados, 'IdsResultados', '')
+                                .split(',')
+                                .map((id: string) => id.trim()),
+                            indicadorRealizacionId: checkData(item.IndicadorRealizacionId, 'IndicadorRealizacionId', undefined) as number | undefined,
+                        }));
+
+                        const indicadorResultadoAccion: IndicadorResultadoAccion[] = (indicadoresResultadoAccion ?? []).map((item: any) => ({
+                            id: checkData(item.IndicadorResultadoId, 'Id', '0'),
+                            descripcion: '',
+                            metaAnual: {
+                                hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
+                                mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
+                                total: checkData(item.MetaAnual_Total, 'MetaAnual_Total'),
+                            },
+                            ejecutado: {
+                                hombres: checkData(item.Ejecutado_Hombre, 'Ejecutado_Hombre'),
+                                mujeres: checkData(item.Ejecutado_Mujer, 'Ejecutado_Mujer'),
+                                total: checkData(item.Ejecutado_Total, 'Ejecutado_Total'),
+                            },
+                            metaFinal: {
+                                hombres: checkData(item.MetaFinal_Hombre, 'MetaFinal_Hombre'),
+                                mujeres: checkData(item.MetaFinal_Mujer, 'MetaFinal_Mujer'),
+                                total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
+                            },
+                            hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
+                            indicadorResultadoId: checkData(item.IndicadorResultadoId, 'IndicadorResultadoId', undefined) as number | undefined,
+                        }));
+
+                        const dataAccion: DatosAccion = {
+                            id: checkData(response.data?.Id, 'Id', '0'),
+                            accion: checkData(response.data?.Nombre, 'Nombre'),
+                            lineaActuaccion: checkData(response.data?.LineaActuaccion, 'LineaActuaccion'),
+                            plurianual: checkData(response.data?.Plurianual, 'Plurianual', 'false'),
+                            indicadorAccion: {
+                                indicadoreRealizacion: indicadorRealizacionAccion,
+                                indicadoreResultado: indicadorResultadoAccion,
+                            },
+                            accionCompartida: response.data?.AccionCompartida ?? null,
+                            datosPlan: dataPlan,
+                            datosMemoria: dataMemoria,
+                            ejeId: idEje,
+                        };
+
+                        setIdEjeEditado(idEje);
+
+                        setYearData({
+                            ...yearData,
+                            plan: {
+                                ...yearData.plan,
+                                ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
+                                    eje.Id === idEje ? { ...eje, acciones: eje.acciones.map((accion) => (accion.id === idAccion ? { ...accion, ...dataAccion } : accion)) } : eje
+                                ),
+                            },
+                        });
+
+                        setDatosEditandoAccion(dataAccion);
+                        if (dataAccion.accionCompartida && Array.isArray(dataAccion.accionCompartida.regiones)) {
+                            const regionCompleta = dataAccion.accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === (regionSeleccionada ?? ''));
+                            if (regionCompleta) {
+                                setBlock(true);
+                            }
+                        } else {
+                            setBlock(false);
+                        }
+                        resolve(dataAccion);
+                    },
+                    onError: (err) => reject(err),
+                });
+            }
         });
     };
 
@@ -463,7 +487,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const GuardarLaEdicionAccion = (setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => {
+    const GuardarLaEdicionAccion = (tipo: TiposAccion, setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => {
         const datos = convertirDatosAccionADatosAccionBackend();
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
@@ -489,28 +513,57 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 IndicadorResultadoAcciones: indicadoreResultadoEdit,
             },
             onSuccess: (response) => {
-                setYearData({
-                    ...yearData,
-                    plan: {
-                        ...yearData.plan,
-                        ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
-                            eje.Id === datosEditandoAccion.ejeId
-                                ? {
-                                      ...eje,
-                                      acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)),
-                                  }
-                                : eje
-                        ),
-                        ejes: yearData.plan.ejes.map((eje) =>
-                            eje.Id === datosEditandoAccion.ejeId
-                                ? {
-                                      ...eje,
-                                      acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)),
-                                  }
-                                : eje
-                        ),
-                    },
-                });
+                if (tipo === 'AccionesAccesorias') {
+                    const eje = yearData.plan.ejes.find((eje) => eje.Id === datosEditandoAccion.ejeId);
+                    if (eje) {
+                        const accionTranformada = accionTransformadaBackAFront(
+                            response.data,
+                            eje.NameEs,
+                            eje.NameEu,
+                            eje.Id,
+                            ListadoNombresIdicadoresSegunADR('realizacion'),
+                            ListadoNombresIdicadoresSegunADR('resultado')
+                        );
+                        console.log(accionTranformada);
+                        setYearData({
+                            ...yearData,
+                            plan: {
+                                ...yearData.plan,
+                                ejesRestantes: yearData.plan.ejesRestantes!.map((eje) =>
+                                    eje.NameEs === eje.NameEs
+                                        ? {
+                                              ...eje,
+                                              acciones: eje.acciones!.map((accion) => (`${accion.id}` === `${response.data.Id}` ? accionTranformada : accion)),
+                                          }
+                                        : eje
+                                ),
+                            },
+                        });
+                    }
+                } else {
+                    setYearData({
+                        ...yearData,
+                        plan: {
+                            ...yearData.plan,
+                            ejesPrioritarios: yearData.plan.ejesPrioritarios.map((eje) =>
+                                eje.Id === datosEditandoAccion.ejeId
+                                    ? {
+                                          ...eje,
+                                          acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)),
+                                      }
+                                    : eje
+                            ),
+                            ejes: yearData.plan.ejes.map((eje) =>
+                                eje.Id === datosEditandoAccion.ejeId
+                                    ? {
+                                          ...eje,
+                                          acciones: eje.acciones.map((accion) => (accion.id === response.data.Id ? { ...accion, camposFaltantes: response.CamposFaltantes ?? '' } : accion)),
+                                      }
+                                    : eje
+                            ),
+                        },
+                    });
+                }
             },
             onError: () => setLoading(false),
         });
@@ -657,7 +710,15 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const llamadaBBDDYearDataAll = async (anioSeleccionada: number, retornarDatos: boolean): Promise<YearData | undefined> => {
+    const llamadaBBDDYearDataAll = async (anioSeleccionada: number, retornarDatos: boolean, ignorarStorage?: boolean): Promise<YearData | undefined> => {
+        const stored = sessionStorage.getItem('DataYear');
+        if (stored && !ignorarStorage) {
+            const data: YearData = JSON.parse(stored);
+            if (data.year === anioSeleccionada && data.nombreRegion === nombreRegionSeleccionada) {
+                setYearData(data);
+                return;
+            }
+        }
         return new Promise((resolve) => {
             LlamadasBBDD({
                 method: 'GET',
@@ -759,6 +820,20 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         };
     };
 
+    const LoadingYearData = () => {
+        return (
+            <LoadingOverlay
+                isLoading={loadingYearData}
+                message={{
+                    successMessage: successMessageYearData,
+                    setSuccessMessage: setSuccessMessageYearData,
+                    errorMessage: errorMessageYearData,
+                    setErrorMessage: setErrorMessageYearData,
+                }}
+            />
+        );
+    };
+
     return (
         <YearContext.Provider
             value={{
@@ -779,6 +854,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 SeleccionEditarServicio,
                 llamadaBBDDYearData,
                 llamadaBBDDYearDataAll,
+                LoadingYearData,
                 datosEditandoServicio,
                 loadingYearData,
                 setDatosEditandoServicio,

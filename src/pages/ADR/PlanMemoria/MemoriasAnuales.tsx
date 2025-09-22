@@ -5,21 +5,20 @@ import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { useEffect, useState } from 'react';
-import { generarDocumentoWord } from '../../../components/Utils/genWORD';
+import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
-import { YearData } from '../../../types/tipadoPlan';
 
-function validarCamposMemoriaGestionAnual(yearData: YearData): boolean {
-    const memoria = yearData.memoria;
+// function validarCamposMemoriaGestionAnual(yearData: YearData): boolean {
+//     const memoria = yearData.memoria;
 
-    if (!memoria.dSeguimiento || memoria.dSeguimiento.trim() === '') return false;
-    if (!memoria.valFinal || memoria.valFinal.trim() === '') return false;
+//     if (!memoria.dSeguimiento || memoria.dSeguimiento.trim() === '') return false;
+//     if (!memoria.valFinal || memoria.valFinal.trim() === '') return false;
 
-    const existeIndicadorValido = yearData.plan.generalOperationADR.operationalIndicators.some((OI) => OI.valueAchieved.trim() !== '');
+//     const existeIndicadorValido = yearData.plan.generalOperationADR.operationalIndicators.some((OI) => OI.valueAchieved.trim() !== '');
 
-    return existeIndicadorValido;
-}
+//     return existeIndicadorValido;
+// }
 
 interface Archivo {
     nombre: string;
@@ -38,7 +37,7 @@ const Index = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-    const { yearData } = useYear();
+    const { yearData, llamadaBBDDYearDataAll } = useYear();
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
     const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
@@ -46,6 +45,7 @@ const Index = () => {
 
     const [guardado, setGuardado] = useState<boolean>(false);
     const guardadoProps = { value: guardado, set: setGuardado };
+    const [validarDatos, setValidarDatos] = useState<boolean>(false);
 
     useEffect(() => {
         if (successMessageSuperior) {
@@ -57,16 +57,7 @@ const Index = () => {
     }, [successMessageSuperior]);
 
     useEffect(() => {
-        if (!validarCamposMemoriaGestionAnual(yearData)) {
-            setMensajeError(t('faltanCamposMemoriaSeguimiento'));
-            setCamposRellenos(false);
-            return;
-        }
-        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, t)) {
-            setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
-            setCamposRellenos(false);
-            return;
-        }
+        if (!validarDatos) return;
         if (!validarAccionesEjes(yearData.plan.ejes, editarPlan, editarMemoria, t)) {
             setMensajeError(t('faltanCamposAccionesEjes'));
             setCamposRellenos(false);
@@ -105,18 +96,21 @@ const Index = () => {
                                         {t('guardar')}
                                     </button>
                                     <button
-                                        disabled={!camposRellenos}
+                                        className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
                                         onClick={() => {
-                                            if (!camposRellenos) return;
-                                            generarDocumentoWord(yearData, 'Memoria');
+                                            if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, t)) {
+                                                setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
+                                                setCamposRellenos(false);
+                                                return;
+                                            } else {
+                                                setValidarDatos(true);
+                                                llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                            }
                                         }}
-                                        className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
-                                        ${camposRellenos ? 'bg-gray-400 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
-                                        `}
                                     >
-                                        <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
-                                        {t('descargarBorrador')}
+                                        {t('validarDatosAnio')}
                                     </button>
+                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} t={t} />
                                     <NavLink
                                         to={camposRellenos ? '/adr/memoriasAnuales/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Memoria' }}
@@ -136,8 +130,10 @@ const Index = () => {
                                         </button>
                                     </NavLink>
                                 </div>
-                                {mensajeError && <div className="text-red-500">{mensajeError}</div>}
-                                {visibleMessageSuperior && <div className="w-full flex flex-col  text-success bg-warning-ligh p-3.5">{visibleMessageSuperior}</div>}
+                                <div className="flex flex-wrap gap-4 justify-end mt-2">
+                                    {visibleMessageSuperior && <div className="text-success bg-warning-ligh ">{visibleMessageSuperior}</div>}
+                                    {mensajeError && <div className="text-red-500">{mensajeError}</div>}
+                                </div>
                             </div>
                         )}
                         <BotonesAceptacionYRechazo pantalla="Memoria" />

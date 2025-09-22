@@ -138,7 +138,7 @@ const Index: React.FC = () => {
         //     alert(t('nombreDeLaAccionNoVacio'));
         // }
 
-        GuardarLaEdicionAccion(setLoading, { setErrorMessage, setSuccessMessage });
+        GuardarLaEdicionAccion(accionAccesoria ? 'AccionesAccesorias' : 'Acciones', setLoading, { setErrorMessage, setSuccessMessage });
     };
 
     return (

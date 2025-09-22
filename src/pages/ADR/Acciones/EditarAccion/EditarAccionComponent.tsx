@@ -88,6 +88,43 @@ export function CustomSelect({ value, disabled, onChange }: CustomSelectProps) {
     );
 }
 
+function VerificarCamposIndicadores(filas: IndicadorRealizacionAccion[], statusPlan: boolean, statusMemoria: boolean): boolean {
+    if (!filas || filas.length === 0) return false;
+
+    return filas.every((fila) => {
+        if (!fila) {
+            return false;
+        } else {
+            if (fila.metaAnual?.total === 0 || fila.metaAnual?.total === '0') return false;
+            if (fila.metaFinal?.total === 0 || fila.metaFinal?.total === '0') return false;
+            if (!statusPlan && statusMemoria) {
+                if (fila.ejecutado?.total === 0 || fila.ejecutado?.total === '0') return false;
+            }
+        }
+
+        return true;
+    });
+}
+
+export function VerificadorIndicadores(datosEditandoAccion: DatosAccion, statusPlan: boolean, statusMemoria: boolean) {
+    if (!datosEditandoAccion.indicadorAccion) {
+        return false;
+    }
+    if (datosEditandoAccion.indicadorAccion.indicadoreRealizacion.length === 0 && datosEditandoAccion.indicadorAccion.indicadoreResultado.length === 0) {
+        return false;
+    }
+    const indicadorRealizacion: IndicadorRealizacionAccion[] = datosEditandoAccion.indicadorAccion.indicadoreRealizacion;
+    const indicadorResultado: IndicadorResultadoAccion[] = datosEditandoAccion.indicadorAccion.indicadoreResultado;
+
+    if (VerificarCamposIndicadores(indicadorRealizacion, statusPlan, statusMemoria)) {
+        if (VerificarCamposIndicadores(indicadorResultado, statusPlan, statusMemoria)) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
 export function VerificarCamposIndicadoresPorRellenar(
     datosEditandoAccion: DatosAccion,
     statusPlan: boolean,
@@ -103,6 +140,7 @@ export function VerificarCamposIndicadoresPorRellenar(
         index: number;
         camposFaltantes: string[];
     }
+
     function validarIndicadores<T extends { metaAnual?: { total?: number | string }; ejecutado?: { total?: number | string }; metaFinal?: { total?: number | string } }>(
         filas: T[] | undefined,
         invalidIndices: InvalidIndex[]

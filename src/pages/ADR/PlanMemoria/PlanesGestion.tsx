@@ -3,7 +3,15 @@ import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, validarAccionesEjes, validarCamposPlanGestionAnual, validarServicios } from './PlanMemoriaComponents';
+import {
+    BotonesAceptacionYRechazo,
+    BotonReapertura,
+    CamposPlanMemoria,
+    validarAccionesEjes,
+    validarAccionesEjesAccesorias,
+    validarCamposPlanGestionAnual,
+    validarServicios,
+} from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEffect, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
@@ -22,7 +30,7 @@ const archivos: Archivo[] = [
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
-    const { yearData, llamadaBBDDYearDataAll } = useYear();
+    const { yearData, llamadaBBDDYearDataAll, LoadingYearData } = useYear();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
@@ -32,6 +40,7 @@ const Index = () => {
     const guardadoProps = { value: guardado, set: setGuardado };
     const { t } = useTranslation();
     const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
+    const [validarDatos, setValidarDatos] = useState<boolean>(false);
 
     useEffect(() => {
         if (successMessageSuperior) {
@@ -43,17 +52,13 @@ const Index = () => {
     }, [successMessageSuperior]);
 
     useEffect(() => {
-        if (!validarCamposPlanGestionAnual(yearData)) {
-            setMensajeError(t('faltanCamposPlanGestion'));
-            setCamposRellenos(false);
-            return;
-        }
+        if (!validarDatos) return;
         if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, false, t)) {
             setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
             setCamposRellenos(false);
             return;
         }
-        if (!validarAccionesEjes(yearData.plan.ejes, editarPlan, false, t)) {
+        if (!validarAccionesEjesAccesorias(yearData.plan.ejesRestantes!, editarPlan, false)) {
             setMensajeError(t('faltanCamposAccionesEjes'));
             setCamposRellenos(false);
             return;
@@ -86,12 +91,22 @@ const Index = () => {
                                     <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={() => setGuardado(true)}>
                                         {t('guardar')}
                                     </button>
-                                    <BtnExportarDocumentoWord
-                                        camposRellenos={camposRellenos}
-                                        yearData={yearData}
-                                        t={t}
-                                        llamadaBBDDYearDataAll={() => llamadaBBDDYearDataAll(anioSeleccionada!, true)}
-                                    />
+                                    <button
+                                        className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
+                                        onClick={() => {
+                                            if (!validarCamposPlanGestionAnual(yearData)) {
+                                                setMensajeError(t('faltanCamposPlanGestion'));
+                                                setCamposRellenos(false);
+                                                return;
+                                            } else {
+                                                setValidarDatos(true);
+                                                llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                            }
+                                        }}
+                                    >
+                                        {t('validarDatosAnio')}
+                                    </button>
+                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Plan" yearData={yearData} t={t} />
                                     <NavLink
                                         to={camposRellenos ? '/adr/planesGestion/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Plan' }}
@@ -111,8 +126,10 @@ const Index = () => {
                                         </button>
                                     </NavLink>
                                 </div>
-                                {mensajeError && <div className="text-red-500">{mensajeError}</div>}
-                                {visibleMessageSuperior && <div className="w-full flex flex-col  text-success bg-warning-ligh p-3.5">{visibleMessageSuperior}</div>}
+                                <div className="flex flex-wrap gap-4 justify-end mt-2">
+                                    {visibleMessageSuperior && <div className="text-success bg-warning-ligh ">{visibleMessageSuperior}</div>}
+                                    {mensajeError && <div className="text-red-500">{mensajeError}</div>}
+                                </div>
                             </div>
                         )}
                         <BotonesAceptacionYRechazo pantalla="Plan" />
@@ -128,6 +145,8 @@ const Index = () => {
                     )
                 }
             />
+            <LoadingYearData />
+
             {editarPlan && <CamposPlanMemoria pantalla="Plan" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />}
             {(yearData.plan.status === 'proceso' || yearData.plan.status === 'aceptado') && (
                 <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">

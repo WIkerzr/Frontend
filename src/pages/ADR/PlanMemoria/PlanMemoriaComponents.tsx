@@ -19,7 +19,7 @@ import { useEstadosPorAnio, useEstadosPorAnioContext } from '../../../contexts/E
 import { LlamadaBBDDActualizarMemoria, LlamadaBBDDActualizarPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Servicios } from '../../../types/GeneralTypes';
-import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal } from '../Acciones/EditarAccion/EditarAccionComponent';
+import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal, VerificadorIndicadores } from '../Acciones/EditarAccion/EditarAccionComponent';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 
 interface CamposProps {
@@ -517,6 +517,28 @@ export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMem
             return true;
         })
     );
+}
+export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean): boolean {
+    return ejes.every((eje) => {
+        if (!eje.IsAccessory) return true;
+        return eje.acciones.every((accion) => {
+            const indicadoresCorrecto = VerificadorIndicadores(accion, editarPlan, editarMemoria);
+            const camposFaltantes = VerificarAccionFinal(accion, editarPlan, false, true);
+            const camposFaltantesMem = VerificarAccionFinal(accion, editarPlan, true, true);
+            const faltanCamposPlan = camposFaltantes ? camposFaltantes.length != 0 : false;
+            const faltanCamposMemoria = camposFaltantesMem ? camposFaltantesMem.length != 0 : false;
+
+            if (editarPlan) {
+                if (!faltanCamposPlan && indicadoresCorrecto) {
+                    return true;
+                }
+            } else {
+                if (!faltanCamposMemoria && indicadoresCorrecto) {
+                    return true;
+                }
+            }
+        });
+    });
 }
 
 export function validarServicios(servicios: Servicios[], editarMemoria: boolean, t: (key: string, options?: any) => string): boolean {

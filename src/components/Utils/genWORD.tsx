@@ -637,7 +637,107 @@ export const generarDocumentoWord = (datos: YearData, pantalla: 'Plan' | 'Memori
     });
 };
 
-export const GeneracionDelDocumentoWord = async (datos: YearData) => {
+export const GeneracionDelDocumentoWordPlan = async (datos: YearData) => {
+    try {
+        // 1. Cargar la plantilla desde /public
+        const response = await fetch('/plantillaPlan.docx');
+        const arrayBuffer = await response.arrayBuffer();
+
+        // 2. Cargar en PizZip
+        const zip = new PizZip(arrayBuffer);
+
+        // 3. Crear instancia de docxtemplater
+        const doc = new Docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+        });
+
+        console.log(datos.plan.ejesPrioritarios);
+
+        // 4. Datos a sustituir
+        let contAccion = 1;
+        const data = {
+            resumenAccion: datos.plan.ejesPrioritarios?.flatMap((item: Ejes) =>
+                item.acciones.map((accion: DatosAccion) => ({
+                    accion: `${contAccion++}: ${accion.accion}`,
+                    eje: item.NameEs,
+                    lineaActuaccion: accion.lineaActuaccion,
+                    ejecutora: accion.datosPlan?.ejecutora,
+                    implicadas: accion.datosPlan?.implicadas,
+                    comarcal: accion.datosPlan?.comarcal,
+                    supracomarcal: accion.datosPlan?.supracomarcal,
+                    plurianual: accion.plurianual,
+                    oAccion: accion.datosPlan?.oAccion,
+                    dAccion: accion.datosPlan?.dAccion,
+                    iMujHom: accion.datosPlan?.iMujHom,
+                    uEuskera: accion.datosPlan?.uEuskera,
+                    sostenibilidad: accion.datosPlan?.sostenibilidad,
+                    dInteligent: accion.datosPlan?.dInteligent,
+                    ods: accion.datosPlan?.ods,
+                    presupuesto: accion.datosPlan?.presupuesto,
+                    indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
+                        descripcion: iR.descripcion,
+                        unitMed: 'unitMed', //TODO
+                        metaAnual: iR.metaAnual,
+                        metaFinal: iR.metaFinal,
+                        anualidadMetaFinal: '', //TODO
+                    })),
+                    indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
+                        descripcion: iR.descripcion,
+                        unitMed: 'unitMed', //TODO
+                        metaAnual: iR.metaAnual,
+                        metaFinal: iR.metaFinal,
+                        anualidadMetaFinal: '', //TODO
+                    })),
+                    observaciones: accion.datosPlan?.observaciones,
+                }))
+            ),
+            acciones: datos.plan.ejesPrioritarios?.flatMap((item: Ejes) =>
+                item.acciones.map((accion: DatosAccion) => ({
+                    nombre: item.NameEs,
+                    lineaActuaccion: accion.lineaActuaccion,
+                    accion: accion.accion,
+                }))
+            ),
+            fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
+                nombre: `S. ${index + 1}.- ${item.nombre}`,
+                descripcion: item.descripcion,
+                indicadoresRealizacion: item.indicadores.map((iR: IndicadoresServicios) => ({
+                    indicador: iR.indicador,
+                    previsto: iR.previsto.valor,
+                })),
+            })),
+            //Plan de gestion
+            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
+            indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
+                nombre: item.nameEs,
+                value: item.value,
+            })),
+        };
+
+        // 5. Renderizar documento con datos
+        doc.render(data);
+
+        // 6. Generar blob final
+        const out = doc.getZip().generate({
+            type: 'blob',
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+
+        // 7. Descargar
+        const url = URL.createObjectURL(out);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado.docx';
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error generando el Word', error);
+    }
+};
+
+//Sin enpezar
+export const GeneracionDelDocumentoWordMemoria = async (datos: YearData) => {
     try {
         // 1. Cargar la plantilla desde /public
         const response = await fetch('/plantillaPlan.docx');
@@ -738,26 +838,21 @@ export const GeneracionDelDocumentoWord = async (datos: YearData) => {
 interface BtnExportarDocumentoWordProps {
     camposRellenos: boolean;
     yearData: YearData;
-    disabled?: boolean;
+    tipo: 'Plan' | 'Memoria';
     t: (key: string) => string;
-    llamadaBBDDYearDataAll: () => Promise<YearData | undefined>;
 }
 
-export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, t, llamadaBBDDYearDataAll }) => {
-    const handleClick = async () => {
-        const dataYear = await llamadaBBDDYearDataAll();
-        if (!dataYear) return;
-
-        GeneracionDelDocumentoWord(dataYear);
-    };
+export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, yearData, tipo, t }) => {
     return (
         <button
             disabled={!camposRellenos}
             onClick={() => {
                 if (!camposRellenos) return;
-                handleClick();
-
-                //generarDocumentoWord(yearData, 'Plan');
+                if (tipo === 'Plan') {
+                    GeneracionDelDocumentoWordPlan(yearData);
+                } else {
+                    GeneracionDelDocumentoWordMemoria(yearData);
+                }
             }}
             className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
                                                 ${camposRellenos ? 'bg-gray-400 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}

@@ -22,6 +22,7 @@ import IconRefresh from '../../../components/Icon/IconRefresh';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../EjesHelpers';
 import { ModoDev } from '../../../components/Utils/data/controlDev';
+import { VerificadorIndicadores, VerificarAccionFinal } from './EditarAccion/EditarAccionComponent';
 
 interface ModalAccionProps {
     acciones: TiposAccion;
@@ -174,7 +175,6 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
             if (bloqueos[index] === true) {
                 setIdEjeSeleccionado(ejesPlan[index + 1].EjeId);
             } else if (bloqueos[index] === false) {
-                setIdEjeSeleccionado(ejesPlan[index].EjeId);
                 break;
             }
         }
@@ -342,6 +342,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
             await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
         }
         await SeleccionEditarAccion(idEje, id, { setErrorMessage, setSuccessMessage }, setLoading);
+        navigate('/adr/acciones/editando');
     };
 
     const mostrarInput = acciones.length < 5;
@@ -465,6 +466,7 @@ interface MostrarAvisoCamposAccionesProps {
 export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ datos, texto = true }) => {
     const { t } = useTranslation();
     const { editarPlan } = useEstadosPorAnio();
+    const { editarMemoria } = useEstadosPorAnio();
 
     if (!datos) {
         return (
@@ -478,28 +480,46 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
             </div>
         );
     }
-    if (!datos.camposFaltantes) {
-        return <></>;
-    }
+    let faltanCamposPlan = false;
+    let faltanCamposMemoria = false;
+    let faltanIndicadores = false;
 
-    const elementos = datos.camposFaltantes.split(',');
+    if (datos.camposFaltantes) {
+        const elementos = datos.camposFaltantes.split(',');
 
-    const faltanCamposPlan = elementos.some((e) => e.startsWith('P'));
-    const faltanCamposMemoria = elementos.some((e) => e.startsWith('M'));
+        faltanCamposPlan = elementos.some((e) => e.startsWith('P'));
+        faltanCamposMemoria = elementos.some((e) => e.startsWith('M'));
 
-    const faltanIndicadores = elementos.some((e) => e.startsWith('Indicadores'));
+        faltanIndicadores = elementos.some((e) => e.startsWith('Indicadores'));
 
-    if (!texto) {
-        return null;
-    }
-
-    if (editarPlan) {
-        if (!faltanCamposPlan && !faltanIndicadores) {
+        if (!texto) {
             return null;
         }
+
+        if (editarPlan) {
+            if (!faltanCamposPlan && !faltanIndicadores) {
+                return null;
+            }
+        } else {
+            if (!faltanCamposMemoria && !faltanIndicadores) {
+                return null;
+            }
+        }
     } else {
-        if (!faltanCamposMemoria && !faltanIndicadores) {
-            return null;
+        faltanIndicadores = !VerificadorIndicadores(datos, editarPlan, editarMemoria);
+        const camposFaltantes = VerificarAccionFinal(datos, editarPlan, false, true);
+        const camposFaltantesMem = VerificarAccionFinal(datos, editarPlan, true, true);
+        faltanCamposPlan = camposFaltantes ? camposFaltantes.length != 0 : false;
+        faltanCamposMemoria = camposFaltantesMem ? camposFaltantesMem.length != 0 : false;
+
+        if (editarPlan) {
+            if (!faltanCamposPlan && !faltanIndicadores) {
+                return null;
+            }
+        } else {
+            if (!faltanCamposMemoria && !faltanIndicadores) {
+                return null;
+            }
         }
     }
 

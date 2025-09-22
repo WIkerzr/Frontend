@@ -192,7 +192,7 @@ export const transformIndicadoresRealizacion = (listadoNombresIndicadoresRealiza
             total: checkData(item.MetaFinal_Total, 'MetaFinal_Total'),
         },
         hipotesis: checkData(item.Hipotesis, 'Hipotesis'),
-        idsResultados: checkData(item.IdsResultados, 'IdsResultados', '').map((id: string) => id.trim()),
+        //idsResultados: checkData(item.IdsResultados, 'IdsResultados', '').map((id: string) => id.trim()),
         indicadorRealizacionId: checkData(item.IndicadorRealizacionId, 'IndicadorRealizacionId', undefined) as number | undefined,
     }));
 
@@ -228,13 +228,20 @@ export const accionesTransformadasBackAFront = (
     eje.Acciones.map((accion: DatosAccionDTO) => {
         const dataPlan = transformDatosPlan(accion.DatosPlan);
         const dataMemoria = transformDatosMemoria(accion.DatosMemoria);
-        const indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadorRealizacionAcciones);
-        const indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadorResultadoAcciones);
+        let indicadorRealizacionAccion: IndicadorRealizacionAccion[] = [];
+        let indicadorResultadoAccion: IndicadorResultadoAccion[] = [];
+        if (accion.IndicadorRealizacionAcciones && accion.IndicadorResultadoAcciones) {
+            indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadorRealizacionAcciones);
+            indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadorResultadoAcciones);
+        } else {
+            indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadoresRealizacionAccion);
+            indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadoresResultadoAccion);
+        }
 
         return {
             id: checkData(accion?.Id, 'Id', '0'),
             accion: checkData(accion?.Nombre, 'Nombre'),
-            lineaActuaccion: checkData(accion?.LineaAcctuacion, 'LineaAcctuacion'),
+            lineaActuaccion: checkData(accion?.LineaActuaccion, 'LineaAcctuacion'),
             plurianual: checkData(accion?.Plurianual, 'Plurianual', 'false'),
             indicadorAccion: {
                 indicadoreRealizacion: indicadorRealizacionAccion,
@@ -249,6 +256,50 @@ export const accionesTransformadasBackAFront = (
             ejeId: `${eje.EjeGlobal.Id}`,
         };
     });
+
+export const accionTransformadaBackAFront = (
+    accion: DatosAccionDTO,
+    ejeEs: string,
+    ejeEu: string,
+    ejeId: string,
+    listadoNombresIndicadoresRealizacion: { id: number; nombre: string }[],
+    listadoNombresIndicadoresResultado: { id: number; nombre: string }[]
+): DatosAccion => {
+    const dataPlan = transformDatosPlan(accion.DatosPlan);
+    const dataMemoria = transformDatosMemoria(accion.DatosMemoria);
+
+    let indicadorRealizacionAccion: IndicadorRealizacionAccion[] = [];
+    let indicadorResultadoAccion: IndicadorResultadoAccion[] = [];
+
+    if (accion.IndicadorRealizacionAcciones && accion.IndicadorResultadoAcciones) {
+        indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadorRealizacionAcciones);
+        indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadorResultadoAcciones);
+    } else {
+        indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadoresRealizacionAccion);
+        indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadoresResultadoAccion);
+    }
+
+    const lineaActuacion = accion?.LineaAcctuacion ?? accion?.LineaActuaccion ?? '';
+    const idPlan = accion?.DatosPlanId ? accion?.DatosPlanId : accion.DatosPlan?.Id ? accion.DatosPlan?.Id : '0';
+    const idMemoria = accion?.DatosPlanId ? accion?.DatosPlanId : accion.DatosMemoria?.Id ? accion.DatosMemoria?.Id : '0';
+    return {
+        id: checkData(accion?.Id, 'Id', '0'),
+        accion: checkData(accion?.Nombre, 'Nombre'),
+        lineaActuaccion: checkData(lineaActuacion, 'LineaAcctuacion'),
+        plurianual: checkData(accion?.Plurianual, 'Plurianual', 'false'),
+        indicadorAccion: {
+            indicadoreRealizacion: indicadorRealizacionAccion,
+            indicadoreResultado: indicadorResultadoAccion,
+        },
+        ejeEs,
+        ejeEu,
+        DatosPlanId: `${idPlan}`,
+        DatosMemoriaId: `${idMemoria}`,
+        datosPlan: dataPlan,
+        datosMemoria: dataMemoria,
+        ejeId,
+    };
+};
 
 export const convertirOperationalIndicators = (indicatorsDTO?: OperationalIndicatorsDTO[]): OperationalIndicators[] =>
     (indicatorsDTO ?? []).map((OI) => ({
