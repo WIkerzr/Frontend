@@ -24,7 +24,6 @@ import { useRegionContext } from './RegionContext';
 import { ModoDev } from '../components/Utils/data/controlDev';
 import { MessageSetters } from '../components/Utils/data/dataEjes';
 import { accionesTransformadasBackAFront, accionTransformadaBackAFront, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
-import { useIndicadoresContext } from './IndicadoresContext';
 import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
 import { LoadingOverlay } from '../pages/Configuracion/Users/componentes';
 
@@ -66,7 +65,6 @@ const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
 
     const [errorMessageYearData, setErrorMessageYearData] = useState<string>('');
     const [successMessageYearData, setSuccessMessageYearData] = useState<string>('');
@@ -516,14 +514,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 if (tipo === 'AccionesAccesorias') {
                     const eje = yearData.plan.ejes.find((eje) => eje.Id === datosEditandoAccion.ejeId);
                     if (eje) {
-                        const accionTranformada = accionTransformadaBackAFront(
-                            response.data,
-                            eje.NameEs,
-                            eje.NameEu,
-                            eje.Id,
-                            ListadoNombresIdicadoresSegunADR('realizacion'),
-                            ListadoNombresIdicadoresSegunADR('resultado')
-                        );
+                        const accionTranformada = accionTransformadaBackAFront(response.data, eje.NameEs, eje.NameEu, eje.Id);
                         console.log(accionTranformada);
                         setYearData({
                             ...yearData,
@@ -617,7 +608,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
-    const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean) => {
+    const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, anioSeleccionada: number) => {
         const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
         const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
         const ejesPrioritarios: Ejes[] = [];
@@ -634,7 +625,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         data.data.Plan.Ejes.forEach((eje: EjeBBDD2) => {
             let acciones: DatosAccion[] = [];
             if (todasLasAcciones) {
-                acciones = accionesTransformadasBackAFront(eje, ListadoNombresIdicadoresSegunADR('realizacion'), ListadoNombresIdicadoresSegunADR('resultado'));
+                acciones = accionesTransformadasBackAFront(eje);
             } else {
                 acciones = eje.Acciones.map((accion: any) => ({
                     id: `${accion.Id}`,
@@ -676,7 +667,17 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             ejes.push(nuevoEje);
         });
 
-        const dotosAnio: YearData = construirYearData(data.data, nombreRegionSeleccionada ?? '', planStatus, memoriaStatus, generalOperationADR, ejesRestantes, ejesPrioritarios, ejes);
+        const dotosAnio: YearData = construirYearData(
+            data.data,
+            nombreRegionSeleccionada ?? '',
+            planStatus,
+            memoriaStatus,
+            generalOperationADR,
+            ejesRestantes,
+            ejesPrioritarios,
+            ejes,
+            anioSeleccionada
+        );
         if (ModoDev) {
             console.log('dotosAnio');
             console.log('dotosAnio');
@@ -705,7 +706,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage: setErrorMessageYearData,
             setSuccessMessage: setSuccessMessageYearData,
             onSuccess: (data: any) => {
-                onSuccessYearData(data, false, false);
+                onSuccessYearData(data, false, false, anioSeleccionada);
             },
         });
     };
@@ -728,7 +729,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 setErrorMessage: setErrorMessageYearData,
                 setSuccessMessage: setSuccessMessageYearData,
                 onSuccess: (data: any) => {
-                    const datosAnio: YearData | undefined = onSuccessYearData(data, true, true);
+                    const datosAnio: YearData | undefined = onSuccessYearData(data, true, true, anioSeleccionada);
                     if (datosAnio) {
                         if (retornarDatos) resolve(datosAnio);
                     }
@@ -746,6 +747,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const mapIndicadoresRealizacion = (indicadores: IndicadorRealizacionAccion[] | undefined): IndicadorRealizacionAccionDTO[] =>
             (indicadores ?? []).map((ind) => ({
                 IndicadorRealizacionId: ind.id,
+                NameEs: ind.descripcion,
+                NameEu: ind.descripcion,
                 DatosAccionId: Number(datosEditandoAccion.id),
                 Hipotesis: ind.hipotesis,
                 MetaAnual_Hombre: ind.metaAnual?.hombres?.toString(),
@@ -763,6 +766,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const mapIndicadoresResultado = (indicadores: IndicadorResultadoAccion[] | undefined): IndicadorResultadoAccionDTO[] =>
             (indicadores ?? []).map((ind) => ({
                 IndicadorResultadoId: ind.id,
+                NameEs: ind.descripcion,
+                NameEu: ind.descripcion,
                 DatosAccionId: Number(datosEditandoAccion.id),
                 Hipotesis: ind.hipotesis,
                 MetaAnual_Hombre: ind.metaAnual?.hombres?.toString(),

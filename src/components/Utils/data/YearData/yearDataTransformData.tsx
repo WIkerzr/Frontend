@@ -172,10 +172,10 @@ export const transformDatosMemoria = (dm?: DatosMemoriaDTO): DatosMemoriaBackF =
 });
 
 // Transformar Indicadores de Realización
-export const transformIndicadoresRealizacion = (listadoNombresIndicadoresRealizacion: { id: number; nombre: string }[], items?: IndicadorRealizacionAccionDTO[]): IndicadorRealizacionAccion[] =>
+export const transformIndicadoresRealizacion = (items?: IndicadorRealizacionAccionDTO[]): IndicadorRealizacionAccion[] =>
     (items ?? []).map((item) => ({
         id: checkData(item.IndicadorRealizacionId, 'Id', '0'),
-        descripcion: listadoNombresIndicadoresRealizacion.find((lI) => lI.id === item.IndicadorRealizacionId)?.nombre || '',
+        descripcion: item.NameEs ? item.NameEs : item.NameEu ? item.NameEu : '',
         metaAnual: {
             hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
             mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
@@ -197,10 +197,10 @@ export const transformIndicadoresRealizacion = (listadoNombresIndicadoresRealiza
     }));
 
 // Transformar Indicadores de Resultado
-export const transformIndicadoresResultado = (listadoNombresIndicadoresResultado: { id: number; nombre: string }[], items?: IndicadorResultadoAccionDTO[]): IndicadorResultadoAccion[] =>
+export const transformIndicadoresResultado = (items?: IndicadorResultadoAccionDTO[]): IndicadorResultadoAccion[] =>
     (items ?? []).map((item) => ({
         id: checkData(item.IndicadorResultadoId, 'Id', '0'),
-        descripcion: listadoNombresIndicadoresResultado.find((lI) => lI.id === item.IndicadorResultadoId)?.nombre || '',
+        descripcion: item.NameEs ? item.NameEs : item.NameEu ? item.NameEu : '',
         metaAnual: {
             hombres: checkData(item.MetaAnual_Hombre, 'MetaAnual_Hombre'),
             mujeres: checkData(item.MetaAnual_Mujer, 'MetaAnual_Mujer'),
@@ -220,22 +220,18 @@ export const transformIndicadoresResultado = (listadoNombresIndicadoresResultado
         indicadorResultadoId: checkData(item.IndicadorResultadoId, 'IndicadorResultadoId', undefined) as number | undefined,
     }));
 
-export const accionesTransformadasBackAFront = (
-    eje: EjeBBDD2,
-    listadoNombresIndicadoresRealizacion: { id: number; nombre: string }[],
-    listadoNombresIndicadoresResultado: { id: number; nombre: string }[]
-): DatosAccion[] =>
+export const accionesTransformadasBackAFront = (eje: EjeBBDD2): DatosAccion[] =>
     eje.Acciones.map((accion: DatosAccionDTO) => {
         const dataPlan = transformDatosPlan(accion.DatosPlan);
         const dataMemoria = transformDatosMemoria(accion.DatosMemoria);
         let indicadorRealizacionAccion: IndicadorRealizacionAccion[] = [];
         let indicadorResultadoAccion: IndicadorResultadoAccion[] = [];
         if (accion.IndicadorRealizacionAcciones && accion.IndicadorResultadoAcciones) {
-            indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadorRealizacionAcciones);
-            indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadorResultadoAcciones);
+            indicadorRealizacionAccion = transformIndicadoresRealizacion(accion.IndicadorRealizacionAcciones);
+            indicadorResultadoAccion = transformIndicadoresResultado(accion.IndicadorResultadoAcciones);
         } else {
-            indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadoresRealizacionAccion);
-            indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadoresResultadoAccion);
+            indicadorRealizacionAccion = transformIndicadoresRealizacion(accion.IndicadoresRealizacionAccion);
+            indicadorResultadoAccion = transformIndicadoresResultado(accion.IndicadoresResultadoAccion);
         }
 
         return {
@@ -257,14 +253,7 @@ export const accionesTransformadasBackAFront = (
         };
     });
 
-export const accionTransformadaBackAFront = (
-    accion: DatosAccionDTO,
-    ejeEs: string,
-    ejeEu: string,
-    ejeId: string,
-    listadoNombresIndicadoresRealizacion: { id: number; nombre: string }[],
-    listadoNombresIndicadoresResultado: { id: number; nombre: string }[]
-): DatosAccion => {
+export const accionTransformadaBackAFront = (accion: DatosAccionDTO, ejeEs: string, ejeEu: string, ejeId: string): DatosAccion => {
     const dataPlan = transformDatosPlan(accion.DatosPlan);
     const dataMemoria = transformDatosMemoria(accion.DatosMemoria);
 
@@ -272,11 +261,11 @@ export const accionTransformadaBackAFront = (
     let indicadorResultadoAccion: IndicadorResultadoAccion[] = [];
 
     if (accion.IndicadorRealizacionAcciones && accion.IndicadorResultadoAcciones) {
-        indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadorRealizacionAcciones);
-        indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadorResultadoAcciones);
+        indicadorRealizacionAccion = transformIndicadoresRealizacion(accion.IndicadorRealizacionAcciones);
+        indicadorResultadoAccion = transformIndicadoresResultado(accion.IndicadorResultadoAcciones);
     } else {
-        indicadorRealizacionAccion = transformIndicadoresRealizacion(listadoNombresIndicadoresRealizacion, accion.IndicadoresRealizacionAccion);
-        indicadorResultadoAccion = transformIndicadoresResultado(listadoNombresIndicadoresResultado, accion.IndicadoresResultadoAccion);
+        indicadorRealizacionAccion = transformIndicadoresRealizacion(accion.IndicadoresRealizacionAccion);
+        indicadorResultadoAccion = transformIndicadoresResultado(accion.IndicadoresResultadoAccion);
     }
 
     const lineaActuacion = accion?.LineaAcctuacion ?? accion?.LineaActuaccion ?? '';
@@ -342,14 +331,14 @@ export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[
         indicadores: convertirIndicadoresServicios(s.Indicadores ?? []),
     }));
 
-export const convertirEje = (eje: EjeBBDD2, listadoRealizacion: { id: number; nombre: string }[], listadoResultado: { id: number; nombre: string }[]): Ejes => ({
+export const convertirEje = (eje: EjeBBDD2): Ejes => ({
     Id: `${eje.Id}`,
     NameEs: eje.EjeGlobal.NameEs,
     NameEu: eje.EjeGlobal.NameEu,
     IsActive: eje.EjeGlobal.IsActive,
     IsPrioritarios: eje.IsPrioritario,
     IsAccessory: eje.IsAccessory,
-    acciones: accionesTransformadasBackAFront(eje, listadoRealizacion, listadoResultado),
+    acciones: accionesTransformadasBackAFront(eje),
 });
 
 export const normalizarServicios = (servicios: ServiciosDTO[] | ServiciosDTOConvertIndicadores[]): ServiciosDTOConvertIndicadores[] => {
@@ -378,14 +367,15 @@ export const construirYearData = (
     generalOperationADR: GeneralOperationADR,
     ejesRestantes: Ejes[],
     ejesPrioritarios: Ejes[],
-    ejes: Ejes[]
+    ejes: Ejes[],
+    anioSeleccionada: number
 ): YearData => {
     const serviciosConvertidos: ServiciosDTOConvertIndicadores[] = normalizarServicios(data.Servicios);
     const servicios: Servicios[] = convertirServicios(serviciosConvertidos);
 
     return {
         nombreRegion: nombreRegionSeleccionada ?? '',
-        year: data.Year,
+        year: anioSeleccionada,
         plan: {
             id: `${data.Plan.Id}`,
             ejes: ejes,

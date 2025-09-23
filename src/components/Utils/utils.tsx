@@ -557,3 +557,37 @@ export function convertirArrayACadena<T>(valores: T[]): string {
     if (!valores || valores.length === 0) return '';
     return valores.map((v) => String(v)).join(',');
 }
+
+export function compararObjetosGenerico(prev: Record<string, any>, actual: Record<string, any>): string[] {
+    const cambios: string[] = [];
+
+    const keys = new Set([...Object.keys(prev), ...Object.keys(actual)]);
+
+    keys.forEach((key) => {
+        if (prev[key] !== actual[key]) {
+            cambios.push(`${key} ${prev[key]} --> ${actual[key]}`);
+        }
+    });
+
+    return cambios;
+}
+
+//ejemplo
+//     const prevDatosPlan = useEffectPrevio(datosEditandoAccion);
+//
+//     useEffect(() => {
+//         if (datosEditandoAccion.accionCompartida) {
+//             if (prevDatosPlan) {
+//                 const cambios = compararObjetosGenerico(prevDatosPlan, datosEditandoAccion);
+//                 console.log('Cambios detectados:', cambios);
+//             }
+//         }
+//     }, [datosEditandoAccion]);
+
+export function useEffectPrevio<T>(value: T): T | undefined {
+    const ref = useRef<T>();
+    useEffect(() => {
+        ref.current = value;
+    }, [value]);
+    return ref.current;
+}

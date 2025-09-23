@@ -289,6 +289,8 @@ export interface AccionCompartidaDTO {
 
 export interface IndicadorRealizacionAccionDTO {
     IndicadorRealizacionId: number;
+    NameEs: string;
+    NameEu: string;
     DatosAccionId: number;
     Hipotesis?: string;
     MetaAnual_Hombre?: string;
@@ -305,6 +307,8 @@ export interface IndicadorRealizacionAccionDTO {
 
 export interface IndicadorResultadoAccionDTO {
     IndicadorResultadoId: number;
+    NameEs: string;
+    NameEu: string;
     DatosAccionId: number;
     Hipotesis?: string;
     MetaAnual_Hombre?: string;
