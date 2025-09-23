@@ -137,7 +137,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                                         ? opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal)
                                             ? datosEditandoAccion.datosPlan?.supracomarcal
                                             : 'Otros'
-                                        : 'Sin tratamiento territorial supracomarcal'
+                                        : `${t('sinOpcionesSupraComarcal')}`
                                 }
                                 options={opcionesSupraComarcal}
                                 visualOptions={opcionesSupraComarcalSegunIdioma}
@@ -148,7 +148,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                                     nombreInput="supracomarcal"
                                     required
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosPlan.supracomarcal}
+                                    value={datosEditandoAccion.datosPlan.supracomarcal != 'Otros' ? datosEditandoAccion.datosPlan.supracomarcal : ''}
                                     onChange={(e) => handleChangeCampos('supracomarcal', e)}
                                 />
                             )}

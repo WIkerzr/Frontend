@@ -14,6 +14,7 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton } from '../../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { DropdownLineaActuaccion, ErrorFullScreen } from '../ComponentesAccionesServicios';
+import { DatosAccion } from '../../../../types/TipadoAccion';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -60,6 +61,30 @@ const Index: React.FC = () => {
             if (nombreDelEje) {
                 setNombreEje(nombreDelEje);
             }
+        }
+    }, [datosEditandoAccion]);
+
+    useEffect(() => {
+        if (
+            (datosEditandoAccion.accionCompartida === undefined || datosEditandoAccion.accionCompartida === null) &&
+            datosEditandoAccion.datosPlan?.supracomarcal !== `${t('sinOpcionesSupraComarcal')}`
+        ) {
+            setDatosEditandoAccion((prev: DatosAccion) => ({
+                ...prev,
+                datosPlan: {
+                    ...prev.datosPlan!,
+                    supracomarcal: `${t('sinOpcionesSupraComarcal')}`,
+                },
+            }));
+        } else if (typeof datosEditandoAccion.accionCompartida === 'object' && datosEditandoAccion.datosPlan?.supracomarcal === `${t('sinOpcionesSupraComarcal')}`) {
+            const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
+            setDatosEditandoAccion((prev: DatosAccion) => ({
+                ...prev,
+                datosPlan: {
+                    ...prev.datosPlan!,
+                    supracomarcal: opcionesSupraComarcalSegunIdioma[0],
+                },
+            }));
         }
     }, [datosEditandoAccion]);
 
