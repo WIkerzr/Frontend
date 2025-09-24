@@ -3,6 +3,7 @@ import { get, set } from 'lodash';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
 import IconArrowLeft from '../../Icon/IconArrowLeft';
 import IconEqual from '../../Icon/IconEqual';
+import { useState } from 'react';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
     'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },
@@ -38,6 +39,7 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
         justifyContent: 'left',
         alignItems: 'start',
     };
+    const [tempValue, setTempValue] = useState<string>('');
     return {
         accessor,
         title,
@@ -60,10 +62,14 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                         {isEditable ? (
                             <input
                                 className={ambosCero ? 'border p-1 rounded text-center' : 'border p-1 rounded bg-gray-100 text-gray-700 text-center'}
-                                value={ambosCero ? total : hombres + mujeres}
+                                value={tempValue == '' ? (ambosCero ? total : hombres + mujeres) : tempValue}
                                 style={commonStyleNumber}
                                 readOnly={!ambosCero}
                                 onChange={(e) => {
+                                    setTempValue(e.target.value);
+                                }}
+                                onBlur={(e) => {
+                                    setTempValue('');
                                     if (ambosCero) {
                                         setIndicadores((prevRows) => {
                                             const copy = [...prevRows];
@@ -96,10 +102,14 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                         {isEditable ? (
                             <input
                                 className="border p-1 rounded text-center"
-                                value={get(row, accessor) ?? ''}
+                                value={tempValue == '' ? get(row, accessor) ?? '' : tempValue}
                                 required={true}
                                 style={commonStyleNumber}
                                 onChange={(e) => {
+                                    setTempValue(e.target.value);
+                                }}
+                                onBlur={(e) => {
+                                    setTempValue('');
                                     const nuevoValor = Number(e.target.value) || 0;
                                     const accessorContrario = accessor.endsWith('mujeres') ? accessor.replace('mujeres', 'hombres') : accessor.replace('hombres', 'mujeres');
 
@@ -129,10 +139,14 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                     {isEditable ? (
                         <input
                             className="border p-1 rounded text-left"
-                            value={get(row, accessor) ?? ''}
+                            value={tempValue == '' ? get(row, accessor) ?? '' : tempValue}
                             required={true}
                             style={commonStyleText}
                             onChange={(e) => {
+                                setTempValue(e.target.value);
+                            }}
+                            onBlur={(e) => {
+                                setTempValue('');
                                 setIndicadores((prevRows) => {
                                     const copy = [...prevRows];
                                     const updatedRow = { ...copy[index] };

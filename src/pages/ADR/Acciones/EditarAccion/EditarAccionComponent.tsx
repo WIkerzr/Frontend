@@ -310,6 +310,11 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
         const [dataRealizacion, setDataRealizacion] = useState(sortBy(indicadoresRealizacion, 'id'));
         const [dataResultado, setDataResultado] = useState(sortBy(indicadoresResultado, 'id'));
 
+        const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(indicadoresRealizacion);
+        const [indicadoresResultadoTabla, setIndicadoresResultadoTabla] = useState<IndicadorResultadoAccion[]>(indicadoresResultado);
+
+        const [prevEditableRowIndexRealizacion, setPrevEditableRowIndexRealizacion] = useState<boolean>(false);
+        const [prevEditableRowIndexResultado, setPrevEditableRowIndexResultado] = useState<boolean>(false);
         useEffect(() => {
             if (!editarPlan && !editarMemoria) {
                 setBloqueo(true);
@@ -357,35 +362,74 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             setDataResultado(sortStatusResultado.direction === 'desc' ? data.reverse() : data);
         }, [sortStatusRealizacion]);
 
+        useEffect(() => {
+            console.log(indicadoresRealizacion);
+        }, [indicadoresRealizacion]);
+
         const TablasIndicadores = forwardRef<HTMLDivElement, TablasIndicadoresProps>(({ tipoIndicador }, ref) => {
-            const records = tipoIndicador === 'realizacion' ? dataRealizacion : dataResultado;
-            const setIndicador = tipoIndicador === 'realizacion' ? setIndicadoresRealizacion : setIndicadoresResultado;
+            let records = [];
+            if (tipoIndicador === 'realizacion') {
+                if (editableRowIndexRealizacion === 0) {
+                    records = indicadoresRealizacionTabla;
+                } else {
+                    records = dataRealizacion;
+                }
+            } else {
+                if (editableRowIndexResultado === 0) {
+                    records = indicadoresResultadoTabla;
+                } else {
+                    records = dataResultado;
+                }
+            }
+            const setIndicadorTabla = tipoIndicador === 'realizacion' ? setIndicadoresRealizacionTabla : setIndicadoresResultadoTabla;
             const editableRowIndex = tipoIndicador === 'realizacion' ? editableRowIndexRealizacion : editableRowIndexResultado;
             const setEditableRowIndex = tipoIndicador === 'realizacion' ? setEditableRowIndexRealizacion : setEditableRowIndexResultado;
             const sortStatus = tipoIndicador === 'realizacion' ? sortStatusRealizacion : sortStatusResultado;
             const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
+            let guardado: boolean = false;
+            useEffect(() => {
+                if (editableRowIndexRealizacion === 0) {
+                    setPrevEditableRowIndexRealizacion(true);
+                }
+                if (!guardado && prevEditableRowIndexRealizacion && editableRowIndexRealizacion === -1) {
+                    setIndicadoresRealizacion(indicadoresRealizacionTabla);
+                    setPrevEditableRowIndexRealizacion(false);
+                    guardado = true;
+                }
+            }, [editableRowIndexRealizacion]);
+
+            useEffect(() => {
+                if (editableRowIndexResultado === 0) {
+                    setPrevEditableRowIndexResultado(true);
+                }
+                if (!guardado && prevEditableRowIndexResultado && editableRowIndexResultado === -1) {
+                    setIndicadoresResultado(indicadoresResultadoTabla);
+                    setPrevEditableRowIndexResultado(false);
+                    guardado = true;
+                }
+            }, [editableRowIndexResultado]);
 
             const columnMetaAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicadorTabla, editableRowIndex, editarPlan),
             ];
 
             const columnEjecutadoAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicador, editableRowIndex, editarMemoria),
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarMemoria),
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicador, editableRowIndex, editarMemoria),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, editarMemoria),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, editarMemoria),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicadorTabla, editableRowIndex, editarMemoria),
             ];
 
             const columnMetaFinal = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicadorTabla, editableRowIndex, editarPlan),
             ];
-            const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
+            const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicadorTabla, editableRowIndex, false)];
 
             const columns = [
-                editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
+                editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicadorTabla, editableRowIndex, true),
                 ...(!bloqueo
                     ? [
                           {
