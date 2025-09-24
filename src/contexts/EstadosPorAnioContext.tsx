@@ -237,7 +237,10 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                 return;
             }
         };
-        fetchYears();
+        const aniosRegion = sessionStorage.getItem('aniosRegion');
+        if (!aniosRegion) {
+            fetchYears();
+        }
     };
 
     return (

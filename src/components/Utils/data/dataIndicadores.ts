@@ -195,7 +195,7 @@ export async function guardarNuevoRealizacionBack({
             const indicadorNuevo = response.data;
 
             let realizaciones: IndicadorRealizacion[] = [];
-            const storedRealizacion = sessionStorage.getItem('indicadoresRealizacion');
+            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
             if (storedRealizacion) {
                 realizaciones = JSON.parse(storedRealizacion);
             }
@@ -207,7 +207,7 @@ export async function guardarNuevoRealizacionBack({
 
             if (indicadorNuevo.Resultados && indicadorNuevo.Resultados.length > 0) {
                 let resultados: IndicadorRealizacion[] = [];
-                const storedResultado = sessionStorage.getItem('indicadoresResultado');
+                const storedResultado = localStorage.getItem('indicadoresResultado');
                 if (storedResultado) {
                     resultados = JSON.parse(storedResultado);
                 }

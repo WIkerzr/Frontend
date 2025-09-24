@@ -71,11 +71,12 @@ export const LlamadaBBDDEjesRegion = async (
                     if (setFechaUltimoActualizadoBBDD) {
                         setFechaUltimoActualizadoBBDD(new Date());
                     }
-                    sessionStorage.setItem(
+                    localStorage.setItem(
                         'ejesRegion',
                         JSON.stringify({
                             ejesEstrategicos: datosEstrategicosOrdenados,
                             ejesGlobales: datosOrdenadosTodosLosEjes,
+                            region: regionSeleccionada,
                         })
                     );
 
@@ -162,4 +163,37 @@ export const LlamadaBBDDTodosEjes = async (
             },
         });
     });
+};
+
+export const ValidarEjesRegion = (regionSeleccionada: string | null) => {
+    const ejesRegionStr = localStorage.getItem('ejesRegion');
+    if (!regionSeleccionada) {
+        return false;
+    }
+    if (ejesRegionStr) {
+        try {
+            const ejesRegion = JSON.parse(ejesRegionStr) as {
+                ejesEstrategicos?: any[];
+                ejesGlobales?: any[];
+                region: string;
+            };
+            if (ejesRegion.region !== regionSeleccionada) {
+                return false;
+            }
+
+            const ejesEstrategicosOk = Array.isArray(ejesRegion.ejesEstrategicos) && ejesRegion.ejesEstrategicos.length > 0;
+            const ejesGlobalesOk = Array.isArray(ejesRegion.ejesGlobales) && ejesRegion.ejesGlobales.length > 0;
+
+            if (ejesEstrategicosOk || ejesGlobalesOk) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.error('Error al parsear ejesRegion desde localStorage:', error);
+            return false;
+        }
+    } else {
+        return false;
+    }
 };

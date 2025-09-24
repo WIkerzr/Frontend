@@ -125,7 +125,11 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => {
         const token = sessionStorage.getItem('access_token');
         if (!token) return;
-        llamarIndicadoresBBDD();
+        const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
+        const storedResultado = localStorage.getItem('indicadoresResultado');
+        if (!storedRealizacion || storedRealizacion === '[]' || !storedResultado || storedResultado === '[]') {
+            llamarIndicadoresBBDD();
+        }
     }, [login]);
 
     const llamarIndicadoresBBDD = async () => {
@@ -172,8 +176,8 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const actualizarIndicadoresADR = () => {
-        const storedRealizacion = sessionStorage.getItem('indicadoresRealizacion');
-        const storedResultado = sessionStorage.getItem('indicadoresResultado');
+        const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
+        const storedResultado = localStorage.getItem('indicadoresResultado');
         if (storedRealizacion && storedResultado) {
             const indicadoresRealizacionPreFiltrado: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
             const realizacionADR = transformarRealizacionPorRegion(indicadoresRealizacionPreFiltrado);
@@ -205,8 +209,8 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!token) return;
         if (user && (user.role as string) != 'GOBIERNOVASCO') {
             setLoading(true);
-            const storedRealizacion = sessionStorage.getItem('indicadoresRealizacion');
-            const storedResultado = sessionStorage.getItem('indicadoresResultado');
+            const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
+            const storedResultado = localStorage.getItem('indicadoresResultado');
 
             if (storedRealizacion && storedRealizacion != '[]' && storedResultado && storedResultado != '[]' && regionSeleccionada === regionSeleccionada) {
                 const indicadoresRealizacion: IndicadorRealizacion[] = JSON.parse(storedRealizacion);
@@ -239,9 +243,12 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // }, [regionSeleccionada, PrimeraLlamada]);
 
     const SegundaLlamadaEjes = () => {
-        const ejes = sessionStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
+        const ejes = localStorage.getItem(`EjesIndicador_${regionSeleccionada}`);
         if (ejes) {
-            setEjesIndicador(JSON.parse(ejes));
+            const ejesLocal: EjeIndicadorBBDD[] = JSON.parse(ejes);
+            if (ejesLocal && ejesLocal.length > 0) {
+                setEjesIndicador(ejesLocal);
+            }
             return;
         }
 
@@ -252,19 +259,20 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setLoading: setLoading,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDD,
             onSuccess: (response: ApiSuccess<EjeIndicadorBBDD[]>) => {
-                const arrayMapeado = response.data.map((ejes: EjeIndicadorBBDD) => ({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const arrayMapeado = (response.data as any).ejes.map((ejes: EjeIndicadorBBDD) => ({
                     EjeId: ejes.EjeId,
                     NameEs: ejes.NameEs || '',
                     NameEu: ejes.NameEu || '',
                 }));
                 setEjesIndicador(arrayMapeado);
-                for (let i = sessionStorage.length - 1; i >= 0; i--) {
-                    const key = sessionStorage.key(i);
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
                     if (key && key.startsWith('EjesIndicador_')) {
-                        sessionStorage.removeItem(key);
+                        localStorage.removeItem(key);
                     }
                 }
-                sessionStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
+                localStorage.setItem(`EjesIndicador_${regionSeleccionada}`, JSON.stringify(arrayMapeado));
             },
         });
     };
@@ -375,7 +383,9 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!indicadoresRealizacion) {
             setIndicadoresRealizacion([]);
         } else {
-            sessionStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
+            if (indicadoresRealizacion.length != 0) {
+                localStorage.setItem('indicadoresRealizacion', JSON.stringify(indicadoresRealizacion));
+            }
         }
     }, [indicadoresRealizacion]);
 
@@ -383,7 +393,9 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!indicadoresResultado) {
             setIndicadoresResultado([]);
         } else {
-            sessionStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+            if (indicadoresResultado.length != 0) {
+                localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+            }
         }
     }, [indicadoresResultado]);
 

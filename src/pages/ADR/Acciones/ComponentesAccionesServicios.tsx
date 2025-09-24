@@ -13,7 +13,7 @@ import { NewModal, PrintFechaTexto, formateaConCeroDelante, obtenerFechaLlamada 
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import MyEditableDropdown from '../../../components/Utils/inputs';
-import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
+import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { Loading } from '../../../components/Utils/animations';
 import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
 import React from 'react';
@@ -68,15 +68,17 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
             rellenarEjes = ejes ?? [];
 
             if (condicionalReturn(rellenarEjes)) {
-                isFetchingRef.current = true;
-                if (acciones === 'Acciones') {
-                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
-                        isFetchingRef.current = false;
-                    });
-                } else {
-                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
-                        isFetchingRef.current = false;
-                    });
+                if (!ValidarEjesRegion(regionSeleccionada)) {
+                    isFetchingRef.current = true;
+                    if (acciones === 'Acciones') {
+                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
+                            isFetchingRef.current = false;
+                        });
+                    } else {
+                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
+                            isFetchingRef.current = false;
+                        });
+                    }
                 }
             }
         }
