@@ -76,7 +76,11 @@ const Index: React.FC = () => {
                     supracomarcal: `${t('sinOpcionesSupraComarcal')}`,
                 },
             }));
-        } else if (typeof datosEditandoAccion.accionCompartida === 'object' && datosEditandoAccion.datosPlan?.supracomarcal === `${t('sinOpcionesSupraComarcal')}`) {
+        } else if (
+            datosEditandoAccion.accionCompartida !== null &&
+            typeof datosEditandoAccion.accionCompartida === 'object' &&
+            datosEditandoAccion.datosPlan?.supracomarcal === `${t('sinOpcionesSupraComarcal')}`
+        ) {
             const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
             setDatosEditandoAccion((prev: DatosAccion) => ({
                 ...prev,
