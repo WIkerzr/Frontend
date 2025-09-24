@@ -1,6 +1,6 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { TabCard } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
@@ -15,6 +15,11 @@ import { Boton } from '../../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { DropdownLineaActuaccion, ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { DatosAccion } from '../../../../types/TipadoAccion';
+import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../../components/Utils/data/dataEjes';
+import { EjesBBDD } from '../../../../types/tipadoPlan';
+import { useRegionContext } from '../../../../contexts/RegionContext';
+import { EjesBBDDToEjes } from '../../EjesHelpers';
+import { Loading } from '../../../../components/Utils/animations';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -25,44 +30,63 @@ const Index: React.FC = () => {
     const titulo = t('accionTituloEditado');
     const tituloCampo = t('Accion');
     const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : '/adr/acciones/';
+    const { regionSeleccionada } = useRegionContext();
 
     const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, controlguardado, setControlguardado, block, GuardarLaEdicionAccion } = useYear();
     const navigate = useNavigate();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
-    const [nombreEje, setNombreEje] = useState<string>('');
+    const [ejeSeleccionado, setEjeSeleccionado] = useState<EjesBBDD>();
 
-    const [lineaActuaccion, setLineaActuaccion] = useState('');
+    const [lineaActuaccion, setLineaActuaccion] = useState(datosEditandoAccion.lineaActuaccion || '');
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    let ejesPlan = yearData.plan.ejesPrioritarios;
-    if (datosEditandoAccion.id !== '0') {
-        if (datosEditandoAccion.ejeId) {
-            if (yearData.plan.ejesPrioritarios.some((e) => e.Id === datosEditandoAccion.ejeId)) {
-                ejesPlan = yearData.plan.ejesPrioritarios;
-            } else if (yearData.plan.ejes.some((e) => e.Id === datosEditandoAccion.ejeId)) {
-                ejesPlan = yearData.plan.ejes;
-            }
-        }
-    }
+    const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
+    const isFetchingRef = useRef(false);
 
     useEffect(() => {
-        if (!(i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu)) {
-            const eje = ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId);
-            if (eje) {
-                setNombreEje(i18n.language === 'es' ? eje.NameEs : eje.NameEu);
-            }
-        } else {
-            const nombreDelEje = i18n.language === 'es' ? datosEditandoAccion.ejeEs : datosEditandoAccion.ejeEu;
-            if (nombreDelEje) {
-                setNombreEje(nombreDelEje);
+        if (!loading && !isFetchingRef.current && ejesPlan.length === 0) {
+            let rellenarEjes: EjesBBDD[] = [];
+            const ejesRegionStr = localStorage.getItem('ejesRegion');
+            const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(ejesRegionStr || '{}');
+
+            const ejes = !accionAccesoria ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales;
+
+            setEjesPlan(ejes ?? []);
+            rellenarEjes = ejes ?? [];
+
+            if (rellenarEjes.length === 0) {
+                if (!ValidarEjesRegion(regionSeleccionada)) {
+                    isFetchingRef.current = true;
+                    if (!accionAccesoria) {
+                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
+                            isFetchingRef.current = false;
+                        });
+                    } else {
+                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
+                            isFetchingRef.current = false;
+                        });
+                    }
+                }
             }
         }
-    }, [datosEditandoAccion]);
+    }, [yearData, loading]);
+
+    useEffect(() => {
+        let eje = ejesPlan.find((r) => r.NameEs === datosEditandoAccion.ejeEs);
+        if (eje) {
+            setEjeSeleccionado(eje);
+        } else {
+            eje = ejesPlan.find((r) => r.NameEu === datosEditandoAccion.ejeEu);
+            if (eje) {
+                setEjeSeleccionado(eje);
+            }
+        }
+    }, [ejesPlan]);
 
     useEffect(() => {
         if (
@@ -125,10 +149,12 @@ const Index: React.FC = () => {
     }, [controlguardado]);
 
     useEffect(() => {
-        setDatosEditandoAccion({
-            ...datosEditandoAccion!,
-            lineaActuaccion: lineaActuaccion,
-        });
+        if (lineaActuaccion !== datosEditandoAccion.lineaActuaccion) {
+            setDatosEditandoAccion({
+                ...datosEditandoAccion!,
+                lineaActuaccion: lineaActuaccion,
+            });
+        }
     }, [lineaActuaccion]);
 
     if (datosEditandoAccion.id === '0') {
@@ -169,6 +195,10 @@ const Index: React.FC = () => {
 
         GuardarLaEdicionAccion(accionAccesoria ? 'AccionesAccesorias' : 'Acciones', setLoading, { setErrorMessage, setSuccessMessage });
     };
+
+    if (ejeSeleccionado === undefined || !ejeSeleccionado.EjeId) {
+        return <Loading />;
+    }
 
     return (
         <div className="panel">
@@ -214,15 +244,15 @@ const Index: React.FC = () => {
                             <>
                                 <div className="w-1/2 flex flex-col gap-2 justify-center">
                                     <span className="block  font-semibold mb-1">
-                                        <span className="font-normal text-lg">{nombreEje}</span>
+                                        <span className="font-normal text-lg">{ejeSeleccionado.NameEs}</span>
                                     </span>
                                     <span className="block  font-semibold">
                                         {editarPlan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
-                                                idEjeSeleccionado={ejesPlan.find((r) => r.Id === datosEditandoAccion.ejeId)?.Id}
+                                                idEjeSeleccionado={ejeSeleccionado.EjeId}
                                                 lineaActuaccion={lineaActuaccion}
-                                                ejesPlan={ejesPlan}
+                                                ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                                 tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
                                             />
                                         ) : (

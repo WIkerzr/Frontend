@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -388,7 +388,14 @@ export default function MyEditableDropdown({ options, setOpcion, placeholder, va
         }
     }
 
-    const formattedOptions: OptionType[] = options.map((opt) => ({ value: opt, label: opt }));
+    const opcionesFinales = useMemo(() => {
+        if (value && !options.includes(value)) {
+            return [...options, value];
+        }
+        return options;
+    }, [options, value]);
+
+    const formattedOptions: OptionType[] = opcionesFinales.map((opt) => ({ value: opt, label: opt }));
 
     return (
         <CreatableSelect
