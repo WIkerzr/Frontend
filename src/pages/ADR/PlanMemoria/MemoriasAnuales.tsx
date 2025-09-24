@@ -35,7 +35,7 @@ const archivos: Archivo[] = [
 
 const Index = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const { yearData, llamadaBBDDYearDataAll } = useYear();
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
@@ -110,7 +110,7 @@ const Index = () => {
                                     >
                                         {t('validarDatosAnio')}
                                     </button>
-                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} t={t} />
+                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} language={i18n.language} t={t} />
                                     <NavLink
                                         to={camposRellenos ? '/adr/memoriasAnuales/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Memoria' }}

@@ -38,7 +38,7 @@ const Index = () => {
 
     const [guardado, setGuardado] = useState<boolean>(false);
     const guardadoProps = { value: guardado, set: setGuardado };
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
     const [validarDatos, setValidarDatos] = useState<boolean>(false);
 
@@ -106,7 +106,7 @@ const Index = () => {
                                     >
                                         {t('validarDatosAnio')}
                                     </button>
-                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Plan" yearData={yearData} t={t} />
+                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Plan" yearData={yearData} language={i18n.language} t={t} />
                                     <NavLink
                                         to={camposRellenos ? '/adr/planesGestion/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Plan' }}

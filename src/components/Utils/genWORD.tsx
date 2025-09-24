@@ -22,10 +22,10 @@ const formatHMT = (dato: HMT | undefined) => {
     texto += ` T: ${dato.total}`;
     return texto;
 };
-export const GeneracionDelDocumentoWordPlan = async (datos: YearData, t: (key: string) => string) => {
+export const GeneracionDelDocumentoWordPlan = async (datos: YearData, language: string, t: (key: string) => string) => {
     try {
         // 1. Cargar la plantilla desde /public
-        const response = await fetch('/plantillaPlan.docx');
+        const response = await fetch(language === 'es' ? '/plantillaPlanEs.docx' : language === 'eu' ? '/plantillaPlanEu.docx' : '/plantillaPlanEs.docx');
         const arrayBuffer = await response.arrayBuffer();
 
         // 2. Cargar en PizZip
@@ -47,7 +47,7 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, t: (key: s
                     ejecutora: accion.datosPlan?.ejecutora,
                     implicadas: accion.datosPlan?.implicadas,
                     comarcal: accion.datosPlan?.comarcal,
-                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : t('sinTratamientoTerritorialSupracomarcal'),
+                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : `${t('sinTratamientoTerritorialSupracomarcal')}`,
                     plurianual: accion.plurianual ? 'Si' : 'No',
                     oAccion: accion.datosPlan?.oAccion,
                     dAccion: accion.datosPlan?.dAccion,
@@ -77,26 +77,67 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, t: (key: s
         };
 
         const accionesYProyectos: Ejes[] = (datos.plan.ejesRestantes ?? []).filter((eje: Ejes) => eje.IsAccessory);
-        const indi = accionesYProyectos[0].acciones[0].indicadorAccion?.indicadoreRealizacion[0];
-        console.log(indi);
+        // Funcion Hipotesis
+        //TODO Verificar Funcion Hipotesis
+
+        const hipotesis = () => {
+            const indicadoresRA: {
+                nombre: string;
+                hipo: string;
+            }[] = [];
+            const indicadoresRS: {
+                nombre: string;
+                hipo: string;
+            }[] = [];
+
+            for (let ejes = 0; ejes < 2; ejes++) {
+                const ejeRaiz = ejes === 0 ? accionesYProyectos : datos.plan.ejesPrioritarios;
+                for (let index = 0; index < ejeRaiz.length; index++) {
+                    const eje = ejeRaiz[index];
+                    for (let index2 = 0; index2 < eje.acciones.length; index2++) {
+                        const accion = eje.acciones[index2];
+                        if (!accion.indicadorAccion) {
+                            continue;
+                        }
+                        for (let index3 = 0; index3 < accion.indicadorAccion?.indicadoreRealizacion.length; index3++) {
+                            const indicadorRA = accion.indicadorAccion?.indicadoreRealizacion[index3];
+                            if (!indicadorRA.hipotesis) {
+                                continue;
+                            }
+                            indicadoresRA.push({
+                                nombre: indicadorRA.descripcion,
+                                hipo: indicadorRA.hipotesis,
+                            });
+                        }
+                        for (let index3 = 0; index3 < accion.indicadorAccion?.indicadoreResultado.length; index3++) {
+                            const indicadorRS = accion.indicadorAccion?.indicadoreResultado[index3];
+                            if (!indicadorRS.hipotesis) {
+                                continue;
+                            }
+                            indicadoresRS.push({
+                                nombre: indicadorRS.descripcion,
+                                hipo: indicadorRS.hipotesis,
+                            });
+                        }
+                    }
+                }
+            }
+            return [indicadoresRA, indicadoresRS];
+        };
+        const [hipotesisRA, hipotesisRS] = hipotesis();
 
         // 4. Datos a sustituir
         let contAccion = 1;
         const data = {
             nComarca: datos.nombreRegion,
             anioComarca: datos.year,
-            proceso: datos.plan.proceso,
-            eje1: datos.plan.ejesPrioritarios[0]?.NameEs,
-            eje2: datos.plan.ejesPrioritarios[1] ? datos.plan.ejesPrioritarios[1].NameEs : '',
-            eje3: datos.plan.ejesPrioritarios[2] ? datos.plan.ejesPrioritarios[2].NameEs : '',
-            acciones: datos.plan.ejesPrioritarios?.flatMap((item: Ejes) =>
-                item.acciones.map((accion: DatosAccion) => ({
-                    nombreEje: item.NameEs,
-                    lineaActuaccion: accion.lineaActuaccion,
-                    accion: accion.accion,
-                }))
-            ),
-            resumenAccion: Acciones(datos.plan.ejesPrioritarios),
+            //2.
+            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
+            indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
+                nombre: item.nameEs,
+                value: item.value,
+            })),
+            //3.
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
                 nombre: `S. ${index + 1}.- ${item.nombre}`,
                 descripcion: item.descripcion,
@@ -105,13 +146,27 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, t: (key: s
                     previsto: iR.previsto.valor,
                 })),
             })),
+            //4.1
+            proceso: datos.plan.proceso,
+            //4.2
+            eje1: datos.plan.ejesPrioritarios[0]?.NameEs,
+            eje2: datos.plan.ejesPrioritarios[1] ? datos.plan.ejesPrioritarios[1].NameEs : '',
+            eje3: datos.plan.ejesPrioritarios[2] ? datos.plan.ejesPrioritarios[2].NameEs : '',
+            //4.3
+            acciones: datos.plan.ejesPrioritarios?.flatMap((item: Ejes) =>
+                item.acciones.map((accion: DatosAccion) => ({
+                    nombreEje: item.NameEs,
+                    lineaActuaccion: accion.lineaActuaccion,
+                    accion: accion.accion,
+                }))
+            ),
+            //4.4
+            resumenAccion: Acciones(datos.plan.ejesPrioritarios),
+            //5.
             resumenAccionYProyectos: Acciones(accionesYProyectos),
-            //Plan de gestion
-            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
-            indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
-                nombre: item.nameEs,
-                value: item.value,
-            })),
+            //6.1
+            iRAAnexo1: hipotesisRA.length > 0 ? hipotesisRA : [{ nombre: '', hipo: '' }],
+            iRSAnexo1: hipotesisRS.length > 0 ? hipotesisRS : [{ nombre: '', hipo: '' }],
         };
         console.log(data);
 
@@ -142,17 +197,18 @@ interface BtnExportarDocumentoWordProps {
     camposRellenos: boolean;
     yearData: YearData;
     tipo: 'Plan' | 'Memoria';
+    language: string;
     t: (key: string) => string;
 }
 
-export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, yearData, tipo, t }) => {
+export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, yearData, tipo, language, t }) => {
     return (
         <button
             disabled={!camposRellenos}
             onClick={() => {
                 if (!camposRellenos) return;
                 if (tipo === 'Plan') {
-                    GeneracionDelDocumentoWordPlan(yearData, t);
+                    GeneracionDelDocumentoWordPlan(yearData, language, t);
                 } else {
                     // GeneracionDelDocumentoWordMemoria(yearData);
                 }
