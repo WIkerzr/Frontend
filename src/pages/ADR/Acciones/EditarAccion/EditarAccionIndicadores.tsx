@@ -66,7 +66,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
                 indicadoreResultado: indicadoresResultadoTabla,
             },
         }));
-    }, [indicadoresRealizacionTabla,indicadoresResultadoTabla]);
+    }, [indicadoresRealizacionTabla, indicadoresResultadoTabla]);
 
     useEffect(() => {
         const indicadorActualizado = indicadoresResultadoTabla.map((ind) => {

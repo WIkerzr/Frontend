@@ -362,10 +362,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             setDataResultado(sortStatusResultado.direction === 'desc' ? data.reverse() : data);
         }, [sortStatusRealizacion]);
 
-        useEffect(() => {
-            console.log(indicadoresRealizacion);
-        }, [indicadoresRealizacion]);
-
         const TablasIndicadores = forwardRef<HTMLDivElement, TablasIndicadoresProps>(({ tipoIndicador }, ref) => {
             let records = [];
             if (tipoIndicador === 'realizacion') {
