@@ -52,22 +52,20 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     const [bloqueo, setBloqueo] = useState<boolean[]>([]);
     const [bloqueoMensaje, setBloqueoMensaje] = useState<string[]>([]);
 
-    const condicionalReturn = (ejesReturn: EjesBBDD[]) => {
-        return typeof ejesReturn === 'string' || ejesReturn.length === 0;
-    };
-
     const isFetchingRef = useRef(false);
-    useEffect(() => {
-        if (!loading && !isFetchingRef.current && condicionalReturn(ejesPlan)) {
-            let rellenarEjes: EjesBBDD[] = [];
-            const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
 
-            const ejes = acciones === 'Acciones' ? (ejesStore.ejesEstrategicos ? ejesStore.ejesEstrategicos : []) : ejesStore.ejesGlobales;
+    useEffect(() => {
+        if (!loading && !isFetchingRef.current && ejesPlan.length === 0) {
+            let rellenarEjes: EjesBBDD[] = [];
+            const ejesRegionStr = localStorage.getItem('ejesRegion');
+            const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(ejesRegionStr || '{}');
+
+            const ejes = acciones === 'Acciones' ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales;
 
             setEjesPlan(ejes ?? []);
             rellenarEjes = ejes ?? [];
 
-            if (condicionalReturn(rellenarEjes)) {
+            if (rellenarEjes.length === 0) {
                 if (!ValidarEjesRegion(regionSeleccionada)) {
                     isFetchingRef.current = true;
                     if (acciones === 'Acciones') {
@@ -85,14 +83,14 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }, [yearData, loading]);
 
     useEffect(() => {
-        if (condicionalReturn(ejesPlan)) {
+        if (ejesPlan.length === 0) {
             return;
         }
         if (acciones === 'Acciones' && ejesPlan.length != yearData.plan.ejesPrioritarios.length) {
             const prioritarios: EjesBBDD[] = EjesToEjesBBDD(yearData.plan.ejesPrioritarios);
 
             const ejesPrioritariosConLineas: EjesBBDD[] = prioritarios.map((prioritario) => {
-                const match = ejesPlan.find((e) => e.EjeId === prioritario.EjeId);
+                const match = ejesPlan.find((e) => e.NameEs === prioritario.NameEs);
 
                 return {
                     ...prioritario,
@@ -107,7 +105,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }, [ejesPlan]);
 
     useEffect(() => {
-        if (condicionalReturn(ejesPlan)) {
+        if (ejesPlan.length === 0) {
             return;
         }
         if (idEjeSeleccionado === '') {
@@ -134,15 +132,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         if (acciones != 'Acciones' && ejesPlan.length > 0) {
             const namesPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((eje: Ejes) => eje.NameEs);
             const nuevoDropdown = ejesPlan.filter((eje: EjesBBDD) => !namesPrioritarios.includes(`${eje.NameEs}`));
-            if (yearData.plan.ejes.length - yearData.plan.ejesPrioritarios.length != nuevoDropdown.length) {
-                const fallo = `BTN añadir accion | dropdown | listado de ejes incompleto:${nuevoDropdown.length} Todos los ejes:${yearData.plan.ejes.length} - ${yearData.plan.ejesPrioritarios.length} ejesPrioritarios`;
-                if (ModoDev) {
-                    throw new Error(fallo);
-                } else {
-                    console.error(fallo);
-                }
-            }
-            if (JSON.stringify(nuevoDropdown) !== JSON.stringify(ejesPlan)) {
+            if (nuevoDropdown.length != ejesPlan.length) {
                 setEjesPlan(nuevoDropdown);
             }
         }
@@ -153,7 +143,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         if (acciones === 'AccionesAccesorias') {
             return;
         }
-        if (condicionalReturn(ejesPlan)) {
+        if (ejesPlan.length === 0) {
             return;
         }
         const accionesPorEje: number[] = Array.from({ length: yearData.plan.ejesPrioritarios.length }, (_, i) => yearData.plan.ejesPrioritarios[i].acciones.length);
@@ -206,7 +196,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         setShowModal(false);
     };
 
-    if (condicionalReturn(ejesPlan)) {
+    if (ejesPlan.length === 0) {
         return <Loading />;
     }
     return (
@@ -296,7 +286,7 @@ interface ListadoAccionesProps {
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const navigate = useNavigate();
-    const { yearData, EliminarAccion, SeleccionEditarAccion, loadingYearData } = useYear();
+    const { yearData, EliminarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
     const { regionSeleccionada } = useRegionContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
@@ -337,13 +327,26 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     };
 
     const handleEdit = async (id: string) => {
-        setLoading(true);
-        const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
-        const ejesRegion = ejes.ejesEstrategicos;
-        if (!ejesRegion) {
-            await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
+        let hacerLlamada = true;
+        const dataYearLocal = JSON.parse(sessionStorage.getItem('DataYear') || '{}');
+        if (dataYearLocal) {
+            const eje = dataYearLocal.plan.ejesPrioritarios.find((e: Ejes) => e.Id === idEje);
+            const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${id}`);
+            if (accionDelEje.datosPlan) {
+                hacerLlamada = false;
+                setIdEjeEditado(idEje);
+                setDatosEditandoAccion(accionDelEje);
+            }
         }
-        await SeleccionEditarAccion(idEje, id, { setErrorMessage, setSuccessMessage }, setLoading);
+        if (hacerLlamada) {
+            setLoading(true);
+            const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+            const ejesRegion = ejes.ejesEstrategicos;
+            if (!ejesRegion) {
+                await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
+            }
+            await SeleccionEditarAccion(idEje, id, { setErrorMessage, setSuccessMessage }, setLoading);
+        }
         navigate('/adr/acciones/editando');
     };
 

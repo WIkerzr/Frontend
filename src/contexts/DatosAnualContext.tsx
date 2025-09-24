@@ -53,6 +53,7 @@ interface YearContextType {
     AgregarServicio: () => void;
     errorMessageYearData: string;
     setErrorMessageYearData?: (a: string) => void;
+    setIdEjeEditado: (a: string) => void;
     successMessageYearData: string;
     setSuccessMessageYearData?: (a: string) => void;
     controlguardado: boolean;
@@ -866,6 +867,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 GuardarEdicionServicio,
                 errorMessageYearData,
                 setErrorMessageYearData,
+                setIdEjeEditado,
                 successMessageYearData,
                 setSuccessMessageYearData,
                 selectedId,
