@@ -90,16 +90,6 @@ const Index: React.FC = () => {
     }, [yearData, loading]);
 
     useEffect(() => {
-        if (datosEditandoAccion.id === '0') return;
-
-        // const eje = ejesPlan.find((r) => r.NameEs === datosEditandoAccion.ejeEs) ?? ejesPlan.find((r) => r.NameEu === datosEditandoAccion.ejeEu);
-
-        // if (eje && ejeSeleccionado?.EjeId !== eje.EjeId) {
-        //     setEjeSeleccionado(eje);
-        // }
-    }, [datosEditandoAccion.ejeEs, datosEditandoAccion.ejeEu, datosEditandoAccion.id]);
-
-    useEffect(() => {
         if (
             (datosEditandoAccion.accionCompartida === undefined || datosEditandoAccion.accionCompartida === null) &&
             datosEditandoAccion.datosPlan?.supracomarcal !== `${t('sinOpcionesSupraComarcal')}`
@@ -141,15 +131,13 @@ const Index: React.FC = () => {
         if (datosEditandoAccion.id === '0') {
             return;
         }
-        if (lineaActuaccion != '') {
+        if (lineaActuaccion != '' && lineaActuaccion != datosEditandoAccion.lineaActuaccion) {
             if (datosEditandoAccion && datosEditandoAccion.lineaActuaccion != null && datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
                 setDatosEditandoAccion((prev) => ({
                     ...prev!,
                     lineaActuaccion,
                 }));
             }
-        } else {
-            setLineaActuaccion(datosEditandoAccion.lineaActuaccion);
         }
     }, [lineaActuaccion, datosEditandoAccion]);
 
@@ -158,15 +146,6 @@ const Index: React.FC = () => {
             navigate(rutaAnterior);
         }
     }, [controlguardado]);
-
-    useEffect(() => {
-        if (lineaActuaccion !== datosEditandoAccion.lineaActuaccion) {
-            setDatosEditandoAccion({
-                ...datosEditandoAccion!,
-                lineaActuaccion: lineaActuaccion,
-            });
-        }
-    }, [lineaActuaccion]);
 
     if (datosEditandoAccion.id === '0') {
         return;
