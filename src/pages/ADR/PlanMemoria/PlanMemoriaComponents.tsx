@@ -51,7 +51,7 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar, plan, memoria, 
         return (
             <div className="panel flex w-[100%] flex-col">
                 <label htmlFor={campo}>*{t(campo)}</label>
-                <textarea required name={campo} className="w-full border rounded p-2 h-[114px] resize-y" value={dataPlan[campo]} onChange={(e) => handleChangeCampos(campo, e)} />
+                <textarea required name={campo} className="w-full border rounded p-2 h-[114px] resize-y" value={dataPlan[campo] ?? ''} onChange={(e) => handleChangeCampos(campo, e)} />
             </div>
         );
     } else if (campo2) {
@@ -65,7 +65,7 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar, plan, memoria, 
             return (
                 <div>
                     <label htmlFor={campo2}>*{t(campo2)}</label>
-                    <textarea name={campo2} className="w-full border rounded p-2 h-[114px] resize-y" value={dataMemoria[campo2]} onChange={(e) => handleChangeCampos(campo2, e)} />
+                    <textarea name={campo2} className="w-full border rounded p-2 h-[114px] resize-y" value={dataMemoria[campo2] ?? ''} onChange={(e) => handleChangeCampos(campo2, e)} />
                 </div>
             );
         } else {
@@ -84,7 +84,7 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar, plan, memoria, 
                     <textarea
                         name="introduccion"
                         className="w-full border rounded p-2 h-[114px] resize-y"
-                        value={dataPlan.generalOperationADR[campo2]}
+                        value={dataPlan.generalOperationADR[campo2] ?? ''}
                         onChange={(e) => handleChangeCampos(campo2, e)}
                     />
                 </div>
@@ -224,6 +224,8 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
         setIndicator(datos);
     }, [open]);
 
+    if (!open) return;
+
     const handleEdit = () => {
         setDataPlan({
             ...dataPlan,
@@ -256,7 +258,7 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
                         readOnly={pantalla === 'Memoria'}
                         name="indicadoresOperativos"
                         className="w-full border rounded p-2 h-[114px] resize-y"
-                        value={i18n.language === 'es' ? indicator.nameEs : indicator.nameEu}
+                        value={i18n.language === 'es' ? indicator.nameEs ?? '' : indicator.nameEu ?? ''}
                         onChange={(e) => {
                             const newValue = e.target.value;
                             setIndicator((prev) => ({

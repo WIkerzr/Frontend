@@ -69,7 +69,10 @@ const Index = () => {
             return;
         }
         setMensajeError('');
-        setCamposRellenos(true);
+        setVisibleMessageSuperior(t('todoCorrecto'));
+        if (!editarPlan) {
+            setCamposRellenos(true);
+        }
     }, [yearData]);
 
     return (
@@ -96,7 +99,7 @@ const Index = () => {
                                         {t('guardar')}
                                     </button>
                                     <button
-                                        className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
+                                        className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                         onClick={() => {
                                             if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, t)) {
                                                 setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
