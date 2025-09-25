@@ -16,9 +16,9 @@ import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { DropdownLineaActuaccion, ErrorFullScreen } from '../ComponentesAccionesServicios';
 import { DatosAccion } from '../../../../types/TipadoAccion';
 import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../../components/Utils/data/dataEjes';
-import { EjesBBDD } from '../../../../types/tipadoPlan';
+import { Ejes, EjesBBDD } from '../../../../types/tipadoPlan';
 import { useRegionContext } from '../../../../contexts/RegionContext';
-import { EjesBBDDToEjes } from '../../EjesHelpers';
+import { EjesBBDDToEjes, EjesToEjesBBDD } from '../../EjesHelpers';
 import { Loading } from '../../../../components/Utils/animations';
 
 const Index: React.FC = () => {
@@ -77,16 +77,32 @@ const Index: React.FC = () => {
     }, [yearData, loading]);
 
     useEffect(() => {
-        let eje = ejesPlan.find((r) => r.NameEs === datosEditandoAccion.ejeEs);
-        if (eje) {
-            setEjeSeleccionado(eje);
-        } else {
-            eje = ejesPlan.find((r) => r.NameEu === datosEditandoAccion.ejeEu);
-            if (eje) {
-                setEjeSeleccionado(eje);
+        if (ejesPlan.length === 0) return;
+
+        let eje: EjesBBDD | undefined;
+
+        // 1. Buscar por NameEs o NameEu
+        eje = ejesPlan.find((r) => r.NameEs === datosEditandoAccion.ejeEs) ?? ejesPlan.find((r) => r.NameEu === datosEditandoAccion.ejeEu);
+
+        // 2. Si no encontró, buscar según accionAccesoria
+        if (!eje) {
+            let ejeTemp: Ejes | undefined;
+            if (accionAccesoria) {
+                ejeTemp = yearData.plan.ejes.find((r) => `${r.Id}` === `${datosEditandoAccion.ejeId}`);
+            } else {
+                ejeTemp = yearData.plan.ejesPrioritarios.find((r) => `${r.Id}` === `${datosEditandoAccion.ejeId}`);
+            }
+            if (ejeTemp) {
+                eje = EjesToEjesBBDD([ejeTemp])[0];
+            } else {
+                eje = ejesPlan.find((r) => `${r.EjeId}` === `${datosEditandoAccion.ejeId}`);
             }
         }
-    }, [ejesPlan]);
+
+        if (eje) {
+            setEjeSeleccionado(eje);
+        }
+    }, [ejesPlan, datosEditandoAccion]);
 
     useEffect(() => {
         if (
