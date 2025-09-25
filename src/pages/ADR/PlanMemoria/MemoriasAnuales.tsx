@@ -37,7 +37,7 @@ const Index = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-    const { yearData, llamadaBBDDYearDataAll } = useYear();
+    const { yearData, llamadaBBDDYearDataAll, LoadingYearData } = useYear();
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
     const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
@@ -149,6 +149,7 @@ const Index = () => {
                     )
                 }
             />
+            <LoadingYearData />
             <>
                 {(yearData.memoria.status === 'borrador' || yearData.memoria.status === 'cerrado') && (
                     <CamposPlanMemoria pantalla="Memoria" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />

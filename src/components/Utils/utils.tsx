@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import i18n from 'i18next';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -591,3 +592,5 @@ export function useEffectPrevio<T>(value: T): T | undefined {
     }, [value]);
     return ref.current;
 }
+
+export const TextoSegunIdioma = (es: string | undefined, eu: string | undefined) => (i18n.language === 'es' ? es : eu);

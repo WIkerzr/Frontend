@@ -285,7 +285,7 @@ interface ListadoAccionesProps {
 }
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const navigate = useNavigate();
-    const { yearData, EliminarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
+    const { yearData, EliminarAccion, datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
     const { regionSeleccionada } = useRegionContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
@@ -297,6 +297,13 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
+
+    const [navigated, setNavigated] = useState<boolean>(false);
+
+    useEffect(() => {
+        SeleccionVaciarEditarAccion();
+        setNavigated(true);
+    }, []);
 
     useEffect(() => {
         const nuevasAcciones = yearData.plan.ejesPrioritarios[number].acciones;
@@ -319,18 +326,35 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         prevAccionesRef.current = nuevasAcciones;
     }, [yearData]);
 
+    const hasNavigated = useRef(false);
+
+    useEffect(() => {
+        // Solo navega si datosEditandoAccion.id no es 0
+        if (navigated && !hasNavigated.current && datosEditandoAccion && datosEditandoAccion.id !== '0') {
+            navigate('/adr/acciones/editando', {
+                state: {
+                    tipo: 'acciones',
+                    ejeId: datosEditandoAccion.ejeId,
+                    nombreEjeES: datosEditandoAccion.ejeEs,
+                    nombreEjeEU: datosEditandoAccion.ejeEu,
+                },
+            });
+            hasNavigated.current = true;
+        }
+    }, [datosEditandoAccion, navigate]);
+
     const handleDelete = (id: string) => {
         const confirmar = window.confirm(t('confirmacionEliminarAccion'));
         if (!confirmar) return;
         EliminarAccion('Acciones', idEje, id);
     };
 
-    const handleEdit = async (id: string) => {
+    const handleEdit = async (accion: DatosAccion) => {
         let hacerLlamada = true;
         const dataYearLocal = JSON.parse(sessionStorage.getItem('DataYear') || '{}');
         if (dataYearLocal) {
             const eje = dataYearLocal.plan.ejesPrioritarios.find((e: Ejes) => e.Id === idEje);
-            const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${id}`);
+            const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${accion.id}`);
             if (accionDelEje.datosPlan) {
                 hacerLlamada = false;
                 setIdEjeEditado(idEje);
@@ -344,9 +368,8 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
             if (!ejesRegion) {
                 await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
             }
-            await SeleccionEditarAccion(idEje, id, { setErrorMessage, setSuccessMessage }, setLoading);
+            await SeleccionEditarAccion(idEje, 'accion', accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
         }
-        navigate('/adr/acciones/editando');
     };
 
     const mostrarInput = acciones.length < 5;
@@ -365,7 +388,6 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     setErrorMessage,
                 }}
                 timeDelay={false}
-                onComplete={() => navigate('/adr/acciones/editando')}
             />
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => {
@@ -397,7 +419,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                 <button
                                     className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
                                     onClick={() => {
-                                        handleEdit(`${accion.id}`);
+                                        handleEdit(accion);
                                     }}
                                 >
                                     {editable ? <IconPencil /> : <IconEye />}

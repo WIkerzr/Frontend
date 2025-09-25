@@ -24,7 +24,7 @@ import { Loading } from '../../../../components/Utils/animations';
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
-    const tipo = location.state?.tipo;
+    const { tipo, ejeId, nombreEjeES, nombreEjeEU } = location.state as { tipo: 'accesoria' | 'accion'; datosEditandoAccion: DatosAccion; ejeId: string; nombreEjeES: string; nombreEjeEU: string };
 
     const accionAccesoria = tipo === 'accesoria';
     const titulo = t('accionTituloEditado');
@@ -37,6 +37,7 @@ const Index: React.FC = () => {
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const [bloqueo, setBloqueo] = useState<boolean>(block);
+
     const [ejeSeleccionado, setEjeSeleccionado] = useState<EjesBBDD>();
 
     const [lineaActuaccion, setLineaActuaccion] = useState(datosEditandoAccion.lineaActuaccion || '');
@@ -45,64 +46,58 @@ const Index: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
     const isFetchingRef = useRef(false);
 
+    const yearDataDir = accionAccesoria ? yearData.plan.ejesRestantes!.filter((eje: Ejes) => eje.IsAccessory) : yearData.plan.ejesPrioritarios.filter((eje: Ejes) => eje.IsPrioritarios);
+    const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
+
     useEffect(() => {
-        if (!loading && !isFetchingRef.current && ejesPlan.length === 0) {
-            let rellenarEjes: EjesBBDD[] = [];
+        if (!loading && !isFetchingRef.current) {
             const ejesRegionStr = localStorage.getItem('ejesRegion');
             const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(ejesRegionStr || '{}');
+            if (ejesStore) {
+                const ejes = !accionAccesoria ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales;
 
-            const ejes = !accionAccesoria ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales;
-
-            setEjesPlan(ejes ?? []);
-            rellenarEjes = ejes ?? [];
-
-            if (rellenarEjes.length === 0) {
-                if (!ValidarEjesRegion(regionSeleccionada)) {
-                    isFetchingRef.current = true;
-                    if (!accionAccesoria) {
-                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
-                            isFetchingRef.current = false;
-                        });
-                    } else {
-                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
-                            isFetchingRef.current = false;
-                        });
+                if (!ejes!.find((r) => r.NameEs === nombreEjeES) || ejes!.find((r) => r.NameEu === nombreEjeEU)) {
+                    const eje = yearDataDir!.find((r) => r.NameEs === datosEditandoAccion.ejeEs);
+                    if (eje) {
+                        let ejeEscogido = EjesToEjesBBDD([eje])[0];
+                        const lineaActuaccion = ejesStore.ejesGlobales!.find((r) => r.NameEs === ejeEscogido.NameEs)?.LineasActuaccion;
+                        if (!lineaActuaccion) return;
+                        ejeEscogido = {
+                            ...ejeEscogido,
+                            LineasActuaccion: lineaActuaccion,
+                        };
+                        setEjeSeleccionado(ejeEscogido);
+                        setEjesPlan([ejeEscogido]);
+                        return;
                     }
+                }
+            }
+            if (!ValidarEjesRegion(regionSeleccionada)) {
+                isFetchingRef.current = true;
+                if (!accionAccesoria) {
+                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
+                        isFetchingRef.current = false;
+                    });
+                } else {
+                    LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
+                        isFetchingRef.current = false;
+                    });
                 }
             }
         }
     }, [yearData, loading]);
 
     useEffect(() => {
-        if (ejesPlan.length === 0) return;
+        if (datosEditandoAccion.id === '0') return;
 
-        let eje: EjesBBDD | undefined;
+        // const eje = ejesPlan.find((r) => r.NameEs === datosEditandoAccion.ejeEs) ?? ejesPlan.find((r) => r.NameEu === datosEditandoAccion.ejeEu);
 
-        // 1. Buscar por NameEs o NameEu
-        eje = ejesPlan.find((r) => r.NameEs === datosEditandoAccion.ejeEs) ?? ejesPlan.find((r) => r.NameEu === datosEditandoAccion.ejeEu);
-
-        // 2. Si no encontró, buscar según accionAccesoria
-        if (!eje) {
-            let ejeTemp: Ejes | undefined;
-            if (accionAccesoria) {
-                ejeTemp = yearData.plan.ejes.find((r) => `${r.Id}` === `${datosEditandoAccion.ejeId}`);
-            } else {
-                ejeTemp = yearData.plan.ejesPrioritarios.find((r) => `${r.Id}` === `${datosEditandoAccion.ejeId}`);
-            }
-            if (ejeTemp) {
-                eje = EjesToEjesBBDD([ejeTemp])[0];
-            } else {
-                eje = ejesPlan.find((r) => `${r.EjeId}` === `${datosEditandoAccion.ejeId}`);
-            }
-        }
-
-        if (eje) {
-            setEjeSeleccionado(eje);
-        }
-    }, [ejesPlan, datosEditandoAccion]);
+        // if (eje && ejeSeleccionado?.EjeId !== eje.EjeId) {
+        //     setEjeSeleccionado(eje);
+        // }
+    }, [datosEditandoAccion.ejeEs, datosEditandoAccion.ejeEu, datosEditandoAccion.id]);
 
     useEffect(() => {
         if (
@@ -212,7 +207,7 @@ const Index: React.FC = () => {
         GuardarLaEdicionAccion(accionAccesoria ? 'AccionesAccesorias' : 'Acciones', setLoading, { setErrorMessage, setSuccessMessage });
     };
 
-    if (ejeSeleccionado === undefined || !ejeSeleccionado.EjeId) {
+    if (!ejeSeleccionado) {
         return <Loading />;
     }
 
@@ -260,13 +255,13 @@ const Index: React.FC = () => {
                             <>
                                 <div className="w-1/2 flex flex-col gap-2 justify-center">
                                     <span className="block  font-semibold mb-1">
-                                        <span className="font-normal text-lg">{ejeSeleccionado.NameEs}</span>
+                                        <span className="font-normal text-lg">{i18n.language === 'eu' ? nombreEjeEU : nombreEjeES}</span>
                                     </span>
                                     <span className="block  font-semibold">
                                         {editarPlan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
-                                                idEjeSeleccionado={ejeSeleccionado.EjeId}
+                                                idEjeSeleccionado={ejeId}
                                                 lineaActuaccion={lineaActuaccion}
                                                 ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                                 tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}

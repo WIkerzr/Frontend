@@ -38,7 +38,7 @@ interface YearContextType {
     datosEditandoServicio: Servicios | null;
     setDatosEditandoServicio: React.Dispatch<React.SetStateAction<Servicios | null>>;
     SeleccionEditarServicio: (idServicio: string | null) => void;
-    SeleccionEditarAccion: (idEjePrioritario: string, idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void) => void;
+    SeleccionEditarAccion: (idEjePrioritario: string, tipoAccion: 'accion' | 'accesoria', idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void) => void;
     SeleccionVaciarEditarAccion: () => void;
     SeleccionEditarGuardar: () => void;
     SeleccionEditarGuardarAccesoria: () => void;
@@ -115,7 +115,18 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [successMessageYearData]);
 
-    const SeleccionEditarAccion = (idEje: string, idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void): Promise<DatosAccion> => {
+    const SeleccionEditarAccion = (idEje: string, tipoAccion: 'accion' | 'accesoria', idAccion: string, message: MessageSetters, setLoading: (a: boolean) => void): Promise<DatosAccion> => {
+        const busquedaEje = tipoAccion === 'accion' ? yearData.plan.ejesPrioritarios : yearData.plan.ejesRestantes;
+        if (!busquedaEje) throw new Error('Al editar faltan cargar los ejes');
+
+        const eje: Ejes | undefined = busquedaEje.find((e) => `${e.Id}` === idEje);
+
+        if (tipoAccion === 'accion') {
+            if (!eje?.IsPrioritarios) throw new Error('Al editar fallo al cargar el eje Prioritario');
+        } else if (tipoAccion === 'accesoria') {
+            if (!eje?.IsAccessory) throw new Error('Al editar fallo al cargar el ejes accesoria');
+        }
+
         return new Promise<DatosAccion>((resolve, reject) => {
             const accionEje = ObtenerAccionDeEje(yearData, idEje, idAccion);
             if (accionEje && accionEje.indicadorAccion) {
@@ -250,6 +261,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                             datosPlan: dataPlan,
                             datosMemoria: dataMemoria,
                             ejeId: idEje,
+                            ejeEs: eje?.NameEs,
+                            ejeEu: eje?.NameEu,
                         };
 
                         setIdEjeEditado(idEje);
