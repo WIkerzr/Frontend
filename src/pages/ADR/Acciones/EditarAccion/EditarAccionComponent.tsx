@@ -11,6 +11,7 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
+import { PlanOMemoria } from '../../PlanMemoria/PlanMemoriaComponents';
 interface TabCardProps {
     icon: string;
     label: string;
@@ -131,6 +132,7 @@ export function VerificarCamposIndicadoresPorRellenar(
     statusMemoria: boolean,
     ubicacionDelVerificador: 'NuevoIndicador' | 'GuardadoEdicion',
     t: (key: string, options?: any) => string,
+    verificando: PlanOMemoria,
     sinAlerts?: boolean
 ) {
     const invalidIndicesRealizacion: InvalidIndex[] = [];
@@ -153,9 +155,11 @@ export function VerificarCamposIndicadoresPorRellenar(
             if (!fila) {
                 camposFaltantes.push('fila ausente');
             } else {
-                if (fila.metaAnual?.total === 0 || fila.metaAnual?.total === '0') camposFaltantes.push('metaAnual.total');
-                if (fila.metaFinal?.total === 0 || fila.metaFinal?.total === '0') camposFaltantes.push('metaFinal.total');
-                if ((!statusPlan && statusMemoria) || (sinAlerts && statusMemoria)) {
+                if (verificando === 'Plan') {
+                    if (fila.metaAnual?.total === 0 || fila.metaAnual?.total === '0') camposFaltantes.push('metaAnual.total');
+                    if (fila.metaFinal?.total === 0 || fila.metaFinal?.total === '0') camposFaltantes.push('metaFinal.total');
+                }
+                if (verificando === 'Memoria') {
                     if (fila.ejecutado?.total === 0 || fila.ejecutado?.total === '0') camposFaltantes.push('ejecutado.total');
                 }
             }
@@ -229,7 +233,7 @@ export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPla
     const indicadoresRealizacionAccion: IndicadorRealizacionAccion[] = datosEditandoAccion.indicadorAccion.indicadoreRealizacion;
     const indicadoresResultadoAccion: IndicadorResultadoAccion[] = datosEditandoAccion.indicadorAccion.indicadoreResultado;
     const checkData = (value: any, name: string) => {
-        if (value === null || value === undefined || value === '') {
+        if (value === null || value === undefined || value === '' || value === '\n') {
             camposPendientes.push(name);
             return false;
         }

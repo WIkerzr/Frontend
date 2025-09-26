@@ -13,6 +13,12 @@ interface ResultadoValidacionServicios {
 }
 
 export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoValidacionServicios {
+    const checkDataString = (value: string | undefined | null) => {
+        if (value === null || value === undefined || value === '' || value === '\n') {
+            return false;
+        }
+        return true;
+    };
     const faltanIndicadoresPlan = datos.indicadores.some((item) => !item.indicador || !item.previsto?.valor) || datos.indicadores.length === 0;
 
     let faltanIndicadoresMemoria = true;
@@ -20,9 +26,9 @@ export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoVa
         faltanIndicadoresMemoria = datos.indicadores[0].alcanzado ? !datos.indicadores[0].alcanzado.valor : false;
     }
 
-    const faltanCamposPlan = !datos.nombre || !datos.descripcion;
+    const faltanCamposPlan = !checkDataString(datos.nombre) || !checkDataString(datos.descripcion);
 
-    const faltanCamposMemoria = !datos.dSeguimiento || !datos.valFinal;
+    const faltanCamposMemoria = !checkDataString(datos.dSeguimiento) || !checkDataString(datos.valFinal);
 
     return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
 }

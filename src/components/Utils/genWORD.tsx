@@ -6,6 +6,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
+import { PlanOMemoria } from '../../pages/ADR/PlanMemoria/PlanMemoriaComponents';
 
 const formatHMT = (dato: HMT | undefined) => {
     if (dato === undefined) {
@@ -359,7 +360,7 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
 interface BtnExportarDocumentoWordProps {
     camposRellenos: boolean;
     yearData: YearData;
-    tipo: 'Plan' | 'Memoria';
+    tipo: PlanOMemoria;
     language: string;
     t: (key: string) => string;
 }

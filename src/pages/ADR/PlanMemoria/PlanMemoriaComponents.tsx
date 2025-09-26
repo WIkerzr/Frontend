@@ -22,6 +22,8 @@ import { Servicios } from '../../../types/GeneralTypes';
 import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal, VerificadorIndicadores } from '../Acciones/EditarAccion/EditarAccionComponent';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
 
+export type PlanOMemoria = 'Plan' | 'Memoria';
+
 interface CamposProps {
     campo?: {
         [K in keyof Plan]: Plan[K] extends string ? K : never;
@@ -93,11 +95,11 @@ const Campos: React.FC<CamposProps> = ({ campo, campo2, mostrar, plan, memoria, 
     }
 };
 interface PantallaProps {
-    pantalla: 'Plan' | 'Memoria';
+    pantalla: PlanOMemoria;
 }
 
 interface CamposPlanMemoriaProps {
-    pantalla: 'Plan' | 'Memoria';
+    pantalla: PlanOMemoria;
     guardadoProps: {
         value: boolean;
         set: React.Dispatch<React.SetStateAction<boolean>>;
@@ -149,6 +151,8 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                     valFinal: dataMemoria.dSeguimiento,
                     generalOperationADR: dataPlan.generalOperationADR,
                 };
+                console.log(Number(regionSeleccionada));
+
                 LlamadaBBDDActualizarMemoria(Number(regionSeleccionada), anioSeleccionada!, setLoading, { setErrorMessage, setSuccessMessage }, dataPlan.generalOperationADR, dataMemoriaConGOADR);
                 setYearData({
                     ...yearData,
@@ -203,7 +207,7 @@ interface ModalIndicadorOperativo {
     open: boolean;
     idModal: string;
     onClose: () => void;
-    pantalla: 'Plan' | 'Memoria';
+    pantalla: PlanOMemoria;
     plan: { data: Plan; set: React.Dispatch<React.SetStateAction<Plan>> };
 }
 
@@ -323,7 +327,7 @@ const ModalIndicador = forwardRef<HTMLDivElement, ModalIndicadorOperativo>(({ op
 });
 
 interface IndicadoresOperativosTableProps {
-    pantalla: 'Plan' | 'Memoria';
+    pantalla: PlanOMemoria;
     plan: { data: Plan; set: React.Dispatch<React.SetStateAction<Plan>> };
 }
 
@@ -525,20 +529,25 @@ export function validarCamposMemoriaSeguimientoAnual(yearData: YearData): boolea
     return existeIndicadorValido;
 }
 
-export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, verificando: 'plan' | 'memoria', t: (key: string, options?: any) => string): boolean {
+export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, verificando: PlanOMemoria, t: (key: string, options?: any) => string): boolean | string[] {
+    if (ejes.length === 0) return false;
     return ejes.every((eje) =>
         eje.acciones.every((accion) => {
-            if (VerificarCamposIndicadoresPorRellenar(accion, editarPlan, editarMemoria, 'GuardadoEdicion', t, true)) {
+            const validarCamposIndicadores = VerificarCamposIndicadoresPorRellenar(accion, editarPlan, editarMemoria, 'GuardadoEdicion', t, verificando, true);
+            if (validarCamposIndicadores) {
                 const camposFaltantes = VerificarAccionFinal(accion, editarPlan, editarMemoria, true);
                 return camposFaltantes && camposFaltantes.length === 0;
+            } else {
+                return false;
             }
-            return true;
         })
     );
 }
-export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, verificando: 'plan' | 'memoria'): boolean {
+export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, verificando: PlanOMemoria): boolean {
+    if (ejes.length === 0) return false;
     return ejes.every((eje) => {
         if (!eje.IsAccessory) return true;
+        if (eje.acciones.length === 0) return false;
         return eje.acciones.every((accion) => {
             const indicadoresCorrecto = VerificadorIndicadores(accion, editarPlan, editarMemoria);
             const camposFaltantes = VerificarAccionFinal(accion, editarPlan, false, true);
@@ -547,23 +556,26 @@ export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean,
             const faltanCamposMemoria = camposFaltantesMem ? camposFaltantesMem.length != 0 : false;
 
             if (editarPlan) {
-                if (!faltanCamposPlan && indicadoresCorrecto && verificando === 'plan') {
+                if (!faltanCamposPlan && indicadoresCorrecto && verificando === 'Plan') {
                     return true;
                 }
             } else {
-                if (!faltanCamposMemoria && indicadoresCorrecto && verificando === 'memoria') {
+                if (!faltanCamposMemoria && indicadoresCorrecto && verificando === 'Memoria') {
                     return true;
                 }
             }
+            return false;
         });
     });
 }
 
-export function validarServicios(servicios: Servicios[], editarMemoria: boolean, t: (key: string, options?: any) => string): boolean {
+export function validarServicios(servicios: Servicios[], editarMemoria: boolean, verificando: PlanOMemoria, t: (key: string, options?: any) => string): boolean {
     const camposPendientes: string[] = [];
 
+    if (servicios.length === 0) return false;
+
     const checkData = (value: any, name: string) => {
-        if (value === null || value === undefined || value === '') {
+        if (value === null || value === undefined || value === '' || value === '\n') {
             camposPendientes.push(name);
             return false;
         }
@@ -575,11 +587,11 @@ export function validarServicios(servicios: Servicios[], editarMemoria: boolean,
         servicio.indicadores.forEach((indicador) => {
             checkData(indicador.indicador, t('indicadorNombre'));
             checkData(indicador.previsto, t('valorPrevisto'));
-            if (editarMemoria) {
+            if (verificando === 'Memoria') {
                 checkData(indicador.alcanzado, t('valorReal'));
             }
         });
-        if (editarMemoria) {
+        if (verificando === 'Memoria' && editarMemoria) {
             checkData(servicio.dSeguimiento, t('dSeguimiento'));
             checkData(servicio.valFinal, t('valFinal'));
         }
@@ -589,3 +601,38 @@ export function validarServicios(servicios: Servicios[], editarMemoria: boolean,
     }
     return true;
 }
+
+interface ValidacionAnualPlanMemoriaProps {
+    yearData: YearData;
+    editarPlan: boolean;
+    editarMemoria: boolean;
+    verificando: PlanOMemoria;
+    t: (key: string) => string;
+    setMensajeError: (mensaje: string) => void;
+    setCamposRellenos: (valor: boolean) => void;
+    setVisibleMessageSuperior: (mensaje: string) => void;
+}
+
+export const ValidacionAnualPlanMemoria = ({ yearData, editarPlan, editarMemoria, verificando, t, setMensajeError, setCamposRellenos, setVisibleMessageSuperior }: ValidacionAnualPlanMemoriaProps) => {
+    const valAccionesPCDR: boolean | string[] = validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, verificando, t);
+    if (!valAccionesPCDR || (Array.isArray(valAccionesPCDR) && valAccionesPCDR.length > 0)) {
+        setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
+        setCamposRellenos(false);
+        return;
+    }
+    if (!validarAccionesEjesAccesorias(yearData.plan.ejesRestantes!, editarPlan, editarMemoria, verificando)) {
+        setMensajeError(t('faltanCamposAccionesEjes'));
+        setCamposRellenos(false);
+        return;
+    }
+    if (!validarServicios(yearData.servicios!, editarMemoria, verificando, t)) {
+        setMensajeError(t('faltanCamposServicios'));
+        setCamposRellenos(false);
+        return;
+    }
+    setMensajeError('');
+    setVisibleMessageSuperior(t('todoCorrecto'));
+    if (!editarPlan) {
+        setCamposRellenos(true);
+    }
+};

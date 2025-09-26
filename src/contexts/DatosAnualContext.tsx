@@ -23,7 +23,7 @@ import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/I
 import { useRegionContext } from './RegionContext';
 import { ModoDev } from '../components/Utils/data/controlDev';
 import { MessageSetters } from '../components/Utils/data/dataEjes';
-import { accionesTransformadasBackAFront, accionTransformadaBackAFront, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
+import { accionesTransformadasBackAFront, accionTransformadaBackAFront, checkData, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
 import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
 import { LoadingOverlay } from '../pages/Configuracion/Users/componentes';
 
@@ -156,13 +156,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         const responseDataMemoria: DatosMemoriaBack = response.data.DatosMemoria;
                         const indicadoresRealizacionAccion: IndicadorRealizacionAccionDTO[] = response.data?.IndicadoresRealizacionAccion ?? [];
                         const indicadoresResultadoAccion: IndicadorResultadoAccionDTO[] = response.data.IndicadoresResultadoAccion ?? [];
-                        const checkData = (value: any, name: string, defaultValue = '') => {
-                            if (value === null || value === undefined) {
-                                console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
-                                return defaultValue;
-                            }
-                            return value;
-                        };
 
                         const dataPlan: DatosPlan = {
                             id: checkData(responseDataPlan?.Id, 'Id', '0'),

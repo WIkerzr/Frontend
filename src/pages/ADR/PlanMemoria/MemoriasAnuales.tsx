@@ -1,14 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
-import {
-    BotonesAceptacionYRechazo,
-    BotonReapertura,
-    CamposPlanMemoria,
-    validarAccionesEjes,
-    validarAccionesEjesAccesorias,
-    validarCamposMemoriaSeguimientoAnual,
-    validarServicios,
-} from './PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, ValidacionAnualPlanMemoria, validarCamposMemoriaSeguimientoAnual } from './PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
@@ -80,26 +72,16 @@ const Index = () => {
 
     useEffect(() => {
         if (!validarDatos) return;
-        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, 'memoria', t)) {
-            setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
-            setCamposRellenos(false);
-            return;
-        }
-        if (!validarAccionesEjesAccesorias(yearData.plan.ejes, editarPlan, editarMemoria, 'memoria')) {
-            setMensajeError(t('faltanCamposAccionesEjes'));
-            setCamposRellenos(false);
-            return;
-        }
-        if (!validarServicios(yearData.servicios!, editarMemoria, t)) {
-            setMensajeError(t('faltanCamposServicios'));
-            setCamposRellenos(false);
-            return;
-        }
-        setMensajeError('');
-        setVisibleMessageSuperior(t('todoCorrecto'));
-        if (!editarPlan) {
-            setCamposRellenos(true);
-        }
+        ValidacionAnualPlanMemoria({
+            yearData,
+            editarPlan,
+            editarMemoria,
+            verificando: 'Memoria',
+            t,
+            setMensajeError,
+            setCamposRellenos,
+            setVisibleMessageSuperior,
+        });
     }, [validarDatos]);
 
     return (

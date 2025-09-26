@@ -58,7 +58,7 @@ const Index: React.FC = () => {
             if (ejesStore) {
                 const ejes = !accionAccesoria ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales;
 
-                if (!ejes!.find((r) => r.NameEs === nombreEjeES) || ejes!.find((r) => r.NameEu === nombreEjeEU)) {
+                if ((ejes && ejes.length > 0 && !ejes.find((r) => r.NameEs === nombreEjeES)) || ejes!.find((r) => r.NameEu === nombreEjeEU)) {
                     const eje = yearDataDir!.find((r) => r.NameEs === datosEditandoAccion.ejeEs);
                     if (eje) {
                         let ejeEscogido = EjesToEjesBBDD([eje])[0];

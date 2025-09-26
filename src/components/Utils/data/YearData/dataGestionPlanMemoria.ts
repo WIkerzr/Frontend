@@ -64,7 +64,7 @@ export const LlamadaBBDDActualizarMemoria = async (
 
     LlamadasBBDD({
         method: 'POST',
-        url: `yearData/{${regionSeleccionada}}/${Number(anioSeleccionada)}/updateMemoria`,
+        url: `yearData/${regionSeleccionada}/${Number(anioSeleccionada)}/updateMemoria`,
         setLoading,
         body: convertirMemoria,
         setErrorMessage: message.setErrorMessage,

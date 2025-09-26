@@ -3,15 +3,7 @@ import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
-import {
-    BotonesAceptacionYRechazo,
-    BotonReapertura,
-    CamposPlanMemoria,
-    validarAccionesEjes,
-    validarAccionesEjesAccesorias,
-    validarCamposPlanGestionAnual,
-    validarServicios,
-} from './PlanMemoriaComponents';
+import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, ValidacionAnualPlanMemoria, validarCamposPlanGestionAnual } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEffect, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
@@ -52,24 +44,29 @@ const Index = () => {
     }, [successMessageSuperior]);
 
     useEffect(() => {
+        if (successMessageSuperior) {
+            setVisibleMessageSuperior(successMessageSuperior);
+        } else {
+            const timer = setTimeout(() => setVisibleMessageSuperior(''), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [successMessageSuperior]);
+
+    useEffect(() => {
         if (!validarDatos) return;
-        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, false, 'plan', t)) {
-            setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
-            setCamposRellenos(false);
-            return;
-        }
-        if (!validarAccionesEjesAccesorias(yearData.plan.ejesRestantes!, editarPlan, false, 'plan')) {
-            setMensajeError(t('faltanCamposAccionesEjes'));
-            setCamposRellenos(false);
-            return;
-        }
-        if (!validarServicios(yearData.servicios!, false, t)) {
-            setMensajeError(t('faltanCamposServicios'));
-            setCamposRellenos(false);
-            return;
-        }
-        setMensajeError('');
-        setCamposRellenos(true);
+        useEffect(() => {
+            if (!validarDatos) return;
+            ValidacionAnualPlanMemoria({
+                yearData,
+                editarPlan,
+                editarMemoria: false,
+                verificando: 'Plan',
+                t,
+                setMensajeError,
+                setCamposRellenos,
+                setVisibleMessageSuperior,
+            });
+        }, [validarDatos]);
     }, [yearData]);
 
     return (

@@ -223,7 +223,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     };
 
     const handleOpenModal = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'NuevoIndicador', t)) {
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'NuevoIndicador', t, editarPlan ? 'plan' : 'memoria')) {
             setOpen(true);
         }
     };
