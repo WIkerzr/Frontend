@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Ejes, OperationalIndicators, YearData } from '../../types/tipadoPlan';
 import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
-import { DatosAccion, EjecucionPresupuestaria, PresupuestoEjecutado } from '../../types/TipadoAccion';
+import { DatosAccion } from '../../types/TipadoAccion';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
@@ -211,27 +211,6 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
         const accionesPrioritarias: Ejes[] = datos.plan.ejesPrioritarios;
         const accionesYProyectos: Ejes[] = (datos.plan.ejesRestantes ?? []).filter((eje: Ejes) => eje.IsAccessory);
 
-        const Presupuestos = () => {
-            return 'ssssssssssssssssssssssssssssssssssssssssssssssssssss';
-        };
-        const presupuestosPresupuestarias: EjecucionPresupuestaria[] = [];
-        const presupuestosEjecutados: PresupuestoEjecutado[] = [];
-        const datosPlan = accionesPrioritarias.map((item: Ejes) => item.acciones.map((accion: DatosAccion) => accion.datosMemoria));
-        for (let index = 0; index < datosPlan.length; index++) {
-            const accion = datosPlan[index];
-            for (let index2 = 0; index2 < accion.length; index2++) {
-                const planAccion = accion[index];
-                const presupuesto = planAccion?.presupuestoEjecutado;
-                const presupuestoPresu = planAccion?.ejecucionPresupuestaria;
-                if (!presupuestoPresu) continue;
-                presupuestosPresupuestarias.push(presupuestoPresu);
-                if (!presupuesto) continue;
-                presupuestosEjecutados.push(presupuesto);
-            }
-        }
-        console.log(presupuestosPresupuestarias);
-        console.log(presupuestosEjecutados);
-
         // Funcion para generar las acciones
         const Acciones = (ejes: Ejes[]) => {
             return ejes?.flatMap((item: Ejes) =>
@@ -252,7 +231,12 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
                     sostenibilidad: accion.datosPlan?.sostenibilidad,
                     dInteligent: accion.datosPlan?.dInteligent,
                     ods: accion.datosPlan?.ods,
-                    presupuesto: Presupuestos(),
+                    presupuestoCuantia: accion.datosMemoria?.presupuestoEjecutado.cuantia,
+                    presupuestoFuenteDeFinanciacion: accion.datosMemoria?.presupuestoEjecutado.fuenteDeFinanciacion,
+                    presupuestoObservaciones: accion.datosMemoria?.presupuestoEjecutado.observaciones,
+                    presupuestoPrevisto: accion.datosMemoria?.ejecucionPresupuestaria.previsto,
+                    presupuestoEjecutado: accion.datosMemoria?.ejecucionPresupuestaria.ejecutado,
+                    presupuestoPorcentajeEjecución: accion.datosMemoria?.ejecucionPresupuestaria.porcentaje,
                     indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
                         nombre: iR.descripcion,
                         unitMed: 'unitMed', //TODO

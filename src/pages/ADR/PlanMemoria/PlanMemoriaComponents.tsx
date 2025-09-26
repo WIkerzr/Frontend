@@ -129,6 +129,11 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
     }, [successMessage]);
 
     useEffect(() => {
+        setDataPlan(yearData.plan);
+        setDataMemoria(yearData.memoria);
+    }, [yearData]);
+
+    useEffect(() => {
         if (guardado) {
             if (pantalla === 'Plan') {
                 LlamadaBBDDActualizarPlan(Number(regionSeleccionada), anioSeleccionada!, setLoading, { setErrorMessage, setSuccessMessage }, dataPlan);
@@ -508,8 +513,19 @@ export function validarCamposPlanGestionAnual(yearData: YearData): boolean {
 
     return existeIndicadorValido;
 }
+export function validarCamposMemoriaSeguimientoAnual(yearData: YearData): boolean {
+    const memoria = yearData.memoria;
+    const plan = yearData.plan;
 
-export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, t: (key: string, options?: any) => string): boolean {
+    if (!memoria.valFinal || memoria.valFinal === '') return false;
+    if (!memoria.dSeguimiento || memoria.dSeguimiento === '') return false;
+
+    const existeIndicadorValido = plan.generalOperationADR.operationalIndicators.some((OI) => OI.valueAchieved && OI.valueAchieved.trim() !== '');
+
+    return existeIndicadorValido;
+}
+
+export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, verificando: 'plan' | 'memoria', t: (key: string, options?: any) => string): boolean {
     return ejes.every((eje) =>
         eje.acciones.every((accion) => {
             if (VerificarCamposIndicadoresPorRellenar(accion, editarPlan, editarMemoria, 'GuardadoEdicion', t, true)) {
@@ -520,7 +536,7 @@ export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMem
         })
     );
 }
-export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean): boolean {
+export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean, editarMemoria: boolean, verificando: 'plan' | 'memoria'): boolean {
     return ejes.every((eje) => {
         if (!eje.IsAccessory) return true;
         return eje.acciones.every((accion) => {
@@ -531,11 +547,11 @@ export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean,
             const faltanCamposMemoria = camposFaltantesMem ? camposFaltantesMem.length != 0 : false;
 
             if (editarPlan) {
-                if (!faltanCamposPlan && indicadoresCorrecto) {
+                if (!faltanCamposPlan && indicadoresCorrecto && verificando === 'plan') {
                     return true;
                 }
             } else {
-                if (!faltanCamposMemoria && indicadoresCorrecto) {
+                if (!faltanCamposMemoria && indicadoresCorrecto && verificando === 'memoria') {
                     return true;
                 }
             }

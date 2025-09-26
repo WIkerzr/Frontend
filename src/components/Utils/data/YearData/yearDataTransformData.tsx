@@ -10,6 +10,8 @@ import {
     DatosAccionDTO,
     IndicadorRealizacionAccionDTO,
     IndicadorResultadoAccionDTO,
+    DatosMemoriaBack,
+    EstadoLabel,
 } from '../../../../types/TipadoAccion';
 import { EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, OperationalIndicatorsDTO, YearData, YearDataDTO } from '../../../../types/tipadoPlan';
 
@@ -149,27 +151,71 @@ export const transformDatosPlan = (dp?: DatosPlanDTO): DatosPlan => ({
     observaciones: checkData(dp?.Observaciones, 'Observaciones'),
 });
 
+function isDatosMemoriaBack(dm: DatosMemoriaDTO | DatosMemoriaBack): dm is DatosMemoriaBack {
+    return 'PresupuestoEjecutado_fuenteDeFinanciacion' in dm;
+}
+
 // Transformar DatosMemoria
-export const transformDatosMemoria = (dm?: DatosMemoriaDTO): DatosMemoriaBackF => ({
-    id: checkData(dm?.Id, 'Id', '0'),
-    dAccionAvances: checkData(dm?.DAccionAvances, 'DAccionAvances'),
-    presupuestoEjecutado: {
-        fuenteDeFinanciacion: checkData(dm?.PresupuestoEjecutado_FuenteDeFinanciacion, 'PresupuestoEjecutado_fuenteDeFinanciacion', '')
-            .split(',')
-            .map((f: string) => f.trim() as FuenteFinanciacion),
-        cuantia: checkData(dm?.PresupuestoEjecutado_Cuantia, 'PresupuestoEjecutado_cuantia'),
-        observaciones: checkData(dm?.PresupuestoEjecutado_Observaciones, 'PresupuestoEjecutado_observaciones'),
-    },
-    ejecucionPresupuestaria: {
-        previsto: checkData(dm?.EjecucionPresupuestaria_Previsto, 'EjecucionPresupuestaria_previsto'),
-        ejecutado: checkData(dm?.EjecucionPresupuestaria_Ejecutado, 'EjecucionPresupuestaria_ejecutado'),
-        porcentaje: checkData(dm?.EjecucionPresupuestaria_Porcentaje, 'EjecucionPresupuestaria_porcentaje'),
-    },
-    observaciones: checkData(dm?.Observaciones, 'Observaciones'),
-    valFinal: checkData(dm?.ValFinal, 'ValFinal'),
-    dSeguimiento: checkData(dm?.DSeguimiento, 'DSeguimiento'),
-    sActual: checkData(dm?.SActual, 'SActual'),
-});
+export const transformDatosMemoria = (dm?: DatosMemoriaDTO | DatosMemoriaBack): DatosMemoriaBackF => {
+    if (!dm) {
+        return {
+            id: '0',
+            dAccionAvances: '',
+            presupuestoEjecutado: { fuenteDeFinanciacion: [], cuantia: '', observaciones: '' },
+            ejecucionPresupuestaria: { previsto: '', ejecutado: '', porcentaje: '' },
+            observaciones: '',
+            valFinal: '',
+            dSeguimiento: '',
+            sActual: '' as EstadoLabel,
+        };
+    }
+
+    if (isDatosMemoriaBack(dm)) {
+        //  Caso Back
+        return {
+            id: checkData(dm.Id, 'Id', '0'),
+            dAccionAvances: checkData(dm.DAccionAvances, 'DAccionAvances'),
+            presupuestoEjecutado: {
+                fuenteDeFinanciacion: checkData(dm.PresupuestoEjecutado_fuenteDeFinanciacion, 'PresupuestoEjecutado_fuenteDeFinanciacion', '')
+                    .split(',')
+                    .map((f: string) => f.trim() as FuenteFinanciacion),
+                cuantia: checkData(dm.PresupuestoEjecutado_cuantia, 'PresupuestoEjecutado_cuantia'),
+                observaciones: checkData(dm.PresupuestoEjecutado_observaciones, 'PresupuestoEjecutado_observaciones'),
+            },
+            ejecucionPresupuestaria: {
+                previsto: checkData(dm.EjecucionPresupuestaria_previsto, 'EjecucionPresupuestaria_previsto'),
+                ejecutado: checkData(dm.EjecucionPresupuestaria_ejecutado, 'EjecucionPresupuestaria_ejecutado'),
+                porcentaje: checkData(dm.EjecucionPresupuestaria_porcentaje, 'EjecucionPresupuestaria_porcentaje'),
+            },
+            observaciones: checkData(dm.Observaciones, 'Observaciones'),
+            valFinal: checkData(dm.ValFinal, 'ValFinal'),
+            dSeguimiento: checkData(dm.DSeguimiento, 'DSeguimiento'),
+            sActual: checkData(dm.SActual, 'SActual'),
+        };
+    } else {
+        //  Caso DTO
+        return {
+            id: checkData(dm.Id, 'Id', '0'),
+            dAccionAvances: checkData(dm.DAccionAvances, 'DAccionAvances'),
+            presupuestoEjecutado: {
+                fuenteDeFinanciacion: checkData(dm.PresupuestoEjecutado_FuenteDeFinanciacion, 'PresupuestoEjecutado_fuenteDeFinanciacion', '')
+                    .split(',')
+                    .map((f: string) => f.trim() as FuenteFinanciacion),
+                cuantia: checkData(dm.PresupuestoEjecutado_Cuantia, 'PresupuestoEjecutado_cuantia'),
+                observaciones: checkData(dm.PresupuestoEjecutado_Observaciones, 'PresupuestoEjecutado_observaciones'),
+            },
+            ejecucionPresupuestaria: {
+                previsto: checkData(dm.EjecucionPresupuestaria_Previsto, 'EjecucionPresupuestaria_previsto'),
+                ejecutado: checkData(dm.EjecucionPresupuestaria_Ejecutado, 'EjecucionPresupuestaria_ejecutado'),
+                porcentaje: checkData(dm.EjecucionPresupuestaria_Porcentaje, 'EjecucionPresupuestaria_porcentaje'),
+            },
+            observaciones: checkData(dm.Observaciones, 'Observaciones'),
+            valFinal: checkData(dm.ValFinal, 'ValFinal'),
+            dSeguimiento: checkData(dm.DSeguimiento, 'DSeguimiento'),
+            sActual: checkData(dm.SActual, 'SActual') as EstadoLabel,
+        };
+    }
+};
 
 // Transformar Indicadores de Realización
 export const transformIndicadoresRealizacion = (items?: IndicadorRealizacionAccionDTO[]): IndicadorRealizacionAccion[] =>

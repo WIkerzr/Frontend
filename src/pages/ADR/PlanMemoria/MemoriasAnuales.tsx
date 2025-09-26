@@ -1,6 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, validarAccionesEjes, validarServicios } from './PlanMemoriaComponents';
+import {
+    BotonesAceptacionYRechazo,
+    BotonReapertura,
+    CamposPlanMemoria,
+    validarAccionesEjes,
+    validarAccionesEjesAccesorias,
+    validarCamposMemoriaSeguimientoAnual,
+    validarServicios,
+} from './PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
@@ -8,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
+import { GeneralOperationADR, Memoria } from '../../../types/tipadoPlan';
 
 // function validarCamposMemoriaGestionAnual(yearData: YearData): boolean {
 //     const memoria = yearData.memoria;
@@ -45,7 +54,20 @@ const Index = () => {
 
     const [guardado, setGuardado] = useState<boolean>(false);
     const guardadoProps = { value: guardado, set: setGuardado };
+
+    const [tablaIndicadoresOperativos, setTablaIndicadoresOperativos] = useState<GeneralOperationADR>(yearData.plan.generalOperationADR);
+    const [camposMemoria, setCamposMemoria] = useState<Memoria>(yearData.memoria);
+
     const [validarDatos, setValidarDatos] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (JSON.stringify(camposMemoria) !== JSON.stringify(yearData.memoria)) {
+            setCamposMemoria(yearData.memoria);
+        }
+        if (JSON.stringify(tablaIndicadoresOperativos) !== JSON.stringify(yearData.plan.generalOperationADR)) {
+            setTablaIndicadoresOperativos(yearData.plan.generalOperationADR);
+        }
+    }, [yearData]);
 
     useEffect(() => {
         if (successMessageSuperior) {
@@ -58,7 +80,12 @@ const Index = () => {
 
     useEffect(() => {
         if (!validarDatos) return;
-        if (!validarAccionesEjes(yearData.plan.ejes, editarPlan, editarMemoria, t)) {
+        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, 'memoria', t)) {
+            setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
+            setCamposRellenos(false);
+            return;
+        }
+        if (!validarAccionesEjesAccesorias(yearData.plan.ejes, editarPlan, editarMemoria, 'memoria')) {
             setMensajeError(t('faltanCamposAccionesEjes'));
             setCamposRellenos(false);
             return;
@@ -73,7 +100,7 @@ const Index = () => {
         if (!editarPlan) {
             setCamposRellenos(true);
         }
-    }, [yearData]);
+    }, [validarDatos]);
 
     return (
         <div className="panel">
@@ -83,7 +110,7 @@ const Index = () => {
                         <span>
                             {t('memoriaTitulo')} {anioSeleccionada}
                         </span>
-                        <span className={`${StatusColors[yearData.memoria.status]}`}>{t(yearData.memoria.status)}</span>
+                        <span className={`${StatusColors[camposMemoria.status]}`}>{t(camposMemoria.status)}</span>
                     </h2>
                 }
                 zonaBtn={
@@ -91,18 +118,14 @@ const Index = () => {
                         {editarMemoria && (
                             <div className="flex flex-col items-center gap-4 justify-end ">
                                 <div className="flex items-center gap-4 justify-end">
-                                    <button
-                                        disabled={!camposRellenos}
-                                        className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
-                                        onClick={() => setGuardado(true)}
-                                    >
+                                    <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={() => setGuardado(true)}>
                                         {t('guardar')}
                                     </button>
                                     <button
                                         className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                         onClick={() => {
-                                            if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, editarMemoria, t)) {
-                                                setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
+                                            if (!validarCamposMemoriaSeguimientoAnual(yearData)) {
+                                                setMensajeError(t('faltanCamposMemoriaSeguimiento'));
                                                 setCamposRellenos(false);
                                                 return;
                                             } else {
@@ -146,18 +169,18 @@ const Index = () => {
                 zonaExplicativa={
                     editarMemoria && (
                         <>
-                            {yearData.memoria.status === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
-                            <span className="block">{t(`explicacionMemoriaParte2${yearData.memoria.status}`)}</span>
+                            {camposMemoria.status === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
+                            <span className="block">{t(`explicacionMemoriaParte2${camposMemoria.status}`)}</span>
                         </>
                     )
                 }
             />
             <LoadingYearData />
             <>
-                {(yearData.memoria.status === 'borrador' || yearData.memoria.status === 'cerrado') && (
+                {(camposMemoria.status === 'borrador' || camposMemoria.status === 'cerrado') && (
                     <CamposPlanMemoria pantalla="Memoria" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />
                 )}
-                {(yearData.memoria.status === 'proceso' || yearData.memoria.status === 'aceptado') && (
+                {(camposMemoria.status === 'proceso' || camposMemoria.status === 'aceptado') && (
                     <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
                         <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
                         <ul className="space-y-3 ">

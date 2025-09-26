@@ -53,12 +53,12 @@ const Index = () => {
 
     useEffect(() => {
         if (!validarDatos) return;
-        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, false, t)) {
+        if (!validarAccionesEjes(yearData.plan.ejesPrioritarios, editarPlan, false, 'plan', t)) {
             setMensajeError(t('faltanCamposAccionesEjesPrioritarios'));
             setCamposRellenos(false);
             return;
         }
-        if (!validarAccionesEjesAccesorias(yearData.plan.ejesRestantes!, editarPlan, false)) {
+        if (!validarAccionesEjesAccesorias(yearData.plan.ejesRestantes!, editarPlan, false, 'plan')) {
             setMensajeError(t('faltanCamposAccionesEjes'));
             setCamposRellenos(false);
             return;

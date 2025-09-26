@@ -62,11 +62,6 @@ export const LlamadaBBDDActualizarMemoria = async (
         GeneralOperationADR: convertirGeneralOperationADR,
     };
 
-    if (!generalOperationADR.dSeguimiento || !generalOperationADR.valFinal) {
-        message.setErrorMessage('generalOperationADR dSeguimiento o valFinal vacio');
-        return;
-    }
-
     LlamadasBBDD({
         method: 'POST',
         url: `yearData/{${regionSeleccionada}}/${Number(anioSeleccionada)}/updateMemoria`,
