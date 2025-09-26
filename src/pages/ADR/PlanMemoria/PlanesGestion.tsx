@@ -54,20 +54,17 @@ const Index = () => {
 
     useEffect(() => {
         if (!validarDatos) return;
-        useEffect(() => {
-            if (!validarDatos) return;
-            ValidacionAnualPlanMemoria({
-                yearData,
-                editarPlan,
-                editarMemoria: false,
-                verificando: 'Plan',
-                t,
-                setMensajeError,
-                setCamposRellenos,
-                setVisibleMessageSuperior,
-            });
-        }, [validarDatos]);
-    }, [yearData]);
+        ValidacionAnualPlanMemoria({
+            yearData,
+            editarPlan,
+            editarMemoria: false,
+            verificando: 'Plan',
+            t,
+            setMensajeError,
+            setCamposRellenos,
+            setVisibleMessageSuperior,
+        });
+    }, [validarDatos]);
 
     return (
         <div className="panel ">
