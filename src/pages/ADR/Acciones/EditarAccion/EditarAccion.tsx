@@ -24,7 +24,7 @@ import { Loading } from '../../../../components/Utils/animations';
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
-    const { tipo, ejeId, nombreEjeES, nombreEjeEU } = location.state as { tipo: 'accesoria' | 'accion'; datosEditandoAccion: DatosAccion; ejeId: string; nombreEjeES: string; nombreEjeEU: string };
+    const { tipo, nombreEjeES, nombreEjeEU } = location.state as { tipo: 'accesoria' | 'accion'; datosEditandoAccion: DatosAccion; ejeId: string; nombreEjeES: string; nombreEjeEU: string };
 
     const accionAccesoria = tipo === 'accesoria';
     const titulo = t('accionTituloEditado');
@@ -240,7 +240,7 @@ const Index: React.FC = () => {
                                         {editarPlan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
-                                                idEjeSeleccionado={ejeId}
+                                                idEjeSeleccionado={ejeSeleccionado.EjeId}
                                                 lineaActuaccion={lineaActuaccion}
                                                 ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                                 tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}

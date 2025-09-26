@@ -632,7 +632,11 @@ export const ValidacionAnualPlanMemoria = ({ yearData, editarPlan, editarMemoria
     }
     setMensajeError('');
     setVisibleMessageSuperior(t('todoCorrecto'));
-    if (!editarPlan) {
+    if (verificando === 'Memoria') {
+        if (editarPlan) {
+            setCamposRellenos(true);
+        }
+    } else {
         setCamposRellenos(true);
     }
 };

@@ -44,15 +44,6 @@ const Index = () => {
     }, [successMessageSuperior]);
 
     useEffect(() => {
-        if (successMessageSuperior) {
-            setVisibleMessageSuperior(successMessageSuperior);
-        } else {
-            const timer = setTimeout(() => setVisibleMessageSuperior(''), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [successMessageSuperior]);
-
-    useEffect(() => {
         if (!validarDatos) return;
         ValidacionAnualPlanMemoria({
             yearData,
