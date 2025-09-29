@@ -34,9 +34,6 @@ const Index = () => {
     const AvisoSalirEditando = useAvisoSalirEditando();
 
     useEffect(() => {
-        if (!regionSeleccionada) {
-            return;
-        }
         if (location.pathname === '/configuracion/indicadoresADR') {
             PrimeraLlamada(regionSeleccionada);
         }
@@ -45,9 +42,6 @@ const Index = () => {
         }
     }, [location.pathname, regionSeleccionada]);
 
-    if (!regionSeleccionada) {
-        return;
-    }
     return (
         <div className="flex w-full gap-5">
             {loading ? (

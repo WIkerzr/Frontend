@@ -85,6 +85,8 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
                 data: [yearIniciadoVacio],
                 idRegion: regionSeleccionada ?? '',
             });
+        } else {
+            sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: null, nombre: null }));
         }
     }, [regionSeleccionada, regiones, i18n.language, nombreRegionSeleccionada]);
 
@@ -103,8 +105,10 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
                     url: `/regions`,
                     setLoading,
                     onSuccess: (response: GetRegionesResponse) => {
-                        setRegiones(response.data);
-                        sessionStorage.setItem('regiones', JSON.stringify(response.data));
+                        const regiones = response.data;
+                        const regionesFiltradas = regiones.filter((r) => r.RegionId !== '00');
+                        setRegiones(regionesFiltradas);
+                        sessionStorage.setItem('regiones', JSON.stringify(regionesFiltradas));
                     },
                     onError(err) {
                         setError(err);
@@ -121,7 +125,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
         if (Number.isNaN(id)) {
             return;
         }
-        if (id === null) {
+        if (id === null || id === 0) {
             setRegionSeleccionadaState(null);
         } else {
             setRegionSeleccionadaState(formateaConCeroDelante(`${id}`));

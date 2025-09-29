@@ -995,6 +995,33 @@ export const TablaIndicadores: React.FC = () => {
     const [modalEditarResultado, setModalEditarResultado] = useState(false);
     const [datosPreEditados, setDatosPreEditados] = useState<IndicadorRealizacion>(indicadorInicial);
 
+    const [listaVisibleRealizacion, setListaVisibleRealizacion] = useState<IndicadorRealizacion[]>(indicadoresRealizacion);
+    const [listaVisibleResultado, setListaVisibleResultado] = useState<IndicadorResultado[]>(indicadoresResultado);
+
+    useEffect(() => {
+        if (!esADR) {
+            const listaRealizacionFiltrada = indicadoresRealizacion.filter((a) => a.RegionsId === null);
+            setListaVisibleRealizacion(listaRealizacionFiltrada);
+            const listaResultadoFiltrada = indicadoresResultado.filter((a) => a.RegionsId === null);
+            setListaVisibleResultado(listaResultadoFiltrada);
+        } else {
+            if (regionSeleccionada !== null) {
+                const listaRealizacionFiltrada = indicadoresRealizacion.filter((a) => Number(a.RegionsId) === Number(regionSeleccionada));
+                setListaVisibleRealizacion(listaRealizacionFiltrada);
+                const listaResultadoFiltrada = indicadoresResultado.filter((a) => Number(a.RegionsId) === Number(regionSeleccionada));
+                setListaVisibleResultado(listaResultadoFiltrada);
+            } else {
+                const listaRealizacionFiltrada = indicadoresRealizacion.filter((a) => a.RegionsId != null);
+                setListaVisibleRealizacion(listaRealizacionFiltrada);
+                const listaResultadoFiltrada = indicadoresResultado.filter((a) => a.RegionsId != null);
+                setListaVisibleResultado(listaResultadoFiltrada);
+            }
+        }
+    }, [listaRealizacion, listaResultado]);
+
+    if (listaVisibleRealizacion.length === 0) {
+        return;
+    }
     const actualizarIndicadorResultadosAlEliminarEnRealizacion = (indicadorResultadoSeleccionado: IndicadorRealizacion, idExcluir: number[] = []) => {
         let resultadoIds = [...(indicadorResultadoSeleccionado.Resultados?.map((r) => r.Id) || [])];
 
@@ -1206,7 +1233,7 @@ export const TablaIndicadores: React.FC = () => {
 
     return (
         <>
-            {listaRealizacion && listaRealizacion.length > 0 && (
+            {listaVisibleRealizacion && listaVisibleRealizacion.length > 0 && (
                 <div className={`h-full panel w-1/2}`}>
                     {indicadorSeleccionado?.tipo === 'Realizacion' && errorMessageRealizacion && <Aviso textoAviso={errorMessageRealizacion} tipoAviso="error" icon={false} />}
                     {indicadorSeleccionado?.tipo === 'Realizacion' && successMessageRealizacion && (
@@ -1224,7 +1251,7 @@ export const TablaIndicadores: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {listaRealizacion
+                                {listaVisibleRealizacion
                                     .slice()
                                     .reverse()
                                     .map((data) => {
@@ -1296,7 +1323,7 @@ export const TablaIndicadores: React.FC = () => {
                 </div>
             )}
 
-            {listaResultado && listaResultado.length > 0 && (
+            {listaVisibleResultado && listaVisibleResultado.length > 0 && (
                 <div className={`h-full panel w-1/2}`}>
                     {indicadorSeleccionado?.tipo === 'Resultado' && errorMessageResultado && <Aviso textoAviso={errorMessageResultado} tipoAviso="error" icon={false} />}
                     {indicadorSeleccionado?.tipo === 'Resultado' && successMessageResultado && (
@@ -1314,13 +1341,10 @@ export const TablaIndicadores: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {listaResultado
+                                {listaVisibleResultado
                                     .slice()
                                     .reverse()
                                     .map((data) => {
-                                        if (esADR && formateaConCeroDelante(`${data.RegionsId}`) !== regionSeleccionada) {
-                                            return;
-                                        }
                                         return (
                                             <tr key={data.Id}>
                                                 <td>

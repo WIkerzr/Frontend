@@ -353,41 +353,41 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     }, [regionSeleccionada]);
 
-    useEffect(() => {
-        if (!indicadoresRealizacionADR) {
-            setIndicadoresRealizacionADR([]);
-        } else {
-            const regionIdADR = indicadoresRealizacionADR[0]?.RegionsId;
-            if (regionIdADR) {
-                const nuevosIndicadores = [...indicadoresRealizacion.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresRealizacionADR];
-                if (nuevosIndicadores.length !== indicadoresRealizacionADR.length) {
-                    const sonDiferentes = JSON.stringify(nuevosIndicadores) !== JSON.stringify(indicadoresRealizacionADR);
-                    if (sonDiferentes) {
-                        setIndicadoresRealizacionADR(nuevosIndicadores);
-                    }
-                }
-            }
-            sessionStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
-        }
-    }, [indicadoresRealizacionADR]);
+    // useEffect(() => {
+    //     if (!indicadoresRealizacionADR) {
+    //         setIndicadoresRealizacionADR([]);
+    //     } else {
+    //         const regionIdADR = indicadoresRealizacionADR[0]?.RegionsId;
+    //         if (regionIdADR) {
+    //             const nuevosIndicadores = [...indicadoresRealizacion.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresRealizacionADR];
+    //             if (nuevosIndicadores.length !== indicadoresRealizacionADR.length) {
+    //                 const sonDiferentes = JSON.stringify(nuevosIndicadores) !== JSON.stringify(indicadoresRealizacionADR);
+    //                 if (sonDiferentes) {
+    //                     setIndicadoresRealizacionADR(nuevosIndicadores);
+    //                 }
+    //             }
+    //         }
+    //         sessionStorage.setItem('indicadoresRealizacionFiltrado', JSON.stringify(indicadoresRealizacionADR));
+    //     }
+    // }, [indicadoresRealizacionADR]);
 
-    useEffect(() => {
-        if (!indicadoresResultadoADR) {
-            setIndicadoresResultadoADR([]);
-        } else {
-            const regionIdADR = indicadoresResultadoADR[0]?.RegionsId;
-            if (regionIdADR) {
-                const nuevosIndicadores = [...indicadoresResultado.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresResultadoADR];
-                if (nuevosIndicadores !== indicadoresResultadoADR) {
-                    const sonDiferentes = JSON.stringify(nuevosIndicadores) !== JSON.stringify(indicadoresResultadoADR);
-                    if (sonDiferentes) {
-                        setIndicadoresResultadoADR(nuevosIndicadores);
-                    }
-                }
-            }
-            sessionStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
-        }
-    }, [indicadoresResultadoADR]);
+    // useEffect(() => {
+    //     if (!indicadoresResultadoADR) {
+    //         setIndicadoresResultadoADR([]);
+    //     } else {
+    //         const regionIdADR = indicadoresResultadoADR[0]?.RegionsId;
+    //         if (regionIdADR) {
+    //             const nuevosIndicadores = [...indicadoresResultado.filter((r) => r.RegionsId !== regionIdADR), ...indicadoresResultadoADR];
+    //             if (nuevosIndicadores !== indicadoresResultadoADR) {
+    //                 const sonDiferentes = JSON.stringify(nuevosIndicadores) !== JSON.stringify(indicadoresResultadoADR);
+    //                 if (sonDiferentes) {
+    //                     setIndicadoresResultadoADR(nuevosIndicadores);
+    //                 }
+    //             }
+    //         }
+    //         sessionStorage.setItem('indicadoresResultadoFiltrado', JSON.stringify(indicadoresResultadoADR));
+    //     }
+    // }, [indicadoresResultadoADR]);
 
     useEffect(() => {
         if (!indicadoresRealizacion) {
