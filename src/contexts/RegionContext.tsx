@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getRegiones, RegionInterface } from '../components/Utils/data/getRegiones';
+import { GetRegionesResponse, RegionInterface } from '../components/Utils/data/getRegiones';
 import { useUser } from './UserContext';
 import { InitialDataResponse, yearIniciadoVacio } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';
 import { GenerarCodigosRegiones } from '../pages/Configuracion/Indicadores/Components/componentesIndicadores';
 import { useTranslation } from 'react-i18next';
+import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 
 interface CodRegiones {
     [key: number]: string;
@@ -97,13 +98,18 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
         if (user) {
             const regionesStr = sessionStorage.getItem('regiones');
             if (!regionesStr) {
-                getRegiones()
-                    .then((data) => {
-                        setRegiones(data);
-                        sessionStorage.setItem('regiones', JSON.stringify(data));
-                    })
-                    .catch(setError)
-                    .finally(() => setLoading(false));
+                LlamadasBBDD({
+                    method: 'GET',
+                    url: `/regions`,
+                    setLoading,
+                    onSuccess: (response: GetRegionesResponse) => {
+                        setRegiones(response.data);
+                        sessionStorage.setItem('regiones', JSON.stringify(response.data));
+                    },
+                    onError(err) {
+                        setError(err);
+                    },
+                });
                 return;
             } else {
                 setLoading(false);
