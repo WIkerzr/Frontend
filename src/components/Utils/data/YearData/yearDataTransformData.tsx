@@ -441,3 +441,44 @@ export const construirYearData = (
         servicios,
     };
 };
+
+export interface Nodo {
+    Nombre: string;
+    RutaRelativa: string;
+    EsCarpeta: boolean;
+    Hijos: Nodo[];
+}
+export interface Archivo {
+    nombre: string;
+    url: string;
+}
+
+export const TransformarArchivos = (datosRecibidos: Nodo): Archivo[] => {
+    const resultado: Archivo[] = [];
+
+    const primerNodo = datosRecibidos;
+    if (primerNodo.Hijos && primerNodo.Hijos.length > 0) {
+        const archivoPrincipal = primerNodo.Hijos.find((h) => !h.EsCarpeta);
+        if (archivoPrincipal) {
+            resultado.push({
+                nombre: archivoPrincipal.Nombre,
+                url: archivoPrincipal.RutaRelativa,
+            });
+        }
+
+        primerNodo.Hijos.forEach((h) => {
+            if (h.EsCarpeta && h.Hijos.length > 0) {
+                h.Hijos.forEach((sub) => {
+                    if (!sub.EsCarpeta) {
+                        resultado.push({
+                            nombre: sub.Nombre,
+                            url: sub.RutaRelativa,
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    return resultado;
+};

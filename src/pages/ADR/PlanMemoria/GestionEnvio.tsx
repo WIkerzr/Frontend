@@ -1,24 +1,30 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { useLocation } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { Aviso, Boton, ModalSave } from '../../../components/Utils/utils';
+import { Aviso, Boton } from '../../../components/Utils/utils';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
+    const { regionSeleccionada } = useRegionContext();
 
     const { t } = useTranslation();
-    const { yearData, setYearData } = useYear();
+    const { yearData } = useYear();
     const [planAnexos, setPlanAnexos] = useState<File[]>([]);
     const [planFiles, setPlanFiles] = useState<File[]>([]);
-    const [mostrandoModal, setMostrandoModal] = useState(false);
 
     const location = useLocation();
     const pantalla = location.state?.pantalla || '';
     const txtPantalla = pantalla === 'Plan' ? 'el plan' : 'la memoria';
+
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
 
     const handleAnexosFilesChange = (files: File[]) => {
         setPlanAnexos(files);
@@ -27,31 +33,53 @@ const Index = () => {
         setPlanFiles(files);
     };
 
-    const handleGuardarFicheros = () => {
-        //TODO llamada
-        if (pantalla === 'Plan') {
-            if (yearData.plan.status === 'proceso') {
-                return;
-            }
-            setYearData({
-                ...yearData,
-                plan: {
-                    ...yearData.plan,
-                    status: 'proceso',
-                },
-            });
-        } else if (pantalla === 'Memoria') {
-            if (yearData.memoria.status === 'proceso') {
-                return;
-            }
-            setYearData({
-                ...yearData,
-                memoria: {
-                    ...yearData.memoria,
-                    status: 'proceso',
-                },
-            });
-        }
+    function renombrarFile(file: File, nuevoNombre: string): File {
+        return new File([file], nuevoNombre, { type: file.type });
+    }
+
+    const planFilesRenombrados: File[] = planFiles.map((file) => {
+        const extension = file.name.split('.').pop();
+        return renombrarFile(file, `plan.${extension}`);
+    });
+
+    const handleGuardarFicheros = async () => {
+        const archivos: File[] = [...planFilesRenombrados, ...planAnexos];
+        await LlamadaBBDDEnviarArchivoPlanConAnexos({
+            regionSeleccionada,
+            anioSeleccionada: yearData.year,
+            setLoading,
+            message: {
+                setErrorMessage,
+                setSuccessMessage,
+            },
+            body: archivos,
+            planOMemoria: 'Plan',
+            // onSuccess: () => {
+            //     if (pantalla === 'Plan') {
+            //         if (yearData.plan.status === 'proceso') {
+            //             return;
+            //         }
+            //         setYearData({
+            //             ...yearData,
+            //             plan: {
+            //                 ...yearData.plan,
+            //                 status: 'proceso',
+            //             },
+            //         });
+            //     } else if (pantalla === 'Memoria') {
+            //         if (yearData.memoria.status === 'proceso') {
+            //             return;
+            //         }
+            //         setYearData({
+            //             ...yearData,
+            //             memoria: {
+            //                 ...yearData.memoria,
+            //                 status: 'proceso',
+            //             },
+            //         });
+            //     }
+            // },
+        });
     };
 
     return (
@@ -74,13 +102,22 @@ const Index = () => {
                     </>
                 }
             />
-            {mostrandoModal && (
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage: successMessage,
+                    setSuccessMessage: setSuccessMessage,
+                    errorMessage: errorMessage,
+                    setErrorMessage: setErrorMessage,
+                }}
+            />
+            {/* {mostrandoModal && (
                 <ModalSave onClose={() => setMostrandoModal(false)} nav={pantalla === 'Plan' ? '/adr/planesGestion' : '/adr/memoriasAnuales'}>
                     {async () => {
                         handleGuardarFicheros();
                     }}
                 </ModalSave>
-            )}
+            )} */}
             <div className="flex justify-center items-center">
                 <div className="panel w-2/4">
                     <section className="panel p-4 shadow-sm">
@@ -107,7 +144,7 @@ const Index = () => {
                                 tipo="guardar"
                                 textoBoton={t('finalizar', { zona: txtPantalla })}
                                 disabled={pantalla === 'Plan' ? planFiles.length != 1 : editarPlan || planFiles.length != 1}
-                                onClick={() => setMostrandoModal(true)}
+                                onClick={handleGuardarFicheros}
                             />
                         </div>
                     </div>

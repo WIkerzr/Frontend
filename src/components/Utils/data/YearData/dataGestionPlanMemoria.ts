@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
+import { PlanOMemoria } from '../../../../pages/ADR/PlanMemoria/PlanMemoriaComponents';
 import { GeneralOperationADR, GeneralOperationADRDTO, GeneralOperationADRDTOMemoria, MemoriaDTO, MemoriaLlamadaGestion, OperationalIndicatorsDTO, Plan, PlanDTO } from '../../../../types/tipadoPlan';
+import { ApiTarget } from '../controlDev';
 import { MessageSetters } from '../dataEjes';
-import { LlamadasBBDD } from '../utilsData';
+import { ApiSuccess, LlamadasBBDD } from '../utilsData';
 
 export const LlamadaBBDDActualizarPlan = async (regionSeleccionada: number, anioSeleccionada: number, setLoading: (loading: boolean) => void, message: MessageSetters, body: Plan): Promise<void> => {
     const operationalIndicators = body.generalOperationADR.operationalIndicators;
@@ -69,5 +72,78 @@ export const LlamadaBBDDActualizarMemoria = async (
         body: convertirMemoria,
         setErrorMessage: message.setErrorMessage,
         setSuccessMessage: message.setSuccessMessage,
+    });
+};
+
+type LlamadaBBDDParams<T = any> = {
+    regionSeleccionada: string | null;
+    anioSeleccionada: number;
+    setLoading: (loading: boolean) => void;
+    message: MessageSetters;
+    body: File[];
+    planOMemoria: PlanOMemoria;
+    onSuccess?: (data: ApiSuccess<T>) => void;
+};
+
+export const LlamadaBBDDEnviarArchivoPlanConAnexos = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, body, planOMemoria, onSuccess }: LlamadaBBDDParams<T>) => {
+    if (!regionSeleccionada) {
+        message.setErrorMessage('No se ha seleccionado ninguna región.');
+        return;
+    }
+
+    const formData = new FormData();
+    for (let index = 0; index < body.length; index++) {
+        formData.append('archivos', body[index]);
+    }
+    const zona = planOMemoria === 'Plan' ? `archivosPlan` : `archivosMemoria`;
+    const route = `yearData/${regionSeleccionada}/${anioSeleccionada}/${zona}`;
+
+    setLoading(true);
+    try {
+        const accessToken = sessionStorage.getItem('access_token');
+
+        const res = await window.fetch(`${ApiTarget}/${route}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            message.setErrorMessage(`Error en la subida: ${text}`);
+            return;
+        }
+
+        const data = await res.json();
+        message.setSuccessMessage(data.message || 'Archivo subido correctamente');
+
+        if (onSuccess) {
+            onSuccess(data);
+        }
+    } catch (err: any) {
+        message.setErrorMessage(`Error en la petición: ${err.message}`);
+        console.error(err);
+    } finally {
+        setLoading(false);
+    }
+};
+
+type LlamadaBBDDArbolArchivosPlan<T = any> = {
+    regionSeleccionada: string | null;
+    anioSeleccionada: number;
+    setLoading: (loading: boolean) => void;
+    message: MessageSetters;
+    onSuccess?: (data: ApiSuccess<T>) => void;
+};
+export const LlamadaArbolArchivosPlan = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, onSuccess }: LlamadaBBDDArbolArchivosPlan<T>) => {
+    LlamadasBBDD({
+        method: 'GET',
+        url: `yearData/${regionSeleccionada}/${Number(anioSeleccionada)}/archivosPlan`,
+        setLoading,
+        setErrorMessage: message.setErrorMessage,
+        setSuccessMessage: message.setSuccessMessage,
+        onSuccess,
     });
 };

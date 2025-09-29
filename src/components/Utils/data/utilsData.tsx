@@ -3,6 +3,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { FetchConRefreshRetry, gestionarErrorServidor } from '../utils';
 import { ApiTarget } from './controlDev';
+import { MessageSetters } from './dataEjes';
 export type ApiSuccess<T> = {
     success: boolean;
     message: string;
@@ -33,6 +34,7 @@ type LlamadaBBDDParams<T = any, TBody = any> = {
     onSuccess?: (data: ApiSuccess<T>) => void;
     onError?: (error: any) => void;
     onFinally?: () => void;
+    sinContentType?: boolean;
 };
 
 export const LlamadasBBDD = async <T = any, TBody = any>({
@@ -91,4 +93,109 @@ export const LlamadasBBDD = async <T = any, TBody = any>({
     fetchData();
 
     return null;
+};
+
+export const LlamadasBBDDSinJson = async <T = any, TBody = any>({
+    method,
+    body,
+    url,
+    setLoading,
+    setErrorMessage,
+    setSuccessMessage,
+    setFechaUltimoActualizadoBBDD,
+    onSuccess,
+    onError,
+    onFinally,
+}: LlamadaBBDDParams<T, TBody>) => {
+    const fetchData = async () => {
+        setLoading(true);
+        const token = sessionStorage.getItem('access_token');
+        try {
+            const res = await fetch(`${ApiTarget}/${url}`, {
+                method,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: body ? JSON.stringify(body) : undefined,
+            });
+
+            if (!res.ok) {
+                const errorInfo = gestionarErrorServidor(res);
+                setErrorMessage?.(errorInfo.mensaje);
+                return;
+            }
+
+            const contentType = res.headers.get('content-type');
+            let data: any;
+
+            if (contentType?.includes('application/octet-stream')) {
+                data = await res.blob();
+            } else {
+                data = await res.json();
+            }
+
+            onSuccess?.(data);
+            setFechaUltimoActualizadoBBDD?.(new Date());
+            if (data?.message) {
+                setSuccessMessage?.(data.message);
+            }
+        } catch (err: unknown) {
+            const errorInfo = gestionarErrorServidor(err);
+            setErrorMessage?.(errorInfo.mensaje);
+            onError?.(errorInfo);
+        } finally {
+            onFinally?.();
+            setLoading(false);
+        }
+    };
+
+    fetchData();
+    return null;
+};
+
+export interface DescargarArchivoBodyParams {
+    RegionId: string;
+    Year: string;
+    RutaArchivo: 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos';
+    NombreArchivo: string;
+}
+interface DescargarArchivoParams {
+    message: MessageSetters;
+    body: DescargarArchivoBodyParams;
+    setLoading: (loading: boolean) => void;
+}
+
+export const LlamarDescargarArchivo = async ({ message, body, setLoading }: DescargarArchivoParams) => {
+    try {
+        setLoading(true);
+        const token = sessionStorage.getItem('access_token');
+        const res = await fetch(`https://localhost:44300/api/yearData/archivosADR/descargar`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            message.setErrorMessage?.(`Error al descargar: ${text}`);
+            return;
+        }
+
+        const blob = await res.blob();
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = body.NombreArchivo;
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+
+        message.setSuccessMessage?.('Archivo descargado correctamente');
+    } catch (err: any) {
+        message.setErrorMessage?.(err.message || 'Error al descargar archivo');
+    } finally {
+        setLoading(false);
+    }
 };

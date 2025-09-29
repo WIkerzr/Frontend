@@ -80,6 +80,8 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
 
     const handleEjecucionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        //const newValue = Number(value);
+
         setDatosEditandoAccion({
             ...datosEditandoAccion,
             datosMemoria: {

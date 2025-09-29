@@ -2,23 +2,16 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
-import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, ValidacionAnualPlanMemoria, validarCamposPlanGestionAnual } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEffect, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-
-interface Archivo {
-    nombre: string;
-    url: string;
-}
-
-const archivos: Archivo[] = [
-    { nombre: 'Memoria.pdf', url: '/docs/Memoria.pdf' },
-    { nombre: 'Anexo1.pdf', url: '/docs/Anexo1.pdf' },
-    { nombre: 'Anexo2.pdf', url: '/docs/Anexo2.pdf' },
-];
+import { LlamadaArbolArchivosPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
+import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
@@ -27,12 +20,18 @@ const Index = () => {
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
     const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
+    const { regionSeleccionada } = useRegionContext();
 
     const [guardado, setGuardado] = useState<boolean>(false);
     const guardadoProps = { value: guardado, set: setGuardado };
     const { t, i18n } = useTranslation();
     const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
     const [validarDatos, setValidarDatos] = useState<boolean>(false);
+
+    const [planGuardado, setPlanGuardado] = useState<Archivo[]>();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     useEffect(() => {
         if (successMessageSuperior) {
@@ -56,6 +55,40 @@ const Index = () => {
             setVisibleMessageSuperior,
         });
     }, [validarDatos]);
+
+    useEffect(() => {
+        if (yearData.plan.status != 'borrador') {
+            if (regionSeleccionada && yearData.year) {
+                LlamadaArbolArchivosPlan({
+                    regionSeleccionada,
+                    anioSeleccionada: yearData.year,
+                    setLoading,
+                    message: { setErrorMessage, setSuccessMessage },
+                    onSuccess: (response) => {
+                        console.log(response.data);
+                        const datosRecibidos: Nodo = response.data;
+                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos);
+                        setPlanGuardado(archivos);
+                    },
+                });
+            }
+        }
+    }, []);
+
+    const handleClick = (nombreArchivo: string, index: number) => {
+        const body: DescargarArchivoBodyParams = {
+            NombreArchivo: nombreArchivo,
+            RegionId: `${regionSeleccionada}`,
+            RutaArchivo: index > 0 ? 'Plan/Anexos' : 'Plan',
+            Year: `${yearData.year}`,
+        };
+
+        LlamarDescargarArchivo({
+            message: { setErrorMessage, setSuccessMessage },
+            body: body,
+            setLoading,
+        });
+    };
 
     return (
         <div className="panel ">
@@ -131,30 +164,40 @@ const Index = () => {
                 }
             />
             <LoadingYearData />
-
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
             {editarPlan && <CamposPlanMemoria pantalla="Plan" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />}
             {(yearData.plan.status === 'proceso' || yearData.plan.status === 'aceptado') && (
                 <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
-                    <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
+                    <h2 className="text-xl font-bold mb-4">Archivos plan 2025</h2>
                     <ul className="space-y-3 ">
-                        {archivos.map((archivo, idx) => (
-                            <li
-                                key={archivo.nombre}
-                                className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
-                                onMouseEnter={() => setHoveredIndex(idx)}
-                                onMouseLeave={() => setHoveredIndex(null)}
-                            >
-                                <div className="flex items-center space-x-3">
-                                    <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
-                                    <span className="font-medium">{archivo.nombre}</span>
-                                </div>
-                                <a href={archivo.url} download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition">
-                                    <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
-                                        {t('descargar')}
-                                    </button>
-                                </a>
-                            </li>
-                        ))}
+                        {planGuardado &&
+                            planGuardado.map((archivo, idx) => (
+                                <li
+                                    key={archivo.nombre}
+                                    className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
+                                    onMouseEnter={() => setHoveredIndex(idx)}
+                                    onMouseLeave={() => setHoveredIndex(null)}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
+                                        <span className="font-medium">{archivo.nombre}</span>
+                                    </div>
+                                    <a download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition" onClick={() => handleClick(archivo.nombre, idx)}>
+                                        <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
+                                            {t('descargar')}
+                                        </button>
+                                    </a>
+                                </li>
+                            ))}
                     </ul>
                 </div>
             )}

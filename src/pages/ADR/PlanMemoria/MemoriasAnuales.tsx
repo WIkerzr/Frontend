@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, ValidacionAnualPlanMemoria, validarCamposMemoriaSeguimientoAnual } from './PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
@@ -9,30 +9,10 @@ import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
 import { GeneralOperationADR, Memoria } from '../../../types/tipadoPlan';
-
-// function validarCamposMemoriaGestionAnual(yearData: YearData): boolean {
-//     const memoria = yearData.memoria;
-
-//     if (!memoria.dSeguimiento || memoria.dSeguimiento.trim() === '') return false;
-//     if (!memoria.valFinal || memoria.valFinal.trim() === '') return false;
-
-//     const existeIndicadorValido = yearData.plan.generalOperationADR.operationalIndicators.some((OI) => OI.valueAchieved.trim() !== '');
-
-//     return existeIndicadorValido;
-// }
-
-interface Archivo {
-    nombre: string;
-    url: string;
-}
-
-const archivos: Archivo[] = [
-    { nombre: 'Memoria.pdf', url: '/docs/Memoria.pdf' },
-    { nombre: 'Anexo1.pdf', url: '/docs/Anexo1.pdf' },
-    { nombre: 'Anexo2.pdf', url: '/docs/Anexo2.pdf' },
-    // { nombre: "Anexo4.pdf", url: "/docs/Anexo4.pdf" },
-    // { nombre: "Anexo5.pdf", url: "/docs/Anexo5.pdf" },
-];
+import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
+import { LlamadaArbolArchivosPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
+import { useRegionContext } from '../../../contexts/RegionContext';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -43,6 +23,7 @@ const Index = () => {
     const [mensajeError, setMensajeError] = useState<string>('');
     const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
     const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
+    const { regionSeleccionada } = useRegionContext();
 
     const [guardado, setGuardado] = useState<boolean>(false);
     const guardadoProps = { value: guardado, set: setGuardado };
@@ -51,6 +32,11 @@ const Index = () => {
     const [camposMemoria, setCamposMemoria] = useState<Memoria>(yearData.memoria);
 
     const [validarDatos, setValidarDatos] = useState<boolean>(false);
+
+    const [memoriaGuardado, setMemoriaGuardado] = useState<Archivo[]>();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     useEffect(() => {
         if (JSON.stringify(camposMemoria) !== JSON.stringify(yearData.memoria)) {
@@ -83,6 +69,40 @@ const Index = () => {
             setVisibleMessageSuperior,
         });
     }, [validarDatos]);
+
+    useEffect(() => {
+        if (yearData.plan.status != 'borrador') {
+            if (regionSeleccionada && yearData.year) {
+                LlamadaArbolArchivosPlan({
+                    regionSeleccionada,
+                    anioSeleccionada: yearData.year,
+                    setLoading,
+                    message: { setErrorMessage, setSuccessMessage },
+                    onSuccess: (response) => {
+                        console.log(response.data);
+                        const datosRecibidos: Nodo = response.data;
+                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos);
+                        setMemoriaGuardado(archivos);
+                    },
+                });
+            }
+        }
+    }, []);
+
+    const handleClick = (nombreArchivo: string, index: number) => {
+        const body: DescargarArchivoBodyParams = {
+            NombreArchivo: nombreArchivo,
+            RegionId: `${regionSeleccionada}`,
+            RutaArchivo: index > 0 ? 'Memoria/Anexos' : 'Memoria',
+            Year: `${yearData.year}`,
+        };
+
+        LlamarDescargarArchivo({
+            message: { setErrorMessage, setSuccessMessage },
+            body: body,
+            setLoading,
+        });
+    };
 
     return (
         <div className="panel">
@@ -158,6 +178,16 @@ const Index = () => {
                 }
             />
             <LoadingYearData />
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
             <>
                 {(camposMemoria.status === 'borrador' || camposMemoria.status === 'cerrado') && (
                     <CamposPlanMemoria pantalla="Memoria" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />
@@ -166,24 +196,29 @@ const Index = () => {
                     <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
                         <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
                         <ul className="space-y-3 ">
-                            {archivos.map((archivo, idx) => (
-                                <li
-                                    key={archivo.nombre}
-                                    className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
-                                    onMouseEnter={() => setHoveredIndex(idx)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                >
-                                    <div className="flex items-center space-x-3">
-                                        <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
-                                        <span className="font-medium">{archivo.nombre}</span>
-                                    </div>
-                                    <a href={archivo.url} download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition">
-                                        <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
-                                            {t('descargar')}
-                                        </button>
-                                    </a>
-                                </li>
-                            ))}
+                            {memoriaGuardado &&
+                                memoriaGuardado.map((archivo, idx) => (
+                                    <li
+                                        key={archivo.nombre}
+                                        className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
+                                        onMouseEnter={() => setHoveredIndex(idx)}
+                                        onMouseLeave={() => setHoveredIndex(null)}
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
+                                            <span className="font-medium">{archivo.nombre}</span>
+                                        </div>
+                                        <a
+                                            download
+                                            className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
+                                            onClick={() => handleClick(archivo.nombre, idx)}
+                                        >
+                                            <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
+                                                {t('descargar')}
+                                            </button>
+                                        </a>
+                                    </li>
+                                ))}
                         </ul>
                     </div>
                 )}

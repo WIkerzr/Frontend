@@ -146,10 +146,10 @@ const Index: React.FC = () => {
                             const editable = editarPlan || editarMemoria;
                             return (
                                 <div key={accion.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
+                                    <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('Eje')}: {TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}
                                     </span>
-                                    <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('LineaActuaccion')}: {accion.lineaActuaccion}
                                     </span>
