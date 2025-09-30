@@ -11,10 +11,8 @@ import React from 'react';
 import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
 import { Acciones, useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../../../components/Utils/data/controlDev';
-import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor, MultiSelectDOM } from '../../../../components/Utils/utils';
+import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../../../components/Utils/utils';
 import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../../../components/Utils/data/dataIndicadores';
-import { EjeIndicadorBBDD } from '../../../../types/tipadoPlan';
-import { ErrorMessage } from '../../../../components/Utils/animations';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
@@ -42,14 +40,14 @@ const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: Indicador
 
 export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal }) => {
     const { t, i18n } = useTranslation();
-    const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado, ejesIndicador } = useIndicadoresContext();
+    const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado } = useIndicadoresContext();
     const { lockedHazi } = useUser();
     const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
 
     const indicadorSeleccionadoSinFallo = ControlDeFallosIndicadorSeleccionado();
     const [indicadorRealizacionDeterminado, setIndicadorRealizacionDeterminado] = useState<IndicadorResultado[]>([]);
     const [indicadorResultadoDeterminado, setIndicadorResultadoDeterminado] = useState<IndicadorResultado[]>([]);
-    const [optionsSelect, setOptionsSelect] = useState<EjeIndicadorBBDD[]>([]);
+    // const [optionsSelect, setOptionsSelect] = useState<EjeIndicadorBBDD[]>([]);
 
     const { regionSeleccionada, codRegiones } = useRegionContext();
 
@@ -177,9 +175,29 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         RelatedAxes: indicadorRealizacion.RelatedAxes ?? [],
         DisaggregationVariables: indicadorRealizacion.DisaggregationVariables ?? '',
         CalculationMethodology: indicadorRealizacion.CalculationMethodology ?? '',
+        UnitMed: indicadorRealizacion.UnitMed ?? '',
     });
     const [indicador, setIndicador] = useState<string[]>([]);
     const [nombreIndicador, setNombreIndicador] = useState<string>('');
+
+    const UnitMedTypes = {
+        NUMERO: 'NUMERO',
+        PORCENTAJE: 'PORCENTAJE',
+        OTRO: 'OTRO',
+    } as const;
+
+    const DisaggregationVariables = {
+        NoAplica: 'NoAplica',
+        Sexo: 'Sexo',
+    } as const;
+
+    const [despegableUnitMed, setDespegableUnitMed] = useState<string>(
+        !formData.UnitMed || formData.UnitMed.trim() === ''
+            ? UnitMedTypes.NUMERO
+            : formData.UnitMed === UnitMedTypes.NUMERO || formData.UnitMed === UnitMedTypes.PORCENTAJE
+            ? formData.UnitMed
+            : UnitMedTypes.OTRO
+    );
 
     useEffect(() => {
         setFormData({
@@ -187,7 +205,8 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             Description: indicadorRealizacion.Description ?? '',
             RelatedAxes: indicadorRealizacion.RelatedAxes ?? [],
             DisaggregationVariables: indicadorRealizacion.DisaggregationVariables ?? '',
-            CalculationMethodology: indicadorRealizacion.CalculationMethodology ?? '',
+            CalculationMethodology: indicadorRealizacion.CalculationMethodology ?? ' ',
+            UnitMed: indicadorRealizacion.UnitMed ?? '',
         });
     }, [indicadorRealizacion]);
 
@@ -202,6 +221,26 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         const updatedData = { ...formData, [name]: value };
         setFormData(updatedData);
         onChange(updatedData);
+    };
+
+    const handleChangeUnitMed = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+        const { name, value } = e.target;
+
+        if (value === UnitMedTypes.NUMERO || value === UnitMedTypes.PORCENTAJE) {
+            // Caso NUMERO o PORCENTAJE --> guardar directamente
+            setDespegableUnitMed(value);
+            const updatedData = { ...formData, [name]: value };
+            setFormData(updatedData);
+            onChange(updatedData);
+        } else {
+            // Caso OTRO --> solo mover el desplegable, el valor real lo maneja el input
+            setDespegableUnitMed(UnitMedTypes.OTRO);
+            if (formData.UnitMed === UnitMedTypes.NUMERO || formData.UnitMed === UnitMedTypes.PORCENTAJE) {
+                const updatedData = { ...formData, [name]: '' };
+                setFormData(updatedData);
+                onChange(updatedData);
+            }
+        }
     };
 
     const handleChangeNombre = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -219,24 +258,24 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         onChange(updatedData);
     };
 
-    const handleChangeRelatedAxes = (ejes: EjeIndicadorBBDD[]) => {
-        const updatedData = { ...formData, RelatedAxes: ejes };
-        setFormData(updatedData);
-        onChange(updatedData);
-    };
+    // const handleChangeRelatedAxes = (ejes: EjeIndicadorBBDD[]) => {
+    //     const updatedData = { ...formData, RelatedAxes: ejes };
+    //     setFormData(updatedData);
+    //     onChange(updatedData);
+    // };
 
     useEffect(() => {
         setFormData(indicadorRealizacion);
     }, []);
 
-    useEffect(() => {
-        const optionsSelect: EjeIndicadorBBDD[] = ejesIndicador.map((eje) => ({
-            EjeId: eje.EjeId,
-            NameEs: eje.NameEs,
-            NameEu: eje.NameEu,
-        }));
-        setOptionsSelect(optionsSelect);
-    }, [ejesIndicador]);
+    // useEffect(() => {
+    //     const optionsSelect: EjeIndicadorBBDD[] = ejesIndicador.map((eje) => ({
+    //         EjeId: eje.EjeId,
+    //         NameEs: eje.NameEs,
+    //         NameEu: eje.NameEu,
+    //     }));
+    //     setOptionsSelect(optionsSelect);
+    // }, [ejesIndicador]);
 
     return (
         <div className="space-y-4 mx-auto w-[350px]">
@@ -255,15 +294,19 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             </div>
             <div>
                 <label className="block font-medium">{t('unitMed')}</label>
-                <select name="unidad" className="w-full p-2 border rounded" onChange={handleChange} disabled={bloqueoHazi}>
-                    <option value="NUMERO">NUMERO</option>
-                    <option value="OTRO">OTRO</option>
+                <select name="UnitMed" value={despegableUnitMed} onChange={handleChangeUnitMed} className="w-full p-2 border rounded">
+                    {Object.values(UnitMedTypes).map((val) => (
+                        <option key={val} value={val}>
+                            {t(val)}
+                        </option>
+                    ))}
                 </select>
+
+                {despegableUnitMed === UnitMedTypes.OTRO && <input type="text" name="UnitMed" className="w-full p-2 border rounded" value={formData.UnitMed} onChange={handleChange} />}
             </div>
 
-            <div>
+            {/* <div>
                 <label className="block font-medium">{t('ejesRelacionados')}</label>
-                {/* <input type="text" name="RelatedAxes" className="w-full p-2 border rounded" value={formData.RelatedAxes ?? ''} onChange={handleChange} /> */}
 
                 <div>
                     {ejesIndicador && ejesIndicador?.length > 0 ? (
@@ -279,7 +322,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                         </div>
                     )}
                 </div>
-            </div>
+            </div> */}
 
             <div>
                 <label className="block font-medium">{t('Definicion')}</label>
@@ -299,7 +342,13 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                         {<label>{formData.DisaggregationVariables && formData.DisaggregationVariables.trim() !== '' ? formData.DisaggregationVariables : '-'}</label>}
                     </div>
                 ) : (
-                    <input type="text" name="DisaggregationVariables" className="w-full p-2 border rounded" value={formData.DisaggregationVariables ?? ''} onChange={handleChange} />
+                    <select name="DisaggregationVariables" value={formData.DisaggregationVariables ?? ''} onChange={handleChangeUnitMed} className="w-full p-2 border rounded">
+                        {Object.values(DisaggregationVariables).map((val) => (
+                            <option key={val} value={val}>
+                                {t(val)}
+                            </option>
+                        ))}
+                    </select>
                 )}
             </div>
 
@@ -828,6 +877,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
             Description: data.Description,
             DisaggregationVariables: data.DisaggregationVariables,
             CalculationMethodology: data.CalculationMethodology,
+            UnitMed: data.UnitMed ?? '',
         }));
     };
 

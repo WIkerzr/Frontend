@@ -217,6 +217,7 @@ export async function guardarNuevoRealizacionBack({
                         resultados.push({
                             Id: obj.Id,
                             NameEs: obj.NameEs,
+                            UnitMed: obj.UnitMed,
                             CalculationMethodology: obj.CalculationMethodology,
                             Description: obj.Description,
                             NameEu: obj.NameEu,

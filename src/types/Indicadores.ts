@@ -40,6 +40,7 @@ export interface IndicadorResultado {
     Id: number;
     NameEs: string;
     NameEu?: string;
+    UnitMed?: string;
     RegionsId?: string;
     Description?: string;
     DisaggregationVariables?: any;
@@ -58,6 +59,7 @@ export const indicadorResultadoinicial: IndicadorResultado = {
     DisaggregationVariables: '',
     CalculationMethodology: '',
     RelatedAxes: [],
+    UnitMed: '',
 };
 
 export const indicadorInicial: IndicadorRealizacion = {
@@ -69,6 +71,7 @@ export const indicadorInicial: IndicadorRealizacion = {
     CalculationMethodology: '',
     RelatedAxes: [],
     Resultados: [],
+    UnitMed: '',
 };
 export const indicadorInicialResultado: IndicadorResultado = {
     Id: 0,
@@ -78,6 +81,7 @@ export const indicadorInicialResultado: IndicadorResultado = {
     DisaggregationVariables: '',
     CalculationMethodology: '',
     RelatedAxes: [],
+    UnitMed: '',
 };
 
 export const datosPruebaIndicadoreRealizacion: IndicadorRealizacionAccion[] = [
