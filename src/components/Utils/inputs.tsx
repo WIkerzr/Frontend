@@ -433,6 +433,8 @@ export default function MyEditableDropdown({ options, setOpcion, placeholder, va
         setSelected(valor);
         if (valor) {
             setOpcion(valor.value);
+        } else {
+            setOpcion('');
         }
     };
 

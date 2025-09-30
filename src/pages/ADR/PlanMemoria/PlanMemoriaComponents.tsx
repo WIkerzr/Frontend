@@ -535,7 +535,7 @@ export function validarAccionesEjes(ejes: Ejes[], editarPlan: boolean, editarMem
         eje.acciones.every((accion) => {
             const validarCamposIndicadores = VerificarCamposIndicadoresPorRellenar(accion, editarPlan, editarMemoria, 'GuardadoEdicion', t, verificando, true);
             if (validarCamposIndicadores) {
-                const camposFaltantes = VerificarAccionFinal(accion, editarPlan, editarMemoria, true);
+                const camposFaltantes = VerificarAccionFinal(accion, editarPlan, editarMemoria, 'Acciones', true);
                 return camposFaltantes && camposFaltantes.length === 0;
             } else {
                 return false;
@@ -550,8 +550,8 @@ export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean,
         if (eje.acciones.length === 0) return false;
         return eje.acciones.every((accion) => {
             const indicadoresCorrecto = VerificadorIndicadores(accion, editarPlan, editarMemoria);
-            const camposFaltantes = VerificarAccionFinal(accion, editarPlan, false, true);
-            const camposFaltantesMem = VerificarAccionFinal(accion, editarPlan, true, true);
+            const camposFaltantes = VerificarAccionFinal(accion, editarPlan, false, 'AccionesAccesorias', true);
+            const camposFaltantesMem = VerificarAccionFinal(accion, editarPlan, true, 'AccionesAccesorias', true);
             const faltanCamposPlan = camposFaltantes ? camposFaltantes.length != 0 : false;
             const faltanCamposMemoria = camposFaltantesMem ? camposFaltantesMem.length != 0 : false;
 

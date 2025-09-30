@@ -131,7 +131,8 @@ const Index: React.FC = () => {
         if (datosEditandoAccion.id === '0') {
             return;
         }
-        if (lineaActuaccion != '' && lineaActuaccion != datosEditandoAccion.lineaActuaccion) {
+        const accionConLinea = (tipo === 'accion' && lineaActuaccion !== '') || accionAccesoria;
+        if (accionConLinea && lineaActuaccion != datosEditandoAccion.lineaActuaccion) {
             if (datosEditandoAccion && datosEditandoAccion.lineaActuaccion != null && datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
                 setDatosEditandoAccion((prev) => ({
                     ...prev!,

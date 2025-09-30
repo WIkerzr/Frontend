@@ -5,7 +5,7 @@ import IconEnviar from '../../../components/Icon/IconEnviar.svg';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, ValidacionAnualPlanMemoria, validarCamposPlanGestionAnual } from './PlanMemoriaComponents';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
@@ -15,7 +15,7 @@ import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../com
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
-    const { yearData, llamadaBBDDYearDataAll, LoadingYearData } = useYear();
+    const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
@@ -33,6 +33,7 @@ const Index = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
+    const prevLoadingRef = useRef<boolean | null>(null);
     useEffect(() => {
         if (successMessageSuperior) {
             setVisibleMessageSuperior(successMessageSuperior);
@@ -41,6 +42,17 @@ const Index = () => {
             return () => clearTimeout(timer);
         }
     }, [successMessageSuperior]);
+
+    useEffect(() => {
+        if (prevLoadingRef.current === null || prevLoadingRef.current === loadingYearData) {
+            prevLoadingRef.current = loadingYearData;
+            return;
+        }
+        if (!loadingYearData) {
+            setValidarDatos(true);
+        }
+        prevLoadingRef.current = loadingYearData;
+    }, [LoadingYearData]);
 
     useEffect(() => {
         if (!validarDatos) return;
@@ -54,6 +66,7 @@ const Index = () => {
             setCamposRellenos,
             setVisibleMessageSuperior,
         });
+        setValidarDatos(false);
     }, [validarDatos]);
 
     useEffect(() => {
@@ -111,14 +124,13 @@ const Index = () => {
                                     </button>
                                     <button
                                         className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]"
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (!validarCamposPlanGestionAnual(yearData)) {
                                                 setMensajeError(t('faltanCamposPlanGestion'));
                                                 setCamposRellenos(false);
                                                 return;
                                             } else {
-                                                setValidarDatos(true);
-                                                llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
                                             }
                                         }}
                                     >

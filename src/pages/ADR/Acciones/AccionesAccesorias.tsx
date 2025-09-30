@@ -167,7 +167,7 @@ const Index: React.FC = () => {
                                             </button>
                                         )}
                                     </div>
-                                    <MostrarAvisoCamposAcciones datos={accion} />
+                                    <MostrarAvisoCamposAcciones datos={accion} tiposAccion="AccionesAccesorias" />
                                 </div>
                             );
                         })}

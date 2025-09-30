@@ -7,7 +7,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
 import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { editableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
-import { useYear } from '../../../../contexts/DatosAnualContext';
+import { TiposAccion, useYear } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
@@ -223,7 +223,7 @@ export function VerificarCamposIndicadoresPorRellenar(
     return true;
 }
 
-export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPlan: boolean, editarMemoria: boolean, validacionMemoriaSeguimientoAnual?: boolean) {
+export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPlan: boolean, editarMemoria: boolean, tiposAccion: TiposAccion, validacionMemoriaSeguimientoAnual?: boolean) {
     if (!datosEditandoAccion.indicadorAccion) {
         return;
     }
@@ -279,7 +279,9 @@ export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPla
 
     //DataAccion
     checkData(datosEditandoAccion.accion, 'Nombre');
-    checkData(datosEditandoAccion.lineaActuaccion, 'LineaActuaccion');
+    if (tiposAccion === 'Acciones') {
+        checkData(datosEditandoAccion.lineaActuaccion, 'LineaActuaccion');
+    }
     checkData(datosEditandoAccion.plurianual, 'Plurianual');
 
     return camposPendientes;

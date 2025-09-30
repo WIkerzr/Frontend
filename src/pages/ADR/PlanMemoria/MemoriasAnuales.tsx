@@ -4,7 +4,7 @@ import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, Validaci
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
 import IconEnviar from '../../../components/Icon/IconEnviar.svg';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
@@ -18,7 +18,7 @@ const Index = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-    const { yearData, llamadaBBDDYearDataAll, LoadingYearData } = useYear();
+    const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
     const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
@@ -38,15 +38,7 @@ const Index = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    useEffect(() => {
-        if (JSON.stringify(camposMemoria) !== JSON.stringify(yearData.memoria)) {
-            setCamposMemoria(yearData.memoria);
-        }
-        if (JSON.stringify(tablaIndicadoresOperativos) !== JSON.stringify(yearData.plan.generalOperationADR)) {
-            setTablaIndicadoresOperativos(yearData.plan.generalOperationADR);
-        }
-    }, [yearData]);
-
+    const prevLoadingRef = useRef<boolean | null>(null);
     useEffect(() => {
         if (successMessageSuperior) {
             setVisibleMessageSuperior(successMessageSuperior);
@@ -55,6 +47,26 @@ const Index = () => {
             return () => clearTimeout(timer);
         }
     }, [successMessageSuperior]);
+
+    useEffect(() => {
+        if (prevLoadingRef.current === null || prevLoadingRef.current === loadingYearData) {
+            prevLoadingRef.current = loadingYearData;
+            return;
+        }
+        if (!loadingYearData) {
+            setValidarDatos(true);
+        }
+        prevLoadingRef.current = loadingYearData;
+    }, [LoadingYearData]);
+
+    useEffect(() => {
+        if (JSON.stringify(camposMemoria) !== JSON.stringify(yearData.memoria)) {
+            setCamposMemoria(yearData.memoria);
+        }
+        if (JSON.stringify(tablaIndicadoresOperativos) !== JSON.stringify(yearData.plan.generalOperationADR)) {
+            setTablaIndicadoresOperativos(yearData.plan.generalOperationADR);
+        }
+    }, [yearData]);
 
     useEffect(() => {
         if (!validarDatos) return;
@@ -126,14 +138,13 @@ const Index = () => {
                                     </button>
                                     <button
                                         className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (!validarCamposMemoriaSeguimientoAnual(yearData)) {
                                                 setMensajeError(t('faltanCamposMemoriaSeguimiento'));
                                                 setCamposRellenos(false);
                                                 return;
                                             } else {
-                                                setValidarDatos(true);
-                                                llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
                                             }
                                         }}
                                     >

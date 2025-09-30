@@ -180,7 +180,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }, [yearData]);
 
     const handleNuevaAccion = () => {
-        if (!nuevaAccion.trim() || !nuevaLineaActuaccion.trim()) {
+        if (acciones == 'Acciones' ? !nuevaAccion.trim() || !nuevaLineaActuaccion.trim() : !nuevaAccion.trim()) {
             setInputError(true);
             return;
         }
@@ -436,11 +436,11 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                     )}
                                 </div>
                             </div>
-                            <MostrarAvisoCamposAcciones datos={accion} />
+                            <MostrarAvisoCamposAcciones tiposAccion="Acciones" datos={accion} />
                         </div>
                     );
                 })}
-                {accionesMostradas.length === 0 && <MostrarAvisoCamposAcciones />}
+                {accionesMostradas.length === 0 && <MostrarAvisoCamposAcciones tiposAccion="Acciones" />}
             </div>
         </div>
     );
@@ -484,12 +484,13 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 // }
 
 interface MostrarAvisoCamposAccionesProps {
+    tiposAccion: TiposAccion;
     datos?: DatosAccion;
     plurianual?: boolean;
     texto?: boolean;
 }
 
-export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ datos, texto = true }) => {
+export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProps> = ({ tiposAccion, datos, texto = true }) => {
     const { t } = useTranslation();
     const { editarPlan } = useEstadosPorAnio();
     const { editarMemoria } = useEstadosPorAnio();
@@ -533,8 +534,8 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
         }
     } else {
         faltanIndicadores = !VerificadorIndicadores(datos, editarPlan, editarMemoria);
-        const camposFaltantes = VerificarAccionFinal(datos, editarPlan, false, true);
-        const camposFaltantesMem = VerificarAccionFinal(datos, editarPlan, true, true);
+        const camposFaltantes = VerificarAccionFinal(datos, editarPlan, false, tiposAccion, true);
+        const camposFaltantesMem = VerificarAccionFinal(datos, editarPlan, true, tiposAccion, true);
         faltanCamposPlan = camposFaltantes ? camposFaltantes.length != 0 : false;
         faltanCamposMemoria = camposFaltantesMem ? camposFaltantesMem.length != 0 : false;
 
