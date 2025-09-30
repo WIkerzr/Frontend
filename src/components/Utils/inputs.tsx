@@ -271,7 +271,6 @@ export const EditableDropdown = <T extends string | number>({ title, options, va
 interface AttachProps {
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
-    onChange: (files: File[]) => void;
     multiple?: boolean;
     title?: string;
 }
@@ -280,14 +279,25 @@ export function isImage(file: File) {
     return /^image\//.test(file.type);
 }
 
-export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }: AttachProps) => {
+export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = e.target.files ? Array.from(e.target.files) : [];
-        setFiles(newFiles);
-        onChange(newFiles);
+        if (multiple) {
+            setFiles((prevFiles) => {
+                const todos = [...prevFiles, ...newFiles];
+                const vistos = new Set<string>();
+                return todos.filter((file) => {
+                    if (vistos.has(file.name)) return false;
+                    vistos.add(file.name);
+                    return true;
+                });
+            });
+        } else {
+            setFiles(newFiles);
+        }
     };
 
     // Drag and drop handlers
@@ -296,7 +306,6 @@ export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }:
         e.stopPropagation();
         const newFiles = Array.from(e.dataTransfer.files).filter((file) => file.type === 'application/pdf' || file.type.startsWith('image/'));
         setFiles(newFiles);
-        onChange(newFiles);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -336,7 +345,6 @@ export const AdjuntarArchivos = ({ files, setFiles, onChange, multiple, title }:
                             onClick={() => {
                                 const newFiles = files.filter((_, i) => i !== idx);
                                 setFiles(newFiles);
-                                onChange(newFiles);
                             }}
                             aria-label={`Eliminar archivo ${file.name}`}
                         >

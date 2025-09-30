@@ -8,7 +8,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEffect, useState } from 'react';
 import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { LlamadaArbolArchivosPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
 import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
@@ -59,13 +59,13 @@ const Index = () => {
     useEffect(() => {
         if (yearData.plan.status != 'borrador') {
             if (regionSeleccionada && yearData.year) {
-                LlamadaArbolArchivosPlan({
+                LlamadaArbolArchivos({
                     regionSeleccionada,
                     anioSeleccionada: yearData.year,
                     setLoading,
                     message: { setErrorMessage, setSuccessMessage },
+                    tipoPantalla: 'Plan',
                     onSuccess: (response) => {
-                        console.log(response.data);
                         const datosRecibidos: Nodo = response.data;
                         const archivos: Archivo[] = TransformarArchivos(datosRecibidos);
                         setPlanGuardado(archivos);

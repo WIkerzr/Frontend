@@ -10,7 +10,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
 import { GeneralOperationADR, Memoria } from '../../../types/tipadoPlan';
 import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
-import { LlamadaArbolArchivosPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
 import { useRegionContext } from '../../../contexts/RegionContext';
 
@@ -73,11 +73,12 @@ const Index = () => {
     useEffect(() => {
         if (yearData.plan.status != 'borrador') {
             if (regionSeleccionada && yearData.year) {
-                LlamadaArbolArchivosPlan({
+                LlamadaArbolArchivos({
                     regionSeleccionada,
                     anioSeleccionada: yearData.year,
                     setLoading,
                     message: { setErrorMessage, setSuccessMessage },
+                    tipoPantalla: 'Memoria',
                     onSuccess: (response) => {
                         console.log(response.data);
                         const datosRecibidos: Nodo = response.data;

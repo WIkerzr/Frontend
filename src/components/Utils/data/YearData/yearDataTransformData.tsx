@@ -482,3 +482,26 @@ export const TransformarArchivos = (datosRecibidos: Nodo): Archivo[] => {
 
     return resultado;
 };
+export const TransformarArchivosAFile = (datosRecibidos: Nodo): File[] => {
+    const resultado: File[] = [];
+
+    const primerNodo = datosRecibidos;
+    if (primerNodo.Hijos && primerNodo.Hijos.length > 0) {
+        const archivoPrincipal = primerNodo.Hijos.find((h) => !h.EsCarpeta);
+        if (archivoPrincipal) {
+            resultado.push(new File([''], archivoPrincipal.Nombre));
+        }
+
+        primerNodo.Hijos.forEach((h) => {
+            if (h.EsCarpeta && h.Hijos.length > 0) {
+                h.Hijos.forEach((sub) => {
+                    if (!sub.EsCarpeta) {
+                        resultado.push(new File([''], sub.Nombre));
+                    }
+                });
+            }
+        });
+    }
+
+    return resultado;
+};

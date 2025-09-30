@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { useLocation } from 'react-router-dom';
@@ -7,7 +7,8 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { Aviso, Boton } from '../../../components/Utils/utils';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import { LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { LlamadaArbolArchivos, LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { Nodo, TransformarArchivosAFile } from '../../../components/Utils/data/YearData/yearDataTransformData';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
@@ -15,8 +16,8 @@ const Index = () => {
 
     const { t } = useTranslation();
     const { yearData } = useYear();
-    const [planAnexos, setPlanAnexos] = useState<File[]>([]);
     const [planFiles, setPlanFiles] = useState<File[]>([]);
+    const [planAnexos, setPlanAnexos] = useState<File[]>([]);
 
     const location = useLocation();
     const pantalla = location.state?.pantalla || '';
@@ -25,13 +26,6 @@ const Index = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-
-    const handleAnexosFilesChange = (files: File[]) => {
-        setPlanAnexos(files);
-    };
-    const handlePlanFilesChange = (files: File[]) => {
-        setPlanFiles(files);
-    };
 
     function renombrarFile(file: File, nuevoNombre: string): File {
         return new File([file], nuevoNombre, { type: file.type });
@@ -82,8 +76,40 @@ const Index = () => {
         });
     };
 
+    useEffect(() => {
+        if (yearData.plan.status === 'borrador') {
+            if (regionSeleccionada && yearData.year) {
+                LlamadaArbolArchivos({
+                    regionSeleccionada,
+                    anioSeleccionada: yearData.year,
+                    setLoading,
+                    message: { setErrorMessage, setSuccessMessage },
+                    tipoPantalla: pantalla,
+                    onSuccess: (response) => {
+                        console.log(response.data);
+                        const datosRecibidos: Nodo = response.data;
+                        const archivos: File[] = TransformarArchivosAFile(datosRecibidos);
+                        if (archivos) {
+                            setPlanFiles([archivos[0]]);
+                            setPlanAnexos(archivos.slice(1));
+                        }
+                    },
+                });
+            }
+        }
+    }, []);
     return (
         <div className="panel">
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
@@ -122,17 +148,12 @@ const Index = () => {
                 <div className="panel w-2/4">
                     <section className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{pantalla === 'plan' ? t('archivosPdf') : t('archivoPdf')}</h3>
-                        <AdjuntarArchivos
-                            files={planFiles}
-                            setFiles={setPlanFiles}
-                            onChange={handlePlanFilesChange}
-                            title={t('archivoCorrespondiente', { zona: pantalla === 'Plan' ? 'al plan' : 'a la memoria' })}
-                        />
+                        <AdjuntarArchivos files={planFiles} setFiles={setPlanFiles} title={t('archivoCorrespondiente', { zona: pantalla === 'Plan' ? 'al plan' : 'a la memoria' })} />
                     </section>
 
                     <section className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('adjuntarAnexos', { zona: txtPantalla })}</h3>
-                        <AdjuntarArchivos files={planAnexos} setFiles={setPlanAnexos} onChange={handleAnexosFilesChange} multiple={true} />
+                        <AdjuntarArchivos files={planAnexos} setFiles={setPlanAnexos} multiple={true} />
                     </section>
 
                     <div className="panel p-4 shadow-sm">

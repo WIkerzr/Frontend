@@ -130,17 +130,19 @@ export const LlamadaBBDDEnviarArchivoPlanConAnexos = async <T = any>({ regionSel
     }
 };
 
-type LlamadaBBDDArbolArchivosPlan<T = any> = {
+type LlamadaBBDDArbolArchivos<T = any> = {
     regionSeleccionada: string | null;
     anioSeleccionada: number;
     setLoading: (loading: boolean) => void;
     message: MessageSetters;
+    tipoPantalla: PlanOMemoria;
     onSuccess?: (data: ApiSuccess<T>) => void;
 };
-export const LlamadaArbolArchivosPlan = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, onSuccess }: LlamadaBBDDArbolArchivosPlan<T>) => {
+export const LlamadaArbolArchivos = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, tipoPantalla, onSuccess }: LlamadaBBDDArbolArchivos<T>) => {
+    const dir = tipoPantalla === 'Plan' ? 'archivosPlan' : 'archivosMemoria';
     LlamadasBBDD({
         method: 'GET',
-        url: `yearData/${regionSeleccionada}/${Number(anioSeleccionada)}/archivosPlan`,
+        url: `yearData/${regionSeleccionada}/${Number(anioSeleccionada)}/${dir}`,
         setLoading,
         setErrorMessage: message.setErrorMessage,
         setSuccessMessage: message.setSuccessMessage,
