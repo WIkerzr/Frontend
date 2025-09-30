@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../../types/TipadoAccion';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { sortBy } from 'lodash';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
+import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { editableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
@@ -285,6 +285,35 @@ export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPla
     return camposPendientes;
 }
 
+function actualizarMetaFinal<T extends { metaAnual?: HMT; metaFinal?: HMT }>(items: T[]): T[] {
+    let hasChanges = false;
+
+    const updated = items.map((item) => {
+        if (!item.metaAnual) return item;
+
+        const metaFinalChanged =
+            !item.metaFinal ||
+            item.metaFinal.hombres !== (item.metaAnual.hombres ?? 0) ||
+            item.metaFinal.mujeres !== (item.metaAnual.mujeres ?? 0) ||
+            item.metaFinal.total !== (item.metaAnual.total ?? 0);
+
+        if (metaFinalChanged) {
+            hasChanges = true;
+            return {
+                ...item,
+                metaFinal: {
+                    hombres: item.metaAnual.hombres ?? 0,
+                    mujeres: item.metaAnual.mujeres ?? 0,
+                    total: item.metaAnual.total ?? 0,
+                },
+            };
+        }
+
+        return item;
+    });
+
+    return hasChanges ? updated : items;
+}
 interface TablasIndicadoresProps {
     tipoIndicador: TiposDeIndicadores;
 }
@@ -293,12 +322,13 @@ interface TablaIndicadorAccionProps {
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
     indicadoresResultado: IndicadorRealizacionAccion[];
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
+    plurianual: boolean;
     botonNuevoIndicadorAccion: React.ReactNode;
     handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
 }
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
-    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, botonNuevoIndicadorAccion, handleEliminarIndicador }, ref) => {
+    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, plurianual, botonNuevoIndicadorAccion, handleEliminarIndicador }, ref) => {
         const { t } = useTranslation();
 
         const { block } = useYear();
@@ -319,6 +349,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
 
         const [prevEditableRowIndexRealizacion, setPrevEditableRowIndexRealizacion] = useState<boolean>(false);
         const [prevEditableRowIndexResultado, setPrevEditableRowIndexResultado] = useState<boolean>(false);
+
         useEffect(() => {
             if (!editarPlan && !editarMemoria) {
                 setBloqueo(true);
@@ -347,6 +378,20 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                     item.hipotesis?.toLowerCase().includes(s)
             );
         };
+
+        useEffect(() => {
+            //No plurianual entonces el contenido de metaFinal es la de MetaAnual
+            if (!plurianual) {
+                setIndicadoresRealizacionTabla((prev) => actualizarMetaFinal(prev));
+            }
+        }, [plurianual, indicadoresRealizacionTabla]);
+
+        useEffect(() => {
+            //No plurianual entonces el contenido de metaFinal es la de MetaAnual
+            if (!plurianual) {
+                setIndicadoresResultadoTabla((prev) => actualizarMetaFinal(prev));
+            }
+        }, [plurianual, indicadoresResultadoTabla]);
 
         useEffect(() => {
             setDataRealizacion(filtrarIndicadores(indicadoresRealizacion, searchRealizacion));
@@ -422,9 +467,9 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             ];
 
             const columnMetaFinal = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicadorTabla, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, plurianual ? editarPlan : false),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, plurianual ? editarPlan : false),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicadorTabla, editableRowIndex, plurianual ? editarPlan : false),
             ];
             const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicadorTabla, editableRowIndex, false)];
 

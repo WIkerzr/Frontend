@@ -9,6 +9,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
     required?: boolean;
     divClassName?: string;
+    placeholder?: string;
+}
+
+interface DivInputMultiProps extends InputProps {
+    handleNueva: (nueva: string) => void;
+    camposTextos: string[];
+    handleBorrar: (borrado: number) => void;
+    disabled: boolean;
 }
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     nombreInput: string;
@@ -44,6 +52,47 @@ export const InputField = ({ nombreInput, divClassName, className, required, ...
         </div>
     );
 };
+
+export const DivInputFieldMulti = ({ camposTextos, handleBorrar, nombreInput, placeholder, divClassName, required, disabled, handleNueva }: DivInputMultiProps) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className={`flex-1 ${divClassName}`}>
+            <label htmlFor={nombreInput}>
+                {required ? '*' : ''}
+                {t(nombreInput)}
+            </label>
+            {!disabled && (
+                <input
+                    disabled={disabled}
+                    type="text"
+                    placeholder={placeholder}
+                    required={required}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleNueva(e.currentTarget.value);
+                            e.currentTarget.value = '';
+                        }
+                    }}
+                    className={`w-full border rounded p-2 resize-y`}
+                />
+            )}
+            <div className={`w-full border rounded p-2 resize-y input ${disabled ? 'bg-[#fafafa] ' : 'bg-white'}`}>
+                {camposTextos.map((e, i) => (
+                    <span key={i}>
+                        {e}
+                        {!disabled && (
+                            <button type="button" onClick={() => handleBorrar(i)} className="ml-1 text-red-500">
+                                x
+                            </button>
+                        )}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 export const TextArea = ({ nombreInput, className = '', required, value, onChange, noTitle, ...rest }: TextAreaProps) => {
     const { t } = useTranslation();
     const textareaRef = useRef<HTMLTextAreaElement>(null);

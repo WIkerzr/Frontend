@@ -124,6 +124,7 @@
     "errorObtenerUsuarios": "Error al obtener usuarios",
     "errorUserDisabled": "Usuario deshabilitado",
     "errorUserNoFound": "Usuario no encontrado",
+    "escribaEntidad": "Escriba una entidad y presione Enter para añadir más",
     "esSupracomarcal": "¿La acción es supracomarcal?",
     "estadoBorrador": "BORRADOR",
     "estadoCerrado": "CERRADO",
@@ -207,6 +208,7 @@
     "newAccion": "Nueva Acción",
     "newFileIndicador": "Añadir indicador {{tipo}}",
     "newIndicador": "Nuevo Indicador {{tipo}}",
+    "NoAplica": "No Aplica",
     "noComarcaSeleccionada": "Sin comarca seleccionada",
     "noData": "No hay datos para mostrar",
     "nombre": "Nombre",
@@ -284,6 +286,7 @@
     "Servicios": "Servicios",
     "ServiciosPrestados": "Servicios prestados",
     "servicioTituloEditado": "Servicio para la anualidad",
+    "Sexo": "Sexo: hombre/mujer",
     "sinAnosSelect": "Sin años",
     "sinIndicadorResultadoRelacionado": "Sin Indicador Resultado relacionado",
     "sinOpcionesSupraComarcal": "Sin tratamiento territorial supracomarcal",
@@ -317,7 +320,5 @@
     "volver": "Volver a la pagina anterior",
     "ZEA": "ZEA",
     "ZEATER": "Municipios rurales (ZEA + TER)",
-    "NoAplica":"No Aplica",
-    "Sexo": "Sexo: hombre/mujer",
     "Zrural": "Zona rural (ZEA + TER+ zona rural de HRD)"
 }

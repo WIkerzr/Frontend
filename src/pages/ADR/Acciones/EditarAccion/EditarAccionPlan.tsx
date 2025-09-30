@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { DatosPlan } from '../../../../types/TipadoAccion';
-import { DropdownTraducido, InputField, TextArea } from '../../../../components/Utils/inputs';
+import { DivInputFieldMulti, DropdownTraducido, InputField, TextArea } from '../../../../components/Utils/inputs';
 import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../../types/GeneralTypes';
 import Multiselect from 'multiselect-react-dropdown';
 import { useTranslation } from 'react-i18next';
@@ -21,10 +21,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const opcionesComarcalES = t('object:opcionesComarcal', { returnObjects: true }) as string[];
     const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
     const opcionesODSEUSegunIdioma = t('object:opcionesODS', { returnObjects: true }) as string[];
-
-    if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {
-        return;
-    }
+    const [entidades, setEntidades] = useState<string[]>(datosEditandoAccion.datosPlan!.ejecutora ? datosEditandoAccion.datosPlan!.ejecutora.split('§') : []);
 
     useEffect(() => {
         if (datosEditandoAccion.accionCompartida && datosEditandoAccion.accionCompartida.regionLider && Number(datosEditandoAccion.accionCompartida.regionLider.RegionId) > 0) {
@@ -38,6 +35,31 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             }
         }
     }, []);
+
+    useEffect(() => {
+        if (!entidades || entidades.length == 0) return;
+        const entidadesString = entidades.join('§');
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosPlan: {
+                ...datosEditandoAccion.datosPlan!,
+                ejecutora: entidadesString || '',
+            },
+        });
+    }, [entidades]);
+
+    if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {
+        return;
+    }
+
+    const handleNuevaEntidad = (entidad: string) => {
+        if (!entidad) return;
+        setEntidades((prev) => [...prev, entidad]);
+    };
+
+    const handleBorrarEntidad = (index: number) => {
+        setEntidades((prev) => prev.filter((_, i) => i !== index));
+    };
 
     const handleChangeCampos = (campo: keyof DatosPlan, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoAccion({
@@ -102,7 +124,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
         <div className="p-5 flex flex-col gap-4 w-full">
             <div className="flex gap-4 panel flex-col">
                 <div className="flex gap-4">
-                    <InputField nombreInput="ejecutora" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.ejecutora} onChange={(e) => handleChangeCampos('ejecutora', e)} />
+                    <DivInputFieldMulti nombreInput="ejecutora" required disabled={bloqueo} camposTextos={entidades} handleBorrar={handleBorrarEntidad} handleNueva={handleNuevaEntidad} />
                     <InputField nombreInput="implicadas" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.implicadas} onChange={(e) => handleChangeCampos('implicadas', e)} />
                     {datosEditandoAccion.plurianual && (
                         <InputField nombreInput="rangoAnios" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.rangoAnios} onChange={(e) => handleChangeCampos('rangoAnios', e)} />

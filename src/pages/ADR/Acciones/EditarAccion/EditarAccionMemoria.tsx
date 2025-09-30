@@ -103,7 +103,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
             },
         });
     };
-
+    const dataMemPresu = datosEditandoAccion.datosMemoria.ejecucionPresupuestaria;
     return (
         <div className="p-5 flex flex-col gap-4 w-full">
             <div className="flex gap-4 panel">
@@ -182,7 +182,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
 
             <div className="panel w-1/2">
                 <label htmlFor="ejecucionPresupuestaria" className="block font-medium mb-1">
-                    *Ejecución presupuestaria
+                    {t('ejecucionPreseupuestaria')}
                 </label>
                 <table id="ejecucionPresupuestaria" className="min-w-full border rounded overflow-hidden panel">
                     <thead className="bg-gray-100">
@@ -200,7 +200,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="previsto"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria?.previsto}
+                                    value={dataMemPresu.previsto}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -210,7 +210,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="ejecutado"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria?.ejecutado}
+                                    value={dataMemPresu.ejecutado}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
@@ -220,7 +220,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                     className="w-full border rounded px-2 py-1 h-[38px]"
                                     name="porcentaje"
                                     disabled={bloqueo}
-                                    value={datosEditandoAccion.datosMemoria.ejecucionPresupuestaria?.porcentaje}
+                                    value={bloqueo ? dataMemPresu.porcentaje : (Number(dataMemPresu.ejecutado) / Number(dataMemPresu.previsto)) * 100}
                                     onChange={handleEjecucionChange}
                                 />
                             </td>
