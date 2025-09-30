@@ -342,7 +342,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                         {<label>{formData.DisaggregationVariables && formData.DisaggregationVariables.trim() !== '' ? formData.DisaggregationVariables : '-'}</label>}
                     </div>
                 ) : (
-                    <select name="DisaggregationVariables" value={formData.DisaggregationVariables ?? ''} onChange={handleChangeUnitMed} className="w-full p-2 border rounded">
+                    <select name="DisaggregationVariables" value={formData.DisaggregationVariables ?? ''} onChange={handleChange} className="w-full p-2 border rounded">
                         {Object.values(DisaggregationVariables).map((val) => (
                             <option key={val} value={val}>
                                 {t(val)}
