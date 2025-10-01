@@ -21,6 +21,7 @@ import { useRegionContext } from '../../../contexts/RegionContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal, VerificadorIndicadores } from '../Acciones/EditarAccion/EditarAccionComponent';
 import { LoadingOverlay } from '../../Configuracion/Users/componentes';
+import React from 'react';
 
 export type PlanOMemoria = 'Plan' | 'Memoria';
 
@@ -181,15 +182,22 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                 <span className="text-xl  font-semibold text-gray-700 tracking-wide block mb-2">{t('funcionamientoGeneral')}</span>
                 <div className="mb-[10px]">
                     <span>
-                        {TareasInternasTraduciones[0]}
-                        <br />
-                        {TareasInternasTraduciones[1]}
-                        <br />
-                        {TareasInternasTraduciones[2]}
-                        <br />
-                        {TareasInternasTraduciones[3]}
-                        <br />
-                        {TareasInternasTraduciones[4]}
+                        {TareasInternasTraduciones.map((tarea, index) => (
+                            <React.Fragment key={index}>
+                                {tarea}
+                                <br />
+                            </React.Fragment>
+                        ))}
+                        {pantalla === 'Memoria' && (
+                            <>
+                                {dataPlan.generalOperationADR.adrInternalTasks.split('\n').map((line, index) => (
+                                    <React.Fragment key={index}>
+                                        {line}
+                                        <br />
+                                    </React.Fragment>
+                                ))}
+                            </>
+                        )}
                     </span>
                 </div>
                 <Campos campo2="adrInternalTasks" mostrar={pantalla === 'Plan'} plan={planProps} memoria={memoriaProps} t={t} />
