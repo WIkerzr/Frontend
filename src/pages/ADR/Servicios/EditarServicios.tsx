@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { InputField, TextArea } from '../../../components/Utils/inputs';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { Servicios } from '../../../types/GeneralTypes';
+import { IndicadoresServicios, Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Loading } from '../../../components/Utils/animations';
@@ -16,12 +16,12 @@ import { TabCard } from '../Acciones/EditarAccion/EditarAccionComponent';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
+import { PestanaIndicadoresServicios } from './ComponentesServicios';
 
 const Index: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
-    const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
     const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData, controlguardado, setControlguardado } = useYear();
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -45,6 +45,16 @@ const Index: React.FC = () => {
         setDatosEditandoServicio(actualizado);
     };
 
+    //     const setIndicador = (callback: (prev: IndicadoresServicios[]) => IndicadoresServicios[]) => {
+    //     if (!datosEditandoServicio) return;
+
+    //     const nuevosIndicadores = callback(datosEditandoServicio.indicadores || []);
+    //     setDatosEditandoServicio({
+    //         ...datosEditandoServicio,
+    //         indicadores: nuevosIndicadores,
+    //     });
+    // };
+
     const [erroresGenerales, setErroresGenerales] = useState({
         nombre: false,
         descripcion: false,
@@ -60,160 +70,38 @@ const Index: React.FC = () => {
             [campo]: e.target.value || '',
         });
     };
+    const [datosIndicadorRealizacion, setDatosIndicadorRealizacion] = useState<IndicadoresServicios[]>([]);
+    const [datosIndicadorResultado, setDatosIndicadorResultado] = useState<IndicadoresServicios[]>([]);
 
-    const PestanaIndicadoresServicios = React.forwardRef<HTMLButtonElement>(() => {
-        const agregarIndicador = () => {
-            if (datosEditandoServicio.indicadores?.some((ind) => !ind.indicador?.trim())) {
-                alert(t('indicadorServicioSinRellenar'));
-                return;
+    useEffect(() => {
+        if (datosEditandoServicio?.indicadores) {
+            const hayTipoUndefinedNull = datosEditandoServicio.indicadores.some((indicador) => indicador.tipo === null || indicador.tipo === undefined);
+            if (hayTipoUndefinedNull) {
+                //TODO es para versiones anteriores
+                setServicio((prev) => {
+                    const indicadoresActualizados = prev.indicadores.map((indicador) => ({
+                        ...indicador,
+                        tipo: indicador.tipo ?? 'realizacion',
+                    }));
+
+                    return {
+                        ...prev,
+                        indicadores: indicadoresActualizados,
+                    };
+                });
+            } else {
+                const filtradosRealizacion: IndicadoresServicios[] = datosEditandoServicio.indicadores.filter((indicador) => indicador.tipo === 'realizacion');
+
+                const filtradosResultado: IndicadoresServicios[] = datosEditandoServicio.indicadores.filter((indicador) => indicador.tipo === 'resultado');
+
+                setDatosIndicadorRealizacion(filtradosRealizacion);
+                setDatosIndicadorResultado(filtradosResultado);
             }
-            setServicio((prev) => ({
-                ...prev,
-                indicadores: [
-                    ...prev.indicadores,
-                    {
-                        indicador: '',
-                        previsto: { valor: '' },
-                        alcanzado: { valor: '' },
-                    },
-                ],
-            }));
-        };
-        const eliminarIndicador = async (index: number) => {
-            setServicio((prev) => ({
-                ...prev,
-                indicadores: prev.indicadores.filter((_, i) => i !== index),
-            }));
-        };
-        return (
-            <div className="p-5 flex flex-col gap-4 w-full">
-                <div className="flex-grow gap-4 panel">
-                    <div className="p-2 flex justify-between items-center">
-                        <span>*{t('indicadores').toUpperCase()}</span>
-                        {editarPlan && (
-                            <button type="button" onClick={agregarIndicador} className="px-4 py-2 bg-primary text-white rounded">
-                                {t('agregarFila')}
-                            </button>
-                        )}
-                    </div>
-                    <div className="p-2 flex justify-between items-center">
-                        <table className="w-full border-collapse   text-sm">
-                            <thead>
-                                <tr>
-                                    <th className="borderp-1 thead th">
-                                        {' '}
-                                        {editarPlan ? '*' : ''}
-                                        {t('indicadores')}
-                                    </th>
-                                    <th className="border   p-1 thead th">
-                                        {' '}
-                                        {editarPlan ? '*' : ''}
-                                        {t('valorPrevisto')}
-                                    </th>
-                                    <th className="border   p-1 thead th">
-                                        {' '}
-                                        {!editarPlan ? '*' : ''}
-                                        {t('valorReal')}
-                                    </th>
-                                    {editarPlan && <th className="border thead p-1 text-center th">✖</th>}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {(datosEditandoServicio!.indicadores || []).map((indicador, index) => (
-                                    <tr key={index}>
-                                        <td
-                                            className={`border align-top p-1 ${editarPlan ? 'cursor-text' : ''} ${erroresindicadores[index]?.[0] ? 'border-red-500 border-2' : ''}`}
-                                            onClick={() => inputRefs.current[index]?.[0]?.focus()}
-                                        >
-                                            <input
-                                                disabled={!editarPlan}
-                                                ref={(el) => {
-                                                    if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                                    inputRefs.current[index][0] = el;
-                                                }}
-                                                type="text"
-                                                value={indicador.indicador}
-                                                onChange={(e) => {
-                                                    const nuevos = [...datosEditandoServicio.indicadores];
-                                                    nuevos[index] = { ...nuevos[index], indicador: e.target.value };
-                                                    setServicio((prev) => ({ ...prev, indicadores: nuevos }));
-                                                }}
-                                                className={`text-left w-full`}
-                                            />
-
-                                            {erroresindicadores[index]?.[0] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                                        </td>
-
-                                        {/* Valor previsto */}
-                                        <td
-                                            className={`border td align-top p-1 ${editarPlan ? 'cursor-text' : ''} ${erroresindicadores[index]?.[1] ? 'border-red-500 border-2' : ''}`}
-                                            onClick={() => inputRefs.current[index]?.[1]?.focus()}
-                                        >
-                                            <input
-                                                disabled={!editarPlan}
-                                                ref={(el) => {
-                                                    if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                                    inputRefs.current[index][1] = el;
-                                                }}
-                                                type="text"
-                                                value={indicador.previsto?.valor || ''}
-                                                onChange={(e) => {
-                                                    const nuevos = [...datosEditandoServicio.indicadores];
-                                                    nuevos[index] = {
-                                                        ...nuevos[index],
-                                                        previsto: { valor: e.target.value },
-                                                    };
-                                                    setServicio((prev) => ({ ...prev, indicadores: nuevos }));
-                                                }}
-                                                className={`text-center w-full`}
-                                            />
-
-                                            {erroresindicadores[index]?.[1] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                                        </td>
-
-                                        {/* Valor real */}
-                                        <td
-                                            className={`border td align-top p-1 ${editarPlan || editarMemoria ? 'cursor-text' : ''} ${erroresindicadores[index]?.[2] ? 'border-red-500 border-2' : ''}`}
-                                            onClick={() => inputRefs.current[index]?.[2]?.focus()}
-                                        >
-                                            <input
-                                                ref={(el) => {
-                                                    if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                                    inputRefs.current[index][2] = el;
-                                                }}
-                                                disabled={!editarPlan && !editarMemoria}
-                                                type="text"
-                                                value={indicador.alcanzado?.valor || ''}
-                                                onChange={(e) => {
-                                                    const nuevos = [...datosEditandoServicio.indicadores];
-                                                    nuevos[index] = {
-                                                        ...nuevos[index],
-                                                        alcanzado: { valor: e.target.value },
-                                                    };
-                                                    setServicio((prev) => ({ ...prev, indicadores: nuevos }));
-                                                }}
-                                                className={`text-center w-full`}
-                                            />
-                                            {erroresindicadores[index]?.[2] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                                        </td>
-
-                                        {/* Botón eliminar */}
-                                        {editarPlan && (
-                                            <td className="border td text-center align-top p-1">
-                                                <button type="button" onClick={() => eliminarIndicador(index)} className="text-red-600 font-bold" title="Eliminar fila">
-                                                    ✖
-                                                </button>
-                                            </td>
-                                        )}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        );
-    });
+        } else {
+            setDatosIndicadorRealizacion([]);
+            setDatosIndicadorResultado([]);
+        }
+    }, [datosEditandoServicio]);
 
     const validarAntesDeGuardar = () => {
         if (!datosEditandoServicio) return;
@@ -249,13 +137,24 @@ const Index: React.FC = () => {
         //     alert(t('porFavorCompletaCamposObligatorios') || 'Por favor, completa todos los campos obligatorios.');
         //     return;
         // }
-        hundleGuardarServicio();
+
+        const indicadoresCombinados = [...datosIndicadorRealizacion, ...datosIndicadorResultado];
+
+        setServicio((prev) => {
+            const actualizado: Servicios = {
+                ...prev,
+                indicadores: indicadoresCombinados,
+            };
+            hundleGuardarServicio(actualizado);
+
+            return actualizado;
+        });
     };
 
-    const hundleGuardarServicio = async () => {
-        if (datosEditandoServicio.id === 0) {
+    const hundleGuardarServicio = async (datosServicios: Servicios) => {
+        if (datosServicios.id === 0) {
             const nuevoServicio = await gestionarServicio({
-                datosEditandoServicio,
+                datosEditandoServicio: datosServicios,
                 regionSeleccionada: regionSeleccionada!,
                 anioSeleccionada: anioSeleccionada!,
                 setLoading,
@@ -272,8 +171,8 @@ const Index: React.FC = () => {
             }
         } else {
             const editadoServicio = await gestionarServicio({
-                idServicio: datosEditandoServicio.id,
-                datosEditandoServicio,
+                idServicio: datosServicios.id,
+                datosEditandoServicio: datosServicios,
                 regionSeleccionada: regionSeleccionada!,
                 anioSeleccionada: anioSeleccionada!,
                 setLoading,
@@ -387,7 +286,26 @@ const Index: React.FC = () => {
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
                             <TabPanel>
-                                <PestanaIndicadoresServicios />
+                                <PestanaIndicadoresServicios
+                                    tipoIndicadores="realizacion"
+                                    datosIndicadorRealizacion={datosIndicadorRealizacion}
+                                    datosIndicadorResultado={datosIndicadorResultado}
+                                    setDatosIndicadorResultado={setDatosIndicadorResultado}
+                                    setDatosIndicadorRealizacion={setDatosIndicadorRealizacion}
+                                    editarPlan
+                                    editarMemoria
+                                    erroresindicadores={erroresindicadores}
+                                />
+                                <PestanaIndicadoresServicios
+                                    tipoIndicadores="resultado"
+                                    datosIndicadorRealizacion={datosIndicadorRealizacion}
+                                    datosIndicadorResultado={datosIndicadorResultado}
+                                    setDatosIndicadorResultado={setDatosIndicadorResultado}
+                                    setDatosIndicadorRealizacion={setDatosIndicadorRealizacion}
+                                    editarPlan
+                                    editarMemoria
+                                    erroresindicadores={erroresindicadores}
+                                />
                             </TabPanel>
                             <TabPanel>
                                 <div className="p-5 flex flex-col gap-4 w-full">

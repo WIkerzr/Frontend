@@ -174,6 +174,7 @@ export const servicioIniciadoVacio: Servicios = {
             previsto: {
                 valor: '',
             },
+            tipo: 'realizacion',
             alcanzado: {
                 valor: '',
             },

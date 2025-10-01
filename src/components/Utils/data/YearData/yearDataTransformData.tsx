@@ -365,6 +365,7 @@ export const convertirIndicadoresServicios = (indicadores: IndicadoresServiciosD
             mujeres: i.AlcanzadoMujeres ?? '',
             valor: i.AlcanzadoValor ?? '',
         },
+        tipo: i.Tipo,
     }));
 
 export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[]): Servicios[] =>

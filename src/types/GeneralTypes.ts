@@ -1,3 +1,5 @@
+import { TiposDeIndicadores } from './Indicadores';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Estado = 'borrador' | 'proceso' | 'cerrado' | 'aceptado';
 const validEstados = ['borrador', 'proceso', 'cerrado', 'aceptado'] as const;
@@ -56,6 +58,7 @@ export interface HMTServicios {
 export interface IndicadoresServicios {
     indicador: string;
     previsto: HMTServicios;
+    tipo: TiposDeIndicadores;
     alcanzado?: HMTServicios;
 }
 export interface IndicadoresServiciosDTO {
@@ -66,6 +69,7 @@ export interface IndicadoresServiciosDTO {
     AlcanzadoHombres: string;
     AlcanzadoMujeres: string;
     AlcanzadoValor: string;
+    Tipo: TiposDeIndicadores;
 }
 
 export interface ServiciosDTO {

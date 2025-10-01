@@ -32,6 +32,7 @@ export const gestionarServicio = async ({
         AlcanzadoHombres: i.alcanzado?.hombres ?? '',
         AlcanzadoMujeres: i.alcanzado?.mujeres ?? '',
         AlcanzadoValor: i.alcanzado?.valor ?? '',
+        Tipo: i.tipo ?? '',
     }));
 
     const servicioDTO: ServiciosDTO = {
@@ -76,6 +77,7 @@ export const gestionarServicio = async ({
                             mujeres: i.AlcanzadoMujeres ?? '',
                             valor: i.AlcanzadoValor ?? '',
                         },
+                        tipo: i.Tipo ?? '',
                     })),
                 };
                 resolve(resultado);
