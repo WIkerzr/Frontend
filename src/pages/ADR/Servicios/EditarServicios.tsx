@@ -20,6 +20,15 @@ import { PestanaIndicadoresServicios } from './ComponentesServicios';
 import { EjesBBDD } from '../../../types/tipadoPlan';
 import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
 import { EjesBBDDToEjes } from '../EjesHelpers';
+export const ejeGeneralServicios: EjesBBDD = {
+    EjeId: 'general',
+    NameEs: 'General',
+    NameEu: 'Orokorra',
+    IsActive: true,
+    IsPrioritarios: false,
+    acciones: [],
+    LineasActuaccion: [],
+};
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -50,6 +59,12 @@ const Index: React.FC = () => {
             });
         }
     }, [yearData, loading]);
+
+    useEffect(() => {
+        if (!ejesPlan.some((e) => e.EjeId === ejeGeneralServicios.EjeId)) {
+            setEjesPlan((prev) => [...prev, ejeGeneralServicios]);
+        }
+    }, [ejesPlan]);
 
     useEffect(() => {
         if (controlguardado) {
@@ -287,7 +302,7 @@ const Index: React.FC = () => {
                                     />
                                     <span className="block  font-semibold">
                                         <span className="block  font-semibold">
-                                            <span className="font-normal text-col">{t('LineasdeActuaccion')}</span>
+                                            <span className="font-normal text-col">{t('LineaActuaccion')}</span>
                                         </span>
                                         {editarPlan ? (
                                             <DropdownLineaActuaccion

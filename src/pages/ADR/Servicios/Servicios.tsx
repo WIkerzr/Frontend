@@ -14,6 +14,7 @@ import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componente
 import { eliminarServicio } from '../../../components/Utils/data/dataServices';
 import { ErrorMessage } from '../../../components/Utils/animations';
 import { MostrarAvisoCamposServicios } from './ComponentesServicios';
+import { ejeGeneralServicios } from './EditarServicios';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -94,9 +95,13 @@ const Index: React.FC = () => {
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((servicio: Servicios) => {
                             const editable = editarPlan || editarMemoria;
-                            const nombreEje =
-                                yearData.plan.ejes.find((e) => e.Id == servicio.idEje) &&
-                                (i18n.language === 'eu' ? yearData.plan.ejes.find((e) => e.Id == servicio.idEje)?.NameEu : yearData.plan.ejes.find((e) => e.Id == servicio.idEje)?.NameEs);
+                            let nombreEje = '';
+                            if (servicio.idEje === 'general') {
+                                nombreEje = i18n.language === 'eu' ? ejeGeneralServicios.NameEu : ejeGeneralServicios.NameEs;
+                            } else {
+                                const eje = yearData.plan.ejes.find((e) => e.Id == servicio.idEje);
+                                nombreEje = i18n.language === 'eu' ? eje?.NameEu ?? '' : eje?.NameEs ?? '';
+                            }
                             return (
                                 <div key={servicio.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="text-base">{servicio.nombre}</span>
