@@ -17,7 +17,7 @@ import { MostrarAvisoCamposServicios } from './ComponentesServicios';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { yearData, setYearData, setDatosEditandoServicio, SeleccionVaciarEditarAccion } = useYear();
     const [serviciosGrup, setServiciosGrup] = useState<Servicios[][]>([]);
     const [successMessage, setSuccessMessage] = useState<string>('');
@@ -29,7 +29,9 @@ const Index: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        setServiciosGrup(grup5(yearData.servicios || [], 4));
+        if (!yearData.servicios) return;
+        const serviciosOrdenados = [...yearData.servicios].sort((a, b) => a.id - b.id);
+        setServiciosGrup(grup5(serviciosOrdenados, 4));
     }, [yearData]);
 
     const handleDelete = async (id: number) => {
@@ -92,9 +94,20 @@ const Index: React.FC = () => {
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((servicio: Servicios) => {
                             const editable = editarPlan || editarMemoria;
+                            const nombreEje =
+                                yearData.plan.ejes.find((e) => e.Id == servicio.idEje) &&
+                                (i18n.language === 'eu' ? yearData.plan.ejes.find((e) => e.Id == servicio.idEje)?.NameEu : yearData.plan.ejes.find((e) => e.Id == servicio.idEje)?.NameEs);
                             return (
                                 <div key={servicio.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
                                     <span className="text-base">{servicio.nombre}</span>
+                                    <span className="block text-sm text-gray-500 text-left font-medium mb-1">
+                                        {t('Eje')}: {nombreEje}
+                                    </span>
+                                    {servicio.lineaActuaccion && (
+                                        <span className="block text-sm text-gray-500 text-left font-medium mb-1">
+                                            {t('LineaActuaccion')}: {servicio.lineaActuaccion}
+                                        </span>
+                                    )}
                                     <div className="flex gap-2 justify-end mt-2">
                                         <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
                                             <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio(servicio)}>

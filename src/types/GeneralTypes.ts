@@ -47,6 +47,8 @@ export interface Servicios {
     nombre: string;
     descripcion: string;
     indicadores: IndicadoresServicios[];
+    idEje: string | number;
+    lineaActuaccion: string;
     dSeguimiento?: string;
     valFinal?: string;
 }
@@ -81,6 +83,9 @@ export interface ServiciosDTO {
     ValFinal?: string;
     RegionId: number;
     Year: number;
+    LineaActuaccion: string;
+    EjeGlobalId: string;
+    EjeGlobalIdInt: number;
 }
 export interface ServiciosDTOConvertIndicadores {
     Id?: number;
@@ -91,4 +96,7 @@ export interface ServiciosDTOConvertIndicadores {
     ValFinal?: string;
     RegionId: number;
     Year: number;
+    LineaActuaccion: string;
+    EjeGlobalId: string;
+    EjeGlobalIdInt: number;
 }

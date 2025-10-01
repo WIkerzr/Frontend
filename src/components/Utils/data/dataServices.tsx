@@ -43,6 +43,9 @@ export const gestionarServicio = async ({
         IndicadoresServicios: indicadoresServiciosDto,
         RegionId: Number(regionSeleccionada),
         Year: anioSeleccionada,
+        EjeGlobalId: typeof datosEditandoServicio.idEje === 'string' ? datosEditandoServicio.idEje : '',
+        EjeGlobalIdInt: typeof datosEditandoServicio.idEje === 'number' ? datosEditandoServicio.idEje : 0,
+        LineaActuaccion: datosEditandoServicio.lineaActuaccion,
     };
 
     const url = method === 'POST' ? `/services/newService` : `/services/${idServicio}/updateService`;
@@ -65,6 +68,8 @@ export const gestionarServicio = async ({
                     descripcion: data.Descripcion,
                     dSeguimiento: data.DSeguimiento ?? undefined,
                     valFinal: data.ValFinal ?? undefined,
+                    idEje: data.EjeGlobalIdInt,
+                    lineaActuaccion: data.LineaActuaccion,
                     indicadores: data.IndicadoresServicios.map((i) => ({
                         indicador: i.Indicador,
                         previsto: {

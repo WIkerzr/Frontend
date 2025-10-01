@@ -28,7 +28,6 @@ const Index: React.FC = () => {
 
     const accionAccesoria = tipo === 'accesoria';
     const titulo = t('accionTituloEditado');
-    const tituloCampo = t('Accion');
     const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : '/adr/acciones/';
     const { regionSeleccionada } = useRegionContext();
 
@@ -222,7 +221,7 @@ const Index: React.FC = () => {
                         <small style={{ color: '#666' }}>{t('camposObligatoriosLeyenda')}</small>
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
-                                <label className="block text-sm font-medium mb-1">{'*' + tituloCampo}</label>
+                                <label className="block text-sm font-medium mb-1">{'*' + t('Accion')}</label>
                                 {editarPlan ? (
                                     <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={(e) => handleAccionChange(e)} />
                                 ) : (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
 import IconPencil from '../../../components/Icon/IconPencil';
@@ -12,7 +13,7 @@ import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
 import { NewModal, PrintFechaTexto, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import MyEditableDropdown from '../../../components/Utils/inputs';
+import MyEditableDropdown, { SelectorEje } from '../../../components/Utils/inputs';
 import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { Loading } from '../../../components/Utils/animations';
 import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
@@ -54,30 +55,18 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     const isFetchingRef = useRef(false);
 
     useEffect(() => {
-        if (!loading && !isFetchingRef.current && ejesPlan.length === 0) {
-            let rellenarEjes: EjesBBDD[] = [];
-            const ejesRegionStr = localStorage.getItem('ejesRegion');
-            const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(ejesRegionStr || '{}');
-
-            const ejes = acciones === 'Acciones' ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales;
-
-            setEjesPlan(ejes ?? []);
-            rellenarEjes = ejes ?? [];
-
-            if (rellenarEjes.length === 0) {
-                if (!ValidarEjesRegion(regionSeleccionada)) {
-                    isFetchingRef.current = true;
-                    if (acciones === 'Acciones') {
-                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan).finally(() => {
-                            isFetchingRef.current = false;
-                        });
-                    } else {
-                        LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan).finally(() => {
-                            isFetchingRef.current = false;
-                        });
-                    }
-                }
-            }
+        if (!loading && ejesPlan.length === 0) {
+            FetchEjesPlan({
+                regionSeleccionada,
+                acciones,
+                t,
+                i18n,
+                setErrorMessage,
+                setSuccessMessage,
+                setLoading,
+                setEjesPlan,
+                isFetchingRef,
+            });
         }
     }, [yearData, loading]);
 
@@ -220,19 +209,14 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
             )}
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('newAccion')}>
                 <div className="space-y-5">
-                    <div>
-                        <label className="block font-medium mb-1">{t('Ejes')}</label>
-                        <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
-                            {ejesPlan.map((eje, index) => {
-                                const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}${acciones === 'Acciones' ? bloqueoMensaje[index] : ''}`;
-                                return (
-                                    <option key={eje.EjeId} value={eje.EjeId} disabled={bloqueo[index]}>
-                                        {label}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                    </div>
+                    <SelectorEje
+                        idEjeSeleccionado={idEjeSeleccionado}
+                        setIdEjeSeleccionado={setIdEjeSeleccionado}
+                        ejesPlan={ejesPlan}
+                        acciones={acciones}
+                        bloqueo={bloqueo}
+                        bloqueoMensaje={bloqueoMensaje}
+                    />
                     <div>
                         <label className="block font-medium mb-1">{t('NombreAccion')}</label>
                         <input
@@ -632,10 +616,14 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
         if (ejesEnDropdown && idEjeSeleccionado && idEjeSeleccionado != '') {
             const index = ejesPlan.findIndex((eje) => `${eje.Id}` === `${idEjeSeleccionado}`);
             const datosEje = ejesPlan[index];
+            if (!datosEje) return;
 
             let lineaActuacion = ejesEnDropdown.find((e) => `${e.NameEs}` === `${datosEje.NameEs}`)?.LineasActuaccion;
             if (!lineaActuacion) {
                 lineaActuacion = ejesEnDropdown.find((e) => `${e.NameEu}` === `${datosEje.NameEu}`)?.LineasActuaccion;
+            }
+            if (!lineaActuacion) {
+                lineaActuacion = datosEje.LineasActuaccion;
             }
             if (lineaActuacion) {
                 setLineaActuaciones(lineaActuacion.map((la) => la.Title));
@@ -679,4 +667,43 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
             )}
         </div>
     );
+};
+
+type LlamadaParams = {
+    regionSeleccionada: string | null;
+    acciones: TiposAccion | 'Servicios';
+    t: any;
+    i18n: any;
+    setErrorMessage: (msg: string) => void;
+    setSuccessMessage: (msg: string) => void;
+    setLoading: (loading: boolean) => void;
+    setEjesPlan: (ejes: EjesBBDD[]) => void;
+    isFetchingRef: React.MutableRefObject<boolean>;
+};
+
+export const FetchEjesPlan = async ({ regionSeleccionada, acciones, t, i18n, setErrorMessage, setSuccessMessage, setLoading, setEjesPlan, isFetchingRef }: LlamadaParams) => {
+    if (isFetchingRef.current) return;
+
+    let rellenarEjes: EjesBBDD[] = [];
+    const ejesRegionStr = localStorage.getItem('ejesRegion');
+    const ejesStore: { ejesEstrategicos?: EjesBBDD[]; ejesGlobales?: EjesBBDD[] } = JSON.parse(ejesRegionStr || '{}');
+
+    const ejes = acciones === 'Acciones' ? ejesStore.ejesEstrategicos ?? [] : ejesStore.ejesGlobales ?? [];
+    setEjesPlan(ejes);
+    rellenarEjes = ejes;
+
+    if (rellenarEjes.length === 0) {
+        if (!ValidarEjesRegion(regionSeleccionada)) {
+            isFetchingRef.current = true;
+            try {
+                if (acciones === 'Acciones') {
+                    await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan);
+                } else {
+                    await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesPlan, undefined, setEjesPlan);
+                }
+            } finally {
+                isFetchingRef.current = false;
+            }
+        }
+    }
 };

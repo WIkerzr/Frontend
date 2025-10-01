@@ -4,7 +4,7 @@ import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
 import { useTranslation } from 'react-i18next';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import React, { Dispatch, forwardRef, SetStateAction, useRef } from 'react';
+import React, { Dispatch, forwardRef, SetStateAction, useRef, useState } from 'react';
 import { t } from 'i18next';
 import { TiposDeIndicadores } from '../../../types/Indicadores';
 
@@ -152,94 +152,108 @@ export const PestanaIndicadoresServicios = forwardRef<HTMLButtonElement, Pestana
 
             return (
                 <>
-                    {(datosIndicador || []).map((indicador, index) => (
-                        <tr key={index}>
-                            <td
-                                className={`border align-top p-1 ${editarPlan ? 'cursor-text' : ''} ${erroresindicadores[index]?.[0] ? 'border-red-500 border-2' : ''}`}
-                                onClick={() => inputRefs.current[index]?.[0]?.focus()}
-                            >
-                                <input
-                                    disabled={!editarPlan}
-                                    ref={(el) => {
-                                        if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                        inputRefs.current[index][0] = el;
-                                    }}
-                                    type="text"
-                                    value={indicador.indicador}
-                                    onChange={(e) => {
-                                        const nuevos = [...datosIndicador];
-                                        nuevos[index] = { ...nuevos[index], indicador: e.target.value };
-                                        setDatosIndicador(nuevos);
-                                    }}
-                                    className={`text-left w-full`}
-                                />
+                    {(datosIndicador || []).map((indicador, index) => {
+                        const [indicadorNombre, setIndicadorNombre] = useState<string>(indicador.indicador);
+                        const [previsto, setPrevisto] = useState<string>(indicador.previsto.valor);
+                        const [alcanzado, setAlcanzado] = useState<string>(indicador.alcanzado ? indicador.alcanzado.valor : '');
+                        return (
+                            <tr key={index}>
+                                <td
+                                    className={`border align-top p-1 ${editarPlan ? 'cursor-text' : ''} ${erroresindicadores[index]?.[0] ? 'border-red-500 border-2' : ''}`}
+                                    onClick={() => inputRefs.current[index]?.[0]?.focus()}
+                                >
+                                    <input
+                                        disabled={!editarPlan}
+                                        ref={(el) => {
+                                            if (!inputRefs.current[index]) inputRefs.current[index] = [];
+                                            inputRefs.current[index][0] = el;
+                                        }}
+                                        type="text"
+                                        value={indicadorNombre}
+                                        onChange={(e) => {
+                                            setIndicadorNombre(e.target.value);
+                                        }}
+                                        onBlur={(e) => {
+                                            const nuevos = [...datosIndicador];
+                                            nuevos[index] = { ...nuevos[index], indicador: e.target.value };
+                                            setDatosIndicador(nuevos);
+                                        }}
+                                        className={`text-left w-full`}
+                                    />
 
-                                {erroresindicadores[index]?.[0] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                            </td>
-
-                            {/* Valor previsto */}
-                            <td
-                                className={`border td align-top p-1 ${editarPlan ? 'cursor-text' : ''} ${erroresindicadores[index]?.[1] ? 'border-red-500 border-2' : ''}`}
-                                onClick={() => inputRefs.current[index]?.[1]?.focus()}
-                            >
-                                <input
-                                    disabled={!editarPlan}
-                                    ref={(el) => {
-                                        if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                        inputRefs.current[index][1] = el;
-                                    }}
-                                    type="text"
-                                    value={indicador.previsto?.valor || ''}
-                                    onChange={(e) => {
-                                        const nuevos = [...datosIndicador];
-                                        nuevos[index] = {
-                                            ...nuevos[index],
-                                            previsto: { valor: e.target.value },
-                                        };
-                                        setDatosIndicador(nuevos);
-                                    }}
-                                    className={`text-center w-full`}
-                                />
-
-                                {erroresindicadores[index]?.[1] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                            </td>
-
-                            {/* Valor real */}
-                            <td
-                                className={`border td align-top p-1 ${editarPlan || editarMemoria ? 'cursor-text' : ''} ${erroresindicadores[index]?.[2] ? 'border-red-500 border-2' : ''}`}
-                                onClick={() => inputRefs.current[index]?.[2]?.focus()}
-                            >
-                                <input
-                                    ref={(el) => {
-                                        if (!inputRefs.current[index]) inputRefs.current[index] = [];
-                                        inputRefs.current[index][2] = el;
-                                    }}
-                                    disabled={!editarPlan && !editarMemoria}
-                                    type="text"
-                                    value={indicador.alcanzado?.valor || ''}
-                                    onChange={(e) => {
-                                        const nuevos = [...datosIndicador];
-                                        nuevos[index] = {
-                                            ...nuevos[index],
-                                            alcanzado: { valor: e.target.value },
-                                        };
-                                        setDatosIndicador(nuevos);
-                                    }}
-                                    className={`text-center w-full`}
-                                />
-                                {erroresindicadores[index]?.[2] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
-                            </td>
-
-                            {/* Botón eliminar */}
-                            {editarPlan && (
-                                <td className="border td text-center align-top p-1">
-                                    <button type="button" onClick={() => eliminarIndicador(index)} className="text-red-600 font-bold" title="Eliminar fila">
-                                        ✖
-                                    </button>
+                                    {erroresindicadores[index]?.[0] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
                                 </td>
-                            )}
-                        </tr>
-                    ))}
+
+                                {/* Valor previsto */}
+                                <td
+                                    className={`border td align-top p-1 ${editarPlan ? 'cursor-text' : ''} ${erroresindicadores[index]?.[1] ? 'border-red-500 border-2' : ''}`}
+                                    onClick={() => inputRefs.current[index]?.[1]?.focus()}
+                                >
+                                    <input
+                                        disabled={!editarPlan}
+                                        ref={(el) => {
+                                            if (!inputRefs.current[index]) inputRefs.current[index] = [];
+                                            inputRefs.current[index][1] = el;
+                                        }}
+                                        type="text"
+                                        value={previsto}
+                                        onChange={(e) => {
+                                            setPrevisto(e.target.value);
+                                        }}
+                                        onBlur={(e) => {
+                                            const nuevos = [...datosIndicador];
+                                            nuevos[index] = {
+                                                ...nuevos[index],
+                                                previsto: { valor: e.target.value },
+                                            };
+                                            setDatosIndicador(nuevos);
+                                        }}
+                                        className={`text-center w-full`}
+                                    />
+
+                                    {erroresindicadores[index]?.[1] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
+                                </td>
+
+                                {/* Valor real */}
+                                <td
+                                    className={`border td align-top p-1 ${editarPlan || editarMemoria ? 'cursor-text' : ''} ${erroresindicadores[index]?.[2] ? 'border-red-500 border-2' : ''}`}
+                                    onClick={() => inputRefs.current[index]?.[2]?.focus()}
+                                >
+                                    <input
+                                        ref={(el) => {
+                                            if (!inputRefs.current[index]) inputRefs.current[index] = [];
+                                            inputRefs.current[index][2] = el;
+                                        }}
+                                        disabled={!editarPlan && !editarMemoria}
+                                        type="text"
+                                        value={alcanzado}
+                                        onChange={(e) => {
+                                            setAlcanzado(e.target.value);
+                                        }}
+                                        onBlur={(e) => {
+                                            const nuevos = [...datosIndicador];
+                                            nuevos[index] = {
+                                                ...nuevos[index],
+                                                alcanzado: { valor: e.target.value },
+                                            };
+                                            setDatosIndicador(nuevos);
+                                        }}
+                                        className={`text-center w-full`}
+                                    />
+                                    {erroresindicadores[index]?.[2] && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
+                                </td>
+
+                                {/* Botón eliminar */}
+                                {editarPlan && (
+                                    <td className="border td text-center align-top p-1">
+                                        <button type="button" onClick={() => eliminarIndicador(index)} className="text-red-600 font-bold" title="Eliminar fila">
+                                            ✖
+                                        </button>
+                                    </td>
+                                )}
+                            </tr>
+                        );
+                    })}
                 </>
             );
         };

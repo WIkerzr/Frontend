@@ -408,6 +408,8 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
 
 import CreatableSelect from 'react-select/creatable';
 import { SingleValue } from 'react-select';
+import { EjesBBDD } from '../../types/tipadoPlan';
+import { TiposAccion } from '../../contexts/DatosAnualContext';
 interface OptionType {
     value: string;
     label: string;
@@ -477,3 +479,38 @@ export default function MyEditableDropdown({ options, setOpcion, placeholder, va
         />
     );
 }
+
+interface SelectorEjeProps {
+    idEjeSeleccionado: string;
+    setIdEjeSeleccionado: React.Dispatch<React.SetStateAction<string>>;
+    ejesPlan: EjesBBDD[];
+    acciones: TiposAccion | 'Servicios';
+    bloqueo?: boolean[];
+    bloqueoMensaje?: string[];
+}
+export const SelectorEje = ({ idEjeSeleccionado, setIdEjeSeleccionado, ejesPlan, acciones, bloqueo, bloqueoMensaje }: SelectorEjeProps) => {
+    const { t, i18n } = useTranslation();
+    const ejesPlanOrdenado = [...ejesPlan].sort((a, b) => {
+        if (i18n.language === 'es') {
+            return a.NameEs.localeCompare(b.NameEs);
+        } else {
+            return a.NameEu.localeCompare(b.NameEu);
+        }
+    });
+
+    return (
+        <div>
+            <label className="block font-medium mb-1">{t('Ejes')}</label>
+            <select className="form-select text-gray-800 w-full" style={{ minWidth: 'calc(100% + 10px)' }} value={idEjeSeleccionado} onChange={(e) => setIdEjeSeleccionado(e.target.value)}>
+                {ejesPlanOrdenado.map((eje, index) => {
+                    const label = `${i18n.language === 'es' ? eje.NameEs : eje.NameEu}${acciones === 'Acciones' ? (bloqueoMensaje ? bloqueoMensaje[index] : '') : ''}`;
+                    return (
+                        <option key={eje.EjeId} value={eje.EjeId} disabled={bloqueo ? bloqueo[index] : false}>
+                            {label}
+                        </option>
+                    );
+                })}
+            </select>
+        </div>
+    );
+};

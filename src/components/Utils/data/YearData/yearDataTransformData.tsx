@@ -376,6 +376,8 @@ export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[
         dSeguimiento: s.DSeguimiento ?? '',
         valFinal: s.ValFinal ?? '',
         indicadores: convertirIndicadoresServicios(s.Indicadores ?? []),
+        idEje: s.EjeGlobalId === '' ? s.EjeGlobalIdInt : s.EjeGlobalId,
+        lineaActuaccion: s.LineaActuaccion,
     }));
 
 export const convertirEje = (eje: EjeBBDD2): Ejes => ({
@@ -402,6 +404,9 @@ export const normalizarServicios = (servicios: ServiciosDTO[] | ServiciosDTOConv
             ValFinal: s.ValFinal,
             RegionId: s.RegionId,
             Year: s.Year,
+            EjeGlobalId: s.EjeGlobalId,
+            EjeGlobalIdInt: s.EjeGlobalIdInt,
+            LineaActuaccion: s.LineaActuaccion,
         };
     });
 };
