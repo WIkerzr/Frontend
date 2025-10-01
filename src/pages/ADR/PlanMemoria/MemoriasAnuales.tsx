@@ -74,16 +74,19 @@ const Index = () => {
             yearData,
             editarPlan,
             editarMemoria,
-            verificando: 'Memoria',
+            tipoPM: 'Memoria',
             t,
             setMensajeError,
             setCamposRellenos,
             setVisibleMessageSuperior,
         });
+        setValidarDatos(false);
     }, [validarDatos]);
 
     useEffect(() => {
-        if (yearData.plan.status != 'borrador') {
+        if (yearData.memoria.status === 'borrador') {
+            setValidarDatos(false);
+        } else {
             if (regionSeleccionada && yearData.year) {
                 LlamadaArbolArchivos({
                     regionSeleccionada,

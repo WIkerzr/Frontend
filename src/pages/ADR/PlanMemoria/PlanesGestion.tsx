@@ -60,7 +60,7 @@ const Index = () => {
             yearData,
             editarPlan,
             editarMemoria: false,
-            verificando: 'Plan',
+            tipoPM: 'Plan',
             t,
             setMensajeError,
             setCamposRellenos,

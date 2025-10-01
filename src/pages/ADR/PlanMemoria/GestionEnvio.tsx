@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { Aviso, Boton } from '../../../components/Utils/utils';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
@@ -11,21 +11,25 @@ import { LlamadaArbolArchivos, LlamadaBBDDEnviarArchivoPlanConAnexos } from '../
 import { Nodo, TransformarArchivosAFile } from '../../../components/Utils/data/YearData/yearDataTransformData';
 
 const Index = () => {
+    const navigate = useNavigate();
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
     const { regionSeleccionada } = useRegionContext();
 
     const { t } = useTranslation();
-    const { yearData } = useYear();
+    const { yearData, setYearData } = useYear();
     const [planFiles, setPlanFiles] = useState<File[]>([]);
     const [planAnexos, setPlanAnexos] = useState<File[]>([]);
 
     const location = useLocation();
     const pantalla = location.state?.pantalla || '';
     const txtPantalla = pantalla === 'Plan' ? 'el plan' : 'la memoria';
+    const tipo = pantalla === 'Memoria' ? 'memoria' : 'plan';
 
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const [loadingGuardado, setLoadingGuardado] = useState<boolean>(false);
+    const [guardado, setGuardado] = useState<boolean>(false);
 
     function renombrarFile(file: File, nuevoNombre: string): File {
         return new File([file], nuevoNombre, { type: file.type });
@@ -33,7 +37,7 @@ const Index = () => {
 
     const planFilesRenombrados: File[] = planFiles.map((file) => {
         const extension = file.name.split('.').pop();
-        return renombrarFile(file, `plan.${extension}`);
+        return renombrarFile(file, `${tipo}.${extension}`);
     });
 
     const handleGuardarFicheros = async () => {
@@ -41,43 +45,31 @@ const Index = () => {
         await LlamadaBBDDEnviarArchivoPlanConAnexos({
             regionSeleccionada,
             anioSeleccionada: yearData.year,
-            setLoading,
+            setLoading: setLoadingGuardado,
             message: {
                 setErrorMessage,
                 setSuccessMessage,
             },
             body: archivos,
-            planOMemoria: 'Plan',
-            // onSuccess: () => {
-            //     if (pantalla === 'Plan') {
-            //         if (yearData.plan.status === 'proceso') {
-            //             return;
-            //         }
-            //         setYearData({
-            //             ...yearData,
-            //             plan: {
-            //                 ...yearData.plan,
-            //                 status: 'proceso',
-            //             },
-            //         });
-            //     } else if (pantalla === 'Memoria') {
-            //         if (yearData.memoria.status === 'proceso') {
-            //             return;
-            //         }
-            //         setYearData({
-            //             ...yearData,
-            //             memoria: {
-            //                 ...yearData.memoria,
-            //                 status: 'proceso',
-            //             },
-            //         });
-            //     }
-            // },
+            planOMemoria: pantalla,
+            onSuccess: () => {
+                if (yearData[tipo].status === 'proceso') {
+                    return;
+                }
+                setYearData({
+                    ...yearData,
+                    [tipo]: {
+                        ...yearData[tipo],
+                        status: 'proceso',
+                    },
+                });
+                setGuardado(true);
+            },
         });
     };
 
     useEffect(() => {
-        if (yearData.plan.status === 'borrador') {
+        if (yearData[tipo].status === 'borrador') {
             if (regionSeleccionada && yearData.year) {
                 LlamadaArbolArchivos({
                     regionSeleccionada,
@@ -86,10 +78,9 @@ const Index = () => {
                     message: { setErrorMessage, setSuccessMessage },
                     tipoPantalla: pantalla,
                     onSuccess: (response) => {
-                        console.log(response.data);
                         const datosRecibidos: Nodo = response.data;
                         const archivos: File[] = TransformarArchivosAFile(datosRecibidos);
-                        if (archivos) {
+                        if (archivos && archivos.length > 0) {
                             setPlanFiles([archivos[0]]);
                             setPlanAnexos(archivos.slice(1));
                         }
@@ -98,6 +89,7 @@ const Index = () => {
             }
         }
     }, []);
+
     return (
         <div className="panel">
             <LoadingOverlay
@@ -109,6 +101,25 @@ const Index = () => {
                     setErrorMessage,
                 }}
                 timeDelay={false}
+            />
+            <LoadingOverlay
+                isLoading={loadingGuardado}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+                onComplete={() => {
+                    if (guardado) {
+                        if (tipo === 'plan') {
+                            navigate('/adr/planesGestion');
+                        } else if (tipo === 'memoria') {
+                            navigate('/adr/memoriasAnuales');
+                        }
+                    }
+                }}
             />
             <ZonaTitulo
                 titulo={
@@ -127,15 +138,6 @@ const Index = () => {
                         <span>{t('asegurateAntesPdfCorrecto')}</span>
                     </>
                 }
-            />
-            <LoadingOverlay
-                isLoading={loading}
-                message={{
-                    successMessage: successMessage,
-                    setSuccessMessage: setSuccessMessage,
-                    errorMessage: errorMessage,
-                    setErrorMessage: setErrorMessage,
-                }}
             />
             {/* {mostrandoModal && (
                 <ModalSave onClose={() => setMostrandoModal(false)} nav={pantalla === 'Plan' ? '/adr/planesGestion' : '/adr/memoriasAnuales'}>
