@@ -491,6 +491,7 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
             </div>
         );
     }
+    if (datos.camposFaltantes === 'verificado') return;
     let faltanCamposPlan = false;
     let faltanCamposMemoria = false;
     let faltanIndicadores = false;
