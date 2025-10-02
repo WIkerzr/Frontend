@@ -11,9 +11,9 @@ const Index = () => {
     const handlePcdrFilesChange = (files: File[]) => {
         setPcdrFiles(files);
     };
-    const handleAnexosFilesChange = (files: File[]) => {
-        setPlanAnexos(files);
-    };
+    // const handleAnexosFilesChange = (files: File[]) => {
+    //     setPlanAnexos(files);
+    // };
     return (
         <div className="panel">
             <ZonaTitulo
@@ -27,7 +27,7 @@ const Index = () => {
                 {pcdrFiles.length === 0 ? (
                     <section className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('adjuntarAnexos', { zona: t('archivoPCDR') })}</h3>
-                        <AdjuntarArchivos files={pcdrFiles} setFiles={setPcdrFiles} onChange={handlePcdrFilesChange} />
+                        <AdjuntarArchivos files={pcdrFiles} setFiles={setPcdrFiles} />
                     </section>
                 ) : (
                     pcdrFiles.map((file, idx) => (
@@ -60,7 +60,12 @@ const Index = () => {
                 )}
                 <section className="panel p-4 shadow-sm">
                     <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('adjuntarAnexos', { zona: t('PCDR') })}</h3>
-                    <AdjuntarArchivos files={planAnexos} setFiles={setPlanAnexos} onChange={handleAnexosFilesChange} multiple={true} />
+                    <AdjuntarArchivos
+                        files={planAnexos}
+                        setFiles={setPlanAnexos}
+                        //onChange={handleAnexosFilesChange}
+                        multiple={true}
+                    />
                 </section>
             </div>
         </div>

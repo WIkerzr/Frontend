@@ -100,23 +100,20 @@ const Index = () => {
                     )}
                     <div className="flex justify-between items-center mb-2">
                         <div>{mensajeError && <span className="text-red-500 hover:text-red-700">{mensajeError}</span>}</div>
-
-                        {regionSeleccionada && (
-                            <div className="flex items-center space-x-2">
-                                <PrintFecha date={fechaUltimoActualizadoBBDD} />
-                                <Tippy content={t('Actualizar')}>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            llamarIndicadoresBBDD();
-                                            setLoading(false);
-                                        }}
-                                    >
-                                        <IconRefresh />
-                                    </button>
-                                </Tippy>
-                            </div>
-                        )}
+                        <div className="flex items-center space-x-2">
+                            <PrintFecha date={fechaUltimoActualizadoBBDD} />
+                            <Tippy content={t('Actualizar')}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        llamarIndicadoresBBDD();
+                                        setLoading(false);
+                                    }}
+                                >
+                                    <IconRefresh />
+                                </button>
+                            </Tippy>
+                        </div>
                     </div>
                     <div className="flex flex-row justify-center mb-5 gap-5">
                         <TablaIndicadores />

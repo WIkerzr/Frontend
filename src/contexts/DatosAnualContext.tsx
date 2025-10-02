@@ -424,15 +424,15 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 const nuevaAccionObj: DatosAccion = {
                     id: response.data.Id,
                     accion: nuevaAccion,
-                    ejeEs: ejeSeleccionado.NameEs,
-                    ejeEu: ejeSeleccionado.NameEu,
+                    ejeEs: ejeSeleccionado!.NameEs,
+                    ejeEu: ejeSeleccionado!.NameEu,
                     lineaActuaccion: nuevaLineaActuaccion,
                     plurianual,
                 };
                 if (tipo === 'Acciones') {
                     const actualizarEjes = (ejes: Ejes[]) =>
                         ejes.map((eje) =>
-                            eje.Id === ejeSeleccionado.Id
+                            eje.Id === ejeSeleccionado!.Id
                                 ? {
                                       ...eje,
                                       acciones: [...(eje.acciones || []), nuevaAccionObj],
@@ -460,7 +460,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                                 : eje
                         );
                     let nuevosEjesRestantes: Ejes[];
-                    if (yearData.plan.ejesRestantes!.find((e) => `${e.NameEs}` === ejeSeleccionado.NameEs)) {
+                    if (yearData.plan.ejesRestantes!.find((e) => `${e.NameEs}` === ejeSeleccionado!.NameEs)) {
                         setYearData({
                             ...yearData,
                             plan: {
@@ -470,11 +470,11 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                         });
                     } else {
                         const nuevoEje: Ejes = {
-                            ...ejeSeleccionado,
+                            ...ejeSeleccionado!,
                             Id: `${response.IdEje}`,
                             IsAccessory: true,
                             acciones: [nuevaAccionObj],
-                            LineasActuaccion: ejeSeleccionado.LineasActuaccion ?? [],
+                            LineasActuaccion: ejeSeleccionado!.LineasActuaccion ?? [],
                         };
 
                         nuevosEjesRestantes = [...(yearData.plan.ejesRestantes || []), nuevoEje];

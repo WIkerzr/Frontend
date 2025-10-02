@@ -12,10 +12,13 @@ import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/da
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
 import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
+import { useUser } from '../../../contexts/UserContext';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan } = useEstadosPorAnio();
     const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
+    const { rol } = useUser();
+
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [camposRellenos, setCamposRellenos] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string>('');
@@ -167,11 +170,18 @@ const Index = () => {
                     </>
                 }
                 zonaExplicativa={
-                    editarPlan && (
+                    editarPlan ? (
                         <>
                             <span>{t('explicacionPlanParte1')}</span>
                             <span>{t('explicacionPlanParte2')}</span>
                         </>
+                    ) : (
+                        rol === 'HAZI' &&
+                        yearData.plan.status === 'borrador' && (
+                            <>
+                                <span>{t('esperaADRPlan')}</span>
+                            </>
+                        )
                     )
                 }
             />
@@ -186,6 +196,7 @@ const Index = () => {
                 }}
                 timeDelay={false}
             />
+            {rol === 'HAZI' && yearData.plan.status === 'borrador' && <></>}
             {editarPlan && <CamposPlanMemoria pantalla="Plan" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />}
             {(yearData.plan.status === 'proceso' || yearData.plan.status === 'aceptado') && (
                 <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">

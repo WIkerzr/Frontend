@@ -13,6 +13,7 @@ import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../com
 import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
 import { useRegionContext } from '../../../contexts/RegionContext';
+import { useUser } from '../../../contexts/UserContext';
 
 const Index = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -24,6 +25,7 @@ const Index = () => {
     const [successMessageSuperior, setSuccessMessageSuperior] = useState<string>('');
     const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
     const { regionSeleccionada } = useRegionContext();
+    const { rol } = useUser();
 
     const [guardado, setGuardado] = useState<boolean>(false);
     const guardadoProps = { value: guardado, set: setGuardado };
@@ -184,11 +186,18 @@ const Index = () => {
                     </>
                 }
                 zonaExplicativa={
-                    editarMemoria && (
+                    editarMemoria ? (
                         <>
                             {camposMemoria.status === 'borrador' && <span className="block mb-2">{t('explicacionMemoriaParte1')}</span>}
                             <span className="block">{t(`explicacionMemoriaParte2${camposMemoria.status}`)}</span>
                         </>
+                    ) : (
+                        rol === 'HAZI' &&
+                        yearData.plan.status === 'borrador' && (
+                            <>
+                                <span>{t('esperaADRMemoria')}</span>
+                            </>
+                        )
                     )
                 }
             />
@@ -203,41 +212,43 @@ const Index = () => {
                 }}
                 timeDelay={false}
             />
-            <>
-                {(camposMemoria.status === 'borrador' || camposMemoria.status === 'cerrado') && (
-                    <CamposPlanMemoria pantalla="Memoria" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />
-                )}
-                {(camposMemoria.status === 'proceso' || camposMemoria.status === 'aceptado') && (
-                    <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
-                        <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
-                        <ul className="space-y-3 ">
-                            {memoriaGuardado &&
-                                memoriaGuardado.map((archivo, idx) => (
-                                    <li
-                                        key={archivo.nombre}
-                                        className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
-                                        onMouseEnter={() => setHoveredIndex(idx)}
-                                        onMouseLeave={() => setHoveredIndex(null)}
-                                    >
-                                        <div className="flex items-center space-x-3">
-                                            <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
-                                            <span className="font-medium">{archivo.nombre}</span>
-                                        </div>
-                                        <a
-                                            download
-                                            className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
-                                            onClick={() => handleClick(archivo.nombre, idx)}
+            {rol === 'HAZI' && camposMemoria.status === 'borrador' ? (
+                <></>
+            ) : (
+                <>
+                    {editarMemoria && <CamposPlanMemoria pantalla="Memoria" guardadoProps={guardadoProps} setSuccessMessageSuperior={setSuccessMessageSuperior} />}
+                    {(camposMemoria.status === 'proceso' || camposMemoria.status === 'aceptado') && (
+                        <div className="panel w-full max-w-lg mx-auto mt-8 bg-white rounded shadow p-6">
+                            <h2 className="text-xl font-bold mb-4">Archivos Memoria 2025</h2>
+                            <ul className="space-y-3 ">
+                                {memoriaGuardado &&
+                                    memoriaGuardado.map((archivo, idx) => (
+                                        <li
+                                            key={archivo.nombre}
+                                            className={`flex items-center justify-between p-3 rounded transition hover:bg-gray-100 ${hoveredIndex === idx ? 'bg-gray-100' : ''}`}
+                                            onMouseEnter={() => setHoveredIndex(idx)}
+                                            onMouseLeave={() => setHoveredIndex(null)}
                                         >
-                                            <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
-                                                {t('descargar')}
-                                            </button>
-                                        </a>
-                                    </li>
-                                ))}
-                        </ul>
-                    </div>
-                )}
-            </>
+                                            <div className="flex items-center space-x-3">
+                                                <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
+                                                <span className="font-medium">{archivo.nombre}</span>
+                                            </div>
+                                            <a
+                                                download
+                                                className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
+                                                onClick={() => handleClick(archivo.nombre, idx)}
+                                            >
+                                                <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
+                                                    {t('descargar')}
+                                                </button>
+                                            </a>
+                                        </li>
+                                    ))}
+                            </ul>
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 };
