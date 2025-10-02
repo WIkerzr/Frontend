@@ -168,7 +168,7 @@ export const servicioIniciadoVacio: Servicios = {
     id: 0,
     nombre: '',
     descripcion: ``,
-    idEje: '',
+    idEje: 1,
     lineaActuaccion: '',
     indicadores: [
         {

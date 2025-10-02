@@ -239,6 +239,16 @@ const Index: React.FC = () => {
         setControlguardado(true);
     };
 
+    const nombreEje = () => {
+        let nombreEje = '';
+        if (datosEditandoServicio.idEje === 'general') {
+            nombreEje = i18n.language === 'eu' ? ejeGeneralServicios.NameEu : ejeGeneralServicios.NameEs;
+        } else {
+            const eje = yearData.plan.ejes.find((e) => e.Id == datosEditandoServicio.idEje);
+            nombreEje = i18n.language === 'eu' ? eje?.NameEu ?? '' : eje?.NameEs ?? '';
+        }
+        return nombreEje;
+    };
     return (
         <div className="panel">
             <ZonaTitulo
@@ -287,19 +297,28 @@ const Index: React.FC = () => {
 
                             <>
                                 <div className="w-1/2 flex flex-col gap-2 justify-center">
-                                    <SelectorEje
-                                        idEjeSeleccionado={`${datosEditandoServicio.idEje}`}
-                                        setIdEjeSeleccionado={(id) => {
-                                            setServicio((prev) => {
-                                                return {
-                                                    ...prev,
-                                                    idEje: id === 'general' ? 'general' : Number(id),
-                                                };
-                                            });
-                                        }}
-                                        ejesPlan={ejesPlan}
-                                        acciones={'Servicios'}
-                                    />
+                                    {editarPlan ? (
+                                        <SelectorEje
+                                            idEjeSeleccionado={`${datosEditandoServicio.idEje}`}
+                                            setIdEjeSeleccionado={(id) => {
+                                                setServicio((prev) => {
+                                                    return {
+                                                        ...prev,
+                                                        idEje: id === 'general' ? 'general' : Number(id),
+                                                    };
+                                                });
+                                            }}
+                                            ejesPlan={ejesPlan}
+                                            acciones={'Servicios'}
+                                        />
+                                    ) : (
+                                        <>
+                                            <span className="block  font-semibold">
+                                                <span className="font-normal text-col">{t('Ejes')}</span>
+                                            </span>
+                                            <span className="w-3/4 ">{nombreEje()}</span>
+                                        </>
+                                    )}
                                     <span className="block  font-semibold">
                                         <span className="block  font-semibold">
                                             <span className="font-normal text-col">{t('LineaActuaccion')}</span>
