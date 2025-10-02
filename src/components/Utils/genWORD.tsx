@@ -4,9 +4,10 @@ import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
 import { DatosAccion } from '../../types/TipadoAccion';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
-import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
+import { HMT, IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado, IndicadorResultadoAccion } from '../../types/Indicadores';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import { PlanOMemoria } from '../../pages/ADR/PlanMemoria/PlanMemoriaComponents';
+import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 
 const formatHMT = (dato: HMT | undefined) => {
     if (dato === undefined) {
@@ -24,7 +25,18 @@ const formatHMT = (dato: HMT | undefined) => {
     return texto;
 };
 
-export const GeneracionDelDocumentoWordPlan = async (datos: YearData, language: string, t: (key: string) => string) => {
+const Ejecutoras = (ejecutora: string | undefined) => {
+    if (!ejecutora) return '';
+    return ejecutora.split('§').join(', ');
+};
+
+export const GeneracionDelDocumentoWordPlan = async (
+    datos: YearData,
+    indicadoresRealizacion: IndicadorRealizacion[],
+    indicadoresResultado: IndicadorResultado[],
+    language: string,
+    t: (key: string) => string
+) => {
     try {
         // 1. Cargar la plantilla desde /public
         const response = await fetch(language === 'es' ? '/plantillaPlanEs.docx' : language === 'eu' ? '/plantillaPlanEu.docx' : '/plantillaPlanEs.docx');
@@ -46,7 +58,7 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, language: 
                     accion: `${contAccion++}: ${accion.accion}`,
                     eje: item.NameEs,
                     lineaActuaccion: accion.lineaActuaccion,
-                    ejecutora: accion.datosPlan?.ejecutora,
+                    ejecutora: Ejecutoras(accion.datosPlan?.ejecutora),
                     implicadas: accion.datosPlan?.implicadas,
                     comarcal: accion.datosPlan?.comarcal,
                     supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : `${t('sinTratamientoTerritorialSupracomarcal')}`,
@@ -61,17 +73,17 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, language: 
                     presupuesto: accion.datosPlan?.presupuesto,
                     indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
                         nombre: iR.descripcion,
-                        unitMed: 'unitMed', //TODO
+                        unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
                         metaAnual: formatHMT(iR.metaAnual),
                         metaFinal: formatHMT(iR.metaFinal),
-                        anualidadMetaFinal: '', //TODO
+                        anualidadMetaFinal: 'anualidadMetaFinal', //TODO
                     })),
                     indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
                         nombre: iR.descripcion,
-                        unitMed: 'unitMed', //TODO
+                        unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
                         metaAnual: formatHMT(iR.metaAnual),
                         metaFinal: formatHMT(iR.metaFinal),
-                        anualidadMetaFinal: '', //TODO
+                        anualidadMetaFinal: 'anualidadMetaFinal', //TODO
                     })),
                     observaciones: accion.datosPlan?.observaciones,
                 }))
@@ -145,10 +157,18 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, language: 
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
                 nombre: `S. ${index + 1}.- ${item.nombre}`,
                 descripcion: item.descripcion,
-                indicadoresRealizacion: item.indicadores.map((iR: IndicadoresServicios) => ({
-                    indicador: iR.indicador,
-                    previsto: iR.previsto.valor,
-                })),
+                indicadoresRealizacion: item.indicadores
+                    .filter((iR: IndicadoresServicios) => iR.tipo === 'realizacion')
+                    .map((iR) => ({
+                        indicador: iR.indicador,
+                        previsto: iR.previsto.valor,
+                    })),
+                indicadoresResultado: item.indicadores
+                    .filter((iR: IndicadoresServicios) => iR.tipo === 'resultado')
+                    .map((iR) => ({
+                        indicador: iR.indicador,
+                        previsto: iR.previsto.valor,
+                    })),
             })),
             //4.1
             proceso: datos.plan.proceso,
@@ -194,7 +214,13 @@ export const GeneracionDelDocumentoWordPlan = async (datos: YearData, language: 
     }
 };
 
-export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, language: string, t: (key: string) => string) => {
+export const GeneracionDelDocumentoWordMemoria = async (
+    datos: YearData,
+    indicadoresRealizacion: IndicadorRealizacion[],
+    indicadoresResultado: IndicadorResultado[],
+    language: string,
+    t: (key: string) => string
+) => {
     try {
         // 1. Cargar la plantilla desde /public
         const response = await fetch(language === 'es' ? '/plantillaMemoriaEs.docx' : language === 'eu' ? '/plantillaMemoriaEu.docx' : '/plantillaMemoriaEs.docx');
@@ -219,7 +245,7 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
                     accion: `${contAccion++}: ${accion.accion}`,
                     eje: item.NameEs,
                     lineaActuaccion: accion.lineaActuaccion,
-                    ejecutora: accion.datosPlan?.ejecutora,
+                    ejecutora: Ejecutoras(accion.datosPlan?.ejecutora),
                     implicadas: accion.datosPlan?.implicadas,
                     comarcal: accion.datosPlan?.comarcal,
                     supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : `${t('sinTratamientoTerritorialSupracomarcal')}`,
@@ -240,17 +266,17 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
                     presupuestoPorcentajeEjecución: accion.datosMemoria?.ejecucionPresupuestaria.porcentaje,
                     indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
                         nombre: iR.descripcion,
-                        unitMed: 'unitMed', //TODO
+                        unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
                         metaAnual: formatHMT(iR.metaAnual),
-                        valoraAlcanzado: formatHMT(iR.ejecutado),
+                        valorAlcanzado: formatHMT(iR.ejecutado),
                         metaFinal: formatHMT(iR.metaFinal),
                         anualidadMetaFinal: '', //TODO
                     })),
                     indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
                         nombre: iR.descripcion,
-                        unitMed: 'unitMed', //TODO
+                        unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
                         metaAnual: formatHMT(iR.metaAnual),
-                        valoraAlcanzado: formatHMT(iR.ejecutado),
+                        valorAlcanzado: formatHMT(iR.ejecutado),
                         metaFinal: formatHMT(iR.metaFinal),
                         anualidadMetaFinal: '', //TODO
                     })),
@@ -262,7 +288,6 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
         };
 
         // Funcion Hipotesis
-        //TODO Verificar Funcion Hipotesis
         const hipotesis = () => {
             const extraerIndicadores = (ejes: Ejes[], tipo: 'indicadoreRealizacion' | 'indicadoreResultado') =>
                 ejes.flatMap((eje) =>
@@ -304,11 +329,20 @@ export const GeneracionDelDocumentoWordMemoria = async (datos: YearData, languag
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
                 nombre: `S. ${index + 1}.- ${item.nombre}`,
                 descripcion: item.descripcion,
-                indicadoresRealizacion: item.indicadores.map((iR: IndicadoresServicios) => ({
-                    indicador: iR.indicador,
-                    previsto: iR.previsto.valor,
-                    alcanzado: iR.alcanzado?.valor ?? '',
-                })),
+                indicadoresRealizacion: item.indicadores
+                    .filter((iR: IndicadoresServicios) => iR.tipo === 'realizacion')
+                    .map((iR) => ({
+                        indicador: iR.indicador,
+                        previsto: iR.previsto.valor,
+                        alcanzado: iR.alcanzado?.valor,
+                    })),
+                indicadoresResultado: item.indicadores
+                    .filter((iR: IndicadoresServicios) => iR.tipo === 'resultado')
+                    .map((iR) => ({
+                        indicador: iR.indicador,
+                        previsto: iR.previsto.valor,
+                        alcanzado: iR.alcanzado?.valor,
+                    })),
                 dSeguimiento: item.dSeguimiento,
                 valFinal: item.valFinal,
             })),
@@ -366,15 +400,17 @@ interface BtnExportarDocumentoWordProps {
 }
 
 export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, yearData, tipo, language, t }) => {
+    const { indicadoresRealizacion, indicadoresResultado } = useIndicadoresContext();
+
     return (
         <button
             disabled={!camposRellenos}
             onClick={() => {
                 if (!camposRellenos) return;
                 if (tipo === 'Plan') {
-                    GeneracionDelDocumentoWordPlan(yearData, language, t);
+                    GeneracionDelDocumentoWordPlan(yearData, indicadoresRealizacion, indicadoresResultado, language, t);
                 } else {
-                    GeneracionDelDocumentoWordMemoria(yearData, language, t);
+                    GeneracionDelDocumentoWordMemoria(yearData, indicadoresRealizacion, indicadoresResultado, language, t);
                 }
             }}
             className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
