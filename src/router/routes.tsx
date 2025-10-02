@@ -131,15 +131,6 @@ const fase4 = [
 ];
 const fase5 = [
     {
-        path: '/configuracion/CuadroMando',
-        element: (
-            <OnlyIfLoggedIn>
-                <CuadroMando />
-            </OnlyIfLoggedIn>
-        ),
-        layout: 'CuadroMando',
-    },
-    {
         path: '/adr/planesGestion',
         element: (
             <OnlyIfLoggedIn>
@@ -178,6 +169,15 @@ const fase5 = [
     },
 ];
 const fase6 = [
+    {
+        path: '/configuracion/CuadroMando',
+        element: (
+            <OnlyIfLoggedIn>
+                <CuadroMando />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'CuadroMando',
+    },
     {
         path: '/configuracion/indicadoresInpacto',
         element: (

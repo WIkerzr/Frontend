@@ -123,8 +123,12 @@ const Sidebar = () => {
                                 )}
                             </>
                         )}
-                        {Fases >= 5 && <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />}
-                        {Fases >= 6 && <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />}
+                        {Fases >= 6 && (
+                            <>
+                                <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
+                                <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
+                            </>
+                        )}
                         {Fases >= 2 && (
                             <li>
                                 <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ADR'}</NavLink>
