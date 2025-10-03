@@ -1,7 +1,8 @@
 import { lazy } from 'react';
 import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
-import { Fases } from '../components/Utils/data/controlDev';
-const CuadroMando = lazy(() => import('../pages/Configuracion/CuadroMando'));
+import { Fases, ModoDev } from '../components/Utils/data/controlDev';
+import CuadroMando from '../pages/Configuracion/CuadroMando/CuadroMando';
+import { ErrorPage } from './ErrorPage';
 const Informes = lazy(() => import('../pages/Configuracion/Informes'));
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones/Acciones'));
@@ -31,6 +32,7 @@ const fase1 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Profile',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/configuracion/usuarios',
@@ -40,6 +42,7 @@ const fase1 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Usuarios',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 const fase2 = [
@@ -51,6 +54,7 @@ const fase2 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'indicadores',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/Ejes',
@@ -60,6 +64,7 @@ const fase2 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Ejes',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/configuracion/indicadoresADR',
@@ -69,6 +74,7 @@ const fase2 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'IndicadoresADR',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 const fase3 = [
@@ -80,6 +86,7 @@ const fase3 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Acciones',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/acciones/editando',
@@ -89,6 +96,7 @@ const fase3 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarAccion',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 const fase4 = [
@@ -100,6 +108,7 @@ const fase4 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'AccionesAccesorias',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/accionesYproyectos/editando',
@@ -109,6 +118,7 @@ const fase4 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarAccion',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/servicios',
@@ -118,6 +128,7 @@ const fase4 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Servicios',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/servicios/editando',
@@ -127,6 +138,7 @@ const fase4 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarServicios',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 const fase5 = [
@@ -138,6 +150,7 @@ const fase5 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'PlanesGestion',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/planesGestion/gestionEnvio',
@@ -147,6 +160,7 @@ const fase5 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'planesGestion/GestionEnvio',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/adr/memoriasAnuales',
@@ -156,6 +170,7 @@ const fase5 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'MemoriasAnuales',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 
     {
@@ -166,6 +181,7 @@ const fase5 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'memoriasAnuales/GestionEnvio',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 const fase6 = [
@@ -177,6 +193,7 @@ const fase6 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'CuadroMando',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/configuracion/indicadoresInpacto',
@@ -186,6 +203,7 @@ const fase6 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'IndicadoresInpacto',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 
     {
@@ -196,6 +214,7 @@ const fase6 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'PCDR',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/configuracion/informes',
@@ -205,6 +224,7 @@ const fase6 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Informes',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 
@@ -217,6 +237,7 @@ const inicial = [
             //</OnlyIfNotLoggedIn>
         ),
         layout: 'blank',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/Authenticacion/Login',
@@ -226,11 +247,13 @@ const inicial = [
             //</OnlyIfNotLoggedIn>
         ),
         layout: 'blank',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
         path: '/Authenticacion/Login/Recuperar/*',
         element: <Login />,
         layout: 'blank',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
 const todasLasFases = [fase1, fase2, fase3, fase4, fase5, fase6];

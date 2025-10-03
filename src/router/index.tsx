@@ -38,6 +38,7 @@ const finalRoutes = routes.map((route) => {
     return {
         ...route,
         element: isProtected ? <ProtectedRoute>{elementWithLayout}</ProtectedRoute> : elementWithLayout,
+        errorElement: route.errorElement,
     };
 });
 const router = createBrowserRouter(finalRoutes);
