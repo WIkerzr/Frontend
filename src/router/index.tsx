@@ -1,8 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom';
 import BlankLayout from '../components/Layouts/BlankLayout';
-import DefaultLayout from '../components/Layouts/DefaultLayout';
 import { routes } from './routes';
 import { ProtectedRoute } from '../components/ProtectedRoute'; // Asegúrate de tener este componente
+import React, { Suspense } from 'react';
+const DefaultLayout = React.lazy(() => import('../components/Layouts/DefaultLayout'));
+
 // import { worker } from '../mocks/browser';
 
 // if (process.env.NODE_ENV === 'development') {
@@ -32,7 +34,14 @@ const protectedPaths = [
     '/profile',
 ];
 const finalRoutes = routes.map((route) => {
-    const elementWithLayout = route.layout === 'blank' ? <BlankLayout>{route.element}</BlankLayout> : <DefaultLayout>{route.element}</DefaultLayout>;
+    const elementWithLayout =
+        route.layout === 'blank' ? (
+            <BlankLayout>{route.element}</BlankLayout>
+        ) : (
+            <Suspense>
+                <DefaultLayout>{route.element}</DefaultLayout>
+            </Suspense>
+        );
     const isProtected = protectedPaths.includes(route.path);
 
     return {
