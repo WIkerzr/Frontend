@@ -67,8 +67,10 @@ const Index: React.FC = () => {
                             ...ejeEscogido,
                             LineasActuaccion: lineaActuaccion,
                         };
-                        setEjeSeleccionado(ejeEscogido);
-                        setEjesPlan([ejeEscogido]);
+                        if (ejeSeleccionado?.EjeId !== ejeEscogido.EjeId) {
+                            setEjeSeleccionado({ ...ejeEscogido });
+                            setEjesPlan([ejeEscogido]);
+                        }
                         return;
                     }
                 }
@@ -147,12 +149,12 @@ const Index: React.FC = () => {
         }
     }, [controlguardado]);
 
-    if (datosEditandoAccion.id === '0') {
-        return;
-    }
-
     if (!datosEditandoAccion) {
         return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
+    }
+
+    if (datosEditandoAccion.id === '0') {
+        return;
     }
 
     const handleFinalize = () => {
