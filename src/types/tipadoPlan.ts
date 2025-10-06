@@ -1,4 +1,6 @@
-import { Estado, Servicios, ServiciosDTO, ServiciosDTOConvertIndicadores } from './GeneralTypes';
+import { RegionInterface } from '../components/Utils/data/getRegiones';
+import { Estado, IndicadoresServicios, Servicios, ServiciosDTO, ServiciosDTOConvertIndicadores } from './GeneralTypes';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from './Indicadores';
 import { DatosAccion, DatosAccionDTO } from './TipadoAccion';
 
 export type Year = number;
@@ -208,3 +210,36 @@ export const yearIniciadoVacio: YearData = {
     accionesAccesorias: [],
     servicios: [],
 };
+
+export interface DatosAccionCuadroMando {
+    id: number;
+    nombreAccion: string;
+    ejeId: number;
+    lineaActuaccion: string;
+    indicadorAccion?: {
+        indicadoreRealizacion: IndicadorRealizacionAccion[];
+        indicadoreResultado: IndicadorResultadoAccion[];
+    };
+    plurianual: boolean;
+    AccionCompartida: boolean;
+    regionLiderId?: number;
+    regionesCompartidas?: RegionInterface[];
+}
+export interface ServiciosCuadroMando {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    indicadores: IndicadoresServicios[];
+    idEje: string | number;
+    lineaActuaccion: string;
+}
+
+export interface DatosAnioCuadroMando {
+    year: Year;
+    nombreRegion: string;
+    accion: DatosAccionCuadroMando[];
+    accionesAccesorias: DatosAccionCuadroMando[];
+    servicios: ServiciosCuadroMando[];
+    planStatus: Estado;
+    memoriaStatus: Estado;
+}

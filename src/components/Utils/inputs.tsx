@@ -514,3 +514,21 @@ export const SelectorEje = ({ idEjeSeleccionado, setIdEjeSeleccionado, ejesPlan,
         </div>
     );
 };
+
+interface BuscadorProps {
+    setSearch: React.Dispatch<React.SetStateAction<string>>;
+    divClassName?: string | 'h-1/2 mt-auto';
+}
+export const InputBuscador = ({ setSearch, divClassName = 'h-1/2 mt-auto' }: BuscadorProps) => {
+    const { t } = useTranslation();
+    const [buscar, setBuscar] = useState('');
+
+    return (
+        <div className={`flex ${divClassName}`}>
+            <input type="text" className="border border-gray-300 rounded p-2 " placeholder={t('Buscar') + ' ...'} value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+            <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => setSearch(buscar)}>
+                {t('buscar')}
+            </button>
+        </div>
+    );
+};

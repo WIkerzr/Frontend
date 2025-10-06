@@ -250,6 +250,7 @@ export function editableColumnByPathInput<T extends { id: number }, V = unknown>
 }
 
 export function visualColumnByPath<T extends object>(accessor: string, title: string) {
+    const esColumnaNombre = accessor === 'descripcion' || accessor === 'indicador';
     return {
         accessor,
         title,
@@ -282,15 +283,26 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
             }
 
             if (accessor.startsWith('porcentaje')) {
-                const metaHombres = Number(get(row, 'metaAnual.hombres')) || 0;
-                const metaMujeres = Number(get(row, 'metaAnual.mujeres')) || 0;
-                const metaTotal = Number(get(row, 'metaAnual.total')) || 0;
-                const ejecutadoHombres = Number(get(row, 'ejecutado.hombres')) || 0;
-                const ejecutadoMujeres = Number(get(row, 'ejecutado.mujeres')) || 0;
-                const ejecutadoTotal = Number(get(row, 'ejecutado.total')) || 0;
+                const esperado = { H: 0, M: 0, T: 0 };
+                const conseguido = { H: 0, M: 0, T: 0 };
+                if (accessor.startsWith('porcentajeS')) {
+                    esperado.H = Number(get(row, 'previsto.hombres')) || 0;
+                    esperado.M = Number(get(row, 'previsto.mujeres')) || 0;
+                    esperado.T = Number(get(row, 'previsto.valor')) || 0;
+                    conseguido.H = Number(get(row, 'alcanzado.hombres')) || 0;
+                    conseguido.M = Number(get(row, 'alcanzado.mujeres')) || 0;
+                    conseguido.T = Number(get(row, 'alcanzado.valor')) || 0;
+                } else {
+                    esperado.H = Number(get(row, 'metaAnual.hombres')) || 0;
+                    esperado.M = Number(get(row, 'metaAnual.mujeres')) || 0;
+                    esperado.T = Number(get(row, 'metaAnual.total')) || 0;
+                    conseguido.H = Number(get(row, 'ejecutado.hombres')) || 0;
+                    conseguido.M = Number(get(row, 'ejecutado.mujeres')) || 0;
+                    conseguido.T = Number(get(row, 'ejecutado.total')) || 0;
+                }
 
-                const porcentajeHombre = ejecutadoHombres > 0 ? (ejecutadoHombres / metaHombres) * 100 : 0;
-                const porcentajeMujeres = ejecutadoMujeres > 0 ? (ejecutadoMujeres / metaMujeres) * 100 : 0;
+                const porcentajeHombre = esperado.H > 0 ? (conseguido.H > 0 ? (conseguido.H / esperado.H) * 100 : 0) : 0;
+                const porcentajeMujeres = esperado.M > 0 ? (conseguido.M > 0 ? (conseguido.M / esperado.M) * 100 : 0) : 0;
 
                 let width = 0;
                 switch (title) {
@@ -307,7 +319,7 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
                         if (porcentajeHombre != 0 || porcentajeMujeres != 0) {
                             porcentajeTotal = (porcentajeHombre + porcentajeMujeres) / 2;
                         } else {
-                            porcentajeTotal = ejecutadoTotal > 0 ? (ejecutadoTotal / metaTotal) * 100 : 0;
+                            porcentajeTotal = esperado.T > 0 ? (conseguido.T > 0 ? (conseguido.T / esperado.T) * 100 : 0) : 0;
                         }
                         width = porcentajeTotal;
                         break;
@@ -329,17 +341,24 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
                         <span className="block text-center">-</span>
                     </div>
                 ) : (
-                    <div className="flex items-center justify-between">
-                        <div className="w-5/6 rounded-full h-5 p-1 bg-dark-light overflow-hidden shadow-3xl dark:shadow-none dark:bg-dark-light/10">
-                            <div
-                                className="bg-gradient-to-r w-full h-full rounded-full relative before:absolute before:inset-y-0 ltr:before:right-0.5 rtl:before:left-0.5 before:bg-white before:w-2 before:h-2 before:rounded-full before:m-auto"
-                                style={{
-                                    width: width,
-                                    background: `linear-gradient(to right, ${colorFrom}, ${colorTo})`,
-                                }}
-                            ></div>
+                    <div className="flex flex-col items-start">
+                        <div className="w-full relative">
+                            <div className="w-full rounded-full h-5 bg-dark-light overflow-hidden shadow-3xl dark:shadow-none dark:bg-dark-light/10">
+                                <div
+                                    className="bg-gradient-to-r h-full rounded-full"
+                                    style={{
+                                        width: `${width}%`,
+                                        background: `linear-gradient(to right, ${colorFrom}, ${colorTo})`,
+                                    }}
+                                ></div>
+                            </div>
+                            <span
+                                className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs dark:text-white-light"
+                                style={{ width: '100%', textAlign: 'center', pointerEvents: 'none' }}
+                            >
+                                {Number(width).toFixed(2)}%
+                            </span>
                         </div>
-                        <span className="w-1/6 ltr:ml-5 rtl:mr-5 dark:text-white-light text-xs text-right">{width}%</span>
                     </div>
                 );
             }
@@ -347,11 +366,11 @@ export function visualColumnByPath<T extends object>(accessor: string, title: st
             const value = get(row, accessor);
             const visual = value === 0 || value === '0' || value === '' || value === null || typeof value === 'undefined' ? '-' : value;
             return (
-                <div style={accessor === 'descripcion' || accessor === 'hipotesis' ? {} : { display: 'flex', justifyContent: 'left' }}>
+                <div style={esColumnaNombre || accessor === 'hipotesis' ? {} : { display: 'flex', justifyContent: 'left' }}>
                     <span
-                        className={accessor === 'descripcion' || accessor === 'hipotesis' ? 'text-left' : 'text-center'}
+                        className={esColumnaNombre || accessor === 'hipotesis' ? 'text-left' : 'text-center'}
                         style={{
-                            maxWidth: accessor !== 'descripcion' && accessor !== 'hipotesis' ? 60 : 300,
+                            maxWidth: !esColumnaNombre && accessor !== 'hipotesis' ? 60 : 300,
                             display: 'inline-block',
                             margin: '0 auto',
                             overflow: 'hidden',

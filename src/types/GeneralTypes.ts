@@ -58,6 +58,7 @@ export interface HMTServicios {
     valor: string;
 }
 export interface IndicadoresServicios {
+    [key: string]: unknown;
     indicador: string;
     previsto: HMTServicios;
     tipo: TiposDeIndicadores;

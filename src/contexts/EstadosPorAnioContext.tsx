@@ -269,7 +269,7 @@ export const useEstadosPorAnio = () => {
     const { yearData } = useYear();
     const { user } = useUser();
 
-    const rolUsuario = (user!.role as string).toUpperCase() as UserRole;
+    const rolUsuario = user ? ((user.role as string).toUpperCase() as UserRole) : ('' as UserRole);
     const esADR = ModoDevEdicionTotal ? true : rolUsuario === 'ADR';
 
     const [editarPlan, setEditarPlan] = useState<boolean>(esADR && yearData.plan.status === 'borrador');
