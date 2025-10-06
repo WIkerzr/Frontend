@@ -9,24 +9,37 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
+import { sortBy } from 'lodash';
 
 export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
-    const { ListadoNombresIdicadoresSegunADR, indicadoresRealizacion, PrimeraLlamada } = useIndicadoresContext();
+    const { ListadoNombresIdicadoresSegunADR, indicadoresRealizacion, indicadoresResultado, PrimeraLlamada } = useIndicadoresContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const [carga, setCarga] = useState<boolean>(false);
 
-    const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? []);
-    const [indicadoresResultadoTabla, setIndicadoresResultadoTabla] = useState<IndicadorResultadoAccion[]>(datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? []);
+    const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(sortBy(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion, 'id') ?? []);
+    const [indicadoresResultadoTabla, setIndicadoresResultadoTabla] = useState<IndicadorResultadoAccion[]>(sortBy(datosEditandoAccion.indicadorAccion?.indicadoreResultado, 'id') ?? []);
 
     const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
     const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
 
+    const [reglasEspeciales, setReglasEspeciales] = useState<{ realizacion: number[]; resultado: number[] }>({ realizacion: [], resultado: [] });
+
     useEffect(() => {
         if (indicadoresRealizacion.length === 0) {
             PrimeraLlamada(null);
+        } else {
+            const reglasReali = indicadoresRealizacion.filter((e) => e.DisaggregationVariables === 'Sexo');
+            const reglasResu = indicadoresResultado.filter((e) => e.DisaggregationVariables === 'Sexo');
+
+            const nuevosReglasEspeciales = {
+                realizacion: reglasReali.map((r) => r.Id),
+                resultado: reglasResu.map((r) => r.Id),
+            };
+
+            setReglasEspeciales(nuevosReglasEspeciales);
         }
     }, [indicadoresRealizacion]);
 
@@ -40,13 +53,14 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
         if (!rescargarIndicadorRealizacion) {
             return;
         }
-        setIndicadoresRealizacionTabla(rescargarIndicadorRealizacion);
-
+        if (JSON.stringify(sortBy(rescargarIndicadorRealizacion, 'id')) !== JSON.stringify(indicadoresRealizacionTabla)) {
+            setIndicadoresRealizacionTabla(sortBy(rescargarIndicadorRealizacion, 'id'));
+        }
         const rescargarIndicadorResultado = datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
         if (!rescargarIndicadorResultado) {
             return;
         }
-        setIndicadoresResultadoTabla(rescargarIndicadorResultado);
+        setIndicadoresResultadoTabla(sortBy(rescargarIndicadorResultado, 'id'));
     }, [datosEditandoAccion]);
 
     useEffect(() => {
@@ -90,9 +104,10 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
                     indicadoreResultado: indicadorResult,
                 },
             });
-            setIndicadoresRealizacionTabla(indicadorActualizado);
+            setIndicadoresRealizacionTabla(sortBy(indicadorActualizado, 'id'));
         }
     }, [indicadoresRealizacionTabla, listadoNombresIndicadoresRealizacion]);
+
     useEffect(() => {
         if (listadoNombresIndicadoresResultado.length === 0) return;
         const indicadorActualizado = indicadoresResultadoTabla.map((ind) => {
@@ -106,18 +121,23 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
         const haCambiado = indicadorActualizado.some((newInd, i) => newInd.descripcion !== indicadoresResultadoTabla[i].descripcion);
 
         if (haCambiado) {
-            setIndicadoresResultadoTabla(indicadorActualizado);
+            setIndicadoresResultadoTabla(sortBy(indicadorActualizado, 'id'));
         }
     }, [indicadoresResultadoTabla, listadoNombresIndicadoresResultado]);
 
     useEffect(() => {
-        setDatosEditandoAccion((prev) => ({
-            ...prev,
-            indicadorAccion: {
-                indicadoreRealizacion: indicadoresRealizacionTabla,
-                indicadoreResultado: indicadoresResultadoTabla,
-            },
-        }));
+        if (
+            JSON.stringify(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion) !== JSON.stringify(indicadoresRealizacionTabla) &&
+            JSON.stringify(datosEditandoAccion.indicadorAccion?.indicadoreResultado) !== JSON.stringify(indicadoresResultadoTabla)
+        ) {
+            setDatosEditandoAccion((prev) => ({
+                ...prev,
+                indicadorAccion: {
+                    indicadoreRealizacion: indicadoresRealizacionTabla,
+                    indicadoreResultado: indicadoresResultadoTabla,
+                },
+            }));
+        }
     }, [indicadoresRealizacionTabla, indicadoresResultadoTabla]);
 
     if (!carga) {
@@ -192,7 +212,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
 
             if (window.confirm(textoEliminar)) {
                 const nuevosIndicadoresRealizacion = indicadoresRealizacionTabla.filter((_row, idx) => idx !== rowIndex);
-                setIndicadoresRealizacionTabla(nuevosIndicadoresRealizacion);
+                setIndicadoresRealizacionTabla(sortBy(nuevosIndicadoresRealizacion, 'id'));
 
                 const nuevosIndicadoresResultado =
                     resultadosAEliminar && resultadosAEliminar.length > 0 ? indicadoresResultadoTabla.filter((r) => !resultadosAEliminar.includes(r.id)) : indicadoresResultadoTabla;
@@ -210,7 +230,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
         if (tipoIndicador === 'resultado') {
             if (window.confirm(t('confirmarEliminarIndicador'))) {
                 const nuevosIndicadores = indicadoresResultadoTabla.filter((_row, idx) => idx !== rowIndex);
-                setIndicadoresResultadoTabla(nuevosIndicadores);
+                setIndicadoresResultadoTabla(sortBy(nuevosIndicadores, 'id'));
                 setDatosEditandoAccion({
                     ...datosEditandoAccion!,
                     indicadorAccion: {
@@ -236,6 +256,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
             setIndicadoresResultado={setIndicadoresResultadoTabla}
             handleEliminarIndicador={handleEliminarIndicador}
             plurianual={datosEditandoAccion.plurianual}
+            reglasEspeciales={reglasEspeciales}
             botonNuevoIndicadorAccion={
                 <BtnNuevoIndicadorAccion
                     indicadoresRealizacionTabla={indicadoresRealizacionTabla}
@@ -300,7 +321,7 @@ interface ModalNuevoIndicadorAccionProps {
 }
 
 export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(function ModalNuevoIndicadorAccion(props, ref) {
-    const { indicadoresRealizacionTabla, indicadoresResultadoTabla, open, onClose, onSave } = props;
+    const { open, onClose, onSave } = props;
 
     const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
     const [resultadosRelacionados, setResultadosRelacionados] = useState<Indicador[]>([]);
@@ -310,8 +331,6 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
 
     const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
     const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
-    const listadoNombresIndicadoresRealizacionFiltrado = listadoNombresIndicadoresRealizacion.filter((item) => indicadoresRealizacionTabla.some((tabla) => tabla.id === item.id));
-    const listadoNombresIndicadoresResultadoFiltrado = listadoNombresIndicadoresResultado.filter((item) => indicadoresResultadoTabla.some((tabla) => tabla.id === item.id));
 
     const handleToggleResultado = (id: number) => {
         setResultadosRelacionados((prevResultados) => prevResultados.map((resultado) => (resultado.id === id ? { ...resultado, checked: !resultado.checked } : resultado)));
@@ -332,24 +351,6 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
     };
 
     const handleSave = () => {
-        if (listadoNombresIndicadoresRealizacionFiltrado.some((f) => f.id === indicadorRealizacionId)) {
-            console.log('Realizacion ya está en el listado');
-            //TODO Que se prefiere que desaparezca las opciones, que lo sobrescriba avisando antes o aviso y ya?
-            return;
-        } else {
-            console.log('Realizacion Nuevo');
-        }
-
-        resultadosRelacionados.forEach((resultado) => {
-            if (listadoNombresIndicadoresResultadoFiltrado.some((f) => f.id === resultado.id)) {
-                console.log('Resultado ya está en el listado');
-                //TODO Que se prefiere que desaparezca las opciones, que lo sobrescriba avisando antes o aviso y ya?
-                return;
-            } else {
-                console.log('Resultado Nuevo');
-            }
-        });
-
         if (onSave && indicadorRealizacionId !== null) {
             onSave({
                 idRealizacion: indicadorRealizacionId,

@@ -4,8 +4,8 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../../types/TipadoAccion';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { sortBy } from 'lodash';
-import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
+import { isEqual, sortBy } from 'lodash';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { editableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
 import { TiposAccion, useYear } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
@@ -287,35 +287,6 @@ export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPla
     return camposPendientes;
 }
 
-function actualizarMetaFinal<T extends { metaAnual?: HMT; metaFinal?: HMT }>(items: T[]): T[] {
-    let hasChanges = false;
-
-    const updated = items.map((item) => {
-        if (!item.metaAnual) return item;
-
-        const metaFinalChanged =
-            !item.metaFinal ||
-            item.metaFinal.hombres !== (item.metaAnual.hombres ?? 0) ||
-            item.metaFinal.mujeres !== (item.metaAnual.mujeres ?? 0) ||
-            item.metaFinal.total !== (item.metaAnual.total ?? 0);
-
-        if (metaFinalChanged) {
-            hasChanges = true;
-            return {
-                ...item,
-                metaFinal: {
-                    hombres: item.metaAnual.hombres ?? 0,
-                    mujeres: item.metaAnual.mujeres ?? 0,
-                    total: item.metaAnual.total ?? 0,
-                },
-            };
-        }
-
-        return item;
-    });
-
-    return hasChanges ? updated : items;
-}
 interface TablasIndicadoresProps {
     tipoIndicador: TiposDeIndicadores;
 }
@@ -325,17 +296,20 @@ interface TablaIndicadorAccionProps {
     indicadoresResultado: IndicadorRealizacionAccion[];
     setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
     plurianual: boolean;
+    reglasEspeciales: { realizacion: number[]; resultado: number[] };
     botonNuevoIndicadorAccion: React.ReactNode;
     handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
 }
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
-    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, plurianual, botonNuevoIndicadorAccion, handleEliminarIndicador }, ref) => {
+    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, plurianual, reglasEspeciales, botonNuevoIndicadorAccion, handleEliminarIndicador }, ref) => {
         const { t } = useTranslation();
-
         const { block } = useYear();
-
         const { editarPlan, editarMemoria } = useEstadosPorAnio();
+
+        const [dataRealizacion, setDataRealizacion] = useState(indicadoresRealizacion);
+        const [dataResultado, setDataResultado] = useState(indicadoresResultado);
+
         const [bloqueo, setBloqueo] = useState<boolean>(block);
         const [searchRealizacion, setSearchRealizacion] = useState('');
         const [searchResultado, setSearchResultado] = useState('');
@@ -343,14 +317,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
         const [sortStatusResultado, setSortStatusResultado] = useState<DataTableSortStatus<IndicadorResultadoAccion>>({ columnAccessor: 'id', direction: 'asc' });
         const [editableRowIndexRealizacion, setEditableRowIndexRealizacion] = useState(-1);
         const [editableRowIndexResultado, setEditableRowIndexResultado] = useState(-1);
-        const [dataRealizacion, setDataRealizacion] = useState(sortBy(indicadoresRealizacion, 'id'));
-        const [dataResultado, setDataResultado] = useState(sortBy(indicadoresResultado, 'id'));
-
-        const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(indicadoresRealizacion);
-        const [indicadoresResultadoTabla, setIndicadoresResultadoTabla] = useState<IndicadorResultadoAccion[]>(indicadoresResultado);
-
-        const [prevEditableRowIndexRealizacion, setPrevEditableRowIndexRealizacion] = useState<boolean>(false);
-        const [prevEditableRowIndexResultado, setPrevEditableRowIndexResultado] = useState<boolean>(false);
 
         useEffect(() => {
             if (!editarPlan && !editarMemoria) {
@@ -382,101 +348,70 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
         };
 
         useEffect(() => {
-            //No plurianual entonces el contenido de metaFinal es la de MetaAnual
-            if (!plurianual) {
-                setIndicadoresRealizacionTabla((prev) => actualizarMetaFinal(prev));
+            const indicadorFiltrado = filtrarIndicadores(indicadoresRealizacion, searchRealizacion);
+            if (JSON.stringify(indicadorFiltrado) !== JSON.stringify(dataRealizacion)) {
+                setDataRealizacion(indicadorFiltrado);
             }
-        }, [plurianual, indicadoresRealizacionTabla]);
-
-        useEffect(() => {
-            //No plurianual entonces el contenido de metaFinal es la de MetaAnual
-            if (!plurianual) {
-                setIndicadoresResultadoTabla((prev) => actualizarMetaFinal(prev));
-            }
-        }, [plurianual, indicadoresResultadoTabla]);
-
-        useEffect(() => {
-            setDataRealizacion(filtrarIndicadores(indicadoresRealizacion, searchRealizacion));
         }, [searchRealizacion, indicadoresRealizacion]);
 
         useEffect(() => {
-            setDataResultado(filtrarIndicadores(indicadoresResultado, searchResultado));
+            const indicadorFiltrado = filtrarIndicadores(indicadoresResultado, searchResultado);
+            if (JSON.stringify(indicadorFiltrado) !== JSON.stringify(dataResultado)) {
+                setDataResultado(indicadorFiltrado);
+            }
         }, [searchResultado, indicadoresResultado]);
 
+        const prevSortStatusRefRealizacion = useRef<DataTableSortStatus<IndicadorRealizacionAccion> | undefined>(undefined);
         useEffect(() => {
-            const data = sortBy(dataRealizacion, sortStatusRealizacion.columnAccessor);
-            setDataRealizacion(sortStatusRealizacion.direction === 'desc' ? data.reverse() : data);
-        }, [sortStatusRealizacion]);
+            if (!isEqual(prevSortStatusRefRealizacion.current, sortStatusRealizacion)) {
+                const data = sortBy(dataRealizacion, sortStatusRealizacion.columnAccessor);
+                const sortedData = sortStatusRealizacion.direction === 'desc' ? data.reverse() : data;
+                setDataRealizacion(sortedData);
 
+                prevSortStatusRefRealizacion.current = sortStatusRealizacion;
+            }
+        }, [sortStatusRealizacion, dataRealizacion]);
+
+        const prevSortStatusRefResultado = useRef<DataTableSortStatus<IndicadorResultadoAccion> | undefined>(undefined);
         useEffect(() => {
-            const data = sortBy(dataResultado, sortStatusResultado.columnAccessor);
-            setDataResultado(sortStatusResultado.direction === 'desc' ? data.reverse() : data);
-        }, [sortStatusRealizacion]);
+            if (!isEqual(prevSortStatusRefResultado.current, sortStatusResultado)) {
+                const data = sortBy(dataResultado, sortStatusResultado.columnAccessor);
+                const sortedData = sortStatusResultado.direction === 'desc' ? data.reverse() : data;
+                setDataResultado(sortedData);
+
+                prevSortStatusRefResultado.current = sortStatusResultado;
+            }
+        }, [sortStatusResultado, dataResultado]);
 
         const TablasIndicadores = forwardRef<HTMLDivElement, TablasIndicadoresProps>(({ tipoIndicador }, ref) => {
-            let records = [];
-            if (tipoIndicador === 'realizacion') {
-                if (editableRowIndexRealizacion === 0) {
-                    records = indicadoresRealizacionTabla;
-                } else {
-                    records = dataRealizacion;
-                }
-            } else {
-                if (editableRowIndexResultado === 0) {
-                    records = indicadoresResultadoTabla;
-                } else {
-                    records = dataResultado;
-                }
-            }
-            const setIndicadorTabla = tipoIndicador === 'realizacion' ? setIndicadoresRealizacionTabla : setIndicadoresResultadoTabla;
+            const records = tipoIndicador === 'realizacion' ? dataRealizacion : dataResultado;
+            const setIndicador = tipoIndicador === 'realizacion' ? setIndicadoresRealizacion : setIndicadoresResultado;
             const editableRowIndex = tipoIndicador === 'realizacion' ? editableRowIndexRealizacion : editableRowIndexResultado;
             const setEditableRowIndex = tipoIndicador === 'realizacion' ? setEditableRowIndexRealizacion : setEditableRowIndexResultado;
             const sortStatus = tipoIndicador === 'realizacion' ? sortStatusRealizacion : sortStatusResultado;
             const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
-            let guardado: boolean = false;
-            useEffect(() => {
-                if (editableRowIndexRealizacion === 0) {
-                    setPrevEditableRowIndexRealizacion(true);
-                }
-                if (!guardado && prevEditableRowIndexRealizacion && editableRowIndexRealizacion === -1) {
-                    setIndicadoresRealizacion(indicadoresRealizacionTabla);
-                    setPrevEditableRowIndexRealizacion(false);
-                    guardado = true;
-                }
-            }, [editableRowIndexRealizacion]);
-
-            useEffect(() => {
-                if (editableRowIndexResultado === 0) {
-                    setPrevEditableRowIndexResultado(true);
-                }
-                if (!guardado && prevEditableRowIndexResultado && editableRowIndexResultado === -1) {
-                    setIndicadoresResultado(indicadoresResultadoTabla);
-                    setPrevEditableRowIndexResultado(false);
-                    guardado = true;
-                }
-            }, [editableRowIndexResultado]);
 
             const columnMetaAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, editarPlan),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicadorTabla, editableRowIndex, editarPlan),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, editarPlan, reglasEspeciales, plurianual),
             ];
 
             const columnEjecutadoAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, editarMemoria),
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, editarMemoria),
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicadorTabla, editableRowIndex, editarMemoria),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicador, editableRowIndex, editarMemoria, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarMemoria, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicador, editableRowIndex, editarMemoria, reglasEspeciales),
             ];
 
             const columnMetaFinal = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicadorTabla, editableRowIndex, plurianual ? editarPlan : false),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicadorTabla, editableRowIndex, plurianual ? editarPlan : false),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicadorTabla, editableRowIndex, plurianual ? editarPlan : false),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, plurianual ? editarPlan : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, plurianual ? editarPlan : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, plurianual ? editarPlan : false, reglasEspeciales),
             ];
-            const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicadorTabla, editableRowIndex, false)];
+            const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
 
             const columns = [
-                editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicadorTabla, editableRowIndex, true),
+                editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
                 ...(!bloqueo
                     ? [
                           {
@@ -554,7 +489,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                 </div>
             );
         });
-
         return (
             <div ref={ref}>
                 <div className="panel mt-6">

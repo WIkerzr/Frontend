@@ -46,6 +46,17 @@ export const SelectorEstado: React.FC = () => {
                     ))}
                 </select>
             </div>
+            <div>
+                <button
+                    className="bg-green-500 text-white px-2 py-1 rounded"
+                    onClick={() => {
+                        sessionStorage.removeItem('DataYear');
+                        window.location.reload();
+                    }}
+                >
+                    Resetear Datos años
+                </button>
+            </div>
         </div>
     );
 };

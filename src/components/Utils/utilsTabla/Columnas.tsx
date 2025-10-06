@@ -4,13 +4,25 @@ import { DataTableColumnTextAlign } from 'mantine-datatable';
 import IconArrowLeft from '../../Icon/IconArrowLeft';
 import IconEqual from '../../Icon/IconEqual';
 import { useState } from 'react';
+import { IndicadorRealizacionAccion } from '../../../types/Indicadores';
+import { useTranslation } from 'react-i18next';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
     'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },
     'ejecutado.total': { root: 'ejecutado', hombres: 'ejecutado.hombres', mujeres: 'ejecutado.mujeres', total: 'ejecutado.total' },
 };
 
-export function editableColumnByPath<T extends object>(accessor: string, title: string, setIndicadores: React.Dispatch<React.SetStateAction<T[]>>, editableRowIndex: number | null, editable = true) {
+export function editableColumnByPath<T extends object>(
+    accessor: string,
+    title: string,
+    setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
+    editableRowIndex: number | null,
+    editable = true,
+    reglasEspeciales?: { realizacion: number[]; resultado: number[] },
+    plurianual?: boolean
+) {
+    const { t } = useTranslation();
+
     const commonStyleNumber: React.CSSProperties = {
         maxWidth: 60,
         width: '100%',
@@ -40,11 +52,24 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
         alignItems: 'start',
     };
     const [tempValue, setTempValue] = useState<string>('');
+
     return {
         accessor,
         title,
         sortable: true,
-        render: (row: T, index: number) => {
+        render: (row: T & IndicadorRealizacionAccion, index: number) => {
+            let esDesagregacionSexo = false;
+            if (reglasEspeciales) {
+                if (row.indicadorRealizacionId) {
+                    if (reglasEspeciales.realizacion.includes(row.indicadorRealizacionId)) {
+                        esDesagregacionSexo = true;
+                    }
+                } else if (row.indicadorResultadoId) {
+                    if (reglasEspeciales.realizacion.includes(row.indicadorResultadoId)) {
+                        esDesagregacionSexo = true;
+                    }
+                }
+            }
             const isEditable = editableRowIndex === index && editable;
 
             const value = get(row, accessor);
@@ -56,39 +81,60 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                 const mujeres = Number(get(row, keys.mujeres)) || 0;
                 const total = Number(get(row, keys.total)) || 0;
                 const ambosCero = hombres === 0 && mujeres === 0;
+                const [mostrarAviso, setMostrarAviso] = useState(false);
 
+                const handleAviso = () => {
+                    if (esDesagregacionSexo) {
+                        setMostrarAviso(true);
+                        setTimeout(() => setMostrarAviso(false), 2500);
+                    }
+                };
                 return (
-                    <div style={wrapperStyleNumber}>
+                    <div style={wrapperStyleNumber} className={esDesagregacionSexo ? 'relative cursor-pointer' : ''} onClick={() => handleAviso()}>
                         {isEditable ? (
-                            <input
-                                className={ambosCero ? 'border p-1 rounded text-center' : 'border p-1 rounded bg-gray-100 text-gray-700 text-center'}
-                                value={tempValue == '' ? (ambosCero ? total : hombres + mujeres) : tempValue}
-                                style={commonStyleNumber}
-                                readOnly={!ambosCero}
-                                onChange={(e) => {
-                                    setTempValue(e.target.value);
-                                }}
-                                onBlur={(e) => {
-                                    setTempValue('');
-                                    if (ambosCero) {
-                                        setIndicadores((prevRows) => {
-                                            const copy = [...prevRows];
-                                            const updatedRow = { ...copy[index] };
-                                            set(updatedRow as object, accessor, Number(e.target.value));
-                                            copy[index] = updatedRow;
-                                            return copy;
-                                        });
-                                    } else {
-                                        setIndicadores((prevRows) => {
-                                            const copy = [...prevRows];
-                                            const updatedRow = { ...copy[index] };
-                                            set(updatedRow as object, accessor, Number(e.target.value));
-                                            copy[index] = updatedRow;
-                                            return copy;
-                                        });
-                                    }
-                                }}
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    disabled={esDesagregacionSexo}
+                                    className={ambosCero ? `border p-1 rounded text-center` : `border p-1 rounded bg-gray-100 text-gray-700 text-center ${esDesagregacionSexo && 'h-1/2'}`}
+                                    value={tempValue == '' ? (ambosCero ? total : hombres + mujeres) : tempValue}
+                                    style={{
+                                        ...commonStyleNumber,
+                                        pointerEvents: esDesagregacionSexo ? 'none' : 'auto',
+                                    }}
+                                    readOnly={!ambosCero}
+                                    onChange={(e) => {
+                                        setTempValue(e.target.value);
+                                    }}
+                                    onBlur={(e) => {
+                                        setTempValue('');
+                                        if (!plurianual && accessor.startsWith('metaAnual')) {
+                                            setIndicadores((prevRows) => {
+                                                const copy = [...prevRows];
+                                                const updatedRow = { ...copy[index] };
+
+                                                set(updatedRow as object, accessor, e.target.value);
+
+                                                const metaFinalAccessor = accessor.replace('metaAnual', 'metaFinal');
+                                                set(updatedRow as object, metaFinalAccessor, e.target.value);
+
+                                                copy[index] = updatedRow;
+                                                return copy;
+                                            });
+                                        } else {
+                                            setIndicadores((prevRows) => {
+                                                const copy = [...prevRows];
+                                                const updatedRow = { ...copy[index] };
+                                                set(updatedRow as object, accessor, Number(e.target.value));
+                                                copy[index] = updatedRow;
+                                                return copy;
+                                            });
+                                        }
+                                    }}
+                                />
+                                {mostrarAviso && (
+                                    <div className="absolute left-1/2 -translate-x-1/2 bg-yellow-200 text-gray-800 text-xs px-2 py-1 rounded shadow animate-fade-in">{t('DesagregacionSexo')}</div>
+                                )}
+                            </div>
                         ) : (
                             <span style={commonStyleNumber}>{ambosCero ? total : hombres + mujeres}</span>
                         )}
@@ -122,6 +168,14 @@ export function editableColumnByPath<T extends object>(accessor: string, title: 
                                         const updatedRow = { ...copy[index] };
                                         set(updatedRow as object, accessor, nuevoValor);
                                         set(updatedRow as object, accessorTotal, nuevoValor + valorContrario);
+                                        if (!plurianual && accessor.startsWith('metaAnual')) {
+                                            const metaFinalAccessor = accessor.replace('metaAnual', 'metaFinal');
+                                            if (accessor.endsWith('mujeres') || accessor.endsWith('hombres')) {
+                                                set(updatedRow as object, metaFinalAccessor, nuevoValor);
+                                            } else {
+                                                set(updatedRow as object, metaFinalAccessor, nuevoValor + valorContrario);
+                                            }
+                                        }
                                         copy[index] = updatedRow;
                                         return copy;
                                     });
