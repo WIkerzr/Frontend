@@ -10,7 +10,7 @@ import { TiposAccion, useYear } from '../../../contexts/DatosAnualContext';
 import IconEye from '../../../components/Icon/IconEye';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
-import { NewModal, PrintFechaTexto, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
+import { NewModal, PrintFechaTexto, TextoSegunIdioma, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import MyEditableDropdown, { SelectorEje } from '../../../components/Utils/inputs';
@@ -116,15 +116,16 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         return accionesPorEje.map(() => false);
     }
 
-    useEffect(() => {
-        if (acciones != 'Acciones' && ejesPlan.length > 0) {
-            const namesPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((eje: Ejes) => eje.NameEs);
-            const nuevoDropdown = ejesPlan.filter((eje: EjesBBDD) => !namesPrioritarios.includes(`${eje.NameEs}`));
-            if (nuevoDropdown.length != ejesPlan.length) {
-                setEjesPlan(nuevoDropdown);
-            }
-        }
-    }, [ejesPlan]);
+    //Filtro en acciones accesorias por los ejes primarios
+    // useEffect(() => {
+    //     if (acciones != 'Acciones' && ejesPlan.length > 0) {
+    //         const namesPrioritarios: string[] = yearData.plan.ejesPrioritarios.map((eje: Ejes) => eje.NameEs);
+    //         const nuevoDropdown = ejesPlan.filter((eje: EjesBBDD) => !namesPrioritarios.includes(`${eje.NameEs}`));
+    //         if (nuevoDropdown.length != ejesPlan.length) {
+    //             setEjesPlan(nuevoDropdown);
+    //         }
+    //     }
+    // }, [ejesPlan]);
 
     //limites Acciones
     useEffect(() => {
@@ -396,6 +397,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     return (
                         <div key={accion.id} className={`${colorAccion} border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
                             <span className="text-base">{accion.accion}</span>
+                            <span className="text-base">{`${t('Eje')}: ${TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}`}</span>
                             <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                 {t('LineaActuaccion')}: {accion.lineaActuaccion}
                             </span>
