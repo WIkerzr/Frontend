@@ -522,7 +522,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     const eje = yearData.plan.ejes.find((eje) => eje.Id === datosEditandoAccion.ejeId);
                     if (eje) {
                         const accionTranformada = accionTransformadaBackAFront(response.data, eje.NameEs, eje.NameEu, eje.Id);
-                        console.log(accionTranformada);
                         setYearData({
                             ...yearData,
                             plan: {

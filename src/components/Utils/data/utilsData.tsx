@@ -154,23 +154,25 @@ export const LlamadasBBDDSinJson = async <T = any, TBody = any>({
     return null;
 };
 
-export interface DescargarArchivoBodyParams {
+export interface ArchivoBodyParams {
     RegionId: string;
-    Year: string;
-    RutaArchivo: 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos';
+    Year?: string;
+    RutaArchivo: 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos' | '';
     NombreArchivo: string;
 }
-interface DescargarArchivoParams {
+interface ArchivoParams {
     message: MessageSetters;
-    body: DescargarArchivoBodyParams;
+    body: ArchivoBodyParams;
     setLoading: (loading: boolean) => void;
+    ruta: string;
+    onSuccess?: (data: any) => void;
 }
 
-export const LlamarDescargarArchivo = async ({ message, body, setLoading }: DescargarArchivoParams) => {
+export const LlamarDescargarArchivo = async ({ message, body, setLoading, ruta }: ArchivoParams) => {
     try {
         setLoading(true);
         const token = sessionStorage.getItem('access_token');
-        const res = await fetch(`https://localhost:44300/api/yearData/archivosADR/descargar`, {
+        const res = await fetch(`${ApiTarget}/${ruta}`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -198,4 +200,16 @@ export const LlamarDescargarArchivo = async ({ message, body, setLoading }: Desc
     } finally {
         setLoading(false);
     }
+};
+
+export const LlamadaBBDDBorrarArchivo = async ({ message, body, setLoading, ruta, onSuccess }: ArchivoParams) => {
+    LlamadasBBDD({
+        method: 'POST',
+        url: `/${ruta}`,
+        body: body,
+        setLoading: setLoading ?? (() => {}),
+        setErrorMessage: message.setErrorMessage,
+        setSuccessMessage: message.setSuccessMessage,
+        onSuccess: onSuccess,
+    });
 };

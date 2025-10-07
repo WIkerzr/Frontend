@@ -9,7 +9,7 @@ import { BtnExportarDocumentoWord } from '../../../components/Utils/genWORD';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio, StatusColors } from '../../../contexts/EstadosPorAnioContext';
 import { GeneralOperationADR, Memoria } from '../../../types/tipadoPlan';
-import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
+import { ArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
 import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
 import { useRegionContext } from '../../../contexts/RegionContext';
@@ -108,7 +108,7 @@ const Index = () => {
     }, []);
 
     const handleClick = (nombreArchivo: string, index: number) => {
-        const body: DescargarArchivoBodyParams = {
+        const body: ArchivoBodyParams = {
             NombreArchivo: nombreArchivo,
             RegionId: `${regionSeleccionada}`,
             RutaArchivo: index > 0 ? 'Memoria/Anexos' : 'Memoria',
@@ -119,6 +119,7 @@ const Index = () => {
             message: { setErrorMessage, setSuccessMessage },
             body: body,
             setLoading,
+            ruta: 'yearData/archivosADR/descargar',
         });
     };
 

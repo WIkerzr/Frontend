@@ -11,7 +11,7 @@ import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAni
 import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
-import { DescargarArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
+import { ArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
 import { useUser } from '../../../contexts/UserContext';
 
 const Index = () => {
@@ -92,7 +92,7 @@ const Index = () => {
     }, []);
 
     const handleClick = (nombreArchivo: string, index: number) => {
-        const body: DescargarArchivoBodyParams = {
+        const body: ArchivoBodyParams = {
             NombreArchivo: nombreArchivo,
             RegionId: `${regionSeleccionada}`,
             RutaArchivo: index > 0 ? 'Plan/Anexos' : 'Plan',
@@ -103,6 +103,7 @@ const Index = () => {
             message: { setErrorMessage, setSuccessMessage },
             body: body,
             setLoading,
+            ruta: 'yearData/archivosADR/descargar',
         });
     };
 
