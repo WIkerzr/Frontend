@@ -13,6 +13,9 @@ import IconXCircle from '../Icon/IconXCircle';
 import IconThumbUp from '../Icon/IconThumbUp';
 import { ApiTargetToken } from './data/controlDev';
 import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
+import { HMTServicios, IndicadoresServicios } from '../../types/GeneralTypes';
+import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
+import { DatosAccion } from '../../types/TipadoAccion';
 
 interface ModalProps {
     open: boolean;
@@ -594,3 +597,82 @@ export function useEffectPrevio<T>(value: T): T | undefined {
 }
 
 export const TextoSegunIdioma = (es: string | undefined, eu: string | undefined) => (i18n.language === 'es' ? es : eu);
+
+function ConvertirHMTServiciosAHMT(hmt?: HMTServicios): HMT | undefined {
+    if (!hmt) return undefined;
+    return {
+        hombres: hmt.hombres ?? '',
+        mujeres: hmt.mujeres ?? '',
+        total: hmt.valor,
+    };
+}
+
+export function ConvertirIndicadoresServicioAAccion(indicadores: IndicadoresServicios[]): DatosAccion['indicadorAccion'] {
+    const indicadoreRealizacion: IndicadorRealizacionAccion[] = [];
+    const indicadoreResultado: IndicadorResultadoAccion[] = [];
+
+    indicadores.forEach((ind) => {
+        const base = {
+            id: ind.id ?? 0,
+            descripcion: ind.indicador,
+            metaAnual: ConvertirHMTServiciosAHMT(ind.previsto),
+            ejecutado: ConvertirHMTServiciosAHMT(ind.alcanzado),
+            metaFinal: undefined,
+            hipotesis: '',
+        };
+
+        if (ind.tipo === 'realizacion') {
+            indicadoreRealizacion.push({
+                ...base,
+                indicadorRealizacionId: ind.id ?? 0,
+            });
+        } else {
+            indicadoreResultado.push({
+                ...base,
+                indicadorResultadoId: ind.id ?? 0,
+            });
+        }
+    });
+
+    return {
+        indicadoreRealizacion,
+        indicadoreResultado,
+    };
+}
+
+function ConvertirHMTAHMTServicios(hmt?: HMT): HMTServicios | undefined {
+    if (!hmt) return undefined;
+    return {
+        hombres: hmt.hombres?.toString(),
+        mujeres: hmt.mujeres?.toString(),
+        valor: hmt.total?.toString(),
+    };
+}
+
+export function ConvertirIndicadoresAccionAServicio(indicadorAccion?: DatosAccion['indicadorAccion']): IndicadoresServicios[] {
+    if (!indicadorAccion) return [];
+
+    const resultado: IndicadoresServicios[] = [];
+
+    indicadorAccion.indicadoreRealizacion?.forEach((ind) => {
+        resultado.push({
+            id: ind.indicadorRealizacionId ?? ind.id,
+            indicador: ind.descripcion,
+            tipo: 'realizacion',
+            previsto: ConvertirHMTAHMTServicios(ind.metaAnual) ?? { valor: '' },
+            alcanzado: ConvertirHMTAHMTServicios(ind.ejecutado),
+        });
+    });
+
+    indicadorAccion.indicadoreResultado?.forEach((ind) => {
+        resultado.push({
+            id: ind.indicadorResultadoId ?? ind.id,
+            indicador: ind.descripcion,
+            tipo: 'resultado',
+            previsto: ConvertirHMTAHMTServicios(ind.metaAnual) ?? { valor: '' },
+            alcanzado: ConvertirHMTAHMTServicios(ind.ejecutado),
+        });
+    });
+
+    return resultado;
+}

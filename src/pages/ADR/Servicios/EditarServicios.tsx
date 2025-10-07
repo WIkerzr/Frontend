@@ -5,7 +5,7 @@ import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componente
 import { InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { IndicadoresServicios, Servicios } from '../../../types/GeneralTypes';
+import { Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Loading } from '../../../components/Utils/animations';
@@ -16,10 +16,11 @@ import { TabCard } from '../Acciones/EditarAccion/EditarAccionComponent';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
 import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
-import { PestanaIndicadoresServicios } from './ComponentesServicios';
 import { EjesBBDD } from '../../../types/tipadoPlan';
 import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
 import { EjesBBDDToEjes } from '../EjesHelpers';
+import { PestanaIndicadores } from '../Acciones/EditarAccion/EditarAccionIndicadores';
+import { ConvertirIndicadoresAccionAServicio } from '../../../components/Utils/utils';
 export const ejeGeneralServicios: EjesBBDD = {
     EjeId: 'general',
     NameEs: 'General',
@@ -34,7 +35,7 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData, controlguardado, setControlguardado } = useYear();
+    const { datosEditandoAccion, datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData, controlguardado, setControlguardado } = useYear();
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const { regionSeleccionada } = useRegionContext();
@@ -85,16 +86,6 @@ const Index: React.FC = () => {
         setDatosEditandoServicio(actualizado);
     };
 
-    //     const setIndicador = (callback: (prev: IndicadoresServicios[]) => IndicadoresServicios[]) => {
-    //     if (!datosEditandoServicio) return;
-
-    //     const nuevosIndicadores = callback(datosEditandoServicio.indicadores || []);
-    //     setDatosEditandoServicio({
-    //         ...datosEditandoServicio,
-    //         indicadores: nuevosIndicadores,
-    //     });
-    // };
-
     const [erroresGenerales, setErroresGenerales] = useState({
         nombre: false,
         descripcion: false,
@@ -102,16 +93,12 @@ const Index: React.FC = () => {
         valFinal: false,
     });
 
-    const [erroresindicadores, setErroresIndicadores] = useState<boolean[][]>([]);
-
     const handleChangeCampos = (campo: keyof Servicios, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoServicio({
             ...datosEditandoServicio,
             [campo]: e.target.value || '',
         });
     };
-    const [datosIndicadorRealizacion, setDatosIndicadorRealizacion] = useState<IndicadoresServicios[]>([]);
-    const [datosIndicadorResultado, setDatosIndicadorResultado] = useState<IndicadoresServicios[]>([]);
 
     useEffect(() => {
         if (!lineaActuaccion || lineaActuaccion === '') return;
@@ -120,34 +107,6 @@ const Index: React.FC = () => {
             lineaActuaccion: lineaActuaccion,
         });
     }, [lineaActuaccion]);
-
-    useEffect(() => {
-        if (datosEditandoServicio?.indicadores) {
-            const hayTipoUndefinedNull = datosEditandoServicio.indicadores.some((indicador) => indicador.tipo === null || indicador.tipo === undefined);
-            if (hayTipoUndefinedNull) {
-                //TODO es para versiones anteriores
-                setServicio((prev) => {
-                    return {
-                        ...prev,
-                        indicadores: prev.indicadores.map((indicador) => ({
-                            ...indicador,
-                            tipo: indicador.tipo ?? 'realizacion',
-                        })),
-                    };
-                });
-            } else {
-                const filtradosRealizacion: IndicadoresServicios[] = datosEditandoServicio.indicadores.filter((indicador) => indicador.tipo === 'realizacion');
-
-                const filtradosResultado: IndicadoresServicios[] = datosEditandoServicio.indicadores.filter((indicador) => indicador.tipo === 'resultado');
-
-                setDatosIndicadorRealizacion(filtradosRealizacion);
-                setDatosIndicadorResultado(filtradosResultado);
-            }
-        } else {
-            setDatosIndicadorRealizacion([]);
-            setDatosIndicadorResultado([]);
-        }
-    }, [datosEditandoServicio]);
 
     const validarAntesDeGuardar = () => {
         if (!datosEditandoServicio) return;
@@ -159,7 +118,6 @@ const Index: React.FC = () => {
             dSeguimiento: false,
             valFinal: false,
         });
-        setErroresIndicadores([]);
         // const nuevosErroresIndicadores = datosEditandoServicio.indicadores.map((ind) => [
         //     editarPlan && !ind.indicador.trim(),
         //     editarPlan && !ind.previsto.valor.trim(),
@@ -184,7 +142,8 @@ const Index: React.FC = () => {
         //     return;
         // }
 
-        const indicadoresCombinados = [...datosIndicadorRealizacion, ...datosIndicadorResultado];
+        const indicadoresModificados = ConvertirIndicadoresAccionAServicio(datosEditandoAccion.indicadorAccion);
+        const indicadoresCombinados = indicadoresModificados;
 
         setServicio((prev) => {
             const actualizado: Servicios = {
@@ -385,26 +344,7 @@ const Index: React.FC = () => {
                 <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                     <TabPanels>
                         <TabPanel>
-                            <PestanaIndicadoresServicios
-                                tipoIndicadores="realizacion"
-                                datosIndicadorRealizacion={datosIndicadorRealizacion}
-                                datosIndicadorResultado={datosIndicadorResultado}
-                                setDatosIndicadorResultado={setDatosIndicadorResultado}
-                                setDatosIndicadorRealizacion={setDatosIndicadorRealizacion}
-                                editarPlan={editarPlan}
-                                editarMemoria={editarMemoria}
-                                erroresindicadores={erroresindicadores}
-                            />
-                            <PestanaIndicadoresServicios
-                                tipoIndicadores="resultado"
-                                datosIndicadorRealizacion={datosIndicadorRealizacion}
-                                datosIndicadorResultado={datosIndicadorResultado}
-                                setDatosIndicadorResultado={setDatosIndicadorResultado}
-                                setDatosIndicadorRealizacion={setDatosIndicadorRealizacion}
-                                editarPlan={editarPlan}
-                                editarMemoria={editarMemoria}
-                                erroresindicadores={erroresindicadores}
-                            />
+                            <PestanaIndicadores servicios />
                         </TabPanel>
                         <TabPanel>
                             <div className="p-5 flex flex-col gap-4 w-full">

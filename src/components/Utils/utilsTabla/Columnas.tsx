@@ -4,7 +4,7 @@ import { DataTableColumnTextAlign } from 'mantine-datatable';
 import IconArrowLeft from '../../Icon/IconArrowLeft';
 import IconEqual from '../../Icon/IconEqual';
 import { useState } from 'react';
-import { IndicadorRealizacionAccion } from '../../../types/Indicadores';
+import { IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado } from '../../../types/Indicadores';
 import { useTranslation } from 'react-i18next';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
@@ -60,12 +60,26 @@ export function editableColumnByPath<T extends object>(
         render: (row: T & IndicadorRealizacionAccion, index: number) => {
             let esDesagregacionSexo = false;
             if (reglasEspeciales) {
-                if (row.indicadorRealizacionId) {
-                    if (reglasEspeciales.realizacion.includes(row.indicadorRealizacionId)) {
+                if (row.indicadorRealizacionId != undefined) {
+                    let idIndicador = row.indicadorRealizacionId;
+                    if (idIndicador === 0) {
+                        const datosGuardados = localStorage.getItem('indicadoresRealizacion');
+
+                        const datos: IndicadorRealizacion[] = datosGuardados ? JSON.parse(datosGuardados) : [];
+                        idIndicador = datos.find((e) => e.NameEs === row.descripcion)?.Id ?? 0;
+                    }
+                    if (reglasEspeciales.realizacion.includes(idIndicador)) {
                         esDesagregacionSexo = true;
                     }
-                } else if (row.indicadorResultadoId) {
-                    if (reglasEspeciales.realizacion.includes(row.indicadorResultadoId)) {
+                } else if (row.indicadorResultadoId != undefined) {
+                    let idIndicador = row.indicadorResultadoId;
+                    if (idIndicador === 0) {
+                        const datosGuardados = localStorage.getItem('indicadoresResultado');
+
+                        const datos: IndicadorResultado[] = datosGuardados ? JSON.parse(datosGuardados) : [];
+                        idIndicador = datos.find((e) => e.NameEs === row.descripcion)?.Id ?? 0;
+                    }
+                    if (reglasEspeciales.resultado.includes(idIndicador)) {
                         esDesagregacionSexo = true;
                     }
                 }

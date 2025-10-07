@@ -85,8 +85,24 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const { user } = useUser();
     const { regionSeleccionada } = useRegionContext();
     const [ejesIndicador, setEjesIndicador] = useState<EjeIndicadorBBDD[]>([]);
-    const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>([]);
-    const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>([]);
+    const [indicadoresRealizacion, setIndicadoresRealizacion] = useState<IndicadorRealizacion[]>(() => {
+        const datosGuardados = localStorage.getItem('indicadoresRealizacion');
+        try {
+            return datosGuardados ? JSON.parse(datosGuardados) : [];
+        } catch (error) {
+            console.warn('Error al parsear indicadoresRealizacion desde localStorage:', error);
+            return [];
+        }
+    });
+    const [indicadoresResultado, setIndicadoresResultado] = useState<IndicadorResultado[]>(() => {
+        const datosGuardados = localStorage.getItem('indicadoresResultado');
+        try {
+            return datosGuardados ? JSON.parse(datosGuardados) : [];
+        } catch (error) {
+            console.warn('Error al parsear indicadoresResultado desde localStorage:', error);
+            return [];
+        }
+    });
     const [indicadoresRealizacionADR, setIndicadoresRealizacionADR] = useState<IndicadorRealizacion[]>([]);
     const [indicadoresResultadoADR, setIndicadoresResultadoADR] = useState<IndicadorResultado[]>([]);
     const [loading, setLoading] = useState(true);

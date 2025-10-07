@@ -299,10 +299,24 @@ interface TablaIndicadorAccionProps {
     reglasEspeciales: { realizacion: number[]; resultado: number[] };
     botonNuevoIndicadorAccion: React.ReactNode;
     handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
+    servicios?: boolean;
 }
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
-    ({ indicadoresRealizacion, setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, plurianual, reglasEspeciales, botonNuevoIndicadorAccion, handleEliminarIndicador }, ref) => {
+    (
+        {
+            indicadoresRealizacion,
+            setIndicadoresRealizacion,
+            indicadoresResultado,
+            setIndicadoresResultado,
+            plurianual,
+            reglasEspeciales,
+            servicios,
+            botonNuevoIndicadorAccion,
+            handleEliminarIndicador,
+        },
+        ref
+    ) => {
         const { t } = useTranslation();
         const { block } = useYear();
         const { editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -472,12 +486,18 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                 { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
                 { id: 'final', title: '', columns: columns },
             ];
+            const columnGroupsServicios = [
+                { id: 'descripcion', title: '', columns: columnNombre },
+                { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
+                { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+                { id: 'final', title: '', columns: [columns[1]] },
+            ];
             return (
                 <div ref={ref}>
                     <DataTable
                         className={`datatable-pagination-horizontal `}
                         records={records}
-                        groups={columnGroups}
+                        groups={servicios ? columnGroupsServicios : columnGroups}
                         withRowBorders={false}
                         withColumnBorders={true}
                         striped={true}

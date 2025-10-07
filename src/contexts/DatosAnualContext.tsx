@@ -17,7 +17,7 @@ import {
 } from '../types/TipadoAccion';
 import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
 import { isEqual } from 'lodash';
-import { convertirArrayACadena, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
+import { convertirArrayACadena, ConvertirIndicadoresServicioAAccion, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 import { useRegionContext } from './RegionContext';
@@ -320,8 +320,20 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const stored = sessionStorage.getItem('datosEditandoServicio');
         return stored ? JSON.parse(stored) : null;
     });
+
     useEffect(() => {
         sessionStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
+        if (datosEditandoServicio) {
+            const indicadorAccion = ConvertirIndicadoresServicioAAccion(datosEditandoServicio.indicadores);
+            const datosAccionTransformados: DatosAccion = {
+                accion: datosEditandoServicio.descripcion,
+                id: `${datosEditandoServicio.id}`,
+                lineaActuaccion: `${datosEditandoServicio.lineaActuaccion}`,
+                plurianual: false,
+                indicadorAccion: indicadorAccion,
+            };
+            setDatosEditandoAccion(datosAccionTransformados);
+        }
     }, [datosEditandoServicio]);
 
     const SeleccionEditarServicio = (idServicio: string | null) => {
