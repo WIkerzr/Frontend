@@ -12,6 +12,10 @@ import { Estado } from '../../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
 import { PlanOMemoria } from '../../PlanMemoria/PlanMemoriaComponents';
+import { AdjuntarArchivos } from '../../../../components/Utils/inputs';
+import { Boton } from '../../../../components/Utils/utils';
+import { LoadingOverlay } from '../../../Configuracion/Users/componentes';
+import { LlamadasBBDD } from '../../../../components/Utils/data/utilsData';
 interface TabCardProps {
     icon: string;
     label: string;
@@ -542,3 +546,51 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
         );
     }
 );
+
+interface PestanaFirmaProps {
+    datosEditandoAccion: DatosAccion;
+    tipo: 'accesoria' | 'accion';
+}
+export const PestanaFirma = forwardRef<HTMLDivElement, PestanaFirmaProps>(({ datosEditandoAccion, tipo }, ref) => {
+    const [firma, setFirma] = useState<File[]>([]);
+    const { t } = useTranslation();
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const handleGuardarFicheros = async () => {
+        LlamadasBBDD({
+            method: 'GET',
+            body: firma,
+            url: `firma/${tipo}/${datosEditandoAccion.id}`,
+            setLoading: setLoading,
+            setErrorMessage: setErrorMessage,
+            setSuccessMessage: setSuccessMessage,
+        });
+    };
+
+    return (
+        <div className="flex justify-center panel" ref={ref}>
+            <LoadingOverlay
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
+            <section className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 w-full max-w-[500px]">
+                <div className="flex flex-col gap-4">
+                    <a href="/Anexo8.pdf" download className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                        <span className="text-sm font-medium">{t('descargarFirma')}</span>
+                    </a>
+
+                    <AdjuntarArchivos files={firma} setFiles={setFirma} multiple={false} />
+                    <Boton tipo="guardar" textoBoton={t('enviar')} onClick={handleGuardarFicheros} />
+                </div>
+            </section>
+        </div>
+    );
+});

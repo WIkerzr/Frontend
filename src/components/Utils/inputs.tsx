@@ -339,8 +339,9 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
                 const todos = [...prevFiles, ...newFiles];
                 const vistos = new Set<string>();
                 return todos.filter((file) => {
-                    if (vistos.has(file.name)) return false;
-                    vistos.add(file.name);
+                    const key = file.name + file.size;
+                    if (vistos.has(key)) return false;
+                    vistos.add(key);
                     return true;
                 });
             });
@@ -362,6 +363,12 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
         e.stopPropagation();
     };
 
+    useEffect(() => {
+        return () => {
+            files.forEach((file) => URL.revokeObjectURL(URL.createObjectURL(file)));
+        };
+    }, [files]);
+
     return (
         <div className="mb-5 flex flex-col">
             {title && <span className="mb-1">{title}</span>}
@@ -382,11 +389,7 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
             <div className="mt-4 space-y-2">
                 {files.map((file, idx) => (
                     <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
-                        {isImage(file) ? (
-                            <img src={URL.createObjectURL(file)} alt={file.name} className="w-12 h-12 object-cover rounded" onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)} />
-                        ) : (
-                            <span className="text-lg">📄</span>
-                        )}
+                        {isImage(file) ? <img src={URL.createObjectURL(file)} alt={file.name} className="w-12 h-12 object-cover rounded" /> : <span className="text-lg">📄</span>}
                         <span className="flex-1 text-sm truncate">{file.name}</span>
                         <button
                             type="button"
