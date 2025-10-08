@@ -26,7 +26,7 @@ const Index = () => {
         const accionesPrio = yearData.plan.ejesPrioritarios[0].acciones;
         if (yearData.plan.ejesRestantes) {
             const ejeRest: Ejes[] = yearData.plan.ejesRestantes.filter((ej) => ej.IsAccessory) ?? [];
-            if (accionesPrio.length > 0 && accionesPrio[0].indicadorAccion && ejeRest && ejeRest[0].acciones[0].indicadorAccion) {
+            if (accionesPrio.length > 0 && accionesPrio[0].indicadorAccion && ejeRest && ejeRest.length > 0 && ejeRest[0].acciones[0].indicadorAccion) {
                 valida = true;
             }
         }

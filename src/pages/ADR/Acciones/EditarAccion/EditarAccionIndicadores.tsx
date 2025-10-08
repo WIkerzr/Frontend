@@ -10,10 +10,8 @@ import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { sortBy } from 'lodash';
-interface PestanaIndicadoresProps {
-    servicios?: boolean;
-}
-export const PestanaIndicadores = React.forwardRef<HTMLDivElement, PestanaIndicadoresProps>(({ servicios }, ref) => {
+
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
@@ -251,30 +249,27 @@ export const PestanaIndicadores = React.forwardRef<HTMLDivElement, PestanaIndica
     };
 
     return (
-        <div ref={ref}>
-            <TablaIndicadorAccion
-                indicadoresRealizacion={indicadoresRealizacionTabla}
-                setIndicadoresRealizacion={setIndicadoresRealizacionTabla}
-                indicadoresResultado={indicadoresResultadoTabla}
-                setIndicadoresResultado={setIndicadoresResultadoTabla}
-                handleEliminarIndicador={handleEliminarIndicador}
-                plurianual={datosEditandoAccion.plurianual}
-                reglasEspeciales={reglasEspeciales}
-                servicios={servicios}
-                botonNuevoIndicadorAccion={
-                    <BtnNuevoIndicadorAccion
-                        indicadoresRealizacionTabla={indicadoresRealizacionTabla}
-                        indicadoresResultadoTabla={indicadoresResultadoTabla}
-                        block={block}
-                        editarPlan={editarPlan}
-                        open={open}
-                        setOpen={setOpen}
-                        handleOpenModal={handleOpenModal}
-                        handleSave={handleSave}
-                    />
-                }
-            />
-        </div>
+        <TablaIndicadorAccion
+            indicadoresRealizacion={indicadoresRealizacionTabla}
+            setIndicadoresRealizacion={setIndicadoresRealizacionTabla}
+            indicadoresResultado={indicadoresResultadoTabla}
+            setIndicadoresResultado={setIndicadoresResultadoTabla}
+            handleEliminarIndicador={handleEliminarIndicador}
+            plurianual={datosEditandoAccion.plurianual}
+            reglasEspeciales={reglasEspeciales}
+            botonNuevoIndicadorAccion={
+                <BtnNuevoIndicadorAccion
+                    indicadoresRealizacionTabla={indicadoresRealizacionTabla}
+                    indicadoresResultadoTabla={indicadoresResultadoTabla}
+                    block={block}
+                    editarPlan={editarPlan}
+                    open={open}
+                    setOpen={setOpen}
+                    handleOpenModal={handleOpenModal}
+                    handleSave={handleSave}
+                />
+            }
+        />
     );
 });
 

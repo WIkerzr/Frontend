@@ -9,7 +9,6 @@ import { ApiTargetToken } from '../../components/Utils/data/controlDev';
 import { gestionarErrorServidor } from '../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 import { useRegionContext } from '../../contexts/RegionContext';
-import { DefaultPath } from '../../router/routes';
 
 const useLogin = () => {
     const { setRegionSeleccionada } = useRegionContext();
@@ -117,7 +116,7 @@ const useLogin = () => {
                 }
 
                 setTimeout(() => {
-                    navigate(DefaultPath);
+                    navigate('/configuracion/indicadoresADR');
                 }, 200);
             }
         } catch (err) {
