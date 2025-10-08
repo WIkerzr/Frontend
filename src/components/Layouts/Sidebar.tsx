@@ -116,26 +116,18 @@ const Sidebar = () => {
                                 <li>
                                     <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
                                 </li>
-                                {Fases >= 2 && (
-                                    <li>
-                                        <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
-                                    </li>
-                                )}
+                                <li>
+                                    <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                                </li>
                             </>
                         )}
+                        <li>
+                            <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ADR'}</NavLink>
+                        </li>
                         {Fases >= 6 && (
                             <>
                                 <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
                                 <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
-                            </>
-                        )}
-                        {Fases >= 2 && (
-                            <li>
-                                <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ADR'}</NavLink>
-                            </li>
-                        )}
-                        {Fases >= 6 && (
-                            <>
                                 <li>
                                     <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
                                 </li>
@@ -188,50 +180,42 @@ const Sidebar = () => {
             >
                 <li className="nav-item">
                     <ul>
-                        {Fases >= 2 && <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />}
-                        {Fases >= 3 && (
-                            <SideBarList
-                                texto={t('AccionesPCDR')}
-                                link="/adr/acciones"
-                                src={IconAcciones}
-                                role={role}
-                                disabled={!(yearData.plan.ejesPrioritarios.length > 0 && yearData.plan.ejesPrioritarios.length <= 3)}
-                            />
-                        )}
-                        {Fases >= 4 && (
-                            <>
-                                <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} disabled={yearData.plan.ejes.length === 0} />
-                                <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
-                            </>
-                        )}
-                        {Fases >= 5 && (
-                            <>
-                                <li className="nav-item">
-                                    <NavLink to="/adr/planesGestion" className="group">
-                                        <div className="flex items-center">
-                                            <TabCard
-                                                icon={IconPlan}
-                                                label="PlanGestion"
-                                                status={yearData.plan.status}
-                                                className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
-                                            />
-                                        </div>
-                                    </NavLink>
-                                </li>
-                                <li className="nav-item">
-                                    <NavLink to="/adr/memoriasAnuales" className="group">
-                                        <div className="flex items-center">
-                                            <TabCard
-                                                icon={IconMemoria}
-                                                label="memoriasAnuales"
-                                                status={yearData.memoria.status}
-                                                className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
-                                            />
-                                        </div>
-                                    </NavLink>
-                                </li>
-                            </>
-                        )}
+                        <SideBarList texto={t('Ejes')} link="/adr/ejes" src={IconEjes} role={role} />
+
+                        <SideBarList
+                            texto={t('AccionesPCDR')}
+                            link="/adr/acciones"
+                            src={IconAcciones}
+                            role={role}
+                            disabled={!(yearData.plan.ejesPrioritarios.length > 0 && yearData.plan.ejesPrioritarios.length <= 3)}
+                        />
+                        <SideBarList texto={t('AccionesAccesorias')} link="/adr/accionesYproyectos" src={IconAccionesAccesorias} role={role} disabled={yearData.plan.ejes.length === 0} />
+                        <SideBarList texto={t('Servicios')} link="/adr/servicios" src={IconServiciosPrestados} role={role} />
+
+                        <li className="nav-item">
+                            <NavLink to="/adr/planesGestion" className="group">
+                                <div className="flex items-center">
+                                    <TabCard
+                                        icon={IconPlan}
+                                        label="PlanGestion"
+                                        status={yearData.plan.status}
+                                        className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                    />
+                                </div>
+                            </NavLink>
+                        </li>
+                        <li className="nav-item">
+                            <NavLink to="/adr/memoriasAnuales" className="group">
+                                <div className="flex items-center">
+                                    <TabCard
+                                        icon={IconMemoria}
+                                        label="memoriasAnuales"
+                                        status={yearData.memoria.status}
+                                        className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                    />
+                                </div>
+                            </NavLink>
+                        </li>
                     </ul>
                 </li>
             </div>
@@ -257,7 +241,7 @@ const Sidebar = () => {
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
                             {role != 'GOBIERNOVASCO' && <DespegableConfiguracion />}
-                            {Fases >= 2 && <SelectorAnio />}
+                            <SelectorAnio />
                             <MenuADRLateral />
                         </ul>
                     </PerfectScrollbar>

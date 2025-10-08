@@ -1,7 +1,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Dispatch, SetStateAction } from 'react';
 import { IndicadorRealizacion, IndicadorResultado } from '../../../types/Indicadores';
 import { EjeIndicadorBBDD } from '../../../types/tipadoPlan';
+import { FetchConRefreshRetry } from '../utils';
+import { ApiTarget } from './controlDev';
 import { LlamadasBBDD } from './utilsData';
 
 interface IndicadoresResponse<T> {
@@ -236,3 +239,57 @@ export async function guardarNuevoRealizacionBack({
         },
     });
 }
+
+type PropsLlamadaIndicadores = {
+    setMensajeError: Dispatch<SetStateAction<string>>;
+    setIndicadoresRealizacion: Dispatch<SetStateAction<IndicadorRealizacion[]>>;
+    setIndicadoresResultado: Dispatch<SetStateAction<IndicadorResultado[]>>;
+    setFechaUltimoActualizadoBBDD: Dispatch<SetStateAction<Date>>;
+    t: (clave: string) => string;
+};
+export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRealizacion, setIndicadoresResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
+    const token = sessionStorage.getItem('access_token');
+    try {
+        const res = await FetchConRefreshRetry(`${ApiTarget}/indicadores`, {
+            headers: {
+                Authorization: `Bearer ` + token,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = res.data;
+
+        // const datosIndicador: IndicadorRealizacion[] = data.data;
+        const datosIndicador: IndicadorRealizacion[] = data.data.map(transformarIndicador);
+
+        if (!res.ok) {
+            setMensajeError(data.Message || t('errorObtenerIndicadores'));
+            throw new Error(data.Message || t('errorObtenerIndicadores'));
+        }
+        setIndicadoresRealizacion(datosIndicador);
+        localStorage.setItem('indicadoresRealizacion', JSON.stringify(datosIndicador));
+
+        const indicadoresResultado: IndicadorResultado[] = datosIndicador
+            .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
+            .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
+            .sort((a, b) => a.Id - b.Id);
+
+        setIndicadoresResultado(indicadoresResultado);
+        setFechaUltimoActualizadoBBDD(new Date());
+        localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
+
+        const datosFiltradosBorrar = datosIndicador.filter((di) => di.RegionsId === '1');
+        const resultadosFiltrados = datosIndicador.flatMap((realizacion) => realizacion.Resultados || []).filter((resultado) => resultado.RegionsId === '1');
+        const maxLength = Math.max(datosFiltradosBorrar.length, resultadosFiltrados.length);
+        const tabla = [];
+
+        for (let i = 0; i < maxLength; i++) {
+            tabla.push({
+                Realizacion: datosFiltradosBorrar[i]?.NameEs || '',
+                Resultado: resultadosFiltrados[i]?.NameEs || '',
+            });
+        }
+    } catch (e) {
+        console.error('Error llamadaBBDDIndicadores', e);
+    }
+};

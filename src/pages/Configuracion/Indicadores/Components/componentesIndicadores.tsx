@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { IndicadorResultado, IndicadorRealizacion, indicadorInicial, indicadorResultadoinicial } from '../../../../types/Indicadores';
@@ -12,7 +12,7 @@ import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
 import { Acciones, useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../../../components/Utils/data/controlDev';
 import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../../../components/Utils/utils';
-import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack, transformarIndicador } from '../../../../components/Utils/data/dataIndicadores';
+import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack } from '../../../../components/Utils/data/dataIndicadores';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
@@ -740,9 +740,6 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const indicadorInicializado = esADR ? indicadorInicialConRegionsId : structuredClone(indicadorInicial);
     const [descripcionEditable, setDescripcionEditable] = useState<IndicadorRealizacion>(esNuevo ? indicadorInicializado : datosIndicador ?? indicadorInicializado);
     const [mensaje, setMensaje] = useState('');
-    const hayResultados = tipoIndicador != 'resultado' ? (descripcionEditable.Resultados!.length > 0 ? true : false) : false;
-    const [mostrarResultadoRelacionado, setMostrarResultadoRelacionado] = useState(esNuevo ? false : hayResultados);
-
     const [loading, setLoading] = useState(false);
 
     const { setIndicadoresRealizacion, indicadoresResultado, setIndicadoresResultado, setIndicadoresRealizacionADR, indicadoresResultadoADR, setIndicadoresResultadoADR, ejesIndicador } =
@@ -775,7 +772,6 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
     const finalizadaLlamadaBBDD = async () => {
         setTimeout(() => {
             setDescripcionEditable(indicadorInicial);
-            setMostrarResultadoRelacionado(false);
             setMensaje('');
             onClose(true);
         }, 1000);
@@ -791,7 +787,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 const indicador: IndicadorRealizacion = {
                     ...descripcionEditable,
                     Id: data.Id,
-                    RegionsId: data.RegionsId ? `${data.RegionsId}` : regionSeleccionada ?? undefined,
+                    RegionsId: esADR ? (data.RegionsId ? `${data.RegionsId}` : regionSeleccionada ?? undefined) : undefined,
                     Resultados: data.Resultados,
                 };
                 setMensaje(t('correctoIndicadorGuardado'));
@@ -804,9 +800,10 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                         }
                     }, 200);
                 }
+                // const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
+
                 setTimeout(() => {
                     setDescripcionEditable(indicadorInicial);
-                    setMostrarResultadoRelacionado(false);
                     setMensaje('');
                     onClose(true);
                 }, 1000);
@@ -881,47 +878,12 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         }));
     };
 
-    const BotonResultadosRelacionados: React.FC = () => {
-        if (tipoIndicador === 'resultado') {
-            return <></>;
-        }
-        return (
-            <>
-                {mostrarResultadoRelacionado ? (
-                    <button
-                        onClick={() => {
-                            if (descripcionEditable.Resultados && descripcionEditable.Resultados.length > 0) {
-                                const confirmacion = window.confirm(t('modalEliminarIndicadoresResultados'));
-                                if (!confirmacion) return;
-                                setDescripcionEditable((prev) => ({
-                                    ...prev,
-                                    Resultados: [],
-                                }));
-                            }
-                            setMostrarResultadoRelacionado(false);
-                        }}
-                        className="btn btn-danger mx-auto block"
-                    >
-                        {t('sinIndicadorResultadoRelacionado')}
-                    </button>
-                ) : (
-                    <button onClick={() => setMostrarResultadoRelacionado(true)} className="btn btn-primary mx-auto block">
-                        {t('agregarIndicadorResultadoRelacionado')}
-                    </button>
-                )}
-            </>
-        );
-    };
+    const validacionGuardar = descripcionEditable.Resultados?.length === 0;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => onClose(false)}>
-            <div
-                className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex
-            ${mostrarResultadoRelacionado ? 'w-full max-w-4xl' : 'w-full max-w-md'}
-        `}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className={`flex-1 transition-all duration-300 ${mostrarResultadoRelacionado ? 'pr-8' : ''}`}>
+            <div className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex w-full max-w-4xl `} onClick={(e) => e.stopPropagation()}>
+                <div className={`flex-1 transition-all duration-300 pr-8`}>
                     <LoadingOverlay
                         isLoading={loading}
                         enModal
@@ -944,8 +906,6 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             editandoResultadoModal={null}
                         />
 
-                        {!bloqueoHazi && <BotonResultadosRelacionados />}
-
                         {bloqueoHazi ? (
                             <button
                                 onClick={() => {
@@ -957,6 +917,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             </button>
                         ) : (
                             <button
+                                disabled={validacionGuardar}
                                 onClick={() => {
                                     let mensajeError = '';
                                     if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
@@ -978,7 +939,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                                         return;
                                     }
                                 }}
-                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
+                                className={`text-white px-4 py-2 rounded w-full ${validacionGuardar ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
                             >
                                 {t('guardar')}
                                 {errorMessage && <Aviso textoAviso={errorMessage} tipoAviso="error" icon={false} />}
@@ -989,19 +950,15 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                     </div>
                 </div>
 
-                {mostrarResultadoRelacionado && (
-                    <>
-                        <div className="w-px bg-gray-300 mx-4 self-stretch" />
-                        <div className="flex-1 min-w-[300px]">
-                            <h2 className="text-xl font-bold mb-4">
-                                {t('Indicadores')} {t('Resultado')}
-                            </h2>
-                            <div>
-                                <SelectorOCreador indicadorRealizacion={descripcionEditable} setDescripcionEditable={setDescripcionEditable} isOpen={isOpen} />
-                            </div>
-                        </div>
-                    </>
-                )}
+                <div className="w-px bg-gray-300 mx-4 self-stretch" />
+                <div className="flex-1 min-w-[300px]">
+                    <h2 className="text-xl font-bold mb-4">
+                        {t('Indicadores')} {t('Resultado')}
+                    </h2>
+                    <div>
+                        <SelectorOCreador indicadorRealizacion={descripcionEditable} setDescripcionEditable={setDescripcionEditable} isOpen={isOpen} />
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -1050,7 +1007,7 @@ export const TablaIndicadores: React.FC = () => {
 
     useEffect(() => {
         if (!esADR) {
-            const listaRealizacionFiltrada = indicadoresRealizacion.filter((a) => a.RegionsId === null);
+            const listaRealizacionFiltrada = indicadoresRealizacion.filter((a) => a.RegionsId === null || a.RegionsId === undefined);
             setListaVisibleRealizacion(listaRealizacionFiltrada);
             const listaResultadoFiltrada = indicadoresResultado.filter((a) => a.RegionsId === null);
             setListaVisibleResultado(listaResultadoFiltrada);
@@ -1463,60 +1420,6 @@ export const TablaIndicadores: React.FC = () => {
             )}
         </>
     );
-};
-
-type PropsLlamadaIndicadores = {
-    setMensajeError: Dispatch<SetStateAction<string>>;
-    setIndicadoresRealizacion: Dispatch<SetStateAction<IndicadorRealizacion[]>>;
-    setIndicadoresResultado: Dispatch<SetStateAction<IndicadorResultado[]>>;
-    setFechaUltimoActualizadoBBDD: Dispatch<SetStateAction<Date>>;
-    t: (clave: string) => string;
-};
-export const llamadaBBDDIndicadores = async ({ setMensajeError, setIndicadoresRealizacion, setIndicadoresResultado, setFechaUltimoActualizadoBBDD, t }: PropsLlamadaIndicadores) => {
-    const token = sessionStorage.getItem('access_token');
-    try {
-        const res = await FetchConRefreshRetry(`${ApiTarget}/indicadores`, {
-            headers: {
-                Authorization: `Bearer ` + token,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = res.data;
-
-        // const datosIndicador: IndicadorRealizacion[] = data.data;
-        const datosIndicador: IndicadorRealizacion[] = data.data.map(transformarIndicador);
-
-        if (!res.ok) {
-            setMensajeError(data.Message || t('errorObtenerIndicadores'));
-            throw new Error(data.Message || t('errorObtenerIndicadores'));
-        }
-        setIndicadoresRealizacion(datosIndicador);
-        localStorage.setItem('indicadoresRealizacion', JSON.stringify(datosIndicador));
-
-        const indicadoresResultado: IndicadorResultado[] = datosIndicador
-            .flatMap((r: IndicadorRealizacion) => r.Resultados || [])
-            .filter((res, index, self) => self.findIndex((x) => x.Id === res.Id) === index)
-            .sort((a, b) => a.Id - b.Id);
-
-        setIndicadoresResultado(indicadoresResultado);
-        setFechaUltimoActualizadoBBDD(new Date());
-        localStorage.setItem('indicadoresResultado', JSON.stringify(indicadoresResultado));
-
-        const datosFiltradosBorrar = datosIndicador.filter((di) => di.RegionsId === '1');
-        const resultadosFiltrados = datosIndicador.flatMap((realizacion) => realizacion.Resultados || []).filter((resultado) => resultado.RegionsId === '1');
-        const maxLength = Math.max(datosFiltradosBorrar.length, resultadosFiltrados.length);
-        const tabla = [];
-
-        for (let i = 0; i < maxLength; i++) {
-            tabla.push({
-                Realizacion: datosFiltradosBorrar[i]?.NameEs || '',
-                Resultado: resultadosFiltrados[i]?.NameEs || '',
-            });
-        }
-    } catch (e) {
-        console.error('Error llamadaBBDDIndicadores', e);
-    }
 };
 
 function generarCodigoRegion(name: string): string | null {

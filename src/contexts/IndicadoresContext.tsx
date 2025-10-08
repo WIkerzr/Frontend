@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { indicadorInicial, IndicadorRealizacion, IndicadorResultado, TiposDeIndicadores } from '../types/Indicadores';
-import { llamadaBBDDIndicadores } from '../pages/Configuracion/Indicadores/Components/componentesIndicadores';
 import { actualizarFechaLLamada, obtenerFechaLlamada } from '../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
 import { useUser } from './UserContext';
@@ -9,6 +8,7 @@ import { EjeIndicadorBBDD } from '../types/tipadoPlan';
 import { ApiSuccess, LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { useRegionContext } from './RegionContext';
 import { useAuth } from './AuthContext';
+import { llamadaBBDDIndicadores } from '../components/Utils/data/dataIndicadores';
 
 export type IndicadorTipo = 'Realizacion' | 'Resultado';
 export type Acciones = 'Editar' | 'Crear' | 'Borrar' | null;
