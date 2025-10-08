@@ -354,6 +354,7 @@ export const convertirGeneralOperationADR = (generalOperationADRDTO: GeneralOper
 
 export const convertirIndicadoresServicios = (indicadores: IndicadoresServiciosDTO[]): IndicadoresServicios[] =>
     (indicadores ?? []).map((i) => ({
+        id: i.Id ?? 0,
         indicador: i.Indicador,
         previsto: {
             hombres: i.PrevistoHombres ?? '',

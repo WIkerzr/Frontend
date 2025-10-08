@@ -174,6 +174,7 @@ export const servicioIniciadoVacio: Servicios = {
     lineaActuaccion: '',
     indicadores: [
         {
+            id: 0,
             indicador: '',
             previsto: {
                 valor: '',

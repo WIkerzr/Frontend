@@ -66,6 +66,7 @@ export interface IndicadoresServicios {
     alcanzado?: HMTServicios;
 }
 export interface IndicadoresServiciosDTO {
+    Id?: number;
     Indicador: string;
     PrevistoHombres: string;
     PrevistoMujeres: string;

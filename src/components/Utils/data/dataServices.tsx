@@ -71,6 +71,7 @@ export const gestionarServicio = async ({
                     idEje: data.EjeGlobalIdInt,
                     lineaActuaccion: data.LineaActuaccion,
                     indicadores: data.IndicadoresServicios.map((i) => ({
+                        id: i.Id ?? 0,
                         indicador: i.Indicador,
                         previsto: {
                             hombres: i.PrevistoHombres ?? '',
