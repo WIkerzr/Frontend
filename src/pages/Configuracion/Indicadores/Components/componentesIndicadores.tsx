@@ -27,19 +27,37 @@ interface RellenoIndicadorProps {
     tipoIndicador: TipoIndicador;
     indicadorResultado?: IndicadorResultado[] | null;
     editandoResultadoModal: 'EditandoResultado' | 'CreandoResultado' | null;
+    setChangeName?: (nuevoNombre: string) => void;
     subIndice?: string;
 }
 
-const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: IndicadorRealizacion) => {
-    const posicionPunto = nombre.indexOf('.');
-    if (posicionPunto > 0 && posicionPunto < 5) {
-        return [nombre.slice(0, 4), nombre.slice(5)];
-    } else {
-        return [indicadorRealizacion.NameEs.slice(0, 6), indicadorRealizacion.NameEs.slice(7)];
+const SacarNombre = (indicadorRealizacion: IndicadorRealizacion) => {
+    const nameEs = indicadorRealizacion.NameEs;
+
+    const primeros10 = nameEs.slice(0, 10);
+    const puntos = [...primeros10].filter((c) => c === '.').length;
+    if (puntos === 1) {
+        const primerPunto = nameEs.indexOf('.');
+        const parteIzquierda = nameEs.slice(0, primerPunto);
+        const parteDerecha = nameEs.slice(primerPunto + 1, nameEs.length);
+        return [parteIzquierda + ' ', parteDerecha];
+    } else if (puntos >= 2) {
+        const primerPunto = nameEs.indexOf('.');
+        const segundoPunto = nameEs.indexOf('.', primerPunto + 1);
+        if (segundoPunto !== -1) {
+            const entrePuntos = nameEs.slice(primerPunto + 1, segundoPunto);
+            if (/^\d+$/.test(entrePuntos)) {
+                const parteIzquierda = nameEs.slice(0, segundoPunto + 1);
+                const parteDerecha = nameEs.slice(segundoPunto + 1);
+                return [parteIzquierda + ' ', parteDerecha];
+            }
+        }
     }
+    const nameEsPart = nameEs.split(' ');
+    return [nameEsPart[0] + ' ', nameEsPart[1]];
 };
 
-export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal, subIndice }) => {
+export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal, setChangeName, subIndice }) => {
     const { t, i18n } = useTranslation();
     const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado } = useIndicadoresContext();
     const { lockedHazi } = useUser();
@@ -95,21 +113,8 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             if (key.endsWith('CreandoResultado')) {
                 return [nameEsPart[0] + ' '];
             } else if (key.endsWith('EditandoResultado')) {
-                const primeros10 = nameEs.slice(0, 10);
-                const puntos = [...primeros10].filter((c) => c === '.').length;
-                if (puntos >= 2) {
-                    const primerPunto = nameEs.indexOf('.');
-                    const segundoPunto = nameEs.indexOf('.', primerPunto + 1);
-                    if (segundoPunto !== -1) {
-                        const entrePuntos = nameEs.slice(primerPunto + 1, segundoPunto);
-                        if (/^\d+$/.test(entrePuntos)) {
-                            const parteIzquierda = nameEs.slice(0, segundoPunto + 1);
-                            const parteDerecha = nameEs.slice(segundoPunto + 1);
-                            return [parteIzquierda + ' ', parteDerecha];
-                        }
-                    }
-                }
-                return [nameEsPart[0] + ' ', nameEsPart[1]];
+                const nombre = SacarNombre(indicadorRealizacion);
+                return [nombre[0] + ' ', nombre[1]];
             }
         }
         switch (key) {
@@ -130,9 +135,6 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             case 'Crear_Realizacion_NoADR_EditandoResultado': {
                 return [nombre.slice(0, 4), nombre.slice(5)];
             }
-            case 'Editar_Realizacion_NoADR': {
-                return rellenoIndicadorEdicion(nombre, indicadorRealizacion);
-            }
             case 'Editar_Realizacion_NoADR_CreandoResultado': {
                 let numeroActual = 0;
                 numeroActual = ultimoNumeroResultado;
@@ -145,9 +147,6 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 }
                 const numeracion = formateaConCeroDelante(Number(numeroActual));
                 return [`${inicializacionNombre}${numeracion}`];
-            }
-            case 'Editar_Realizacion_NoADR_EditandoResultado': {
-                return rellenoIndicadorEdicion(nombre, indicadorRealizacion);
             }
             case 'Crear_Realizacion_ADR': {
                 const numeracion = formateaConCeroDelante(ultimoNumeroRealizacion);
@@ -172,14 +171,15 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 }
                 return [`${inicializacionNombre}${numeracion}${codRegiones[Number(regionSeleccionada)]}`];
             }
+            case 'Editar_Realizacion_NoADR':
+            case 'Editar_Realizacion_NoADR_EditandoResultado':
             case 'Crear_Realizacion_ADR_EditandoResultado':
             case 'Editar_Realizacion_ADR':
             case 'Editar_Realizacion_ADR_EditandoResultado':
-            case 'Editar_Resultado_ADR': {
-                return [nombre.slice(0, 6), nombre.slice(7)];
-            }
+            case 'Editar_Resultado_ADR':
             case 'Editar_Resultado_NoADR': {
-                return [nombre.slice(0, 6), nombre.slice(7)];
+                const nombre = SacarNombre(indicadorRealizacion);
+                return [nombre[0] + ' ', nombre[1]];
             }
         }
 
@@ -232,8 +232,12 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             setIndicador([subIndice]);
         } else {
             const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, indicadorResultadoDeterminado === undefined);
+            if (indicadorN.length === 0) return;
             setIndicador(indicadorN);
             setNombreIndicador(indicadorN[1] ?? '');
+            if (setChangeName) {
+                setChangeName(indicadorN[0]);
+            }
         }
     }, [indicadorResultadoDeterminado, editandoResultadoModal]);
 
@@ -521,82 +525,6 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
             const yaAsignado = indicadorRealizacion.Resultados?.some((resultado) => resultado.Id === op.Id) ?? false;
             return !yaAsignado;
         });
-
-        //SUB INDICES
-        // const prime: string[] = [];
-        // const primeID: number[] = [];
-        // for (let index = 0; index < indicadorRealizacion.Resultados!.length; index++) {
-        //     const nameEs = indicadorRealizacion.Resultados![index].NameEs.split(' ')[0];
-
-        //     const [prefix, subIndexStr] = nameEs.split('.');
-        //     const subIndex = Number(subIndexStr);
-
-        //     const existingIndex: number = prime.findIndex((p) => p.startsWith(prefix + '.'));
-
-        //     if (existingIndex !== -1) {
-        //         const existingSubIndex = Number(prime[existingIndex].split('.')[1]);
-        //         if (subIndex > existingSubIndex) {
-        //             prime[existingIndex] = nameEs;
-        //             primeID[existingIndex] = indicadorRealizacion.Resultados![index].Id;
-        //         }
-        //     } else {
-        //         prime.push(nameEs);
-        //         primeID.push(indicadorRealizacion.Resultados![index].Id);
-        //     }
-        // }
-        // const primeIncremented = prime.map((item) => {
-        //     const parts = item.split('.');
-
-        //     if (parts.length < 3 || parts[1] === '') {
-        //         parts.splice(1, 0, '1');
-        //     } else {
-        //         const num = Number(parts[1]) || 0;
-        //         parts[1] = String(num + 1);
-        //     }
-
-        //     return parts.join('.') + ' ';
-        // });
-
-        // interface BtnAgregarSubIndiceProps {
-        //     data: IndicadorResultado;
-        // }
-        // const BtnAgregarSubIndice: React.FC<BtnAgregarSubIndiceProps> = ({ data }) => {
-        //     if (data.Id !== 0 && primeID.includes(data.Id)) {
-        //         for (let index = 0; index < indicadoresResultado.length; index++) {
-        //             const nameEs = indicadoresResultado[index].NameEs.split(' ')[0];
-        //             if (primeIncremented.includes(nameEs)) {
-        //                 const indexIncludes = primeIncremented.indexOf(nameEs);
-        //                 const parts = primeIncremented[indexIncludes].split('.');
-
-        //                 if (parts.length < 3 || parts[1] === '') {
-        //                     parts.splice(1, 0, '1');
-        //                 } else {
-        //                     const num = Number(parts[1]) || 0;
-        //                     parts[1] = String(num + 1);
-        //                 }
-        //                 primeIncremented[indexIncludes] = parts.join('.') + ' ';
-        //             }
-        //         }
-        //         return (
-        //             <div className="p-2">
-        //                 <button
-        //                     className="bg-blue-500 text-white px-3 rounded"
-        //                     onClick={() => {
-        //                         setDescripcionEditable({
-        //                             ...indicadorInicial,
-        //                             NameEs: primeIncremented[primeID.indexOf(data.Id)],
-        //                         });
-        //                         setModoCrear(true);
-        //                     }}
-        //                 >
-        //                     {`+ ${primeIncremented[primeID.indexOf(data.Id)]}`}
-        //                 </button>
-        //             </div>
-        //         );
-        //     } else {
-        //         <></>;
-        //     }
-        // };
 
         return (
             <>
@@ -965,6 +893,12 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             onChange={cambiosIndicadorRealizacionSinResultados}
                             tipoIndicador={tipoIndicador ? tipoIndicador : 'realizacion'}
                             editandoResultadoModal={null}
+                            setChangeName={(nuevoNombre) =>
+                                setDescripcionEditable((prev) => ({
+                                    ...prev,
+                                    NameEs: nuevoNombre,
+                                }))
+                            }
                         />
 
                         {bloqueoHazi ? (
