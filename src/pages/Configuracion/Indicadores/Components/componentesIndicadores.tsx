@@ -27,6 +27,7 @@ interface RellenoIndicadorProps {
     tipoIndicador: TipoIndicador;
     indicadorResultado?: IndicadorResultado[] | null;
     editandoResultadoModal: 'EditandoResultado' | 'CreandoResultado' | null;
+    subIndice?: string;
 }
 
 const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: IndicadorRealizacion) => {
@@ -38,7 +39,7 @@ const rellenoIndicadorEdicion = (nombre: string, indicadorRealizacion: Indicador
     }
 };
 
-export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal }) => {
+export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal, subIndice }) => {
     const { t, i18n } = useTranslation();
     const { ObtenerRealizacionPorRegion, ObtenerResultadosPorRegion, ControlDeFallosIndicadorSeleccionado } = useIndicadoresContext();
     const { lockedHazi } = useUser();
@@ -88,10 +89,26 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         const key = editandoResultadoModal ? `${baseKey}_${editandoResultadoModal}` : baseKey;
 
         if (indicadorRealizacion.NameEs.length > 0) {
-            const nameEsPart = indicadorRealizacion.NameEs.split(' ');
+            const nameEs = indicadorRealizacion.NameEs;
+            const nameEsPart = nameEs.split(' ');
+
             if (key.endsWith('CreandoResultado')) {
                 return [nameEsPart[0] + ' '];
             } else if (key.endsWith('EditandoResultado')) {
+                const primeros10 = nameEs.slice(0, 10);
+                const puntos = [...primeros10].filter((c) => c === '.').length;
+                if (puntos >= 2) {
+                    const primerPunto = nameEs.indexOf('.');
+                    const segundoPunto = nameEs.indexOf('.', primerPunto + 1);
+                    if (segundoPunto !== -1) {
+                        const entrePuntos = nameEs.slice(primerPunto + 1, segundoPunto);
+                        if (/^\d+$/.test(entrePuntos)) {
+                            const parteIzquierda = nameEs.slice(0, segundoPunto + 1);
+                            const parteDerecha = nameEs.slice(segundoPunto + 1);
+                            return [parteIzquierda + ' ', parteDerecha];
+                        }
+                    }
+                }
                 return [nameEsPart[0] + ' ', nameEsPart[1]];
             }
         }
@@ -211,10 +228,14 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     }, [indicadorRealizacion]);
 
     useEffect(() => {
-        const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, indicadorResultadoDeterminado === undefined);
-        setIndicador(indicadorN);
-        setNombreIndicador(indicadorN[1] ?? '');
-    }, [indicadorResultadoDeterminado]);
+        if (editandoResultadoModal === 'CreandoResultado' && subIndice && subIndice != '') {
+            setIndicador([subIndice]);
+        } else {
+            const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, indicadorResultadoDeterminado === undefined);
+            setIndicador(indicadorN);
+            setNombreIndicador(indicadorN[1] ?? '');
+        }
+    }, [indicadorResultadoDeterminado, editandoResultadoModal]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -378,6 +399,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     const [opciones] = useState(indicadoresResultados);
     const [seleccion, setSeleccion] = useState('');
     const [modoCrear, setModoCrear] = useState(false);
+    const [crearSub, setCrearSub] = useState('');
     const [modoEditar, setModoEditar] = useState(false);
     const [filaEditar, setFilaEditar] = useState(0);
     const { indicadorSeleccionado, setIndicadorSeleccionado, ObtenerResultadosPorRegion } = useIndicadoresContext();
@@ -480,11 +502,13 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
     };
 
     const ZonaListadoResultados = () => {
-        const indicadoresResultadosOrdenadosES = indicadorRealizacion.Resultados!.sort((a, b) => {
-            const nameA = a.NameEs?.toLowerCase() || '';
-            const nameB = b.NameEs?.toLowerCase() || '';
-            return nameA.localeCompare(nameB);
-        });
+        const indicadoresResultadosOrdenadosES =
+            indicadorRealizacion.Resultados &&
+            indicadorRealizacion.Resultados.sort((a, b) => {
+                const nameA = a.NameEs?.toLowerCase() || '';
+                const nameB = b.NameEs?.toLowerCase() || '';
+                return nameA.localeCompare(nameB);
+            });
         const regiones = ObtenerResultadosPorRegion();
         let opcionesPorRegion = [];
         if (location.pathname.endsWith('ADR')) {
@@ -609,10 +633,42 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                                 onClick={() => {
                                     setDescripcionEditable(indicadorInicial);
                                     setModoCrear(true);
+                                    setCrearSub('');
                                 }}
                                 type="button"
                             >
                                 {t('crearNueva')}
+                            </button>
+                            <button
+                                className="bg-blue-500 text-white px-3 py-2 rounded"
+                                onClick={() => {
+                                    setDescripcionEditable(indicadorInicial);
+                                    setModoCrear(true);
+
+                                    const texto = indicadorRealizacion.NameEs;
+                                    const index = texto.indexOf('.');
+                                    const antesDelPunto = index !== -1 ? texto.substring(0, index) : texto;
+                                    const antesModificado = 'RS' + antesDelPunto.substring(2);
+                                    if (!indicadorRealizacion.Resultados?.length) {
+                                        setCrearSub(`${antesModificado}.1`);
+                                        return;
+                                    }
+
+                                    const obtenidos = indicadorRealizacion.Resultados.filter((e) => e.NameEs.startsWith(antesModificado));
+
+                                    const ultimoNumero = obtenidos.reduce((max, { NameEs }) => {
+                                        const partes = NameEs.split('.');
+                                        const posibleNumero = partes[1];
+                                        const numero = /^\d+$/.test(posibleNumero) ? Number(posibleNumero) : NaN;
+                                        return isNaN(numero) ? max : Math.max(max, numero);
+                                    }, 0);
+
+                                    const nuevoCodigo = `${antesModificado}.${ultimoNumero + 1}`;
+                                    setCrearSub(nuevoCodigo);
+                                }}
+                                type="button"
+                            >
+                                {t('crearSubIncie')}
                             </button>
                         </div>
                     </>
@@ -624,40 +680,41 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                                 <div className="flex-1">{t('Resultado')}</div>
                             </div>
 
-                            {indicadoresResultadosOrdenadosES.slice().map((data, index) => (
-                                <div key={data.Id + index} className="flex items-center border-b py-3">
-                                    <div className="w-[60px] !px-0  flex-shrink-0">
-                                        {!bloqueoHazi && (
-                                            <div className="flex space-x-[5px]">
-                                                <Tippy content={t('borrar')}>
-                                                    <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
-                                                        <IconTrash />
-                                                    </button>
-                                                </Tippy>
-                                                {data.Id === 0 && (
-                                                    <Tippy content={t('editar')}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setDescripcionEditable(data);
-                                                                setModoEditar(true);
-                                                                setFilaEditar(index);
-                                                            }}
-                                                        >
-                                                            <IconPencil />
+                            {indicadoresResultadosOrdenadosES &&
+                                indicadoresResultadosOrdenadosES.slice().map((data, index) => (
+                                    <div key={data.Id + index} className="flex items-center border-b py-3">
+                                        <div className="w-[60px] !px-0  flex-shrink-0">
+                                            {!bloqueoHazi && (
+                                                <div className="flex space-x-[5px]">
+                                                    <Tippy content={t('borrar')}>
+                                                        <button type="button" onClick={() => eliminarIndicadorResultado(data)}>
+                                                            <IconTrash />
                                                         </button>
                                                     </Tippy>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+                                                    {data.Id === 0 && (
+                                                        <Tippy content={t('editar')}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setDescripcionEditable(data);
+                                                                    setModoEditar(true);
+                                                                    setFilaEditar(index);
+                                                                }}
+                                                            >
+                                                                <IconPencil />
+                                                            </button>
+                                                        </Tippy>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
 
-                                    <div className="flex-1 break-words overflow-hidden">
-                                        {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
+                                        <div className="flex-1 break-words overflow-hidden">
+                                            {i18n.language === 'eu' ? (data.NameEu?.trim() ? data.NameEu : data.NameEs) : data.NameEs?.trim() ? data.NameEs : data.NameEu}
+                                        </div>
+                                        {/* <BtnAgregarSubIndice data={data} /> */}
                                     </div>
-                                    {/* <BtnAgregarSubIndice data={data} /> */}
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>
@@ -680,6 +737,7 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                             tipoIndicador="resultado"
                             indicadorResultado={indicadorRealizacion?.Resultados ?? null}
                             editandoResultadoModal={modoCrear ? 'CreandoResultado' : modoEditar ? 'EditandoResultado' : null}
+                            subIndice={crearSub}
                         />
                         <div className="flex gap-4">
                             <button
@@ -882,7 +940,10 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => onClose(false)}>
-            <div className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex w-full max-w-4xl `} onClick={(e) => e.stopPropagation()}>
+            <div
+                className={`bg-white p-6 rounded-xl shadow-lg relative transition-all duration-300 flex  ${tipoIndicador != 'resultado' ? 'w-full max-w-4xl' : 'w-full max-w-md'} `}
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className={`flex-1 transition-all duration-300 pr-8`}>
                     <LoadingOverlay
                         isLoading={loading}
@@ -951,14 +1012,16 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 </div>
 
                 <div className="w-px bg-gray-300 mx-4 self-stretch" />
-                <div className="flex-1 min-w-[300px]">
-                    <h2 className="text-xl font-bold mb-4">
-                        {t('Indicadores')} {t('Resultado')}
-                    </h2>
-                    <div>
-                        <SelectorOCreador indicadorRealizacion={descripcionEditable} setDescripcionEditable={setDescripcionEditable} isOpen={isOpen} />
+                {tipoIndicador != 'resultado' && (
+                    <div className="flex-1 min-w-[300px]">
+                        <h2 className="text-xl font-bold mb-4">
+                            {t('Indicadores')} {t('Resultado')}
+                        </h2>
+                        <div>
+                            <SelectorOCreador indicadorRealizacion={descripcionEditable} setDescripcionEditable={setDescripcionEditable} isOpen={isOpen} />
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
@@ -1260,7 +1323,7 @@ export const TablaIndicadores: React.FC = () => {
                             <tbody>
                                 {listaVisibleRealizacion
                                     .slice()
-                                    .reverse()
+                                    .sort((a, b) => b.NameEs.localeCompare(a.NameEs))
                                     .map((data) => {
                                         return (
                                             <tr key={data.Id}>
@@ -1350,7 +1413,7 @@ export const TablaIndicadores: React.FC = () => {
                             <tbody>
                                 {listaVisibleResultado
                                     .slice()
-                                    .reverse()
+                                    .sort((a, b) => b.NameEs.localeCompare(a.NameEs))
                                     .map((data) => {
                                         return (
                                             <tr key={data.Id}>
