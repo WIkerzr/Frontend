@@ -135,17 +135,64 @@ type LlamadaBBDDArbolArchivos<T = any> = {
     anioSeleccionada: number;
     setLoading: (loading: boolean) => void;
     message: MessageSetters;
-    tipoPantalla: PlanOMemoria;
     onSuccess?: (data: ApiSuccess<T>) => void;
 };
-export const LlamadaArbolArchivos = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, tipoPantalla, onSuccess }: LlamadaBBDDArbolArchivos<T>) => {
-    const dir = tipoPantalla === 'Plan' ? 'archivosPlan' : 'archivosMemoria';
+export const LlamadaArbolArchivos = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, onSuccess }: LlamadaBBDDArbolArchivos<T>) => {
     LlamadasBBDD({
         method: 'GET',
-        url: `yearData/${regionSeleccionada}/${Number(anioSeleccionada)}/${dir}`,
+        url: `yearData/${regionSeleccionada}/${Number(anioSeleccionada)}/carpetaArchivos`,
         setLoading,
         setErrorMessage: message.setErrorMessage,
         setSuccessMessage: message.setSuccessMessage,
         onSuccess,
     });
+};
+
+type LlamadaBBDDFirmaParams<T = any> = {
+    regionSeleccionada: string | null;
+    anioSeleccionada: number;
+    setLoading: (loading: boolean) => void;
+    message: MessageSetters;
+    body: File;
+    planOMemoria: PlanOMemoria;
+    onSuccess?: (data: ApiSuccess<T>) => void;
+};
+
+export const LlamadaBBDDFirma = async <T = any>({ regionSeleccionada, anioSeleccionada, setLoading, message, body, onSuccess }: LlamadaBBDDFirmaParams<T>) => {
+    if (!regionSeleccionada) {
+        message.setErrorMessage('No se ha seleccionado ninguna región.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('file', body);
+    setLoading(true);
+    try {
+        const accessToken = sessionStorage.getItem('access_token');
+
+        const res = await window.fetch(`${ApiTarget}/firma/${regionSeleccionada}/${anioSeleccionada}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            message.setErrorMessage(`Error en la subida: ${text}`);
+            return;
+        }
+
+        const data = await res.json();
+        message.setSuccessMessage(data.message || 'Archivo subido correctamente');
+
+        if (onSuccess) {
+            onSuccess(data);
+        }
+    } catch (err: any) {
+        message.setErrorMessage(`Error en la petición: ${err.message}`);
+        console.error(err);
+    } finally {
+        setLoading(false);
+    }
 };

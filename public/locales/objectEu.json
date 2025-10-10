@@ -55,5 +55,10 @@
     "cambioRegion": "Eskualdea aldatu duzu. Gordetako aldaketak galduko dira eta zure kokapenaren orri nagusira bideratuko zara. Jarraitu nahi duzu?",
     "cambioPagina": "Beste orri batera nabigatuko duzu gordetako aldaketarik gabe. Gordetako datuak galduko dira. Jarraitu nahi duzu?",
     "cierreVentanaFlotante": "Leiho flotatzailea ixtear zaude. Gorde gabeko datuak galduko dira. Jarraitu nahi duzu?"
-  }
+  },
+  "infFuente": "Finantzaketa iturria",
+  "infFuentes": "Aurrekontu txostena",
+  "infTotalAportado": "GUZTIRA EMANDA",
+  "infCantidadAportada": "Emandako kopurua",
+  "infPresupuestos": "Aurrekontuen_txostena_"
 }

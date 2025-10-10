@@ -1,7 +1,7 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { PestanaFirma, TabCard } from './EditarAccionComponent';
+import { TabCard } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
@@ -325,22 +325,6 @@ const Index: React.FC = () => {
                                 </button>
                             )}
                         </Tab>
-                        <Tab as={Fragment}>
-                            {({ selected }) => (
-                                <button
-                                    className={`${
-                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
-                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
-                                >
-                                    <div className={`flex items-center`}>
-                                        <div className="relative">
-                                            <img src={IconCuadroMando} alt={t(`${'firma'}`)} className="w-6 h-6" />
-                                        </div>
-                                        <span className={`font-semibold`}>{t(`${'firma'}`)}</span>
-                                    </div>
-                                </button>
-                            )}
-                        </Tab>
                     </TabList>
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
@@ -352,9 +336,6 @@ const Index: React.FC = () => {
                             </TabPanel>
                             <TabPanel>
                                 <PestanaMemoria />
-                            </TabPanel>
-                            <TabPanel>
-                                <PestanaFirma datosEditandoAccion={datosEditandoAccion} tipo={tipo} />
                             </TabPanel>
                         </TabPanels>
                     </div>

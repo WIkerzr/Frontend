@@ -95,11 +95,9 @@ const Index = () => {
                     anioSeleccionada: yearData.year,
                     setLoading,
                     message: { setErrorMessage, setSuccessMessage },
-                    tipoPantalla: 'Memoria',
                     onSuccess: (response) => {
-                        console.log(response.data);
                         const datosRecibidos: Nodo = response.data;
-                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos);
+                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos, 'Memoria');
                         setMemoriaGuardado(archivos);
                     },
                 });

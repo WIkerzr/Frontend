@@ -17,5 +17,6 @@
         "errorNoOpciones": "No hay opciones disponibles",
         "errorNoSePudoConectarServidor": "No se pudo conectar con el servidor. Inténtelo más tarde.",
         "errorPeticionIncorrecta": "Petición incorrecta. Revisa los datos enviados.",
+        "errorArchivosRecibidos": "Error: archivos no recibidos",
         "localStorageNotFound": "Error al leer usuario de localStorage"
 }

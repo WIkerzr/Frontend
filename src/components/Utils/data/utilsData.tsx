@@ -154,10 +154,11 @@ export const LlamadasBBDDSinJson = async <T = any, TBody = any>({
     return null;
 };
 
+export type RutasArchivos = 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos' | 'Firma';
 export interface ArchivoBodyParams {
     RegionId: string;
     Year?: string;
-    RutaArchivo: 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos' | '';
+    RutaArchivo: RutasArchivos;
     NombreArchivo: string;
 }
 interface ArchivoParams {

@@ -17,5 +17,6 @@
   "errorNoOpciones": "No hay opciones disponibles",
   "errorNoSePudoConectarServidor": "Ezin izan da zerbitzarira konektatu. Saiatu berriro geroago.",
   "errorPeticionIncorrecta": "Eskaera okerra. Berrikusi bidalitako datuak.",
+  "errorArchivosRecibidos": "Errorea: fitxategiak ez dira jaso",
   "localStorageNotFound": "Error al leer usuario de localStorage"
 }

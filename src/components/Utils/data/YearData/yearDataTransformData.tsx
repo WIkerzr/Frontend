@@ -455,15 +455,34 @@ export interface Nodo {
     EsCarpeta: boolean;
     Hijos: Nodo[];
 }
+
+function BuscarNodoPorRuta(nodos: Nodo[], rutaBuscada?: 'Plan' | 'Memoria' | 'Firma'): Nodo | undefined {
+    for (const nodo of nodos) {
+        if (rutaBuscada && nodo.RutaRelativa.toLowerCase() === rutaBuscada.toLowerCase()) {
+            return nodo;
+        }
+        if (nodo.Hijos.length > 0) {
+            const encontrado = BuscarNodoPorRuta(nodo.Hijos, rutaBuscada);
+            if (encontrado) return encontrado;
+        }
+    }
+    return undefined;
+}
+export function BuscarNodo(datosRecibidos: Nodo, rutaBuscada?: 'Plan' | 'Memoria' | 'Firma'): Nodo {
+    if (!rutaBuscada) {
+        return datosRecibidos.Hijos.find((h) => h.RutaRelativa.toLowerCase() === '') ?? datosRecibidos;
+    }
+    return BuscarNodoPorRuta(datosRecibidos.Hijos, rutaBuscada) ?? datosRecibidos;
+}
+
 export interface Archivo {
     nombre: string;
     url: string;
 }
 
-export const TransformarArchivos = (datosRecibidos: Nodo): Archivo[] => {
+export const TransformarArchivos = (datosRecibidos: Nodo, carpetaObjetio?: 'Plan' | 'Memoria' | 'Firma'): Archivo[] => {
     const resultado: Archivo[] = [];
-
-    const primerNodo = datosRecibidos;
+    const primerNodo = carpetaObjetio ? BuscarNodoPorRuta(datosRecibidos.Hijos, carpetaObjetio) ?? datosRecibidos : datosRecibidos;
     if (primerNodo.Hijos && primerNodo.Hijos.length > 0) {
         const archivoPrincipal = primerNodo.Hijos.find((h) => !h.EsCarpeta);
         if (archivoPrincipal) {

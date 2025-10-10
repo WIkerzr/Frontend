@@ -11,7 +11,7 @@ import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAni
 import { LlamadaArbolArchivos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Archivo, Nodo, TransformarArchivos } from '../../../components/Utils/data/YearData/yearDataTransformData';
-import { ArchivoBodyParams, LlamarDescargarArchivo } from '../../../components/Utils/data/utilsData';
+import { ArchivoBodyParams, LlamarDescargarArchivo, RutasArchivos } from '../../../components/Utils/data/utilsData';
 import { useUser } from '../../../contexts/UserContext';
 
 const Index = () => {
@@ -80,22 +80,27 @@ const Index = () => {
                     anioSeleccionada: yearData.year,
                     setLoading,
                     message: { setErrorMessage, setSuccessMessage },
-                    tipoPantalla: 'Plan',
                     onSuccess: (response) => {
                         const datosRecibidos: Nodo = response.data;
-                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos);
-                        setPlanGuardado(archivos);
+                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos, 'Plan');
+                        const archivoFirma: Archivo[] = TransformarArchivos(datosRecibidos, 'Firma');
+                        const archivosCombinados: Archivo[] = [...archivos, ...archivoFirma];
+                        setPlanGuardado(archivosCombinados);
                     },
                 });
             }
         }
     }, []);
 
-    const handleClick = (nombreArchivo: string, index: number) => {
+    const handleClick = (nombreArchivo: string, index: number, url: string) => {
+        let ruta: RutasArchivos = index > 0 ? 'Plan/Anexos' : 'Plan';
+        if (url === 'Firma') {
+            ruta = 'Firma';
+        }
         const body: ArchivoBodyParams = {
             NombreArchivo: nombreArchivo,
             RegionId: `${regionSeleccionada}`,
-            RutaArchivo: index > 0 ? 'Plan/Anexos' : 'Plan',
+            RutaArchivo: ruta,
             Year: `${yearData.year}`,
         };
 
@@ -215,7 +220,11 @@ const Index = () => {
                                         <img src={IconDownloand} alt="PDF" className="w-6 h-6 text-red-500" style={{ minWidth: 24, minHeight: 24 }} />
                                         <span className="font-medium">{archivo.nombre}</span>
                                     </div>
-                                    <a download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition" onClick={() => handleClick(archivo.nombre, idx)}>
+                                    <a
+                                        download
+                                        className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition"
+                                        onClick={() => handleClick(archivo.nombre, idx, archivo.url)}
+                                    >
                                         <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
                                             {t('descargar')}
                                         </button>
