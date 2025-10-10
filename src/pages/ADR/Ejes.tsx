@@ -75,7 +75,7 @@ const Index = () => {
     };
 
     const handleSave = () => {
-        if (!ejesEstrategicos) {
+        if (!ejesEstrategicos || !anioSeleccionada) {
             return;
         }
         const body: EjeSeleccion = {
@@ -95,7 +95,7 @@ const Index = () => {
             setSuccessMessage,
             body: body,
             async onSuccess() {
-                await llamadaBBDDYearData(anioSeleccionada!, true);
+                await llamadaBBDDYearData(anioSeleccionada, true);
             },
         });
     };

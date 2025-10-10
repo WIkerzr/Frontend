@@ -21,7 +21,6 @@ import { convertirArrayACadena, ConvertirIndicadoresServicioAAccion, formateaCon
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 import { useRegionContext } from './RegionContext';
-import { ModoDev } from '../components/Utils/data/controlDev';
 import { MessageSetters } from '../components/Utils/data/dataEjes';
 import { accionesTransformadasBackAFront, accionTransformadaBackAFront, checkData, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
 import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
@@ -632,11 +631,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const ejesPrioritarios: Ejes[] = [];
         const ejesRestantes: Ejes[] = [];
         const ejes: Ejes[] = [];
-        if (ModoDev) {
-            console.log('Llamada Year Data');
-            console.log('Estado del plan ' + data.data.Plan.Status + ' con idPlan: ' + data.data.Plan.Id);
-            console.log('Estado de la memoria ' + data.data.Memoria.Status + ' con idMemoria: ' + data.data.Memoria.Id);
-        }
         const generalOperationADRDTO: GeneralOperationADRDTOCompleto = data.data.Plan.GeneralOperationADR;
         const generalOperationADR: GeneralOperationADR = convertirGeneralOperationADR(generalOperationADRDTO);
 
@@ -696,10 +690,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             ejes,
             anioSeleccionada
         );
-        if (ModoDev) {
-            console.log('dotosAnio');
-            console.log('dotosAnio');
-        }
         setYearData(dotosAnio);
         if (retornarDatos) {
             return dotosAnio;

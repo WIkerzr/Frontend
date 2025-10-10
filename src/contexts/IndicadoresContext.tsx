@@ -234,11 +234,15 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 const indicadoresResultado: IndicadorResultado[] = JSON.parse(storedResultado);
                 setIndicadoresResultado(indicadoresResultado);
                 actualizarIndicadoresADR();
-                SegundaLlamadaEjes();
+                if (regionSeleccionada) {
+                    SegundaLlamadaEjes();
+                }
                 setLoading(false);
                 return;
             } else {
-                SegundaLlamadaEjes();
+                if (regionSeleccionada) {
+                    SegundaLlamadaEjes();
+                }
                 setLoading(false);
             }
         }
