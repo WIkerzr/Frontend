@@ -3,7 +3,7 @@ import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
 import { Fases, ModoDev } from '../components/Utils/data/controlDev';
 import CuadroMando from '../pages/Configuracion/CuadroMando/CuadroMando';
 import { ErrorPage } from './ErrorPage';
-const Informes = lazy(() => import('../pages/Configuracion/Informes/Informes'));
+import Informes from '../pages/Configuracion/Informes/Informes';
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion/EditarAccion'));
@@ -23,7 +23,7 @@ const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
 
 export const DefaultPath = Fases < 2 ? '/configuracion/usuarios' : '/configuracion/indicadoresADR';
 
-const routes = [
+const fase1 = [
     {
         path: '/profile',
         element: (
@@ -44,6 +44,8 @@ const routes = [
         layout: 'Usuarios',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
+];
+const fase2 = [
     {
         path: '/configuracion/indicadores',
         element: (
@@ -74,6 +76,8 @@ const routes = [
         layout: 'IndicadoresADR',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
+];
+const fase3 = [
     {
         path: '/adr/acciones',
         element: (
@@ -94,6 +98,8 @@ const routes = [
         layout: 'EditarAccion',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
+];
+const fase4 = [
     {
         path: '/adr/accionesYproyectos',
         element: (
@@ -134,6 +140,8 @@ const routes = [
         layout: 'EditarServicios',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
+];
+const fase5 = [
     {
         path: '/adr/planesGestion',
         element: (
@@ -175,6 +183,8 @@ const routes = [
         layout: 'memoriasAnuales/GestionEnvio',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
+];
+const fase6 = [
     {
         path: '/configuracion/CuadroMando',
         element: (
@@ -216,6 +226,9 @@ const routes = [
         layout: 'Informes',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
+];
+
+const inicial = [
     {
         path: '/',
         element: (
@@ -243,5 +256,9 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
+const todasLasFases = [fase1, fase2, fase3, fase4, fase5, fase6];
+const fasesActivas = todasLasFases.slice(0, Fases);
+const rutasDeFases = fasesActivas.flat();
+const routes = [...inicial, ...rutasDeFases];
 
 export { routes };
