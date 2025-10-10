@@ -67,7 +67,7 @@ export const SelectorTipoAccionCuadroMando: React.FC<SelectorTipoAccionProps> = 
             <label className="block mb-1">{t('CuadroMandoSelectorTipeAction')}</label>
             <select
                 className="w-full border rounded p-2 resize-y"
-                value={tipeAction}
+                value={t(tipeAction)}
                 onChange={(e) => {
                     if (e.target.value) {
                         setTipeAction(e.target.value as Actions);
@@ -76,30 +76,7 @@ export const SelectorTipoAccionCuadroMando: React.FC<SelectorTipoAccionProps> = 
             >
                 {actions.map((action) => (
                     <option key={action} value={action}>
-                        {action}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-};
-
-interface SelectorAnioCuadroMandoProps {
-    years: string[];
-    yearFilter: string;
-    setYearFilter: React.Dispatch<React.SetStateAction<string>>;
-}
-
-export const SelectorAnioCuadroMando: React.FC<SelectorAnioCuadroMandoProps> = ({ years, yearFilter, setYearFilter }) => {
-    const { t } = useTranslation();
-
-    return (
-        <div className="w-[200px]">
-            <label className="block mb-1">{t('CuadroMandoSelectorYear')}</label>
-            <select className="w-full border rounded p-2 resize-y" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
-                {years.map((anio) => (
-                    <option key={anio} value={anio}>
-                        {anio}
+                        {t(action)}
                     </option>
                 ))}
             </select>
@@ -263,7 +240,7 @@ interface TablasCuadroMandoProps {
 export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoProps>(({ tipeAction, Datayear, search, planStatus }, ref) => {
     const { t } = useTranslation();
 
-    if (tipeAction === 'Acciones y Proyectos' || tipeAction === 'Acciones' || tipeAction === 'Todos') {
+    if (tipeAction === 'AccionesAccesorias' || tipeAction === 'Acciones' || tipeAction === 'TODOS') {
         const accionesPorTipo = tipeAction === 'Acciones' ? Datayear.accion : Datayear.accionesAccesorias;
 
         return (
@@ -295,7 +272,7 @@ export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoPro
         );
     }
 
-    if ((tipeAction === 'Servicios' || tipeAction === 'Todos') && Datayear.servicios) {
+    if ((tipeAction === 'Servicios' || tipeAction === 'TODOS') && Datayear.servicios) {
         return Datayear.servicios.map((servicio, servicioIdx) => {
             const realizacion: IndicadoresServicios[] = servicio.indicadores.filter((indicador) => indicador.tipo === 'realizacion');
             const resultado: IndicadoresServicios[] = servicio.indicadores.filter((indicador) => indicador.tipo === 'resultado');

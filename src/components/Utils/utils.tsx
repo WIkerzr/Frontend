@@ -13,9 +13,10 @@ import IconXCircle from '../Icon/IconXCircle';
 import IconThumbUp from '../Icon/IconThumbUp';
 import { ApiTargetToken } from './data/controlDev';
 import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
-import { HMTServicios, IndicadoresServicios } from '../../types/GeneralTypes';
+import { HMTServicios, IndicadoresServicios, IndicadoresServiciosDTO } from '../../types/GeneralTypes';
 import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
-import { DatosAccion } from '../../types/TipadoAccion';
+import { DatosAccion, IndicadorRealizacionAccionDTO, IndicadorResultadoAccionDTO } from '../../types/TipadoAccion';
+import { ListadoNombresIdicadoresItem } from '../../pages/Configuracion/Informes/informeObjetivo';
 
 interface ModalProps {
     open: boolean;
@@ -675,4 +676,66 @@ export function ConvertirIndicadoresAccionAServicio(indicadorAccion?: DatosAccio
     });
 
     return resultado;
+}
+
+export function MemorizarResultadoFuncion<F extends (...args: any[]) => Promise<any>>(fn: F) {
+    const cache = new Map<string, ReturnType<F>>();
+    return async (...args: Parameters<F>) => {
+        const key = JSON.stringify(args);
+        if (cache.has(key)) return cache.get(key);
+        const res = await fn(...args);
+        cache.set(key, res);
+        return res;
+    };
+}
+
+export function ConvertirIndicadoresServicioAAccionDTO(
+    indicadores: IndicadoresServiciosDTO[],
+    listadoNombresRealizacion: ListadoNombresIdicadoresItem[],
+    listadoNombresResultado: ListadoNombresIdicadoresItem[]
+): {
+    indicadoreRealizacion: IndicadorRealizacionAccionDTO[];
+    indicadoreResultado: IndicadorResultadoAccionDTO[];
+} {
+    const indicadoreRealizacion: IndicadorRealizacionAccionDTO[] = [];
+    const indicadoreResultado: IndicadorResultadoAccionDTO[] = [];
+
+    indicadores.forEach((ind) => {
+        const base = {
+            id: ind.Id ?? 0,
+            descripcion: ind.Indicador,
+            Ejecutado_Hombre: ind.PrevistoHombres,
+            Ejecutado_Mujer: ind.PrevistoMujeres,
+            Ejecutado_Total: ind.PrevistoValor,
+            MetaAnual_Hombre: ind.AlcanzadoHombres,
+            MetaAnual_Mujer: ind.AlcanzadoMujeres,
+            MetaAnual_Total: ind.AlcanzadoValor,
+            hipotesis: '',
+        };
+
+        if (ind.Tipo === 'realizacion') {
+            const idIndicadorOriginal = listadoNombresRealizacion.find((re) => re.nombre === ind.Indicador)?.id;
+            indicadoreRealizacion.push({
+                ...base,
+                IndicadorRealizacionId: idIndicadorOriginal ?? 0,
+                NameEs: ind.Indicador,
+                NameEu: ind.Indicador,
+                DatosAccionId: ind.Id ?? 0,
+            });
+        } else {
+            const idIndicadorOriginal = listadoNombresResultado.find((re) => re.nombre === ind.Indicador)?.id;
+            indicadoreResultado.push({
+                ...base,
+                IndicadorResultadoId: idIndicadorOriginal ?? 0,
+                NameEs: ind.Indicador,
+                NameEu: ind.Indicador,
+                DatosAccionId: ind.Id ?? 0,
+            });
+        }
+    });
+
+    return {
+        indicadoreRealizacion,
+        indicadoreResultado,
+    };
 }

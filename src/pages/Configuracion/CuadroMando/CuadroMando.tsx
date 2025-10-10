@@ -5,12 +5,12 @@ import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosAnioCuadroMando, Ejes } from '../../../types/tipadoPlan';
-import { SelectorTipoAccionCuadroMando, SelectorAnioCuadroMando, TransformarYearDataACuadro, TablasCuadroMando } from './ConversorCuadroMando';
-import { InputBuscador } from '../../../components/Utils/inputs';
+import { SelectorTipoAccionCuadroMando, TransformarYearDataACuadro, TablasCuadroMando } from './ConversorCuadroMando';
+import { InputBuscador, SelectorAnio } from '../../../components/Utils/inputs';
 
-export type Actions = 'Todos' | 'Acciones' | 'Acciones y Proyectos' | 'Servicios';
+export type Actions = 'TODOS' | 'Acciones' | 'AccionesAccesorias' | 'Servicios';
 
-const actions: Actions[] = ['Todos', 'Acciones', 'Acciones y Proyectos', 'Servicios'];
+const actions: Actions[] = ['TODOS', 'Acciones', 'AccionesAccesorias', 'Servicios'];
 
 const Index = () => {
     const { t } = useTranslation();
@@ -35,11 +35,11 @@ const Index = () => {
         }
     }, [loadingYearData]);
 
-    const [years] = useState<string[]>(['Todos', ...anios.map(String)]);
-    const [yearFilter, setYearFilter] = useState<string>('Todos');
+    const [years] = useState<string[]>([t('TODOS'), ...anios.map(String)]);
+    const [yearFilter, setYearFilter] = useState<string>(t('TODOS'));
     const [search, setSearch] = useState('');
 
-    const [tipeAction, setTipeAction] = useState<Actions>('Todos');
+    const [tipeAction, setTipeAction] = useState<Actions>('TODOS');
 
     if (!regionSeleccionada) return;
 
@@ -67,21 +67,21 @@ const Index = () => {
                 <div className="flex-1 flex justify-end gap-4">
                     <InputBuscador setSearch={setSearch} />
                     <SelectorTipoAccionCuadroMando tipeAction={tipeAction} setTipeAction={setTipeAction} actions={actions} />
-                    <SelectorAnioCuadroMando years={years} yearFilter={yearFilter} setYearFilter={setYearFilter} />
+                    <SelectorAnio years={years} yearFilter={yearFilter} setYearFilter={setYearFilter} />
                 </div>
                 {datosAnios.map(
                     (Datayear: DatosAnioCuadroMando, DatayearIdx) =>
                         (yearFilter === 'Todos' || `${Datayear.year}` === yearFilter) && (
                             <div key={`${Datayear.nombreRegion}-${DatayearIdx}`}>
-                                {(tipeAction === 'Acciones' || tipeAction === 'Todos') && (
+                                {(tipeAction === 'Acciones' || tipeAction === 'TODOS') && (
                                     <TablasCuadroMando tipeAction="Acciones" Datayear={Datayear} search={search} planStatus={Datayear.planStatus} />
                                 )}
 
-                                {(tipeAction === 'Acciones y Proyectos' || tipeAction === 'Todos') && (
-                                    <TablasCuadroMando tipeAction="Acciones y Proyectos" Datayear={Datayear} search={search} planStatus={Datayear.planStatus} />
+                                {(tipeAction === 'AccionesAccesorias' || tipeAction === 'TODOS') && (
+                                    <TablasCuadroMando tipeAction="AccionesAccesorias" Datayear={Datayear} search={search} planStatus={Datayear.planStatus} />
                                 )}
 
-                                {(tipeAction === 'Servicios' || tipeAction === 'Todos') && (
+                                {(tipeAction === 'Servicios' || tipeAction === 'TODOS') && (
                                     <TablasCuadroMando tipeAction="Servicios" Datayear={Datayear} search={search} planStatus={Datayear.planStatus} />
                                 )}
                             </div>

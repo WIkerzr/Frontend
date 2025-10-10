@@ -413,6 +413,7 @@ import CreatableSelect from 'react-select/creatable';
 import { SingleValue } from 'react-select';
 import { EjesBBDD } from '../../types/tipadoPlan';
 import { TiposAccion } from '../../contexts/DatosAnualContext';
+import { Informes, tiposInformes } from '../../pages/Configuracion/Informes/Informes';
 interface OptionType {
     value: string;
     label: string;
@@ -528,10 +529,55 @@ export const InputBuscador = ({ setSearch, divClassName = 'h-1/2 mt-auto' }: Bus
 
     return (
         <div className={`flex ${divClassName}`}>
-            <input type="text" className="border border-gray-300 rounded p-2 " placeholder={t('Buscar') + ' ...'} value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+            <input type="text" className="border border-gray-300 rounded p-2 " placeholder={t('buscar') + ' ...'} value={buscar} onChange={(e) => setBuscar(e.target.value)} />
             <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => setSearch(buscar)}>
                 {t('buscar')}
             </button>
+        </div>
+    );
+};
+
+interface SelectorAnioProps {
+    years: string[];
+    yearFilter: string;
+    setYearFilter: React.Dispatch<React.SetStateAction<string>>;
+    className?: string;
+}
+
+export const SelectorAnio: React.FC<SelectorAnioProps> = ({ years, yearFilter, setYearFilter, className }) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className={`${className ? className : 'w-[200px]'}`}>
+            <label className="block mb-1">{t('CuadroMandoSelectorYear')}</label>
+            <select className="w-full border rounded p-2 resize-y" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
+                {years.map((anio) => (
+                    <option key={anio} value={anio}>
+                        {t(anio)}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+};
+interface SelectorAnioCuadroMandoProps {
+    informeSeleccionado: string;
+    setInformeSeleccionado: React.Dispatch<React.SetStateAction<Informes>>;
+}
+
+export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ informeSeleccionado, setInformeSeleccionado }) => {
+    const { t } = useTranslation();
+
+    return (
+        <div className="w-[350px]">
+            <label className="block mb-1">{t('SeleccionTipoInforme')}</label>
+            <select className="w-full border rounded p-2 resize-y" value={informeSeleccionado} onChange={(e) => setInformeSeleccionado(e.target.value as Informes)}>
+                {tiposInformes.map((informe) => (
+                    <option key={informe} value={informe}>
+                        {t(informe)}
+                    </option>
+                ))}
+            </select>
         </div>
     );
 };
