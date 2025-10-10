@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Users/componentes';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { useYear } from '../../../contexts/DatosAnualContext';
@@ -15,12 +15,14 @@ const actions: Actions[] = ['TODOS', 'Acciones', 'AccionesAccesorias', 'Servicio
 const Index = () => {
     const { t } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
+    const ultimaLlamadaRef = useRef<number | null>(null);
 
     const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
     const { anios, anioSeleccionada } = useEstadosPorAnio();
 
     useEffect(() => {
         if (!regionSeleccionada) return;
+        if (loadingYearData) return;
         if (yearData.plan.ejesPrioritarios.length === 0) return;
         let valida = false;
         const accionesPrio = yearData.plan.ejesPrioritarios[0].acciones;
@@ -31,7 +33,15 @@ const Index = () => {
             }
         }
         if (!valida) {
-            llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+            const ahora = Date.now();
+            const haceDiezSec = 10 * 1000;
+
+            const tiempoCumplido = !ultimaLlamadaRef.current || ahora - ultimaLlamadaRef.current > haceDiezSec;
+
+            if (tiempoCumplido) {
+                llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                ultimaLlamadaRef.current = ahora;
+            }
         }
     }, [loadingYearData]);
 
@@ -49,9 +59,15 @@ const Index = () => {
         if (!regionSeleccionada) return;
         if (yearData.plan.ejesPrioritarios.length === 0) return;
         const datoAnio: DatosAnioCuadroMando = TransformarYearDataACuadro(yearData);
-        setDatosAnios([datoAnio]);
+        if (!datosAnios.includes(datoAnio) && datosAnios.every((da) => da.nombreRegion !== datoAnio.nombreRegion)) {
+            setDatosAnios([...datosAnios, datoAnio]);
+        }
     }, [yearData]);
-    // if (datosAnios.length === 0) return;
+
+    if (loadingYearData) {
+        return <LoadingYearData />;
+    }
+    if (datosAnios.length === 0) return;
 
     return (
         <div className="panel">
@@ -62,7 +78,7 @@ const Index = () => {
                     </div>
                 }
             />
-            <LoadingYearData />
+
             <div className="p-5 flex flex-col gap-4 w-full paneln0">
                 <div className="flex-1 flex justify-end gap-4">
                     <InputBuscador setSearch={setSearch} />
@@ -71,7 +87,7 @@ const Index = () => {
                 </div>
                 {datosAnios.map(
                     (Datayear: DatosAnioCuadroMando, DatayearIdx) =>
-                        (yearFilter === 'Todos' || `${Datayear.year}` === yearFilter) && (
+                        (yearFilter === 'TODOS' || `${Datayear.year}` === yearFilter) && (
                             <div key={`${Datayear.nombreRegion}-${DatayearIdx}`}>
                                 {(tipeAction === 'Acciones' || tipeAction === 'TODOS') && (
                                     <TablasCuadroMando tipeAction="Acciones" Datayear={Datayear} search={search} planStatus={Datayear.planStatus} />
