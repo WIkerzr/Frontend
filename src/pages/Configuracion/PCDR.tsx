@@ -7,12 +7,14 @@ import { LlamadaBBDDSubirPCDR, LlamadaBBDDVerPCDR } from '../../components/Utils
 import { useRegionContext } from '../../contexts/RegionContext';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import { ArchivoBodyParams, LlamadaBBDDBorrarArchivo, LlamarDescargarArchivo } from '../../components/Utils/data/utilsData';
+import { useUser } from '../../contexts/UserContext';
 
 const Index = () => {
     const { t } = useTranslation();
     const [archivosPCDR, setArchivosPCDR] = useState<File[]>([]);
     const { regionSeleccionada } = useRegionContext();
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const { rol } = useUser();
 
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
@@ -22,8 +24,10 @@ const Index = () => {
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        handleCargarFicheros();
-    }, []);
+        if (regionSeleccionada) {
+            handleCargarFicheros();
+        }
+    }, [regionSeleccionada]);
 
     const handleCargarFicheros = async () => {
         LlamadaBBDDVerPCDR(
@@ -39,7 +43,9 @@ const Index = () => {
             }
         );
     };
-
+    if (!regionSeleccionada) {
+        return <span className="text-sm text-gray-600">{t('seleccioneRegion')}</span>;
+    }
     const handleGuardarFicheros = async () => {
         const archivos: File[] = [...archivosPCDR];
         await LlamadaBBDDSubirPCDR(
@@ -90,6 +96,7 @@ const Index = () => {
             },
         });
     };
+
     return (
         <div className="panel">
             <ZonaTitulo
@@ -125,9 +132,11 @@ const Index = () => {
                                 <span className="font-medium">{archivo}</span>
                             </div>
                             <div className="flex">
-                                <button type="button" className="ml-2 text-red-500 hover:text-red-700 p-3" onClick={() => handleEliminar(archivo)} aria-label={`Eliminar archivo ${archivo}`}>
-                                    ❌
-                                </button>
+                                {rol === 'ADR' && (
+                                    <button type="button" className="ml-2 text-red-500 hover:text-red-700 p-3" onClick={() => handleEliminar(archivo)} aria-label={`Eliminar archivo ${archivo}`}>
+                                        ❌
+                                    </button>
+                                )}
                                 <a download className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800 transition" onClick={() => handleClick(archivo)}>
                                     <button className="w-20 h-5 mr-2" style={{ minWidth: 20, minHeight: 20 }}>
                                         {t('descargar')}
@@ -136,10 +145,14 @@ const Index = () => {
                             </div>
                         </li>
                     ))}
-                    <section className="panel p-4 shadow-sm">
-                        <AdjuntarArchivos files={archivosPCDR} setFiles={setArchivosPCDR} multiple={true} />
-                    </section>
-                    <Boton tipo="guardar" textoBoton={t('enviar')} onClick={handleGuardarFicheros} />
+                    {rol === 'ADR' && (
+                        <>
+                            <section className="panel p-4 shadow-sm">
+                                <AdjuntarArchivos files={archivosPCDR} setFiles={setArchivosPCDR} multiple={true} />
+                            </section>
+                            <Boton tipo="guardar" textoBoton={t('enviar')} onClick={handleGuardarFicheros} />
+                        </>
+                    )}
                 </ul>
             </div>
         </div>

@@ -154,7 +154,7 @@ export const LlamadasBBDDSinJson = async <T = any, TBody = any>({
     return null;
 };
 
-export type RutasArchivos = 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos' | 'Firma';
+export type RutasArchivos = 'Plan' | 'Plan/Anexos' | 'Memoria' | 'Memoria/Anexos' | 'Firma' | '';
 export interface ArchivoBodyParams {
     RegionId: string;
     Year?: string;
