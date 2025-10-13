@@ -10,6 +10,7 @@ import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
 import { GenerarInformePrestamo } from './informePresupuesto';
 import { GenerarInformeObjetivos } from './informeObjetivo';
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
+import { generarInformeExcel } from './informeAcciones';
 
 export type Informes = 'InfObjetivos' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfPresupuestos';
 
@@ -26,8 +27,8 @@ const Index = () => {
 
     const currentYear = new Date().getFullYear();
 
-    const [years] = useState<string[]>([t('TODOS'), ...Array.from({ length: currentYear - 2025 + 1 }, (_, i) => (2025 + i).toString())]);
-    const [anioSeleccionado, setAnioSeleccionado] = useState<string>(t('TODOS'));
+    const [years] = useState<string[]>(['TODOS', ...Array.from({ length: currentYear - 2025 + 1 }, (_, i) => (2025 + i).toString())]);
+    const [anioSeleccionado, setAnioSeleccionado] = useState<string>('TODOS');
     const [informeSeleccionado, setInformeSeleccionado] = useState<Informes>('InfObjetivos');
     const [regionesEnDropdow, setRegionesEnDropdow] = useState<RegionInterface[]>([]);
     const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
@@ -36,22 +37,15 @@ const Index = () => {
 
     const handlePruebas = () => {
         //TODO borrar
-        // const sessionData = sessionStorage.getItem('lastInformeData');
-        // const data = sessionData ? JSON.parse(sessionData) : null;
-        // GenerarInformeObjetivos({
-        //     realizacion: data.response.indicadoresRealizacion,
-        //     resultado: data.response.indicadoresResultado,
-        //     servicios: data.response.indicadoresServicios,
-        //     ListadoNombresIdicadoresSegunADR,
-        //     t,
-        // });
-        //TODO informes acciones
+        const sessionData = sessionStorage.getItem('lastInformeData');
+        const data = sessionData ? JSON.parse(sessionData) : null;
+        generarInformeExcel(data.data, t, i18n);
     };
 
     const handleObtenerInforme = () => {
         const idRegionesSeleccionadas: number[] = regionesEnDropdow.map((r) => Number(r.RegionId));
         const body = {
-            AnioSeleccionado: [anioSeleccionado],
+            AnioSeleccionado: anioSeleccionado === 'TODOS' ? Array.from({ length: currentYear - 2025 + 1 }, (_, i) => (2025 + i).toString()) : [anioSeleccionado],
             InformeSeleccionado: informeSeleccionado,
             RegionesId: idRegionesSeleccionadas,
         };
@@ -64,8 +58,8 @@ const Index = () => {
             setSuccessMessage: setSuccessMessage,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onSuccess: (data: any) => {
+                sessionStorage.setItem('lastInformeData', JSON.stringify(data));
                 if (informeSeleccionado === 'InfObjetivos') {
-                    sessionStorage.setItem('lastInformeData', JSON.stringify(data));
                     GenerarInformeObjetivos({
                         realizacion: data.response.indicadoresRealizacion,
                         resultado: data.response.indicadoresResultado,
@@ -74,10 +68,12 @@ const Index = () => {
                         t,
                     });
                 }
+                if (informeSeleccionado === 'InfAcciones') {
+                    generarInformeExcel(data.data, t, i18n);
+                }
                 if (informeSeleccionado === 'InfPresupuestos') {
                     GenerarInformePrestamo({ resultados: data.data, t });
                 }
-                console.log(data);
             },
         });
     };
@@ -101,7 +97,7 @@ const Index = () => {
             />
 
             <div className="panel flex flex-row gap-x-4">
-                <SelectorAnio years={years} yearFilter={anioSeleccionado} setYearFilter={setAnioSeleccionado} />
+                <SelectorAnio years={years} yearFilter={t(`${anioSeleccionado}`)} setYearFilter={setAnioSeleccionado} />
                 <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} />
                 <div className="w-full resize-y ">
                     <label className="block mb-1">{t('seleccionaComarca')}</label>
