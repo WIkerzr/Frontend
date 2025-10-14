@@ -12,14 +12,14 @@ import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesSe
 import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Ejes } from '../../../types/tipadoPlan';
-import { TextoSegunIdioma } from '../../../components/Utils/utils';
+import { formateaConCeroDelante, TextoSegunIdioma } from '../../../components/Utils/utils';
 
 const Index: React.FC = () => {
     const navigate = useNavigate();
     const { regionSeleccionada } = useRegionContext();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
-    const { yearData, EliminarAccion, datosEditandoAccion, SeleccionEditarAccion, SeleccionVaciarEditarAccion } = useYear();
+    const { yearData, EliminarAccion, datosEditandoAccion, SeleccionEditarAccion, SeleccionVaciarEditarAccion, LoadingYearData } = useYear();
     const [accionesGrup, setAccionesGrup] = useState<DatosAccion[][]>([]);
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -128,6 +128,7 @@ const Index: React.FC = () => {
                 }}
                 timeDelay={false}
             />
+            <LoadingYearData />
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
@@ -143,9 +144,26 @@ const Index: React.FC = () => {
                 {accionesGrup.map((fila: DatosAccion[], filaIndex: number) => (
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((accion: DatosAccion) => {
-                            const editable = editarPlan || editarMemoria;
+                            let editable = editarPlan || editarMemoria;
+                            let colorAccion = 'bg-white';
+
+                            if (accion.accionCompartida?.regionLider) {
+                                const regionLider = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) === regionSeleccionada;
+                                if (regionLider) {
+                                    colorAccion = 'bg-teal-100';
+                                    editable = (editarPlan || editarMemoria) && true;
+                                }
+                                const regionCooperando = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) != regionSeleccionada;
+                                if (regionCooperando) {
+                                    colorAccion = 'bg-gray-300';
+                                    editable = false;
+                                }
+                            }
                             return (
-                                <div key={accion.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
+                                <div
+                                    key={accion.id}
+                                    className={`${colorAccion} flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}
+                                >
                                     <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('Eje')}: {TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}

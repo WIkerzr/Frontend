@@ -30,7 +30,7 @@ const ModalAviso: React.FC<ModalAvisoProps> = ({ isOpen, onClose, mensaje }) => 
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { yearData, errorMessageYearData, successMessageYearData, selectedId, SeleccionVaciarEditarAccion } = useYear();
+    const { yearData, errorMessageYearData, successMessageYearData, selectedId, SeleccionVaciarEditarAccion, LoadingYearData } = useYear();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
 
     const navigate = useNavigate();
@@ -67,6 +67,7 @@ const Index: React.FC = () => {
             />
 
             <div className="w-full mx-auto mt-1 px-2">
+                <LoadingYearData />
                 <div className="flex items-start  w-full h-100%">
                     {ejesSeleccionados.map((eje, index) => {
                         return (

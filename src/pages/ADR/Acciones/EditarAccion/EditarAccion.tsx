@@ -224,12 +224,12 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{'*' + t('Accion')}</label>
-                                {editarPlan ? (
-                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={(e) => handleAccionChange(e)} />
-                                ) : (
+                                {bloqueo ? (
                                     <span className="block  font-semibold">
                                         <span className="font-normal text-col">{datosEditandoAccion.accion}</span>
                                     </span>
+                                ) : (
+                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={(e) => handleAccionChange(e)} />
                                 )}
                             </div>
 
@@ -239,7 +239,9 @@ const Index: React.FC = () => {
                                         <span className="font-normal text-lg">{i18n.language === 'eu' ? nombreEjeEU : nombreEjeES}</span>
                                     </span>
                                     <span className="block  font-semibold">
-                                        {editarPlan ? (
+                                        {bloqueo ? (
+                                            <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
+                                        ) : (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
                                                 idEjeSeleccionado={ejeSeleccionado.EjeId}
@@ -247,8 +249,6 @@ const Index: React.FC = () => {
                                                 ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                                 tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
                                             />
-                                        ) : (
-                                            <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
                                         )}
                                     </span>
                                 </div>
@@ -265,7 +265,7 @@ const Index: React.FC = () => {
                                         type="checkbox"
                                         className="form-checkbox h-5 w-5 "
                                         checked={datosEditandoAccion.plurianual}
-                                        disabled={!editarPlan}
+                                        disabled={bloqueo}
                                     />
                                     <label>{t('plurianual')}</label>
                                 </div>

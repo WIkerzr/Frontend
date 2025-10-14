@@ -378,13 +378,14 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                 {accionesMostradas.map((accion) => {
                     let editable = editarPlan || editarMemoria;
                     let colorAccion = 'bg-white';
-                    if (accion.accionCompartida && Array.isArray(accion.accionCompartida.regiones)) {
-                        const regionLider = formateaConCeroDelante(`${accion.accionCompartida.regionLider.RegionId}`) === regionSeleccionada;
+
+                    if (accion.accionCompartida?.regionLider) {
+                        const regionLider = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) === regionSeleccionada;
                         if (regionLider) {
                             colorAccion = 'bg-teal-100';
                             editable = true;
                         }
-                        const regionCooperando = accion.accionCompartida.regiones.find((r) => formateaConCeroDelante(`${r.RegionId}`) === regionSeleccionada);
+                        const regionCooperando = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) != regionSeleccionada;
                         if (regionCooperando) {
                             colorAccion = 'bg-gray-300';
                             editable = false;

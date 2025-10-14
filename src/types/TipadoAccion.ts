@@ -58,6 +58,7 @@ export interface DatosMemoria {
 }
 
 export interface AccionCompartida {
+    idCompartida?: number;
     regionLider: RegionInterface;
     regiones: RegionInterface[];
 }
@@ -281,10 +282,13 @@ export interface DatosMemoriaDTO {
     DSeguimiento?: string;
     ValFinal?: string;
 }
-
+export interface AccionCompartidaRegionDTO {
+    RegionId: number;
+}
 export interface AccionCompartidaDTO {
-    Id: number;
-    RegionLiderId?: number;
+    Id?: number;
+    RegionLiderId: number;
+    AccionCompartidaRegiones?: AccionCompartidaRegionDTO[];
 }
 
 export interface IndicadorRealizacionAccionDTO {

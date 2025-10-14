@@ -25,6 +25,7 @@ import { MessageSetters } from '../components/Utils/data/dataEjes';
 import { accionesTransformadasBackAFront, accionTransformadaBackAFront, checkData, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
 import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
 import { LoadingOverlay } from '../pages/Configuracion/Users/componentes';
+import { RegionInterface } from '../components/Utils/data/getRegiones';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -249,7 +250,22 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                                 indicadoreRealizacion: indicadorRealizacionAccion,
                                 indicadoreResultado: indicadorResultadoAccion,
                             },
-                            accionCompartida: response.data?.AccionCompartida ?? null,
+                            accionCompartida: response.data?.AccionCompartida
+                                ? {
+                                      idCompartida: response.data?.AccionCompartida.Id,
+                                      regiones: response.data?.AccionCompartida.Regiones.map((r: RegionInterface) => ({
+                                          RegionId: r.RegionId.toString(),
+                                          NameEs: '',
+                                          NameEu: '',
+                                      })),
+                                      regionLider: {
+                                          RegionId: response.data?.AccionCompartida.RegionLiderId.toString(),
+                                          NameEs: '',
+                                          NameEu: '',
+                                      },
+                                  }
+                                : undefined,
+
                             datosPlan: dataPlan,
                             datosMemoria: dataMemoria,
                             ejeId: idEje,
@@ -508,6 +524,9 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
 
+        if (datosEditandoAccion.accionCompartida?.regiones.every((r) => r.RegionId === undefined)) {
+            console.log('NOP');
+        }
         LlamadasBBDD<any, DatosAccionDTO>({
             method: 'POST',
             url: `actionData/editAction/${datosEditandoAccion.id}`,
@@ -524,7 +543,16 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 DatosPlan: DatosPlan,
                 DatosMemoriaId: DatosMemoria.Id ? Number(DatosMemoria.Id) : undefined,
                 DatosMemoria: DatosMemoria,
-                AccionCompartidaId: datosEditandoAccion.accionCompartidaid ?? undefined,
+                AccionCompartidaId: datosEditandoAccion.accionCompartidaid,
+                AccionCompartida: datosEditandoAccion.accionCompartida
+                    ? {
+                          Id: datosEditandoAccion.accionCompartida.idCompartida,
+                          RegionLiderId: Number(datosEditandoAccion.accionCompartida.regionLider.RegionId),
+                          AccionCompartidaRegiones: datosEditandoAccion.accionCompartida.regiones.map((e) => ({
+                              RegionId: Number(e.RegionId),
+                          })),
+                      }
+                    : undefined,
                 IndicadorRealizacionAcciones: indicadoreRealizacionEdit,
                 IndicadorResultadoAcciones: indicadoreResultadoEdit,
             },
@@ -647,6 +675,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     lineaActuaccion: accion.LineaActuaccion,
                     plurianual: accion.Plurianual,
                     camposFaltantes: accion.CamposFaltantes,
+                    accionCompartida: {
+                        regionLider: accion.RegionLiderId,
+                        regiones: [],
+                    },
                 }));
             }
 
@@ -714,6 +746,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage: setErrorMessageYearData,
             setSuccessMessage: setSuccessMessageYearData,
             onSuccess: (data: any) => {
+                sessionStorage.setItem('lastInformeData', JSON.stringify(data));
                 onSuccessYearData(data, false, false, anioSeleccionada);
             },
         });

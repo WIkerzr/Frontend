@@ -13,7 +13,6 @@ import IconCaretDown from '../Icon/IconCaretDown';
 import IconServiciosPrestados from '../Icon/Menu/IconServiciosPrestados.svg';
 import IconAcciones from '../Icon/Menu/IconAcciones.svg';
 import IconAccionesAccesorias from '../Icon/Menu/IconAccionesAccesorias.svg';
-import IconCuadroMando from '../Icon/Menu/IconCuadroMando.svg';
 import IconEjes from '../Icon/Menu/IconEjes.svg';
 import IconPlan from '../Icon/Menu/IconPlan.svg';
 import IconMemoria from '../Icon/Menu/IconMemoria.svg';
@@ -126,8 +125,17 @@ const Sidebar = () => {
                         </li>
                         {Fases >= 6 && (
                             <>
-                                <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} />
-                                <SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} />
+                                {/* <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} /> */}
+                                <li>
+                                    <NavLink to={'/configuracion/cuadroMando'}>
+                                        <span>{t('CuadroMando')}</span>
+                                    </NavLink>
+                                </li>
+                                {/*<SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} /> */}
+
+                                <li>
+                                    <NavLink to="/configuracion/indicadoresInpacto">{t('indicadoresInpacto')}</NavLink>
+                                </li>
                                 <li>
                                     <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
                                 </li>

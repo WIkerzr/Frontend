@@ -22,6 +22,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
     const opcionesODSEUSegunIdioma = t('object:opcionesODS', { returnObjects: true }) as string[];
     const [entidades, setEntidades] = useState<string[]>(datosEditandoAccion.datosPlan!.ejecutora ? datosEditandoAccion.datosPlan!.ejecutora.split('§') : []);
+    const [dataMultiselect, setDataMultiselect] = useState<RegionInterface[]>();
 
     useEffect(() => {
         if (datosEditandoAccion.accionCompartida && datosEditandoAccion.accionCompartida.regionLider && Number(datosEditandoAccion.accionCompartida.regionLider.RegionId) > 0) {
@@ -34,6 +35,19 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 setBloqueo(false);
             }
         }
+        const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoAccion.accionCompartida?.regiones ?? [];
+        const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
+            const regionIdNormalizado = r.RegionId.padStart(2, '0');
+
+            const regionCompleta = regiones.find((reg) => reg.RegionId.padStart(2, '0') === regionIdNormalizado);
+
+            return {
+                RegionId: regionIdNormalizado,
+                NameEs: regionCompleta?.NameEs || '',
+                NameEu: regionCompleta?.NameEu || '',
+            };
+        });
+        setDataMultiselect(regionesCompletadas);
     }, []);
 
     useEffect(() => {
@@ -80,7 +94,13 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             setDatosEditandoAccion({
                 ...datosEditandoAccion,
                 accionCompartida: {
-                    regionLider: regionActual,
+                    idCompartida: datosEditandoAccion.accionCompartidaid,
+                    regionLider: {
+                        id: regionActual.RegionId,
+                        RegionId: regionActual.RegionId,
+                        NameEs: '',
+                        NameEu: '',
+                    },
                     regiones: [],
                 },
             });
@@ -93,31 +113,35 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
         setRegionesSupracomarcal(supracomarcal);
     };
 
-    const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
-        if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
-            alert(t('error:errorFaltaRegionLider'));
-            return;
-        }
+    // const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
+    //     if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
+    //         alert(t('error:errorFaltaRegionLider'));
+    //         return;
+    //     }
+    //     setDatosEditandoAccion({
+    //         ...datosEditandoAccion,
+    //         accionCompartida: {
+    //             regionLider: regionActual,
+    //             regiones: selected,
+    //         },
+    //     });
+    // };
+
+    const handleChangeRegionsSupracomarcal = (selectedList: RegionInterface[]) => {
+        setDataMultiselect(selectedList);
+
         setDatosEditandoAccion({
             ...datosEditandoAccion,
             accionCompartida: {
-                regionLider: regionActual,
-                regiones: selected,
+                regionLider: {
+                    RegionId: regionActual?.RegionId ?? '0',
+                    NameEs: '',
+                    NameEu: '',
+                },
+                regiones: selectedList,
             },
         });
     };
-
-    const regionesEnDropdow = regiones.map((region) => ({
-        id: region.RegionId,
-        NameEs: region.NameEs,
-        NameEu: region.NameEu,
-    }));
-
-    const regionesPreselecionadasEnDropdow = datosEditandoAccion.accionCompartida?.regiones.map((region) => ({
-        id: region.RegionId,
-        NameEs: region.NameEs,
-        NameEu: region.NameEu,
-    }));
     const opcionesComarcalSinOtros = opcionesComarcal.filter((op) => op !== 'Otros');
     const opcionesSupraComarcalSinOtros = opcionesSupraComarcal.filter((op) => op !== 'Otros');
     return (
@@ -178,8 +202,8 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <label>{t('comarcasIncluidasSupracomarcal')} </label>
                         <Multiselect
                             placeholder={t('seleccionaMultiOpcion')}
-                            options={regionesEnDropdow}
-                            selectedValues={regionesPreselecionadasEnDropdow}
+                            options={regiones}
+                            selectedValues={dataMultiselect}
                             displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
                             onSelect={handleChangeRegionsSupracomarcal}
                             onRemove={handleChangeRegionsSupracomarcal}
