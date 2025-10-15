@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { Estado, IndicadoresServicios, Servicios } from '../../../types/GeneralTypes';
 import { DatosAccion } from '../../../types/TipadoAccion';
-import { DatosAccionCuadroMando, DatosAnioCuadroMando, Ejes, ServiciosCuadroMando, YearData } from '../../../types/tipadoPlan';
+import { DatosAccionCuadroMando, DatosAnioCuadroMando, DatosAnioCuadroMandoBorrador, Ejes, ServiciosCuadroMando, YearData } from '../../../types/tipadoPlan';
 import { Actions } from './CuadroMando';
 import { sortBy } from 'lodash';
 import { DataTableSortStatus, DataTableColumnTextAlign, DataTable } from 'mantine-datatable';
 import { forwardRef, useState, useEffect } from 'react';
 import { visualColumnByPath } from '../../../components/Utils/utilsTabla/Columnas';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../types/Indicadores';
+import { ConvertirIndicadoresServicioAAccion } from '../../../components/Utils/utils';
 
 export const TransformarYearDataACuadro = (yearData: YearData): DatosAnioCuadroMando => {
     const servicios: Servicios[] = yearData.servicios ? yearData.servicios : [];
@@ -54,6 +55,57 @@ export const TransformarYearDataACuadro = (yearData: YearData): DatosAnioCuadroM
     };
 };
 
+export const TransformarYearDataACuadroBorrador = (yearData: YearData): DatosAnioCuadroMandoBorrador => {
+    const servicios: Servicios[] = yearData.servicios ? yearData.servicios : [];
+    const ejesPrioritarios: Ejes[] = yearData.plan.ejesPrioritarios.filter((eje: Ejes) => eje.IsPrioritarios);
+    const ejesRestantes: Ejes[] = yearData.plan.ejesRestantes ? yearData.plan.ejesRestantes.filter((eje: Ejes) => eje.IsAccessory) : [];
+
+    const servicioAccion: DatosAccion[] = [];
+    servicios.forEach((servicio) => {
+        const accion: DatosAccion = {
+            id: '',
+            accion: servicio.nombre,
+            lineaActuaccion: servicio.lineaActuaccion,
+            ejeId: '',
+            indicadorAccion: ConvertirIndicadoresServicioAAccion(servicio.indicadores),
+            accionCompartida: undefined,
+            plurianual: false,
+        };
+        servicioAccion.push(accion);
+    });
+
+    const sacarAcciones = (ejes: Ejes[]): DatosAccion[] => {
+        const acciones: DatosAccion[] = [];
+        for (let index = 0; index < ejes.length; index++) {
+            const eje = ejes[index];
+            acciones.push(...eje.acciones);
+        }
+        return acciones;
+    };
+    const tranformarAcciones = (acciones: DatosAccion[]): DatosAccionCuadroMando[] => {
+        return acciones.map(({ id, accion, lineaActuaccion, ejeId, indicadorAccion, accionCompartida, plurianual }) => ({
+            id: Number(id),
+            nombreAccion: accion,
+            ejeId: ejeId ? Number(ejeId) : 0,
+            lineaActuaccion: lineaActuaccion,
+            indicadorAccion: indicadorAccion,
+            AccionCompartida: accionCompartida && Number(accionCompartida.regionLider.RegionId) != 0 ? true : false,
+            plurianual: plurianual,
+        }));
+    };
+
+    const prioritarios = tranformarAcciones(sacarAcciones(ejesPrioritarios));
+    const accesorias = tranformarAcciones(sacarAcciones(ejesRestantes));
+    return {
+        nombreRegion: yearData.nombreRegion,
+        year: yearData.year,
+        accion: prioritarios,
+        accionesAccesorias: accesorias,
+        servicios: tranformarAcciones(servicioAccion),
+        planStatus: yearData.plan.status,
+        memoriaStatus: yearData.memoria.status,
+    };
+};
 interface SelectorTipoAccionProps {
     tipeAction: Actions;
     setTipeAction: React.Dispatch<React.SetStateAction<Actions>>;
@@ -232,7 +284,7 @@ const filtrarAcciones = (search: string, indicador: IndicadorRealizacionAccion[]
     return filtered;
 };
 interface TablasCuadroMandoProps {
-    tipeAction: Actions;
+    tipeAction: Exclude<Actions, 'TODOS'>;
     Datayear: DatosAnioCuadroMando;
     search: string;
     planStatus: Estado;
@@ -240,7 +292,7 @@ interface TablasCuadroMandoProps {
 export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoProps>(({ tipeAction, Datayear, search, planStatus }, ref) => {
     const { t } = useTranslation();
 
-    if (tipeAction === 'AccionesAccesorias' || tipeAction === 'Acciones' || tipeAction === 'TODOS') {
+    if (tipeAction === 'AccionesAccesorias' || tipeAction === 'Acciones') {
         const accionesPorTipo = tipeAction === 'Acciones' ? Datayear.accion : Datayear.accionesAccesorias;
 
         return (
@@ -249,7 +301,7 @@ export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoPro
                     if (!accion.indicadorAccion) return null;
 
                     const realizacion: IndicadorRealizacionAccion[] = accion.indicadorAccion.indicadoreRealizacion;
-                    const resultado: IndicadorResultadoAccion[] = accion.indicadorAccion.indicadoreResultado; // <-- Ojo aquí, antes estabas usando "indicadoreRealizacion" dos veces
+                    const resultado: IndicadorResultadoAccion[] = accion.indicadorAccion.indicadoreResultado;
 
                     const realizacionFiltrados = filtrarAcciones(search, realizacion);
                     const resultadoFiltrados = filtrarAcciones(search, resultado);
@@ -272,7 +324,7 @@ export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoPro
         );
     }
 
-    if ((tipeAction === 'Servicios' || tipeAction === 'TODOS') && Datayear.servicios) {
+    if (tipeAction === 'Servicios' && Datayear.servicios) {
         return Datayear.servicios.map((servicio, servicioIdx) => {
             const realizacion: IndicadoresServicios[] = servicio.indicadores.filter((indicador) => indicador.tipo === 'realizacion');
             const resultado: IndicadoresServicios[] = servicio.indicadores.filter((indicador) => indicador.tipo === 'resultado');
@@ -293,3 +345,41 @@ export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoPro
         });
     }
 });
+
+export const obtenerFilasPorTipoAccion = (tipeAction: Exclude<Actions, 'TODOS'>, Datayear: DatosAnioCuadroMandoBorrador) => {
+    type RealizacionAccionConNombre = IndicadorRealizacionAccion & { nombreAccion: string };
+    type ResultadoAccionConNombre = IndicadorResultadoAccion & { nombreAccion: string };
+
+    const filasRealizacion: RealizacionAccionConNombre[] = [];
+    const filasResultado: ResultadoAccionConNombre[] = [];
+
+    let accionesPorTipo: DatosAccionCuadroMando[];
+    switch (tipeAction) {
+        case 'Acciones':
+            accionesPorTipo = Datayear.accion;
+            break;
+        case 'AccionesAccesorias':
+            accionesPorTipo = Datayear.accionesAccesorias;
+            break;
+        case 'Servicios':
+            accionesPorTipo = Datayear.servicios;
+            break;
+    }
+
+    accionesPorTipo.forEach((accion) => {
+        if (!accion.indicadorAccion) return;
+
+        const realizacion: RealizacionAccionConNombre[] = accion.indicadorAccion.indicadoreRealizacion.map((item) => ({
+            ...item,
+            nombreAccion: accion.nombreAccion,
+        }));
+        const resultado_ind: ResultadoAccionConNombre[] = accion.indicadorAccion.indicadoreResultado.map((item) => ({
+            ...item,
+            nombreAccion: accion.nombreAccion,
+        }));
+
+        filasRealizacion.push(...realizacion);
+        filasResultado.push(...resultado_ind);
+    });
+    return [filasRealizacion, filasResultado];
+};

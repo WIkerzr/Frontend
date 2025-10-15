@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { Ejes, OperationalIndicators, YearData } from '../../types/tipadoPlan';
+import { DatosAnioCuadroMandoBorrador, Ejes, OperationalIndicators, YearData } from '../../types/tipadoPlan';
 import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
 import { DatosAccion } from '../../types/TipadoAccion';
 import PizZip from 'pizzip';
@@ -8,6 +8,8 @@ import { HMT, IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResulta
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
 import { PlanOMemoria } from '../../pages/ADR/PlanMemoria/PlanMemoriaComponents';
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
+import { obtenerFilasPorTipoAccion, TransformarYearDataACuadroBorrador } from '../../pages/Configuracion/CuadroMando/ConversorCuadroMando';
+import { useYear } from '../../contexts/DatosAnualContext';
 
 const formatHMT = (dato: HMT | undefined) => {
     if (dato === undefined) {
@@ -206,7 +208,7 @@ export const GeneracionDelDocumentoWordPlan = async (
         const url = URL.createObjectURL(out);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'resultado.docx';
+        a.download = `${t('Plan')}_${datos.year}_${datos.nombreRegion}`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
@@ -310,6 +312,20 @@ export const GeneracionDelDocumentoWordMemoria = async (
         };
         const [hipotesisRA, hipotesisRS] = hipotesis();
 
+        let datosCuadro: DatosAnioCuadroMandoBorrador[] = [];
+        const datoAnio: DatosAnioCuadroMandoBorrador = TransformarYearDataACuadroBorrador(datos);
+        if (!datosCuadro.includes(datoAnio) && datosCuadro.every((da) => da.nombreRegion !== datoAnio.nombreRegion)) {
+            datosCuadro = [...datosCuadro, datoAnio];
+        }
+        const cuadroAcciones = obtenerFilasPorTipoAccion('Acciones', datosCuadro[0]);
+        const cuadroAccionesAccesorias = obtenerFilasPorTipoAccion('AccionesAccesorias', datosCuadro[0]);
+        const cuadroServicios = obtenerFilasPorTipoAccion('Servicios', datosCuadro[0]);
+
+        const cuadroMandoRealizacion = [...(cuadroAcciones[0] || []), ...(cuadroAccionesAccesorias[0] || []), ...(cuadroServicios[0] || [])];
+        const cuadroMandoResultado = [...(cuadroAcciones[1] || []), ...(cuadroAccionesAccesorias[1] || []), ...(cuadroServicios[1] || [])];
+
+        console.log(cuadroMandoResultado);
+
         // 4. Datos a sustituir
         let contAccion = 1;
         const data = {
@@ -365,11 +381,29 @@ export const GeneracionDelDocumentoWordMemoria = async (
             resumenAccion: Acciones(accionesPrioritarias),
             //6.
             resumenAccionYProyectos: Acciones(accionesYProyectos),
-            //7.1
+            //7
+
+            cuadroMandoRealizacion: cuadroMandoRealizacion.map((item) => ({
+                accion: item.nombreAccion || '',
+                indicadoresRealizacion: item.descripcion || '',
+                valorInicial: item.ejecutado?.total || '',
+                metaA: item.metaAnual?.total || '',
+                valorAlcanzado: item.metaFinal?.total || '',
+                porcentaje: ((Number(item.metaFinal?.total) / Number(item.metaAnual?.total)) * 100).toFixed(2),
+            })),
+            cuadroMandoResultado: cuadroMandoResultado.map((item) => ({
+                accion: item.nombreAccion || '',
+                indicadoresResultado: item.descripcion || '',
+                valorInicial: item.ejecutado?.total || '',
+                metaA: item.metaAnual?.total || '',
+                valorAlcanzado: item.metaFinal?.total || '',
+                porcentaje: ((Number(item.metaFinal?.total) / Number(item.metaAnual?.total)) * 100).toFixed(2),
+            })),
+
+            //8
             iRAAnexo1: hipotesisRA.length > 0 ? hipotesisRA : [{ nombre: '', hipo: '' }],
             iRSAnexo1: hipotesisRS.length > 0 ? hipotesisRS : [{ nombre: '', hipo: '' }],
         };
-        console.log(data);
 
         // 5. Renderizar documento con datos
         doc.render(data);
@@ -384,7 +418,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
         const url = URL.createObjectURL(out);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'resultado.docx';
+        a.download = `${t('Memoria')}_${datos.year}_${datos.nombreRegion}`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
@@ -392,30 +426,30 @@ export const GeneracionDelDocumentoWordMemoria = async (
     }
 };
 interface BtnExportarDocumentoWordProps {
-    camposRellenos: boolean;
-    yearData: YearData;
+    // camposRellenos: boolean;
     tipo: PlanOMemoria;
     language: string;
     t: (key: string) => string;
 }
 
-export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ camposRellenos, yearData, tipo, language, t }) => {
+export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ tipo, language, t }) => {
     const { indicadoresRealizacion, indicadoresResultado } = useIndicadoresContext();
+    const { yearData, llamadaBBDDYearDataAll } = useYear();
 
     return (
         <button
-            disabled={!camposRellenos}
-            onClick={() => {
-                if (!camposRellenos) return;
+            // disabled={!camposRellenos}
+            onClick={async () => {
+                const updatedYearData = await llamadaBBDDYearDataAll(yearData.year, true, true);
+                const dataToUse = updatedYearData || yearData;
+
                 if (tipo === 'Plan') {
-                    GeneracionDelDocumentoWordPlan(yearData, indicadoresRealizacion, indicadoresResultado, language, t);
+                    await GeneracionDelDocumentoWordPlan(dataToUse, indicadoresRealizacion, indicadoresResultado, language, t);
                 } else {
-                    GeneracionDelDocumentoWordMemoria(yearData, indicadoresRealizacion, indicadoresResultado, language, t);
+                    await GeneracionDelDocumentoWordMemoria(dataToUse, indicadoresRealizacion, indicadoresResultado, language, t);
                 }
             }}
-            className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px]    
-                                                ${camposRellenos ? 'bg-gray-400 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
-                                                `}
+            className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px] bg-gray-400 text-white hover:bg-gray-500`}
         >
             <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
             {t('descargarBorrador')}

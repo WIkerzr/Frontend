@@ -140,6 +140,8 @@ const Index = () => {
                                     <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={() => setGuardado(true)}>
                                         {t('guardar')}
                                     </button>
+                                    {/* <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} language={i18n.language} t={t} /> */}
+                                    <BtnExportarDocumentoWord tipo="Memoria" language={i18n.language} t={t} />
                                     <button
                                         className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                         onClick={async () => {
@@ -154,7 +156,6 @@ const Index = () => {
                                     >
                                         {t('validarDatosAnio')}
                                     </button>
-                                    <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} language={i18n.language} t={t} />
                                     <NavLink
                                         to={camposRellenos ? '/adr/memoriasAnuales/gestionEnvio' : '#'}
                                         state={{ pantalla: 'Memoria' }}

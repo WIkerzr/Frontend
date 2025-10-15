@@ -244,3 +244,13 @@ export interface DatosAnioCuadroMando {
     planStatus: Estado;
     memoriaStatus: Estado;
 }
+
+export interface DatosAnioCuadroMandoBorrador {
+    year: Year;
+    nombreRegion: string;
+    accion: DatosAccionCuadroMando[];
+    accionesAccesorias: DatosAccionCuadroMando[];
+    servicios: DatosAccionCuadroMando[];
+    planStatus: Estado;
+    memoriaStatus: Estado;
+}
