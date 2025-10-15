@@ -89,6 +89,11 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                 ejecucionPresupuestaria: {
                     ...datosEditandoAccion.datosMemoria!.ejecucionPresupuestaria!,
                     [name]: value || '',
+                    porcentaje: (() => {
+                        const ejecutado = name === 'ejecutado' ? Number(value) : Number(dataMemPresu.ejecutado);
+                        const previsto = name === 'previsto' ? Number(value) : Number(dataMemPresu.previsto);
+                        return previsto > 0 ? ((ejecutado / previsto) * 100).toFixed(2) : '0.00';
+                    })(),
                 },
             },
         });
@@ -215,14 +220,7 @@ export const PestanaMemoria = forwardRef<HTMLButtonElement>(() => {
                                 />
                             </td>
                             <td className="px-4 py-2">
-                                <input
-                                    type="number"
-                                    className="w-full border rounded px-2 py-1 h-[38px]"
-                                    name="porcentaje"
-                                    disabled={bloqueo}
-                                    value={bloqueo ? dataMemPresu.porcentaje : (Number(dataMemPresu.ejecutado) / Number(dataMemPresu.previsto)) * 100}
-                                    onChange={handleEjecucionChange}
-                                />
+                                <input type="number" className="w-full border rounded px-2 py-1 h-[38px]" name="porcentaje" disabled={true} value={dataMemPresu.porcentaje} />
                             </td>
                         </tr>
                     </tbody>
