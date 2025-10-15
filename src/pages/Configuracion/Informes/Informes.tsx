@@ -10,7 +10,8 @@ import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
 import { GenerarInformePrestamo } from './informePresupuesto';
 import { GenerarInformeObjetivos } from './informeObjetivo';
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
-import { generarInformeExcel } from './informeAcciones';
+import { generarInformeAcciones } from './informeAcciones';
+import { generarInformeTratamientoComarcal } from './InformesTratamientoComarcal';
 
 export type Informes = 'InfObjetivos' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfPresupuestos';
 
@@ -39,7 +40,7 @@ const Index = () => {
         //TODO borrar
         const sessionData = sessionStorage.getItem('lastInformeData');
         const data = sessionData ? JSON.parse(sessionData) : null;
-        generarInformeExcel(data.data, t, i18n);
+        generarInformeTratamientoComarcal(data.data, t);
     };
 
     const handleObtenerInforme = () => {
@@ -69,7 +70,10 @@ const Index = () => {
                     });
                 }
                 if (informeSeleccionado === 'InfAcciones') {
-                    generarInformeExcel(data.data, t, i18n);
+                    generarInformeAcciones(data.data, t, i18n);
+                }
+                if (informeSeleccionado === 'InfTratamientoComarcal') {
+                    generarInformeTratamientoComarcal(data.data, t);
                 }
                 if (informeSeleccionado === 'InfPresupuestos') {
                     GenerarInformePrestamo({ resultados: data.data, t });
@@ -77,6 +81,7 @@ const Index = () => {
             },
         });
     };
+
     return (
         <div className="panel">
             <ZonaTitulo

@@ -196,7 +196,7 @@ const fase6 = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/indicadoresInpacto',
+        path: '/configuracion/indicadoresImpacto',
         element: (
             <OnlyIfLoggedIn>
                 <IndicadoresInpacto />

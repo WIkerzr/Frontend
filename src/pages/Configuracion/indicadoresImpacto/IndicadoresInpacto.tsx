@@ -100,9 +100,9 @@ const Index = () => {
     const [mostrarDrop, setMostrarDrop] = useState<number>(0);
 
     useEffect(() => {
-        const indicadoresInpacto = sessionStorage.getItem('indicadoresInpacto');
-        if (indicadoresInpacto && indicadoresInpacto?.length > 0) {
-            setIndicadores(JSON.parse(indicadoresInpacto));
+        const indicadoresImpacto = sessionStorage.getItem('indicadoresImpacto');
+        if (indicadoresImpacto && indicadoresImpacto?.length > 0) {
+            setIndicadores(JSON.parse(indicadoresImpacto));
         }
     }, []);
 
@@ -325,7 +325,7 @@ const Index = () => {
                 indicado.push(indicador);
             }
         }
-        sessionStorage.setItem('indicadoresInpacto', JSON.stringify(indicado));
+        sessionStorage.setItem('indicadoresImpacto', JSON.stringify(indicado));
     };
 
     return (
@@ -333,7 +333,7 @@ const Index = () => {
             <ZonaTitulo
                 titulo={
                     <div className="text-xl font-bold flex items-center space-x-2 ">
-                        <span>{t('indicadoresInpacto')}</span>
+                        <span>{t('indicadoresImpacto')}</span>
                     </div>
                 }
                 zonaBtn={

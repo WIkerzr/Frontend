@@ -63,7 +63,7 @@ const generarInformeResumen = (datos: DatoEje[], i18n: { language: string }): Re
     return Array.from(mapa.values());
 };
 
-export const generarInformeExcel = async (anios: RegionAnio[], t: TFunction<'translation'>, i18n: { language: string }) => {
+export const generarInformeAcciones = async (anios: RegionAnio[], t: TFunction<'translation'>, i18n: { language: string }) => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Informe de Acciones');
 

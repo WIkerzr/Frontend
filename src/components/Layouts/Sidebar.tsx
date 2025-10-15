@@ -131,10 +131,10 @@ const Sidebar = () => {
                                         <span>{t('CuadroMando')}</span>
                                     </NavLink>
                                 </li>
-                                {/*<SideBarList texto={t('indicadoresInpacto')} link="/configuracion/indicadoresInpacto" src={IconMenuConfiguracion} role={role} /> */}
+                                {/*<SideBarList texto={t('indicadoresImpacto')} link="/configuracion/indicadoresImpacto" src={IconMenuConfiguracion} role={role} /> */}
 
                                 <li>
-                                    <NavLink to="/configuracion/indicadoresInpacto">{t('indicadoresInpacto')}</NavLink>
+                                    <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
                                 </li>
                                 <li>
                                     <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>

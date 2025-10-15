@@ -16,7 +16,7 @@ const protectedPaths = [
     '/configuracion/indicadores',
     '/configuracion/usuarios',
     '/configuracion/CuadroMando',
-    '/configuracion/indicadoresInpacto',
+    '/configuracion/indicadoresImpacto',
     '/configuracion/indicadoresADR',
     '/configuracion/PCDR',
     '/configuracion/informes',
