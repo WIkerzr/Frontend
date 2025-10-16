@@ -20,6 +20,7 @@ const protectedPaths = [
     '/configuracion/indicadoresADR',
     '/configuracion/PCDR',
     '/configuracion/informes',
+    '/configuracion/plantillas',
     '/adr/Ejes',
     '/adr/acciones',
     '/adr/acciones/editando',

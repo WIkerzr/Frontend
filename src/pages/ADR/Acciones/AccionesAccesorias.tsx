@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -118,7 +118,7 @@ const Index: React.FC = () => {
 
     return (
         <div className="panel">
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     successMessage,

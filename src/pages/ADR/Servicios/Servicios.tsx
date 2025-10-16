@@ -10,7 +10,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { servicioIniciadoVacio } from '../../../types/tipadoPlan';
-import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { eliminarServicio } from '../../../components/Utils/data/dataServices';
 import { ErrorMessage } from '../../../components/Utils/animations';
 import { MostrarAvisoCamposServicios } from './ComponentesServicios';
@@ -88,7 +88,7 @@ const Index: React.FC = () => {
             )}
             <div>{errorMessage && <ErrorMessage message={errorMessage} />}</div>
 
-            <LoadingOverlay isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
+            <LoadingOverlayPersonalizada isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
 
             <div className="w-full mx-auto mt-1 px-2">
                 {serviciosGrup.map((fila: Servicios[], filaIndex: number) => (

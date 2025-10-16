@@ -233,7 +233,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);
                 sessionStorage.removeItem('aniosRegion');
-                console.log(errorInfo.mensaje);
+                console.error(errorInfo.mensaje);
                 return;
             }
         };

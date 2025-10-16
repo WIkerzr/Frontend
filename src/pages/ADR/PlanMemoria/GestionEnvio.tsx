@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
@@ -145,7 +145,7 @@ const Index = () => {
 
     return (
         <div className="panel">
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     successMessage,
@@ -155,7 +155,7 @@ const Index = () => {
                 }}
                 timeDelay={false}
             />
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loadingGuardado}
                 message={{
                     successMessage,

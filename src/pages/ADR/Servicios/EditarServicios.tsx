@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
@@ -405,7 +405,7 @@ const Index: React.FC = () => {
                     </TabPanels>
                 </div>
             </TabGroup>
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     errorMessage,

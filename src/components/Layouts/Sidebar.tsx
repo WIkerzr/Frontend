@@ -125,14 +125,11 @@ const Sidebar = () => {
                         </li>
                         {Fases >= 6 && (
                             <>
-                                {/* <SideBarList texto={t('CuadroMando')} link="/configuracion/cuadroMando" src={IconCuadroMando} role={role} /> */}
                                 <li>
                                     <NavLink to={'/configuracion/cuadroMando'}>
                                         <span>{t('CuadroMando')}</span>
                                     </NavLink>
                                 </li>
-                                {/*<SideBarList texto={t('indicadoresImpacto')} link="/configuracion/indicadoresImpacto" src={IconMenuConfiguracion} role={role} /> */}
-
                                 <li>
                                     <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
                                 </li>
@@ -141,6 +138,9 @@ const Sidebar = () => {
                                 </li>
                                 <li>
                                     <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
                                 </li>
                             </>
                         )}

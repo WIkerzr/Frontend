@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingOverlay, ZonaTitulo } from '../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Configuracion/Users/componentes';
 import { Ejes, EjesBBDD, EjeSeleccion } from '../../types/tipadoPlan';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { obtenerFechaLlamada, PrintFecha } from '../../components/Utils/utils';
@@ -102,7 +102,7 @@ const Index = () => {
 
     return (
         <div className="panel">
-            <LoadingOverlay isLoading={loading || loadingYearData} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
+            <LoadingOverlayPersonalizada isLoading={loading || loadingYearData} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
 
             <div className="w-full mx-auto mt-1 px-2">
                 <ZonaTitulo

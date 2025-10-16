@@ -20,6 +20,7 @@ const Login = lazy(() => import('../pages/Authenticacion/LoginBoxed'));
 const Profile = lazy(() => import('../pages/profile/profile'));
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
+const Plantillas = lazy(() => import('../pages/Configuracion/Plantillas'));
 
 export const DefaultPath = Fases < 2 ? '/configuracion/usuarios' : '/configuracion/indicadoresADR';
 
@@ -203,6 +204,16 @@ const fase6 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'IndicadoresInpacto',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
+    },
+    {
+        path: '/configuracion/plantillas',
+        element: (
+            <OnlyIfLoggedIn>
+                <Plantillas />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'Plantillas',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 

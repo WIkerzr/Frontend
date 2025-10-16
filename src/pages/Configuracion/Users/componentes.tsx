@@ -240,7 +240,7 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
 
     return (
         <>
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={isLoading}
                 enModal={true}
                 message={{
@@ -307,7 +307,7 @@ interface LoadingOverlayProps {
     timeDelay?: boolean;
 }
 
-export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, enModal, message, onComplete, timeDelay = true }) => {
+export const LoadingOverlayPersonalizada: React.FC<LoadingOverlayProps> = ({ isLoading, enModal, message, onComplete, timeDelay = true }) => {
     const { successMessage, errorMessage } = message;
     const setSuccessMessage = message?.setSuccessMessage ?? (() => {});
     const setErrorMessage = message?.setErrorMessage ?? (() => {});

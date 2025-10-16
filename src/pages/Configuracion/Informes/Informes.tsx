@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { LoadingOverlay, ZonaTitulo } from '../Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { SelectorAnio, SelectorInformes } from '../../../components/Utils/inputs';
 import { useState } from 'react';
 import Multiselect from 'multiselect-react-dropdown';
@@ -91,7 +91,7 @@ const Index = () => {
                     </h2>
                 }
             />
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     errorMessage,

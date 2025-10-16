@@ -20,7 +20,7 @@ import { LlamadaBBDDActualizarMemoria, LlamadaBBDDActualizarPlan } from '../../.
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal, VerificadorIndicadores } from '../Acciones/EditarAccion/EditarAccionComponent';
-import { LoadingOverlay } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
 import React from 'react';
 
 export type PlanOMemoria = 'Plan' | 'Memoria';
@@ -167,7 +167,7 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
 
     return (
         <div className=" flex flex-col gap-4" ref={ref}>
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     successMessage,

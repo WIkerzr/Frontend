@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdjuntarArchivos } from '../../components/Utils/inputs';
 import { useTranslation } from 'react-i18next';
-import { LoadingOverlay, ZonaTitulo } from './Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from './Users/componentes';
 import { Boton } from '../../components/Utils/utils';
 import { LlamadaBBDDSubirPCDR, LlamadaBBDDVerPCDR } from '../../components/Utils/data/configuracionData/DataPCDR';
 import { useRegionContext } from '../../contexts/RegionContext';
@@ -106,7 +106,7 @@ const Index = () => {
                     </h2>
                 }
             />
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     successMessage,

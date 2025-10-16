@@ -322,15 +322,18 @@ interface AttachProps {
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
     multiple?: boolean;
     title?: string;
+    borrar?: boolean;
+    btnPlantillas?: boolean;
 }
 
 export function isImage(file: File) {
     return /^image\//.test(file.type);
 }
 
-export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachProps) => {
+export const AdjuntarArchivos = ({ files, setFiles, multiple, title, borrar = true, btnPlantillas }: AttachProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -354,13 +357,26 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        const newFiles = Array.from(e.dataTransfer.files).filter((file) => file.type === 'application/pdf' || file.type.startsWith('image/'));
+        setIsDragging(false);
+        const newFiles = Array.from(e.dataTransfer.files);
         setFiles(newFiles);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
+    };
+
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
     };
 
     useEffect(() => {
@@ -374,13 +390,17 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
             {title && <span className="mb-1">{title}</span>}
             <div className="flex flex-row gap-2 items-center">
                 <div
-                    className="flex-1 bg-gray-100 border border-gray-300 rounded px-4 py-2 flex items-center justify-center cursor-pointer select-none transition-all text-gray-700 hover:bg-gray-200"
+                    className={`flex-1 border rounded px-4 py-2 flex items-center justify-center cursor-pointer select-none transition-all ${
+                        isDragging ? 'bg-blue-100 border-blue-400 border-2' : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+                    }`}
                     onClick={() => fileInputRef.current?.click()}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
                 >
                     {t('inputArchivos')}
-                    <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple={multiple} style={{ display: 'none' }} onChange={handleChange} />
+                    <input ref={fileInputRef} type="file" accept="*" multiple={multiple} style={{ display: 'none' }} onChange={handleChange} />
                 </div>
                 <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => fileInputRef.current?.click()}>
                     {t('Explorar')}
@@ -391,20 +411,56 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title }: AttachPro
                     <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
                         {isImage(file) ? <img src={URL.createObjectURL(file)} alt={file.name} className="w-12 h-12 object-cover rounded" /> : <span className="text-lg">📄</span>}
                         <span className="flex-1 text-sm truncate">{file.name}</span>
-                        <button
-                            type="button"
-                            className="ml-2 text-red-500 hover:text-red-700"
-                            onClick={() => {
-                                const newFiles = files.filter((_, i) => i !== idx);
-                                setFiles(newFiles);
-                            }}
-                            aria-label={`Eliminar archivo ${file.name}`}
-                        >
-                            ❌
-                        </button>
+                        {borrar && (
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    className="ml-2 text-red-500 hover:text-red-700"
+                                    onClick={() => {
+                                        const newFiles = files.filter((_, i) => i !== idx);
+                                        setFiles(newFiles);
+                                    }}
+                                    aria-label={`Eliminar archivo ${file.name}`}
+                                >
+                                    ❌
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
+            {btnPlantillas && (
+                <div className="flex mt-4 justify-between">
+                    <Boton
+                        tipo="guardar"
+                        textoBoton={t('descargar')}
+                        onClick={() => {
+                            if (files && files.length > 0) {
+                                const file = files[0];
+                                const url = URL.createObjectURL(file);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = file.name;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            }
+                        }}
+                        className="w-1/2 h-full"
+                    />
+                    <Boton
+                        tipo="restaurar"
+                        textoBoton={t('RestaurarPlantilla')}
+                        onClick={() => {
+                            if (btnPlantillas) {
+                                setFiles([]);
+                            }
+                        }}
+                        className="w-1/2 h-full text-right"
+                    />
+                </div>
+            )}
         </div>
     );
 };
@@ -414,6 +470,7 @@ import { SingleValue } from 'react-select';
 import { EjesBBDD } from '../../types/tipadoPlan';
 import { TiposAccion } from '../../contexts/DatosAnualContext';
 import { Informes, tiposInformes } from '../../pages/Configuracion/Informes/Informes';
+import { Boton } from './utils';
 interface OptionType {
     value: string;
     label: string;

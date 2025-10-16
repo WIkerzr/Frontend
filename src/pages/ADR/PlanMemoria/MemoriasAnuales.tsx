@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { LoadingOverlay, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { BotonesAceptacionYRechazo, BotonReapertura, CamposPlanMemoria, ValidacionAnualPlanMemoria, validarCamposMemoriaSeguimientoAnual } from './PlanMemoriaComponents';
 import { NavLink } from 'react-router-dom';
 import IconDownloand from '../../../components/Icon/IconDownloand.svg';
@@ -202,7 +202,7 @@ const Index = () => {
                 }
             />
             <LoadingYearData />
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     successMessage,

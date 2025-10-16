@@ -16,7 +16,7 @@ import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoR
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
-import { LoadingOverlay } from '../../Users/componentes';
+import { LoadingOverlayPersonalizada } from '../../Users/componentes';
 import { useAvisoSalirEditando } from '../../../../components/Layouts/DefaultLayout';
 
 export type TipoIndicador = 'realizacion' | 'resultado';
@@ -873,7 +873,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className={`flex-1 transition-all duration-300 pr-8`}>
-                    <LoadingOverlay
+                    <LoadingOverlayPersonalizada
                         isLoading={loading}
                         enModal
                         message={{

@@ -196,7 +196,7 @@ export function Aviso({ textoAviso, icon = true, tipoAviso = 'warning' }: AvisoP
 }
 
 interface BotonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    tipo: 'guardar' | 'cerrar';
+    tipo: 'guardar' | 'cerrar' | 'restaurar';
     textoBoton?: string;
     title?: string;
 }
@@ -207,8 +207,8 @@ export function Boton({ tipo, disabled = false, textoBoton = '', onClick, title 
             disabled={disabled}
             title={title}
             className={`${
-                tipo === 'guardar' ? 'mb-4 bg-primary' : 'mb-4 bg-danger'
-            } px-4 py-2  text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px] disabled:cursor-not-allowed`}
+                tipo === 'guardar' ? 'mb-4 bg-primary' : tipo === 'restaurar' ? 'mb-4 bg-green-700' : 'mb-4 bg-danger'
+            } px-4 py-2 text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px] disabled:cursor-not-allowed`}
             onClick={onClick}
         >
             {textoBoton}

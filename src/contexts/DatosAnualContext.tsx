@@ -24,7 +24,7 @@ import { useRegionContext } from './RegionContext';
 import { MessageSetters } from '../components/Utils/data/dataEjes';
 import { accionesTransformadasBackAFront, accionTransformadaBackAFront, checkData, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
 import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
-import { LoadingOverlay } from '../pages/Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada } from '../pages/Configuracion/Users/componentes';
 import { RegionInterface } from '../components/Utils/data/getRegiones';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
@@ -868,7 +868,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const LoadingYearData = () => {
         return (
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loadingYearData}
                 message={{
                     successMessage: successMessageYearData,

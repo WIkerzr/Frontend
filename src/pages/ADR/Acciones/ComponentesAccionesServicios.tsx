@@ -20,7 +20,7 @@ import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
 import React from 'react';
 import Tippy from '@tippyjs/react';
 import IconRefresh from '../../../components/Icon/IconRefresh';
-import { LoadingOverlay } from '../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../EjesHelpers';
 import { VerificadorIndicadores, VerificarAccionFinal } from './EditarAccion/EditarAccionComponent';
 
@@ -190,7 +190,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
     }
     return (
         <>
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 enModal={true}
                 message={{
@@ -364,7 +364,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     return (
         <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
             <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{eje}</span>
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     successMessage,
@@ -643,7 +643,7 @@ export const DropdownLineaActuaccion = ({ setNuevaLineaActuaccion, idEjeSeleccio
 
     return (
         <div style={{ position: 'relative', minHeight: 40 }}>
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 enModal={true}
                 message={{

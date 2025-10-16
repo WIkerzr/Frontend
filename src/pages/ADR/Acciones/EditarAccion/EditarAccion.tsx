@@ -9,7 +9,7 @@ import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { PestanaIndicadores } from './EditarAccionIndicadores';
-import { LoadingOverlay, ZonaTitulo } from '../../../Configuracion/Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton } from '../../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
@@ -274,7 +274,7 @@ const Index: React.FC = () => {
                     </div>
                 }
             />
-            <LoadingOverlay
+            <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
                     errorMessage,
