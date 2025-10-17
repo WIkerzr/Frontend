@@ -14,7 +14,7 @@ const actions: Actions[] = ['TODOS', 'Acciones', 'AccionesAccesorias', 'Servicio
 
 const Index = () => {
     const { t } = useTranslation();
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
     const ultimaLlamadaRef = useRef<number | null>(null);
 
     const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
@@ -50,20 +50,20 @@ const Index = () => {
     const [search, setSearch] = useState('');
 
     const [tipeAction, setTipeAction] = useState<Actions>('TODOS');
-
-    if (!regionSeleccionada) return;
-
     const [datosAnios, setDatosAnios] = useState<DatosAnioCuadroMando[]>([]);
 
     useEffect(() => {
         if (!regionSeleccionada) return;
         if (yearData.plan.ejesPrioritarios.length === 0) return;
+        if (yearData.nombreRegion != nombreRegionSeleccionada) return;
         const datoAnio: DatosAnioCuadroMando = TransformarYearDataACuadro(yearData);
         if (!datosAnios.includes(datoAnio) && datosAnios.every((da) => da.nombreRegion !== datoAnio.nombreRegion)) {
             setDatosAnios([...datosAnios, datoAnio]);
         }
     }, [yearData]);
 
+    if (!regionSeleccionada) return;
+    if (yearData.nombreRegion != nombreRegionSeleccionada) return;
     if (loadingYearData) {
         return <LoadingYearData />;
     }

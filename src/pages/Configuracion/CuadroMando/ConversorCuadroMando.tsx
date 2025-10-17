@@ -21,13 +21,14 @@ export const TransformarYearDataACuadro = (yearData: YearData): DatosAnioCuadroM
             const eje = ejes[index];
             acciones.push(...eje.acciones);
         }
+        if (acciones.length === 0) return [];
         return acciones.map(({ id, accion, lineaActuaccion, ejeId, indicadorAccion, accionCompartida, plurianual }) => ({
             id: Number(id),
             nombreAccion: accion,
             ejeId: ejeId ? Number(ejeId) : 0,
             lineaActuaccion: lineaActuaccion,
             indicadorAccion: indicadorAccion,
-            AccionCompartida: accionCompartida && Number(accionCompartida.regionLider.RegionId) != 0 ? true : false,
+            AccionCompartida: accionCompartida && (accionCompartida.regionLider ? Number(accionCompartida.regionLider.RegionId) : 0) != 0 ? true : false,
             plurianual: plurianual,
         }));
     };
@@ -83,13 +84,14 @@ export const TransformarYearDataACuadroBorrador = (yearData: YearData): DatosAni
         return acciones;
     };
     const tranformarAcciones = (acciones: DatosAccion[]): DatosAccionCuadroMando[] => {
+        if (acciones.length === 0) return [];
         return acciones.map(({ id, accion, lineaActuaccion, ejeId, indicadorAccion, accionCompartida, plurianual }) => ({
             id: Number(id),
             nombreAccion: accion,
             ejeId: ejeId ? Number(ejeId) : 0,
             lineaActuaccion: lineaActuaccion,
             indicadorAccion: indicadorAccion,
-            AccionCompartida: accionCompartida && Number(accionCompartida.regionLider.RegionId) != 0 ? true : false,
+            AccionCompartida: accionCompartida && (accionCompartida.regionLider ? Number(accionCompartida.regionLider.RegionId) : 0) != 0 ? true : false,
             plurianual: plurianual,
         }));
     };
