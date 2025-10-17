@@ -130,18 +130,25 @@ const Sidebar = () => {
                                         <span>{t('CuadroMando')}</span>
                                     </NavLink>
                                 </li>
-                                <li>
+                                {/* <li>
                                     <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
-                                </li>
+                                </li> */}
                                 <li>
                                     <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
                                 </li>
                                 <li>
                                     <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
                                 </li>
-                                <li>
-                                    <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
-                                </li>
+                                {role === 'HAZI' && (
+                                    <>
+                                        <li>
+                                            <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
+                                        </li>
+                                        {/* <li>
+                                            <NavLink to="/configuracion/plantillas">{t('Anualidad')}</NavLink>
+                                        </li> */}
+                                    </>
+                                )}
                             </>
                         )}
                     </ul>

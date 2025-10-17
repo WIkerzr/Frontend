@@ -319,7 +319,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             </div>
             <div>
                 <label className="block font-medium">{t('unitMed')}</label>
-                <select name="UnitMed" value={despegableUnitMed} onChange={handleChangeUnitMed} className="w-full p-2 border rounded">
+                <select disabled={bloqueoHazi} name="UnitMed" value={despegableUnitMed} onChange={handleChangeUnitMed} className="w-full p-2 border rounded">
                     {Object.values(UnitMedTypes).map((val) => (
                         <option key={val} value={val}>
                             {t(val)}
@@ -646,6 +646,9 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                         </div>
                     </div>
                 </div>
+                {(indicadoresResultadosOrdenadosES?.length === 0 || !indicadoresResultadosOrdenadosES) && (
+                    <button className={`text-white px-4 py-2 rounded w-full bg-green-600 hover:bg-green-700'}`}>{t('Guardar Indicador Realizacion con Indicador Resultado no medible')}</button>
+                )}
             </>
         );
     };
