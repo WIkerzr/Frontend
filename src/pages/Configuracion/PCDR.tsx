@@ -24,6 +24,12 @@ const Index = () => {
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
+        if (rol === 'GOBIERNOVASCO') {
+            window.location.reload();
+        }
+    }, [rol]);
+
+    useEffect(() => {
         if (regionSeleccionada) {
             handleCargarFicheros();
         }

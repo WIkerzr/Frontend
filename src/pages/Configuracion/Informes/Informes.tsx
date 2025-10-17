@@ -36,12 +36,12 @@ const Index = () => {
         setRegionesEnDropdow(selected);
     };
 
-    const handlePruebas = () => {
-        //TODO borrar
-        const sessionData = sessionStorage.getItem('lastInformeData');
-        const data = sessionData ? JSON.parse(sessionData) : null;
-        generarInformeTratamientoComarcal(data.data, t);
-    };
+    // const handlePruebas = () => {
+    //     //TODO borrar
+    //     const sessionData = sessionStorage.getItem('lastInformeData');
+    //     const data = sessionData ? JSON.parse(sessionData) : null;
+    //     generarInformeTratamientoComarcal(data.data, t);
+    // };
 
     const handleObtenerInforme = () => {
         const idRegionesSeleccionadas: number[] = regionesEnDropdow.map((r) => Number(r.RegionId));
@@ -135,7 +135,7 @@ const Index = () => {
                             />
                         </div>
                         <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handleObtenerInforme} />
-                        <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} />
+                        {/* <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} /> */}
                     </div>
                 </div>
             </div>

@@ -344,7 +344,7 @@ const Index: React.FC = () => {
                 <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                     <TabPanels>
                         <TabPanel>
-                            <PestanaIndicadores servicios />
+                            <PestanaIndicadores />
                         </TabPanel>
                         <TabPanel>
                             <div className="p-5 flex flex-col gap-4 w-full">

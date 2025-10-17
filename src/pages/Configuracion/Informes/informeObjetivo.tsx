@@ -201,7 +201,7 @@ export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicio
     const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    saveAs(blob, `${t('object:infPresupuestos')}${new Date().toISOString()}.xlsx`);
+    saveAs(blob, `${t('InfObjetivos')}${new Date().toISOString()}.xlsx`);
 };
 
 function ProcesarIndicadores(indicador: IndicadorRealizacionAccionDTO[] | IndicadorResultadoAccionDTO[]) {

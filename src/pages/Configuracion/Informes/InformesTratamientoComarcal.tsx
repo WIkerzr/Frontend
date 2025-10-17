@@ -72,5 +72,5 @@ export const generarInformeTratamientoComarcal = async (datos: DatosAccionDTOLid
     const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    saveAs(blob, `${t('InfAcciones')}${new Date().toISOString()}.xlsx`);
+    saveAs(blob, `${t('InfTratamientoComarcal')}${new Date().toISOString()}.xlsx`);
 };
