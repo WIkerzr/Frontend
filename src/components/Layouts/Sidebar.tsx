@@ -144,9 +144,9 @@ const Sidebar = () => {
                                         <li>
                                             <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
                                         </li>
-                                        {/* <li>
-                                            <NavLink to="/configuracion/plantillas">{t('Anualidad')}</NavLink>
-                                        </li> */}
+                                        <li>
+                                            <NavLink to="/configuracion/anualidad">{t('Anualidad')}</NavLink>
+                                        </li>
                                     </>
                                 )}
                             </>

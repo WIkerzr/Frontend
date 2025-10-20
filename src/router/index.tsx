@@ -21,6 +21,7 @@ const protectedPaths = [
     '/configuracion/PCDR',
     '/configuracion/informes',
     '/configuracion/plantillas',
+    '/configuracion/anualidad',
     '/adr/Ejes',
     '/adr/acciones',
     '/adr/acciones/editando',

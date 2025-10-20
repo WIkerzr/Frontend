@@ -4,41 +4,6 @@ import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
 import { LoadingOverlayPersonalizada } from './Users/componentes';
 import { AdjuntarArchivos } from '../../components/Utils/inputs';
 
-// interface BotonNuevoAnioProps {
-//     setLoading: (loading: boolean) => void;
-//     setSuccessMessage: (message: string) => void;
-//     setErrorMessage: (message: string) => void;
-// }
-
-// const BotonNuevoAnio: React.FC<BotonNuevoAnioProps> = (props) => {
-//     const { setLoading, setSuccessMessage, setErrorMessage } = props;
-//     const { t } = useTranslation();
-
-//     const [btnAnioNew, setBtnAnioNew] = useState<boolean>(false);
-//     useEffect(() => {
-//         const aniosRegion = sessionStorage.getItem('aniosRegion');
-//         if (aniosRegion) {
-//             const aniosParsed = JSON.parse(aniosRegion) as { RegionId: number; Years: number[] }[];
-//             const aniosMax = Math.max(...aniosParsed.flatMap((region) => region.Years));
-//             const currentYear = new Date().getFullYear();
-//             if (aniosMax === currentYear) {
-//                 setBtnAnioNew(true);
-//             }
-//         }
-//     }, []);
-
-//     const handleNuevoAnio = async () => {
-//         LlamadasBBDD({
-//             method: 'PUT',
-//             url: `nuevoYear`,
-//             setLoading,
-//             setSuccessMessage,
-//             setErrorMessage,
-//         });
-//     };
-//     return <Boton tipo="guardar" disabled={!btnAnioNew} textoBoton={`${t('GenerarAnio')}`} onClick={handleNuevoAnio} />;
-// };
-
 const plantillasOriginales = [
     { url: '/plantillaPlanEsOriginal.docx', name: 'plantillaPlanEsOriginal.docx' },
     { url: '/plantillaPlanEuOriginal.docx', name: 'plantillaPlanEuOriginal.docx' },

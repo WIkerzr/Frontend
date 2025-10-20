@@ -4,6 +4,7 @@ import { Fases, ModoDev } from '../components/Utils/data/controlDev';
 import CuadroMando from '../pages/Configuracion/CuadroMando/CuadroMando';
 import { ErrorPage } from './ErrorPage';
 import Informes from '../pages/Configuracion/Informes/Informes';
+
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion/EditarAccion'));
@@ -21,6 +22,7 @@ const Profile = lazy(() => import('../pages/profile/profile'));
 const Indicadores = lazy(() => import('../pages/Configuracion/Indicadores/Indicadores'));
 const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
 const Plantillas = lazy(() => import('../pages/Configuracion/Plantillas'));
+const Anualidad = lazy(() => import('../pages/Configuracion/Anualidad'));
 
 export const DefaultPath = Fases < 2 ? '/configuracion/usuarios' : '/configuracion/indicadoresADR';
 
@@ -214,6 +216,16 @@ const fase6 = [
             </OnlyIfLoggedIn>
         ),
         layout: 'Plantillas',
+        errorElement: !ModoDev ? <ErrorPage /> : undefined,
+    },
+    {
+        path: '/configuracion/anualidad',
+        element: (
+            <OnlyIfLoggedIn>
+                <Anualidad />
+            </OnlyIfLoggedIn>
+        ),
+        layout: 'anualidad',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 
