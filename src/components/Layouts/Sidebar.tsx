@@ -130,9 +130,9 @@ const Sidebar = () => {
                                         <span>{t('CuadroMando')}</span>
                                     </NavLink>
                                 </li>
-                                {/* <li>
+                                <li>
                                     <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
-                                </li> */}
+                                </li>
                                 <li>
                                     <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
                                 </li>

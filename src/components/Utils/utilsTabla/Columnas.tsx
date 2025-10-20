@@ -252,6 +252,9 @@ export function editableColumnByPathInput<T extends { id: number }, V = unknown>
         title,
         width: anchura,
         render: (row: T, index: number) => {
+            if (accessor === 'year1' || accessor === 'year2') {
+                console.log(accessor);
+            }
             const value = get(row, accessor) as V;
 
             const style: React.CSSProperties = {
@@ -317,11 +320,13 @@ export function editableColumnByPathInput<T extends { id: number }, V = unknown>
     };
 }
 
-export function visualColumnByPath<T extends object>(accessor: string, title: string) {
+export function visualColumnByPath<T extends object>(accessor: string, title: string, anchura?: number) {
     const esColumnaNombre = accessor === 'descripcion' || accessor === 'indicador';
+
     return {
         accessor,
         title,
+        width: anchura,
         textAlign: 'center' as DataTableColumnTextAlign,
         sortable: true,
         render: (row: T) => {
