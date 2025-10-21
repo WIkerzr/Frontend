@@ -7,6 +7,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { DatosAnioCuadroMando, Ejes } from '../../../types/tipadoPlan';
 import { SelectorTipoAccionCuadroMando, TransformarYearDataACuadro, TablasCuadroMando } from './ConversorCuadroMando';
 import { InputBuscador, SelectorAnio } from '../../../components/Utils/inputs';
+import { SeleccioneRegion, SinDatos } from '../../../components/Utils/utils';
 
 export type Actions = 'TODOS' | 'Acciones' | 'AccionesAccesorias' | 'Servicios';
 
@@ -49,8 +50,11 @@ const Index = () => {
     const [yearFilter, setYearFilter] = useState<string>(t('TODOS'));
     const [search, setSearch] = useState('');
 
+    const [actionsDisponibles, setActionsDisponibles] = useState<Actions[]>(actions);
     const [tipeAction, setTipeAction] = useState<Actions>('TODOS');
     const [datosAnios, setDatosAnios] = useState<DatosAnioCuadroMando[]>([]);
+
+    const [datosOk, setDatosOk] = useState<boolean>(false);
 
     useEffect(() => {
         if (!regionSeleccionada) return;
@@ -62,13 +66,39 @@ const Index = () => {
         }
     }, [yearData]);
 
-    if (!regionSeleccionada) return;
-    if (yearData.nombreRegion != nombreRegionSeleccionada) return;
+    useEffect(() => {
+        if (!regionSeleccionada) return;
+        const newActions: Actions[] = [];
+
+        if (yearData?.plan?.ejesPrioritarios?.length) {
+            newActions.push('Acciones');
+        }
+
+        if (yearData?.plan?.ejesRestantes?.some((e) => e.IsAccessory)) {
+            newActions.push('AccionesAccesorias');
+        }
+
+        if (yearData?.servicios?.length) {
+            newActions.push('Servicios');
+        }
+
+        if (newActions.length > 1) {
+            newActions.push('TODOS');
+        }
+        if (newActions.length > 0) {
+            setDatosOk(true);
+        }
+
+        setActionsDisponibles(newActions);
+    }, [yearData, regionSeleccionada]);
+
+    if (!regionSeleccionada) return <SeleccioneRegion />;
+    if (yearData.nombreRegion != nombreRegionSeleccionada) return <SeleccioneRegion />;
     if (loadingYearData) {
         return <LoadingYearData />;
     }
     if (datosAnios.length === 0) return;
-
+    if (!datosOk) return <SinDatos />;
     return (
         <div className="panel">
             <ZonaTitulo
@@ -82,7 +112,7 @@ const Index = () => {
             <div className="p-5 flex flex-col gap-4 w-full paneln0">
                 <div className="flex-1 flex justify-end gap-4">
                     <InputBuscador setSearch={setSearch} />
-                    <SelectorTipoAccionCuadroMando tipeAction={tipeAction} setTipeAction={setTipeAction} actions={actions} />
+                    <SelectorTipoAccionCuadroMando tipeAction={tipeAction} setTipeAction={setTipeAction} actions={actionsDisponibles} />
                     <SelectorAnio years={years} yearFilter={yearFilter} setYearFilter={setYearFilter} />
                 </div>
                 {datosAnios.map(

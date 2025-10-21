@@ -6,7 +6,7 @@ import { SimpleDropdown } from '../../../components/Utils/inputs';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import { NewModal } from '../../../components/Utils/utils';
+import { NewModal, SeleccioneRegion } from '../../../components/Utils/utils';
 export interface ListIndicador {
     Id: number;
     IdIndicador: number;
@@ -320,9 +320,7 @@ const Index = () => {
 
     const [editableRowIndex, setEditableRowIndex] = useState<number | null>(null);
 
-    if (!regionSeleccionada) {
-        return <span className="text-sm text-gray-600">{t('seleccioneRegion')}</span>;
-    }
+    if (!regionSeleccionada) return <SeleccioneRegion />;
 
     const handleNuevo = () => {
         setIndicadores((prev) => prev.map((item) => (item.IdIndicador === indicadorSeleccionado && item.IdCategoria === categoriaSeleccionado ? { ...item, mostrar: true } : item)));

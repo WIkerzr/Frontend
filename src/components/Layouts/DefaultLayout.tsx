@@ -86,10 +86,10 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
         if (editarPlan || editarMemoria) {
             if (regionSeleccionada != regionAnterior) {
                 if (!regionSeleccionada) {
-                    const rutaAceptada = `/configuracion/`;
-                    if (location.pathname.includes(rutaAceptada)) {
-                        navigate('/configuracion/indicadoresADR');
-                    }
+                    // const rutaAceptada = `/configuracion/`;
+                    // if (location.pathname.includes(rutaAceptada)) {
+                    //     navigate('/configuracion/indicadoresADR');
+                    // }
                 } else {
                     const partesRuta = location.pathname.split('/').filter(Boolean);
                     if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {

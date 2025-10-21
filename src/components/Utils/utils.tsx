@@ -18,6 +18,34 @@ import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../..
 import { DatosAccion, IndicadorRealizacionAccionDTO, IndicadorResultadoAccionDTO } from '../../types/TipadoAccion';
 import { ListadoNombresIdicadoresItem } from '../../pages/Configuracion/Informes/informeObjetivo';
 
+export const SinDatos = () => {
+    return (
+        <div role="alert" aria-live="assertive" className="inline-flex items-center gap-2 px-3 py-2 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-md text-sm font-medium">
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.68-1.36 3.445 0l6.518 11.593A1.75 1.75 0 0 1 17.518 17H2.482a1.75 1.75 0 0 1-1.702-2.308L8.257 3.1zM11 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-6.25a.75.75 0 0 0-.75.75v3.5c0 .414.336.75.75.75s.75-.336.75-.75v-3.5A.75.75 0 0 0 10 6.75z"
+                    clipRule="evenodd"
+                />
+            </svg>
+            {t('sinDatos')}
+        </div>
+    );
+};
+export const SeleccioneRegion = () => {
+    return (
+        <div role="alert" aria-live="assertive" className="inline-flex items-center gap-2 px-3 py-2 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-md text-sm font-medium">
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.68-1.36 3.445 0l6.518 11.593A1.75 1.75 0 0 1 17.518 17H2.482a1.75 1.75 0 0 1-1.702-2.308L8.257 3.1zM11 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-6.25a.75.75 0 0 0-.75.75v3.5c0 .414.336.75.75.75s.75-.336.75-.75v-3.5A.75.75 0 0 0 10 6.75z"
+                    clipRule="evenodd"
+                />
+            </svg>
+            {t('seleccioneRegion')}
+        </div>
+    );
+};
 interface ModalProps {
     open: boolean;
     onClose: () => void;

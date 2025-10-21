@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AdjuntarArchivos } from '../../components/Utils/inputs';
 import { useTranslation } from 'react-i18next';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from './Users/componentes';
-import { Boton } from '../../components/Utils/utils';
+import { Boton, SeleccioneRegion } from '../../components/Utils/utils';
 import { LlamadaBBDDSubirPCDR, LlamadaBBDDVerPCDR } from '../../components/Utils/data/configuracionData/DataPCDR';
 import { useRegionContext } from '../../contexts/RegionContext';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
@@ -49,9 +49,7 @@ const Index = () => {
             }
         );
     };
-    if (!regionSeleccionada) {
-        return <span className="text-sm text-gray-600">{t('seleccioneRegion')}</span>;
-    }
+    if (!regionSeleccionada) return <SeleccioneRegion />;
     const handleGuardarFicheros = async () => {
         const archivos: File[] = [...archivosPCDR];
         await LlamadaBBDDSubirPCDR(
