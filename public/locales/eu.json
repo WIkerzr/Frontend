@@ -64,6 +64,7 @@
     "confirmacionEliminateUsuario": "Ziur zaude zure erabiltzailea ezabatu nahi duzula?",
     "confirmacionReabrir": "Ziur zaude {{zona}} {{fecha}} BERRIREKI nahi duzula?",
     "confirmacionRechazar": "Ziur zaude {{zona}} {{fecha}} BAZTERTU nahi duzula?",
+    "confirmarAnadirAnio": "Ziur zaude {{anio}} urte berria sortu nahi duzula?",
     "confirmarEliminar": "Ziur zaude {{nombre}} ezabatu nahi duzula?",
     "confirmarEliminarIndicador": "Ziur zaude adierazlea ezabatu nahi duzula?",
     "confirmarEliminarIndicadorResultados": "Ondorengo emaitza-adierazleak ezabatuko dira:",

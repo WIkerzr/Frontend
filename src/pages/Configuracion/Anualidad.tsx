@@ -29,13 +29,20 @@ const BotonNuevoAnio: React.FC<BotonNuevoAnioProps> = (props) => {
     }, []);
 
     const handleNuevoAnio = async () => {
-        LlamadasBBDD({
-            method: 'PUT',
-            url: `nuevoYear`,
-            setLoading,
-            setSuccessMessage,
-            setErrorMessage,
-        });
+        if (window.confirm(t('confirmarAnadirAnio', { year: new Date().getFullYear() + 1 }))) {
+            const body = {
+                FromYear: new Date().getFullYear(),
+                ToYear: new Date().getFullYear() + 1,
+            };
+            LlamadasBBDD({
+                method: 'POST',
+                url: `nuevoYear`,
+                body: body,
+                setLoading,
+                setSuccessMessage,
+                setErrorMessage,
+            });
+        }
     };
     return <Boton tipo="guardar" disabled={!btnAnioNew} textoBoton={`${t('GenerarAnio')}`} onClick={handleNuevoAnio} />;
 };

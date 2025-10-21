@@ -65,6 +65,7 @@
     "confirmacionEliminateUsuario": "¿Estas seguro que deseas eliminar tu usuario?",
     "confirmacionReabrir": "¿Estás seguro que deseas REABRIR {{zona}} {{fecha}}?",
     "confirmacionRechazar": "¿Estás seguro que deseas RECHAZAR {{zona}} {{fecha}}?",
+    "confirmarAnadirAnio": "¿Esta seguro que quiere agregar el año {{year}}?",
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
     "confirmarEliminarIndicador": "¿Esta seguro que quiere eliminar el indicador?",
     "confirmarEliminarIndicadorResultados": "Se procedera a eliminar los siguientes indicadores de resultado:",
