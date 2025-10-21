@@ -20,6 +20,7 @@ export interface ListIndicador {
     mostrar: boolean;
     alcance: string;
     datos: Dato[];
+    listado: boolean;
 }
 export interface ListIndicadorComodin {
     IdIndicador: number;
@@ -119,8 +120,22 @@ export interface ImpactIndicatorDTO {
 //     [key: string]: string | number | boolean | Categorias[] | string[] | (typeObjetivo | undefined)[] | DataIndicator[] | undefined;
 // }
 
-function getMinMaxYears(indicadores: ListIndicador[]): { minYear: number; maxYear: number } | null {
-    const allYears = indicadores.flatMap((ind) => (ind.datos ?? []).flatMap((d) => (d.Valores ?? []).map((v) => v.Year))).filter((year) => year !== 0 && year != null);
+function getMinMaxYears(regiones: { RegionId: number; Years: number[] }[]): { minYear: number; maxYear: number } | null {
+    if (!Array.isArray(regiones) || regiones.length === 0) return null;
+
+    const allYears = regiones.flatMap((r) => (Array.isArray(r.Years) ? r.Years : [])).filter((y): y is number => typeof y === 'number' && Number.isFinite(y) && y !== 0);
+
+    if (allYears.length === 0) return null;
+
+    const minYear = Math.min(...allYears);
+    const maxYear = Math.max(...allYears);
+
+    return { minYear, maxYear };
+}
+function getMinMaxYearsIndicadores(indicadores: ListIndicador[]): { minYear: number; maxYear: number } | null {
+    const allYears = indicadores
+        .flatMap((ind) => (Array.isArray(ind.datos) ? ind.datos.flatMap((d) => (Array.isArray(d.Valores) ? d.Valores.map((v) => v.Year) : [])) : []))
+        .filter((year) => year !== 0 && year != null);
     if (allYears.length === 0) {
         return null;
     }
@@ -222,11 +237,13 @@ const Index = () => {
     const [categoriaSeleccionado, setCategoriaSeleccionado] = useState<number>(0);
 
     const [indicadoresComodin, setIndicadoresComodin] = useState<ListIndicadorComodin[]>([]);
-
-    const aniosIndicadores = getMinMaxYears(indicadores);
+    let aniosIndicadores = getMinMaxYearsIndicadores(indicadores) || { minYear: 2025, maxYear: 2025 };
+    const aniosRegion = sessionStorage.getItem('aniosRegion');
+    if (aniosRegion && !aniosIndicadores) {
+        const aniosParsed = JSON.parse(aniosRegion) as { RegionId: number; Years: number[] }[];
+        aniosIndicadores = getMinMaxYears(aniosParsed) || aniosIndicadores;
+    }
     const yearsArray: number[] = aniosIndicadores ? Array.from({ length: aniosIndicadores.maxYear - aniosIndicadores.minYear + 1 }, (_, i) => aniosIndicadores.minYear + i) : [];
-
-    // const [mostrarDrop, setMostrarDrop] = useState<number>(0);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -241,15 +258,6 @@ const Index = () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onSuccess: (data: any) => {
                 const listadoCompleto: ListIndicador[] = data.listComplete;
-
-                //Porner a true las primeras
-                // const seenIndicators = new Set<number>();
-                // listadoCompleto.forEach((item) => {
-                //     if (!seenIndicators.has(item.IdIndicador)) {
-                //         item.mostrar = true;
-                //         seenIndicators.add(item.IdIndicador);
-                //     }
-                // });
 
                 const categoriasPorIndicador = listadoCompleto.reduce((acc, item) => {
                     if (!acc[item.IdIndicador]) {
@@ -282,85 +290,135 @@ const Index = () => {
                 for (let index = 0; index < datos.length; index++) {
                     const dato = datos[index];
                     const indexEncontrado = listadoCompleto.findIndex((item) => item.IdIndicador === dato.IdIndicator && item.IdCategoria === dato.IdCategoria);
-                    if (indexEncontrado >= 0 && dato.Datos.length > 0) {
-                        listadoCompleto[indexEncontrado].datos = dato.Datos;
-                        listadoCompleto[indexEncontrado].mostrar = true;
-                        listadoCompleto[indexEncontrado].alcance = dato.Datos[0].AlcanceTerritorial;
-                        console.log(listadoCompleto[indexEncontrado]);
+                    if (indexEncontrado >= 0) {
+                        const listIndex = listadoCompleto[indexEncontrado];
+                        if (dato.Datos.length > 0) {
+                            listIndex.datos = dato.Datos;
+                            if (
+                                (listIndex.alcance === '' || listIndex.alcance === undefined) &&
+                                (listIndex.datos[0].AlcanceTerritorial === '' || listIndex.datos[0].AlcanceTerritorial === undefined) &&
+                                (listIndex.datos[0].Valores[0].Valor === 0 || listIndex.datos[0].Valores[0].Valor === undefined) &&
+                                (listIndex.datos[0].Valores[0].Objetivo === '' || listIndex.datos[0].Valores[0].Objetivo === undefined)
+                            ) {
+                                listIndex.mostrar = false;
+                            } else {
+                                listIndex.mostrar = true;
+                            }
+                            listIndex.alcance = dato.Datos[0].AlcanceTerritorial;
+                        }
+                        listIndex.listado = true;
                     }
                 }
                 const listadoMostrado = listadoCompleto.filter((f) => f.mostrar === true);
                 setIndicadores(listadoCompleto);
 
                 console.log(listadoMostrado);
-                console.log(listadoCompleto);
+                console.log(listadoCompleto.filter((f) => f.listado));
             },
         });
-    }, []);
-
-    // useEffect(() => {
-    //     const listadoMostrado = indicadores.filter((f) => f.mostrar === true);
-    //     listadoMostrado.forEach((mostrado) => {
-    //         const idIndicador = mostrado.IdIndicador;
-    //         indicadores.forEach((indicador) => {
-    //             if (indicador.IdIndicador === idIndicador && indicador.Categorias) {
-    //                 indicador.Categorias = indicador.Categorias.filter((categoria) => categoria !== mostrado.CategoriaNameEs);
-    //             }
-    //         });
-    //     });
-    // }, [indicadores]);
-
-    // useEffect(() => {
-    //     const indicadoresImpacto = sessionStorage.getItem('indicadoresImpactoStorage');
-    //     if (indicadoresImpacto && indicadoresImpacto?.length > 0) {
-    //         setIndicadores(JSON.parse(indicadoresImpacto));
-    //     }
-    // }, []);
-
-    // useEffect(() => {
-    //     setIndicadores(() => {
-    //         return [...indicadores];
-    //     });
-    // }, [mostrarDrop]);
+    }, [regionSeleccionada]);
 
     const [editableRowIndex, setEditableRowIndex] = useState<number | null>(null);
 
-    const handreNuevo = () => {
+    if (!regionSeleccionada) {
+        return <span className="text-sm text-gray-600">{t('seleccioneRegion')}</span>;
+    }
+
+    const handleNuevo = () => {
         setIndicadores((prev) => prev.map((item) => (item.IdIndicador === indicadorSeleccionado && item.IdCategoria === categoriaSeleccionado ? { ...item, mostrar: true } : item)));
     };
 
-    const handleYearValueChange = (id: number, year: number, value: string) => {
+    const inicializarDatosVacios = (item: ListIndicador, year: number, value: string, field: 'Valor' | 'Objetivo') => {
+        const datosActuales = item.datos ?? [];
+
+        if (datosActuales.length > 0) {
+            return datosActuales.map((d) => {
+                const valorExistente = Array.isArray(d.Valores) ? d.Valores.find((v) => v.Year === year) : undefined;
+                const valoresActualizados = valorExistente
+                    ? d.Valores.map((v) => (v.Year === year ? (field === 'Valor' ? { ...v, Valor: Number(value) || 0 } : { ...v, Objetivo: value }) : v))
+                    : [...(d.Valores || []), { Id: 0, Year: year, Valor: field === 'Valor' ? Number(value) || 0 : 0, Objetivo: field === 'Objetivo' ? value : '' }];
+
+                return { ...d, Valores: valoresActualizados };
+            });
+        }
+
+        return [
+            {
+                Id: 0,
+                AlcanceTerritorial: item.alcance || '',
+                Valores: [{ Id: 0, Year: year, Valor: field === 'Valor' ? Number(value) || 0 : 0, Objetivo: field === 'Objetivo' ? value : '' }],
+            },
+        ];
+    };
+
+    const handleYearValueChange = (record: ListIndicador, year: number, value: string) => {
+        const IdCategoria = record.IdCategoria;
+        const IdIndicador = record.IdIndicador;
         setIndicadores((prev) =>
             prev.map((item) => {
-                if (item.Id !== id) return item;
-                const datos = item.datos.map((d) => ({
-                    ...d,
-                    Valores: d.Valores.map((v) => (v.Year === year ? { ...v, Valor: Number(value) || 0 } : v)),
-                }));
-                return { ...item, datos };
+                if (item.IdCategoria === IdCategoria && item.IdIndicador === IdIndicador) {
+                    const datos = inicializarDatosVacios(item, year, value, 'Valor');
+                    return { ...item, datos };
+                }
+                return item;
             })
         );
     };
 
-    const handleYearObjetivoChange = (id: number, year: number, objetivo: typeObjetivo | undefined) => {
+    const handleYearObjetivoChange = (record: ListIndicador, year: number, objetivo: typeObjetivo | undefined) => {
+        const IdCategoria = record.IdCategoria;
+        const IdIndicador = record.IdIndicador;
         setIndicadores((prev) =>
             prev.map((item) => {
-                if (item.Id !== id) return item;
-                const datos = item.datos.map((d) => ({
-                    ...d,
-                    Valores: d.Valores.map((v) => (v.Year === year ? { ...v, Objetivo: objetivo || '' } : v)),
-                }));
-                return { ...item, datos };
+                if (item.IdCategoria === IdCategoria && item.IdIndicador === IdIndicador) {
+                    const datos = inicializarDatosVacios(item, year, objetivo ?? '', 'Objetivo');
+                    return { ...item, datos };
+                } else {
+                    return item;
+                }
             })
         );
     };
 
-    const handleEliminarFila = (rowIndex: number) => {
+    const handleEliminarFila = (rowIndex: number, record: ListIndicador) => {
         if (window.confirm(t('confirmarEliminarIndicador'))) {
             const indicadoresMostrados = indicadores.filter((fila) => fila.mostrar);
             const idAModificar = indicadoresMostrados[rowIndex].Id;
-            setIndicadores((prev) => prev.map((item) => (item.Id === idAModificar ? { ...item, alcance: '', mostrar: false, year: '', valor: '', objetivo: undefined } : item)));
 
+            const datosEliminados = record;
+            datosEliminados.alcance = '';
+            datosEliminados.datos[0].AlcanceTerritorial = '';
+            datosEliminados.datos[0].Valores.map((v) => {
+                v.Objetivo = '';
+                v.Valor = 0;
+                return v;
+            });
+
+            LlamadasBBDD({
+                method: 'POST',
+                url: `/indicators/edit/${regionSeleccionada}`,
+                body: datosEliminados,
+                setLoading: setLoading ?? (() => {}),
+                onSuccess() {
+                    setIndicadores((prev) =>
+                        prev.map((item) =>
+                            item.Id === idAModificar
+                                ? {
+                                      ...item,
+                                      alcance: '',
+                                      mostrar: false,
+                                      valores: item.datos[0].Valores.map((v) => {
+                                          v.Objetivo = '';
+                                          v.Valor = 0;
+                                          return v;
+                                      }),
+                                      objetivo: undefined,
+                                  }
+                                : item
+                        )
+                    );
+                },
+            });
             const idTemp = indicadoresMostrados[rowIndex].IdIndicador;
             setIndicadores((prev) => {
                 const indicesCoinciden = prev.map((item, index) => ({ item, index })).filter(({ item }) => item.IdIndicador === idTemp);
@@ -370,36 +428,32 @@ const Index = () => {
         }
     };
 
-    // const handleChange = (e: React.ChangeEvent<HTMLSelectElement>, idTemp: number) => {
-    //     const newCategoria = e.target.value;
-    //     setIndicadores((prev) => prev.map((indicador) => (indicador.IdIndicador === idTemp && indicador.CategoriaNameEs === newCategoria ? { ...indicador, mostrar: true } : indicador)));
-
-    //     const filtrados = indicadores.filter((i) => i.IdIndicador === idTemp);
-
-    //     let cont = 0;
-    //     for (let index = 0; index < filtrados.length; index++) {
-    //         const indicador = filtrados[index];
-    //         if (indicador.mostrar) {
-    //             cont++;
-    //         }
-    //     }
-
-    //     if (!(cont === filtrados.length - 1)) {
-    //         setMostrarDrop(0);
-    //     } else {
-    //         setIndicadores((prev) => {
-    //             const indicesCoinciden = prev.map((item, index) => ({ item, index })).filter(({ item }) => item.IdIndicador === idTemp);
-
-    //             const ultimoIndex = indicesCoinciden.at(-1)?.index;
-
-    //             return prev.map((indicador, i) => (i === ultimoIndex ? { ...indicador, mostrar: false } : indicador));
-    //         });
-    //     }
-    // };
-
-    const handleChangeTerritorial = (e: React.ChangeEvent<HTMLSelectElement>, id: number) => {
+    const handleChangeTerritorial = (e: React.ChangeEvent<HTMLSelectElement>, record: ListIndicador) => {
+        const IdCategoria = record.IdCategoria;
+        const IdIndicador = record.IdIndicador;
         const value = e.target.value;
-        setIndicadores((prev) => prev.map((item) => (item.Id === id ? { ...item, alcance: value } : item)));
+        setIndicadores((prev) =>
+            prev.map((item) => {
+                if (item.IdIndicador === IdIndicador && item.IdCategoria === IdCategoria) {
+                    const datosActuales = Array.isArray(item.datos) ? item.datos : [];
+                    let nuevosDatos;
+                    if (datosActuales.length > 0) {
+                        nuevosDatos = datosActuales.map((d) => ({ ...d, AlcanceTerritorial: value }));
+                    } else {
+                        nuevosDatos = [
+                            {
+                                Id: 0,
+                                AlcanceTerritorial: value,
+                                Valores: [],
+                            },
+                        ];
+                    }
+
+                    return { ...item, alcance: value, datos: nuevosDatos };
+                }
+                return item;
+            })
+        );
     };
 
     const displayedRecords = indicadores.filter((fila) => fila.mostrar);
@@ -427,10 +481,6 @@ const Index = () => {
                         </div>
                     );
                 }
-
-                // if (record.Categorias && record.Categorias.length > 1 && mostrarDrop != record.IdIndicador) {
-                //     return <></>;
-                // }
             },
         },
         {
@@ -438,7 +488,6 @@ const Index = () => {
             title: 'Categoria',
             width: 200,
             render: (record: ListIndicador) => {
-                // const isFirst = displayedRecords.findIndex((r) => r.IndiadorNameEs === record.IndiadorNameEs) === index;
                 const categoria = record.CategoriaNameEs;
                 if (categoria === 'Sin categoria') {
                     return (
@@ -447,26 +496,11 @@ const Index = () => {
                         </div>
                     );
                 }
-                // const prueba = mostrarDrop === record.IdIndicador;
-
-                // if (record.Categorias && record.Categorias.length > 0 && (isFirst || prueba)) {
-                //     const datos = indicadores.filter((ind) => ind.IdIndicador === record.IdIndicador);
-
-                //     const opcionesYaMostradas = datos.filter((dato) => dato.mostrar === true).map((dato) => dato.CategoriaNameEs);
-                //     const opciones = record.Categorias.filter((name) => !opcionesYaMostradas.includes(name));
-
-                //     return (
-                //         <div style={{ position: 'relative', minHeight: 40 }}>
-                //             <SimpleDropdown options={opciones} mostrarSeleccionaopcion={true} onChange={(e) => handleChange(e, record.IdIndicador)} />
-                //         </div>
-                //     );
-                // } else {
                 return (
                     <div style={{ position: 'relative', minHeight: 40 }}>
                         <div>{categoria}</div>
                     </div>
                 );
-                // }
             },
         },
         { accessor: 'UnitEs', title: 'Unidad de medida', width: 100 },
@@ -476,11 +510,10 @@ const Index = () => {
             width: 300,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;
-
                 return (
                     <div>
                         {isEditing ? (
-                            <select className="border p-1 rounded" value={record.alcance ?? ''} onChange={(e) => handleChangeTerritorial(e, record.Id)}>
+                            <select className="border p-1 rounded" value={record.alcance ?? ''} onChange={(e) => handleChangeTerritorial(e, record)}>
                                 <option value="" disabled>
                                     {t('seleccionaopcion')}
                                 </option>
@@ -498,19 +531,6 @@ const Index = () => {
                 );
             },
         },
-        // editableColumnByPathInput<IndicadorTabla>(`year1`, 'Año', setApanioIndicadores, editableRowIndex, 60),
-        // editableColumnByPathInput<IndicadorTabla>('valor1', 'Valor', setApanioIndicadores, editableRowIndex, 80),
-        // editableColumnByPathInput<IndicadorTabla, string>('objetivos1', 'Objetivo', setApanioIndicadores, editableRowIndex, 100, (value, _onChange, record) => (
-        //     <select className="border p-1 rounded" value={value ?? ''} onChange={(e) => handleChangeObjetivo(e, record.id)}>
-        //         <option value="" disabled>
-        //             {t('seleccionaOpciones')}
-        //         </option>
-        //         <option value="Aumentar">{t('aumentar')}</option>
-        //         <option value="Mantener">{t('mantener')}</option>
-        //         <option value="Disminuir">{t('disminuir')}</option>
-        //     </select>
-        // )),
-        // Insertar columnas dinámicas por año
         ...yearsArray.map((y) => ({
             accessor: `year_${y}`,
             title: `${y}`,
@@ -527,14 +547,14 @@ const Index = () => {
                                     className="border p-1 rounded mb-1"
                                     value={valor ? String(valor.Valor) : ''}
                                     onChange={(e) => {
-                                        handleYearValueChange(record.Id, y, e.target.value);
+                                        handleYearValueChange(record, y, e.target.value);
                                     }}
                                 />
                                 <select
                                     className="border p-1 rounded text-sm"
                                     value={valor?.Objetivo ?? ''}
                                     onChange={(e) => {
-                                        handleYearObjetivoChange(record.Id, y, (e.target.value as typeObjetivo) || undefined);
+                                        handleYearObjetivoChange(record, y, (e.target.value as typeObjetivo) || undefined);
                                     }}
                                 >
                                     <option value="">{t('seleccionaOpciones')}</option>
@@ -571,9 +591,30 @@ const Index = () => {
                                     setEditableRowIndex(null);
                                     LlamadasBBDD({
                                         method: 'POST',
-                                        url: `/indicators/edit`,
+                                        url: `/indicators/edit/${regionSeleccionada}`,
                                         body: record,
                                         setLoading: setLoading ?? (() => {}),
+                                        onSuccess(response) {
+                                            const data = response.data as { parentId: number; valores: Valor[] };
+                                            setIndicadores((prev) =>
+                                                prev.map((item) =>
+                                                    item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
+                                                        ? {
+                                                              ...item,
+                                                              datos: item.datos.map((d, idx) =>
+                                                                  idx === 0
+                                                                      ? {
+                                                                            ...d,
+                                                                            Id: data.parentId,
+                                                                            Valores: data.valores,
+                                                                        }
+                                                                      : d
+                                                              ),
+                                                          }
+                                                        : item
+                                                )
+                                            );
+                                        },
                                     });
                                 }}
                             >
@@ -586,7 +627,7 @@ const Index = () => {
                                 <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
                                     {t('editar')}
                                 </button>
-                                <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index)}>
+                                <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index, record)}>
                                     {t('Eliminar')}
                                 </button>
                             </div>
@@ -619,7 +660,7 @@ const Index = () => {
                 <div className="flex justify-center mt-4">
                     <div className="flex flex-col gap-4 items-center">
                         <SimpleDropdown
-                            options={Array.from(new Map(indicadores.map((i) => [i.IndiadorNameEs, i.IdIndicador]))).map(([name]) => name)}
+                            options={Array.from(new Map(indicadores.filter((f) => f.listado && !f.mostrar).map((i) => [i.IndiadorNameEs, i.IdIndicador]))).map(([name]) => name)}
                             mostrarSeleccionaopcion={true}
                             onChange={(e) => {
                                 const name = e.target.value;
@@ -633,18 +674,29 @@ const Index = () => {
                             (() => {
                                 const indicadorComodin = indicadoresComodin.find((i) => i.IdIndicador === indicadorSeleccionado);
                                 const opciones = indicadorComodin ? indicadorComodin.comodin : [];
-
                                 if (opciones.length === 0) {
+                                    return null;
+                                }
+                                const newOpciones: { nombreCategoria: string; idCategoria: number }[] = [];
+                                const indicador = indicadores.filter((f) => f.listado && f.IdIndicador === indicadorSeleccionado);
+                                indicador.forEach((indicad) => {
+                                    opciones.forEach((opcion) => {
+                                        if (indicad.IdCategoria === opcion.idCategoria && !indicad.mostrar) {
+                                            newOpciones.push(opcion);
+                                        }
+                                    });
+                                });
+                                if (newOpciones.length === 0) {
                                     return null;
                                 }
 
                                 return (
                                     <SimpleDropdown
-                                        options={opciones.map((c) => c.nombreCategoria)}
+                                        options={newOpciones.map((c) => c.nombreCategoria)}
                                         mostrarSeleccionaopcion={true}
                                         onChange={(e) => {
                                             const nombreCategoria = e.target.value;
-                                            const categoriaId = opciones.find((c) => c.nombreCategoria === nombreCategoria)?.idCategoria || 0;
+                                            const categoriaId = newOpciones.find((c) => c.nombreCategoria === nombreCategoria)?.idCategoria || 0;
                                             setCategoriaSeleccionado(categoriaId);
                                         }}
                                     />
@@ -656,7 +708,7 @@ const Index = () => {
                             disabled={loading}
                             onClick={() => {
                                 setShowModal(false);
-                                handreNuevo();
+                                handleNuevo();
                             }}
                         >
                             {t('guardar')}
