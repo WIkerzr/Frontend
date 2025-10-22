@@ -20,6 +20,7 @@ import { Ejes, EjesBBDD } from '../../../../types/tipadoPlan';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../../EjesHelpers';
 import { Loading } from '../../../../components/Utils/animations';
+import { PestanaFirma } from './Firma';
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -325,6 +326,22 @@ const Index: React.FC = () => {
                                 </button>
                             )}
                         </Tab>
+                        <Tab as={Fragment}>
+                            {({ selected }) => (
+                                <button
+                                    className={`${
+                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
+                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
+                                >
+                                    <div className={`flex items-center`}>
+                                        <div className="relative">
+                                            <img src={IconPlan} alt={t(`${'firma'}`)} className="w-6 h-6" />
+                                        </div>
+                                        <span className={`font-semibold`}>{t(`${'firma'}`)}</span>
+                                    </div>
+                                </button>
+                            )}
+                        </Tab>
                     </TabList>
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
@@ -336,6 +353,9 @@ const Index: React.FC = () => {
                             </TabPanel>
                             <TabPanel>
                                 <PestanaMemoria />
+                            </TabPanel>
+                            <TabPanel>
+                                <PestanaFirma />
                             </TabPanel>
                         </TabPanels>
                     </div>

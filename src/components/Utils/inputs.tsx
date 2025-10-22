@@ -320,6 +320,8 @@ export const EditableDropdown = <T extends string | number>({ title, options, va
 interface AttachProps {
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+    disabled?: boolean;
+    tipoArchivosAceptables?: string;
     multiple?: boolean;
     title?: string;
     borrar?: boolean;
@@ -330,13 +332,31 @@ export function isImage(file: File) {
     return /^image\//.test(file.type);
 }
 
-export const AdjuntarArchivos = ({ files, setFiles, multiple, title, borrar = true, btnPlantillas }: AttachProps) => {
+export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAceptables, multiple, title, borrar = true, btnPlantillas }: AttachProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
     const [isDragging, setIsDragging] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = e.target.files ? Array.from(e.target.files) : [];
+        if (tipoArchivosAceptables) {
+            const extensionesPermitidas = tipoArchivosAceptables.split(',').map((ext) =>
+                ext
+                    .trim()
+                    .toLowerCase()
+                    .replace(/^\*?\.?/, '')
+            );
+
+            const archivosInvalidos = newFiles.filter((file) => {
+                const extension = file.name.split('.').pop()?.toLowerCase() || '';
+                return !extensionesPermitidas.some((ext) => ext === extension || ext === '*' || ext.includes('/'));
+            });
+
+            if (archivosInvalidos.length > 0) {
+                alert(t('ArchivoExtensionErronea') + ': ' + archivosInvalidos.map((f) => f.name).join(', ') + '\n' + t('ExtensionesPerm') + ': ' + tipoArchivosAceptables);
+                return;
+            }
+        }
         if (multiple) {
             setFiles((prevFiles) => {
                 const todos = [...prevFiles, ...newFiles];
@@ -388,24 +408,39 @@ export const AdjuntarArchivos = ({ files, setFiles, multiple, title, borrar = tr
     return (
         <div className="mb-5 flex flex-col">
             {title && <span className="mb-1">{title}</span>}
-            <div className="flex flex-row gap-2 items-center">
-                <div
-                    className={`flex-1 border rounded px-4 py-2 flex items-center justify-center cursor-pointer select-none transition-all ${
-                        isDragging ? 'bg-blue-100 border-blue-400 border-2' : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    onClick={() => fileInputRef.current?.click()}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragEnter={handleDragEnter}
-                    onDragLeave={handleDragLeave}
-                >
-                    {t('inputArchivos')}
-                    <input ref={fileInputRef} type="file" accept="*" multiple={multiple} style={{ display: 'none' }} onChange={handleChange} />
+            {!disabled && (
+                <div className="flex flex-row gap-2 items-center">
+                    <div
+                        className={`flex-1 border rounded px-4 py-2 flex items-center justify-center cursor-pointer select-none transition-all ${
+                            isDragging ? 'bg-blue-100 border-blue-400 border-2' : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        onClick={() => fileInputRef.current?.click()}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
+                    >
+                        {t('inputArchivos')}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept={
+                                tipoArchivosAceptables
+                                    ? tipoArchivosAceptables.startsWith('.') || tipoArchivosAceptables.includes('/')
+                                        ? tipoArchivosAceptables
+                                        : `.${tipoArchivosAceptables.toLowerCase()}`
+                                    : '*'
+                            }
+                            multiple={multiple}
+                            style={{ display: 'none' }}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => fileInputRef.current?.click()}>
+                        {t('Explorar')}
+                    </button>
                 </div>
-                <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => fileInputRef.current?.click()}>
-                    {t('Explorar')}
-                </button>
-            </div>
+            )}
             <div className="mt-4 space-y-2">
                 {files.map((file, idx) => (
                     <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">

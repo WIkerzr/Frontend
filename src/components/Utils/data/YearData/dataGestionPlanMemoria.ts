@@ -154,7 +154,6 @@ type LlamadaBBDDFirmaParams<T = any> = {
     setLoading: (loading: boolean) => void;
     message: MessageSetters;
     body: File;
-    planOMemoria: PlanOMemoria;
     onSuccess?: (data: ApiSuccess<T>) => void;
 };
 
