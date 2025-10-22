@@ -132,7 +132,7 @@ const Index = () => {
                                         {t('guardar')}
                                     </button>
                                     {/* <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} language={i18n.language} t={t} /> */}
-                                    <BtnExportarDocumentoWord tipo="Memoria" language={i18n.language} t={t} />
+                                    <BtnExportarDocumentoWord tipo="Plan" language={i18n.language} t={t} />
                                     <button
                                         className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                         onClick={async () => {

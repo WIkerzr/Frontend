@@ -37,6 +37,7 @@ type EstadosContextType = {
     // Estados por año
     anioSeleccionada: number | null;
     anios: number[];
+    setAnios: (a: number[]) => void;
     setAnio: (a: number) => void;
     estados: EstadosPorAnio;
     setEstados: React.Dispatch<React.SetStateAction<EstadosPorAnio>>;
@@ -50,6 +51,7 @@ type EstadosContextType = {
 const EstadosContext = createContext<EstadosContextType>({
     anioSeleccionada: null,
     anios: [],
+    setAnios: () => {},
     setAnio: () => {},
     estados: {},
     setEstados: () => {},
@@ -249,6 +251,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                 anioSeleccionada,
                 anios,
                 setAnio,
+                setAnios,
                 estados,
                 setEstados,
                 cambiarEstadoPlan,

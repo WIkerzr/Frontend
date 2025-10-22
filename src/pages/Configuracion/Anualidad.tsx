@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
 import { Boton } from '../../components/Utils/utils';
 import { LoadingOverlayPersonalizada } from './Users/componentes';
+// import { useEstadosPorAnioContext } from '../../contexts/EstadosPorAnioContext';
 
 interface BotonNuevoAnioProps {
     setLoading: (loading: boolean) => void;
@@ -14,6 +15,7 @@ interface BotonNuevoAnioProps {
 const BotonNuevoAnio: React.FC<BotonNuevoAnioProps> = (props) => {
     const { setLoading, setSuccessMessage, setErrorMessage } = props;
     const { t } = useTranslation();
+    // const { setAnios } = useEstadosPorAnioContext();
 
     const [btnAnioNew, setBtnAnioNew] = useState<boolean>(false);
     useEffect(() => {
@@ -42,6 +44,9 @@ const BotonNuevoAnio: React.FC<BotonNuevoAnioProps> = (props) => {
                 setSuccessMessage,
                 setErrorMessage,
             });
+
+            alert('Por favor, cierre sesión y vuelva a iniciar sesión para ver los cambios.');
+            // setAnios([...Anios, new Date().getFullYear() + 1]);
         }
     };
     return <Boton tipo="guardar" disabled={!btnAnioNew} textoBoton={`${t('GenerarAnio')}`} onClick={handleNuevoAnio} />;
