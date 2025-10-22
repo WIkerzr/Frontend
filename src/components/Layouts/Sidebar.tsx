@@ -85,8 +85,8 @@ const Sidebar = () => {
         const selectedYear = Number(e.target.value);
         const selectedData = regionData?.data.find((d) => d.year === selectedYear);
 
+        setAnio(Number(e.target.value));
         if (selectedData) {
-            setAnio(Number(e.target.value));
             setEstados({
                 [selectedData.year]: { plan: selectedData.plan.status, memoria: selectedData.memoria.status },
             });
