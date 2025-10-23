@@ -11,7 +11,7 @@ import { useUser } from '../../contexts/UserContext';
 import LogoutItem from '../../pages/Authenticacion/logout';
 import { LanguageSelector, RegionSelect } from '../Utils/inputs';
 import { UserRole } from '../../types/users';
-import { Fases, ModoDev } from '../Utils/data/controlDev';
+import { ModoDev } from '../Utils/data/controlDev';
 import { LogoRegion_SUP } from './LayoutsComponents';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { SelectorEstado } from '../Utils/data/controlDevComplementos';
@@ -49,20 +49,19 @@ const Header = () => {
                         </button>
                     </div>
 
-                    {Fases >= 2 &&
-                        (role.toUpperCase() != 'ADR' ? (
-                            <div>
-                                <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                    <RegionSelect header={true} />
-                                </div>
+                    {role.toUpperCase() != 'ADR' ? (
+                        <div>
+                            <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                <RegionSelect header={true} />
                             </div>
-                        ) : (
-                            <div>
-                                <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
-                                    <RegionSelect header={true} disabled />
-                                </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className=" text-white-dark min-w-max" style={{ minWidth: 'calc(100% + 10px)' }}>
+                                <RegionSelect header={true} disabled />
                             </div>
-                        ))}
+                        </div>
+                    )}
 
                     {ModoDev && <SelectorEstado />}
                     <div className="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">

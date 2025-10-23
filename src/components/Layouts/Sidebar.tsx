@@ -21,7 +21,6 @@ import { UserRole } from '../../types/users';
 import { TabCard } from '../../pages/ADR/Acciones/EditarAccion/EditarAccionComponent';
 import { useYear } from '../../contexts/DatosAnualContext';
 import { SideBarList } from '../Utils/utils';
-import { Fases } from '../Utils/data/controlDev';
 import { useEstadosPorAnioContext } from '../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../contexts/RegionContext';
 import { Loading } from '../Utils/animations';
@@ -123,34 +122,32 @@ const Sidebar = () => {
                         <li>
                             <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ADR'}</NavLink>
                         </li>
-                        {Fases >= 6 && (
-                            <>
-                                <li>
-                                    <NavLink to={'/configuracion/cuadroMando'}>
-                                        <span>{t('CuadroMando')}</span>
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
-                                </li>
-                                {role === 'HAZI' && (
-                                    <>
-                                        <li>
-                                            <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
-                                        </li>
-                                        <li>
-                                            <NavLink to="/configuracion/anualidad">{t('Anualidad')}</NavLink>
-                                        </li>
-                                    </>
-                                )}
-                            </>
-                        )}
+                        <>
+                            <li>
+                                <NavLink to={'/configuracion/cuadroMando'}>
+                                    <span>{t('CuadroMando')}</span>
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
+                            </li>
+                            <li>
+                                <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
+                            </li>
+                            <li>
+                                <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
+                            </li>
+                            {role === 'HAZI' && (
+                                <>
+                                    <li>
+                                        <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink to="/configuracion/anualidad">{t('Anualidad')}</NavLink>
+                                    </li>
+                                </>
+                            )}
+                        </>
                     </ul>
                 </AnimateHeight>
             </li>

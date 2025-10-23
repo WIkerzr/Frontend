@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { OnlyIfLoggedIn } from '../components/OnlyIfNotLoggedIn';
-import { Fases, ModoDev } from '../components/Utils/data/controlDev';
+import { ModoDev } from '../components/Utils/data/controlDev';
 import CuadroMando from '../pages/Configuracion/CuadroMando/CuadroMando';
 import { ErrorPage } from './ErrorPage';
 import Informes from '../pages/Configuracion/Informes/Informes';
@@ -24,9 +24,7 @@ const Usuarios = lazy(() => import('../pages/Configuracion/Users/Usuarios'));
 const Plantillas = lazy(() => import('../pages/Configuracion/Plantillas'));
 const Anualidad = lazy(() => import('../pages/Configuracion/Anualidad'));
 
-export const DefaultPath = Fases < 2 ? '/configuracion/usuarios' : '/configuracion/indicadoresADR';
-
-const fase1 = [
+const routes = [
     {
         path: '/profile',
         element: (
@@ -47,8 +45,6 @@ const fase1 = [
         layout: 'Usuarios',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
-];
-const fase2 = [
     {
         path: '/configuracion/indicadores',
         element: (
@@ -79,8 +75,6 @@ const fase2 = [
         layout: 'IndicadoresADR',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
-];
-const fase3 = [
     {
         path: '/adr/acciones',
         element: (
@@ -101,8 +95,6 @@ const fase3 = [
         layout: 'EditarAccion',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
-];
-const fase4 = [
     {
         path: '/adr/accionesYproyectos',
         element: (
@@ -143,8 +135,6 @@ const fase4 = [
         layout: 'EditarServicios',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
-];
-const fase5 = [
     {
         path: '/adr/planesGestion',
         element: (
@@ -186,8 +176,6 @@ const fase5 = [
         layout: 'memoriasAnuales/GestionEnvio',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
-];
-const fase6 = [
     {
         path: '/configuracion/CuadroMando',
         element: (
@@ -249,9 +237,6 @@ const fase6 = [
         layout: 'Informes',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
-];
-
-const inicial = [
     {
         path: '/',
         element: (
@@ -279,9 +264,5 @@ const inicial = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
 ];
-const todasLasFases = [fase1, fase2, fase3, fase4, fase5, fase6];
-const fasesActivas = todasLasFases.slice(0, Fases);
-const rutasDeFases = fasesActivas.flat();
-const routes = [...inicial, ...rutasDeFases];
 
 export { routes };
