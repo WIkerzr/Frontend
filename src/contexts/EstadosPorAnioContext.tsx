@@ -10,6 +10,7 @@ import { useAuth } from './AuthContext';
 import { useRegionContext } from './RegionContext';
 import { UserRole } from '../types/users';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
+import { YearData } from '../types/tipadoPlan';
 
 export const StatusColorsFonds: Record<Estado, string> = {
     proceso: 'bg-info',
@@ -29,7 +30,7 @@ type EstadoPorAnio = {
     memoria: Estado | null;
 };
 
-type EstadosPorAnio = {
+export type EstadosPorAnio = {
     [anio: number]: EstadoPorAnio;
 };
 
@@ -67,6 +68,7 @@ export const useEstadosPorAnioContext = () => useContext(EstadosContext);
 export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
     const { yearData, setYearData, llamadaBBDDYearData } = useYear();
+
     const { user } = useUser();
     const { login } = useAuth();
     const token = sessionStorage.getItem('access_token');
@@ -108,8 +110,15 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (anios && anios.length > 0) {
-            const newAnio = Math.max(...anios) ?? null;
-            setAnio(newAnio);
+            let newAnio = Math.max(...anios) ?? null;
+            const dataYear = sessionStorage.getItem('DataYear');
+            if (dataYear) {
+                const parsedDataYear: YearData = JSON.parse(dataYear);
+                setAnio(parsedDataYear.year);
+                newAnio = parsedDataYear.year;
+            } else {
+                setAnio(newAnio);
+            }
             if (newAnio !== null && estados[newAnio]) {
                 setPlanState(estados[newAnio].plan);
                 setMemoriaState(estados[newAnio].memoria);
@@ -166,7 +175,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
             setLoading: setLoadingChageState,
             method: 'POST',
             url: `yearData/${regionSeleccionada}/${yearData.year}/updateMemoriaStatus`,
-            body: { MemoriaStatus: 'proceso' },
+            body: { MemoriaStatus: nuevoEstado },
             onSuccess: () => {
                 setEstados((estadosPrev) => ({
                     ...estadosPrev,
