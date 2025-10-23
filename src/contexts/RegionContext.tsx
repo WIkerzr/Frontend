@@ -78,7 +78,9 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
             const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
 
             if (regionCompleta) {
-                setNombreRegionSeleccionada(i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : null);
+                setNombreRegionSeleccionada(
+                    i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : regionCompleta.NameEu ? regionCompleta.NameEu : regionCompleta.NameEs
+                );
                 setRegionActual(regionCompleta);
             }
             setRegionData({
@@ -87,6 +89,13 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
             });
         } else {
             sessionStorage.setItem('regionSeleccionada', JSON.stringify({ id: null, nombre: null }));
+            const regionCompleta = regiones.find((r) => `${r.RegionId}` === regionSeleccionada);
+            if (regionCompleta) {
+                setNombreRegionSeleccionada(
+                    i18n.language === 'es' ? (regionCompleta.NameEs ? regionCompleta.NameEs : regionCompleta.NameEu) : regionCompleta.NameEu ? regionCompleta.NameEu : regionCompleta.NameEs
+                );
+                setRegionActual(regionCompleta);
+            }
         }
     }, [regionSeleccionada, regiones, i18n.language, nombreRegionSeleccionada]);
 

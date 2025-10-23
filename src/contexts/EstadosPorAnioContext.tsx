@@ -114,11 +114,13 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
             const dataYear = sessionStorage.getItem('DataYear');
             if (dataYear) {
                 const parsedDataYear: YearData = JSON.parse(dataYear);
-                setAnio(parsedDataYear.year);
-                newAnio = parsedDataYear.year;
-            } else {
-                setAnio(newAnio);
+                if (parsedDataYear.year > 2000) {
+                    setAnio(parsedDataYear.year);
+                    newAnio = parsedDataYear.year;
+                }
             }
+            setAnio(newAnio);
+
             if (newAnio !== null && estados[newAnio]) {
                 setPlanState(estados[newAnio].plan);
                 setMemoriaState(estados[newAnio].memoria);

@@ -120,7 +120,7 @@ const Sidebar = () => {
                             </>
                         )}
                         <li>
-                            <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ADR'}</NavLink>
+                            <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ' + t('adr')}</NavLink>
                         </li>
                         <>
                             <li>

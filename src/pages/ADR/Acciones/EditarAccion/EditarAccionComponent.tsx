@@ -430,7 +430,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                     ? [
                           {
                               accessor: 'acciones',
-                              title: 'Acciones',
+                              title: t('Acciones'),
                               render: (_row: IndicadorRealizacionAccion, index: number) => {
                                   return editableRowIndex === index ? (
                                       <button

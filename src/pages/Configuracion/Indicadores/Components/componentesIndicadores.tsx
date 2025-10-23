@@ -31,29 +31,38 @@ interface RellenoIndicadorProps {
     subIndice?: string;
 }
 
-const SacarNombre = (indicadorRealizacion: IndicadorRealizacion) => {
-    const nameEs = indicadorRealizacion.NameEs;
-
-    const primeros10 = nameEs.slice(0, 10);
+const SacarNombre = (indicadorRealizacion: IndicadorRealizacion, i18n: any) => {
+    const nombre =
+        i18n.language === 'es'
+            ? indicadorRealizacion.NameEs
+                ? indicadorRealizacion.NameEs
+                : indicadorRealizacion.NameEu
+            : indicadorRealizacion.NameEu
+            ? indicadorRealizacion.NameEu
+            : indicadorRealizacion.NameEs;
+    if (!nombre) {
+        return ['', ''];
+    }
+    const primeros10 = nombre.slice(0, 10);
     const puntos = [...primeros10].filter((c) => c === '.').length;
     if (puntos === 1) {
-        const primerPunto = nameEs.indexOf('.');
-        const parteIzquierda = nameEs.slice(0, primerPunto);
-        const parteDerecha = nameEs.slice(primerPunto + 1, nameEs.length);
+        const primerPunto = nombre.indexOf('.');
+        const parteIzquierda = nombre.slice(0, primerPunto);
+        const parteDerecha = nombre.slice(primerPunto + 1, nombre.length);
         return [parteIzquierda + ' ', parteDerecha];
     } else if (puntos >= 2) {
-        const primerPunto = nameEs.indexOf('.');
-        const segundoPunto = nameEs.indexOf('.', primerPunto + 1);
+        const primerPunto = nombre.indexOf('.');
+        const segundoPunto = nombre.indexOf('.', primerPunto + 1);
         if (segundoPunto !== -1) {
-            const entrePuntos = nameEs.slice(primerPunto + 1, segundoPunto);
+            const entrePuntos = nombre.slice(primerPunto + 1, segundoPunto);
             if (/^\d+$/.test(entrePuntos)) {
-                const parteIzquierda = nameEs.slice(0, segundoPunto + 1);
-                const parteDerecha = nameEs.slice(segundoPunto + 1);
+                const parteIzquierda = nombre.slice(0, segundoPunto + 1);
+                const parteDerecha = nombre.slice(segundoPunto + 1);
                 return [parteIzquierda + ' ', parteDerecha];
             }
         }
     }
-    const nameEsPart = nameEs.split(' ');
+    const nameEsPart = nombre.split(' ');
     return [nameEsPart[0] + ' ', nameEsPart[1]];
 };
 
@@ -96,8 +105,14 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             ultimoNumeroRealizacion = ultimoIndicadorRealizacion ? Number(ultimoIndicadorRealizacion.NameEs?.slice(2, 4) ?? '00') + 1 : 1;
             ultimoNumeroResultado = ultimoIndicadorResultado ? Number(ultimoIndicadorResultado.NameEs?.slice(2, 4) ?? '00') + 1 : 1;
         }
-
-        const nombre = indicadorRealizacion.NameEs;
+        const nombre =
+            i18n.language === 'es'
+                ? indicadorRealizacion.NameEs
+                    ? indicadorRealizacion.NameEs
+                    : indicadorRealizacion.NameEu
+                : indicadorRealizacion.NameEu
+                ? indicadorRealizacion.NameEu
+                : indicadorRealizacion.NameEs;
         const inicializacionNombre = tipoIndicador === 'realizacion' ? 'RE' : 'RS';
         const accion = indicadorSeleccionadoSinFallo.accion;
         const tipo = indicadorSeleccionadoSinFallo.tipo;
@@ -106,14 +121,13 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
         const baseKey = `${accion}_${tipo}_${esADR ? 'ADR' : 'NoADR'}`;
         const key = editandoResultadoModal ? `${baseKey}_${editandoResultadoModal}` : baseKey;
 
-        if (indicadorRealizacion.NameEs.length > 0) {
-            const nameEs = indicadorRealizacion.NameEs;
-            const nameEsPart = nameEs.split(' ');
+        if (nombre) {
+            const nameEsPart = nombre.split(' ');
 
             if (key.endsWith('CreandoResultado')) {
                 return [nameEsPart[0] + ' '];
             } else if (key.endsWith('EditandoResultado')) {
-                const nombre = SacarNombre(indicadorRealizacion);
+                const nombre = SacarNombre(indicadorRealizacion, i18n);
                 return [nombre[0] + ' ', nombre[1]];
             }
         }
@@ -133,6 +147,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 return [`${inicializacionNombre}${numeracion}`];
             }
             case 'Crear_Realizacion_NoADR_EditandoResultado': {
+                if (!nombre) return [];
                 return [nombre.slice(0, 4), nombre.slice(5)];
             }
             case 'Editar_Realizacion_NoADR_CreandoResultado': {
@@ -178,7 +193,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             case 'Editar_Realizacion_ADR_EditandoResultado':
             case 'Editar_Resultado_ADR':
             case 'Editar_Resultado_NoADR': {
-                const nombre = SacarNombre(indicadorRealizacion);
+                const nombre = SacarNombre(indicadorRealizacion, i18n);
                 return [nombre[0] + ' ', nombre[1]];
             }
         }
