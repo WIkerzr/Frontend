@@ -166,7 +166,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
             setLoading: setLoadingChageState,
             method: 'POST',
             url: `yearData/${regionSeleccionada}/${yearData.year}/updateMemoriaStatus`,
-            body: { PlanStatus: 'proceso' },
+            body: { MemoriaStatus: 'proceso' },
             onSuccess: () => {
                 setEstados((estadosPrev) => ({
                     ...estadosPrev,
@@ -283,11 +283,6 @@ export const useEstadosPorAnio = () => {
         setEditarMemoria(esADR && yearData.memoria.status === 'borrador');
     }, [yearData]);
 
-    return {
-        ...ctx,
-        editarPlan: editarPlan,
-        editarMemoria: editarMemoria,
-    };
     return {
         ...ctx,
         editarPlan: editarPlan,

@@ -109,11 +109,12 @@ const Index = () => {
                     titulo={<h2 className="text-xl font-bold">{t('ejesTitulo')}</h2>}
                     zonaBtn={
                         <>
-                            {!lockedHazi && (
-                                <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked}>
-                                    {t('guardar')}
-                                </button>
-                            )}
+                            {!lockedHazi ||
+                                (editarPlan && (
+                                    <button className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400" onClick={handleSave} disabled={locked}>
+                                        {t('guardar')}
+                                    </button>
+                                ))}
                         </>
                     }
                     zonaExplicativa={

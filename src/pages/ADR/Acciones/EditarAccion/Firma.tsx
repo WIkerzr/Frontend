@@ -132,11 +132,14 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
 
                 <AdjuntarArchivos files={firma} setFiles={setFirma} tipoArchivosAceptables="PDF" multiple={true} disabled={!editarPlan} borrar={editarPlan} />
 
-                {/* {!editarPlan && ( */}
+                {firma.length === 0 && (
+                    <div className="flex justify-center">
+                        <span className="text-red-600 font-semibold">{t('noFirmaSubida')}</span>
+                    </div>
+                )}
                 <div className="flex justify-center">
                     <Boton tipo="guardar" disabled={firma.length === 0} textoBoton={`${t('descargar')}`} onClick={() => handleClick(firma[0].name, 0, 'Firma')} />
                 </div>
-                {/* )} */}
 
                 {editarPlan && (
                     <div className="flex justify-center">
