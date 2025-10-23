@@ -12,6 +12,7 @@ import { GenerarInformeObjetivos } from './informeObjetivo';
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 import { generarInformeAcciones } from './informeAcciones';
 import { generarInformeTratamientoComarcal } from './InformesTratamientoComarcal';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 
 export type Informes = 'InfObjetivos' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfPresupuestos';
 
@@ -21,6 +22,7 @@ const Index = () => {
     const { t, i18n } = useTranslation();
     const { regiones } = useRegionContext();
     const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
+    const { anios } = useEstadosPorAnio();
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -28,7 +30,7 @@ const Index = () => {
 
     const currentYear = new Date().getFullYear();
 
-    const [years] = useState<string[]>(['TODOS', ...Array.from({ length: currentYear - 2025 + 1 }, (_, i) => (2025 + i).toString())]);
+    const [years] = useState<string[]>(['TODOS', ...anios.map(String)]);
     const [anioSeleccionado, setAnioSeleccionado] = useState<string>('TODOS');
     const [informeSeleccionado, setInformeSeleccionado] = useState<Informes>('InfObjetivos');
     const [regionesEnDropdow, setRegionesEnDropdow] = useState<RegionInterface[]>([]);

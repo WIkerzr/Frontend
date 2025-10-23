@@ -116,7 +116,11 @@ const useLogin = () => {
                 }
 
                 setTimeout(() => {
-                    navigate('/configuracion/indicadoresADR');
+                    if (user.role === 'GOBIERNOVASCO') {
+                        navigate('/adr/planesGestion');
+                    } else {
+                        navigate('/configuracion/indicadoresADR');
+                    }
                 }, 200);
             }
         } catch (err) {

@@ -90,7 +90,7 @@ const Index = () => {
                 });
             }
         }
-    }, []);
+    }, [yearData]);
 
     const handleClick = (nombreArchivo: string, index: number, url: string) => {
         let ruta: RutasArchivos = index > 0 ? 'Plan/Anexos' : 'Plan';
