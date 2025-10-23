@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { DatosAnioCuadroMandoBorrador, Ejes, OperationalIndicators, YearData } from '../../types/tipadoPlan';
 import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
@@ -41,19 +42,18 @@ export const GeneracionDelDocumentoWordPlan = async (
     plantilla: File,
     indicadoresRealizacion: IndicadorRealizacion[],
     indicadoresResultado: IndicadorResultado[],
-    language: string,
     t: (key: string) => string
 ) => {
     try {
         // 1. Cargar la plantilla desde /public
-        // const response = await fetch(language === 'es' ? '/plantillaPlanEs.docx' : language === 'eu' ? '/plantillaPlanEu.docx' : '/plantillaPlanEs.docx');
-        // const arrayBuffer = await response.arrayBuffer();
         const arrayBuffer = await plantilla.arrayBuffer();
 
         // 2. Cargar en PizZip
-        const zip = new PizZip(arrayBuffer);
+        const originalZip = new PizZip(arrayBuffer);
+        const originalMediaFiles = Object.keys(originalZip.files).filter((f) => f.startsWith('word/media/'));
 
-        // 3. Crear instancia de docxtemplater
+        // 3. Crear instancia de docxtemplater con una copia del zip
+        const zip = new PizZip(arrayBuffer);
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
@@ -204,6 +204,46 @@ export const GeneracionDelDocumentoWordPlan = async (
         // 5. Renderizar documento con datos
         doc.render(data);
 
+        // Restaurar imágenes/medios si docxtemplater las hubiera eliminado (problemas con algunas plantillas)
+        try {
+            const renderedZip = doc.getZip();
+            const renderedMedia = Object.keys(renderedZip.files).filter((f) => f.startsWith('word/media/'));
+            const missing = originalMediaFiles.filter((f) => !renderedMedia.includes(f));
+            if (missing.length > 0) {
+                console.warn('Se detectaron medias faltantes tras render. Restaurando:', missing);
+                for (const fname of missing) {
+                    const zobj = originalZip.file(fname) as unknown;
+                    if (!zobj) continue;
+                    let content: Uint8Array | null = null;
+                    if (typeof (zobj as any).async === 'function') {
+                        content = await (zobj as any).async('uint8array');
+                    } else if (typeof (zobj as any).asUint8Array === 'function') {
+                        content = (zobj as any).asUint8Array();
+                    } else if (typeof (zobj as any).nodeStream === 'function') {
+                        const stream = (zobj as any).nodeStream();
+                        const chunks: Uint8Array[] = [];
+                        for await (const chunk of stream) {
+                            const arr = chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk);
+                            chunks.push(arr);
+                        }
+                        const total = chunks.reduce((s, c) => s + c.length, 0);
+                        const combined = new Uint8Array(total);
+                        let offset = 0;
+                        for (const c of chunks) {
+                            combined.set(c, offset);
+                            offset += c.length;
+                        }
+                        content = combined;
+                    }
+                    if (content) {
+                        renderedZip.file(fname, content);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('No se pudo restaurar medias automáticamente:', err);
+        }
+
         // 6. Generar blob final
         const out = doc.getZip().generate({
             type: 'blob',
@@ -228,20 +268,18 @@ export const GeneracionDelDocumentoWordMemoria = async (
     plantilla: File,
     indicadoresRealizacion: IndicadorRealizacion[],
     indicadoresResultado: IndicadorResultado[],
-    language: string,
     t: (key: string) => string
 ) => {
     try {
         // 1. Cargar la plantilla desde /public
         const arrayBuffer = await plantilla.arrayBuffer();
 
-        // const response = await fetch(language === 'es' ? '/plantillaMemoriaEs.docx' : language === 'eu' ? '/plantillaMemoriaEu.docx' : '/plantillaMemoriaEs.docx');
-        // const arrayBuffer = await response.arrayBuffer();
-
         // 2. Cargar en PizZip
-        const zip = new PizZip(arrayBuffer);
+        const originalZip2 = new PizZip(arrayBuffer);
+        const originalMediaFiles2 = Object.keys(originalZip2.files).filter((f) => f.startsWith('word/media/'));
 
-        // 3. Crear instancia de docxtemplater
+        // 3. Crear instancia de docxtemplater con una copia del zip
+        const zip = new PizZip(arrayBuffer);
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
@@ -334,8 +372,6 @@ export const GeneracionDelDocumentoWordMemoria = async (
         const cuadroMandoRealizacion = [...(cuadroAcciones[0] || []), ...(cuadroAccionesAccesorias[0] || []), ...(cuadroServicios[0] || [])];
         const cuadroMandoResultado = [...(cuadroAcciones[1] || []), ...(cuadroAccionesAccesorias[1] || []), ...(cuadroServicios[1] || [])];
 
-        console.log(cuadroMandoResultado);
-
         // 4. Datos a sustituir
         let contAccion = 1;
         const data = {
@@ -418,6 +454,46 @@ export const GeneracionDelDocumentoWordMemoria = async (
         // 5. Renderizar documento con datos
         doc.render(data);
 
+        // Restaurar imágenes/medios si docxtemplater las hubiera eliminado
+        try {
+            const renderedZip2 = doc.getZip();
+            const renderedMedia2 = Object.keys(renderedZip2.files).filter((f) => f.startsWith('word/media/'));
+            const missing2 = originalMediaFiles2.filter((f) => !renderedMedia2.includes(f));
+            if (missing2.length > 0) {
+                console.warn('Se detectaron medias faltantes tras render (Memoria). Restaurando:', missing2);
+                for (const fname of missing2) {
+                    const zobj = originalZip2.file(fname) as unknown;
+                    if (!zobj) continue;
+                    let content: Uint8Array | null = null;
+                    if (typeof (zobj as any).async === 'function') {
+                        content = await (zobj as any).async('uint8array');
+                    } else if (typeof (zobj as any).asUint8Array === 'function') {
+                        content = (zobj as any).asUint8Array();
+                    } else if (typeof (zobj as any).nodeStream === 'function') {
+                        const stream = (zobj as any).nodeStream();
+                        const chunks: Uint8Array[] = [];
+                        for await (const chunk of stream) {
+                            const arr = chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk);
+                            chunks.push(arr);
+                        }
+                        const total = chunks.reduce((s, c) => s + c.length, 0);
+                        const combined = new Uint8Array(total);
+                        let offset = 0;
+                        for (const c of chunks) {
+                            combined.set(c, offset);
+                            offset += c.length;
+                        }
+                        content = combined;
+                    }
+                    if (content) {
+                        renderedZip2.file(fname, content);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('No se pudo restaurar medias automáticamente (Memoria):', err);
+        }
+
         // 6. Generar blob final
         const out = doc.getZip().generate({
             type: 'blob',
@@ -465,7 +541,6 @@ export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> =
                         setLoading,
                         setErrorMessage,
                         setSuccessMessage,
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onSuccess: async (data: any) => {
                             const tempPlanEs: File[] = [];
                             const tempPlanEu: File[] = [];
@@ -503,9 +578,9 @@ export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> =
                 }
 
                 if (tipo === 'Plan') {
-                    await GeneracionDelDocumentoWordPlan(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, language, t);
+                    await GeneracionDelDocumentoWordPlan(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, t);
                 } else {
-                    await GeneracionDelDocumentoWordMemoria(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, language, t);
+                    await GeneracionDelDocumentoWordMemoria(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, t);
                 }
             }}
             className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px] bg-gray-400 text-white hover:bg-gray-500`}
