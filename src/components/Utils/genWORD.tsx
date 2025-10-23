@@ -10,6 +10,10 @@ import { PlanOMemoria } from '../../pages/ADR/PlanMemoria/PlanMemoriaComponents'
 import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
 import { obtenerFilasPorTipoAccion, TransformarYearDataACuadroBorrador } from '../../pages/Configuracion/CuadroMando/ConversorCuadroMando';
 import { useYear } from '../../contexts/DatosAnualContext';
+import { LlamadasBBDD } from './data/utilsData';
+import { useState } from 'react';
+import { LoadingOverlayPersonalizada } from '../../pages/Configuracion/Users/componentes';
+import { convertirPlantillaAFileValidado, onSuccessFillFiles, plantillasOriginales } from '../../pages/Configuracion/Plantillas';
 
 const formatHMT = (dato: HMT | undefined) => {
     if (dato === undefined) {
@@ -34,6 +38,7 @@ const Ejecutoras = (ejecutora: string | undefined) => {
 
 export const GeneracionDelDocumentoWordPlan = async (
     datos: YearData,
+    plantilla: File,
     indicadoresRealizacion: IndicadorRealizacion[],
     indicadoresResultado: IndicadorResultado[],
     language: string,
@@ -41,8 +46,9 @@ export const GeneracionDelDocumentoWordPlan = async (
 ) => {
     try {
         // 1. Cargar la plantilla desde /public
-        const response = await fetch(language === 'es' ? '/plantillaPlanEs.docx' : language === 'eu' ? '/plantillaPlanEu.docx' : '/plantillaPlanEs.docx');
-        const arrayBuffer = await response.arrayBuffer();
+        // const response = await fetch(language === 'es' ? '/plantillaPlanEs.docx' : language === 'eu' ? '/plantillaPlanEu.docx' : '/plantillaPlanEs.docx');
+        // const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = await plantilla.arrayBuffer();
 
         // 2. Cargar en PizZip
         const zip = new PizZip(arrayBuffer);
@@ -213,11 +219,13 @@ export const GeneracionDelDocumentoWordPlan = async (
         URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Error generando el Word', error);
+        throw error; // re-lanzar para que el llamador pueda manejarlo y ver el stack en consola
     }
 };
 
 export const GeneracionDelDocumentoWordMemoria = async (
     datos: YearData,
+    plantilla: File,
     indicadoresRealizacion: IndicadorRealizacion[],
     indicadoresResultado: IndicadorResultado[],
     language: string,
@@ -225,8 +233,10 @@ export const GeneracionDelDocumentoWordMemoria = async (
 ) => {
     try {
         // 1. Cargar la plantilla desde /public
-        const response = await fetch(language === 'es' ? '/plantillaMemoriaEs.docx' : language === 'eu' ? '/plantillaMemoriaEu.docx' : '/plantillaMemoriaEs.docx');
-        const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = await plantilla.arrayBuffer();
+
+        // const response = await fetch(language === 'es' ? '/plantillaMemoriaEs.docx' : language === 'eu' ? '/plantillaMemoriaEu.docx' : '/plantillaMemoriaEs.docx');
+        // const arrayBuffer = await response.arrayBuffer();
 
         // 2. Cargar en PizZip
         const zip = new PizZip(arrayBuffer);
@@ -423,6 +433,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
         URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Error generando el Word', error);
+        throw error;
     }
 };
 interface BtnExportarDocumentoWordProps {
@@ -436,6 +447,10 @@ export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> =
     const { indicadoresRealizacion, indicadoresResultado } = useIndicadoresContext();
     const { yearData, llamadaBBDDYearDataAll } = useYear();
 
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
     return (
         <button
             // disabled={!camposRellenos}
@@ -443,14 +458,60 @@ export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> =
                 const updatedYearData = await llamadaBBDDYearDataAll(yearData.year, true, true);
                 const dataToUse = updatedYearData || yearData;
 
+                const templatesData = await new Promise<{ planEs: File[]; planEu: File[]; memoriaEs: File[]; memoriaEu: File[] }>((resolve, reject) => {
+                    LlamadasBBDD({
+                        method: 'GET',
+                        url: `plantillas`,
+                        setLoading,
+                        setErrorMessage,
+                        setSuccessMessage,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        onSuccess: async (data: any) => {
+                            const tempPlanEs: File[] = [];
+                            const tempPlanEu: File[] = [];
+                            const tempMemoriaEs: File[] = [];
+                            const tempMemoriaEu: File[] = [];
+                            await onSuccessFillFiles(
+                                data,
+                                (files) => tempPlanEs.push(...files),
+                                (files) => tempPlanEu.push(...files),
+                                (files) => tempMemoriaEs.push(...files),
+                                (files) => tempMemoriaEu.push(...files)
+                            );
+                            resolve({ planEs: tempPlanEs, planEu: tempPlanEu, memoriaEs: tempMemoriaEs, memoriaEu: tempMemoriaEu });
+                        },
+                        onError: () => reject(new Error('Error loading templates')),
+                    });
+                });
+
+                let plantillaEscogida =
+                    tipo === 'Plan' ? (language === 'es' ? templatesData.planEs[0] : templatesData.planEu[0]) : language === 'es' ? templatesData.memoriaEs[0] : templatesData.memoriaEu[0];
+                if (!plantillaEscogida) {
+                    if (tipo === 'Plan') {
+                        if (language === 'es') {
+                            plantillaEscogida = await convertirPlantillaAFileValidado(plantillasOriginales[0].url, plantillasOriginales[0].name);
+                        } else {
+                            plantillaEscogida = await convertirPlantillaAFileValidado(plantillasOriginales[1].url, plantillasOriginales[1].name);
+                        }
+                    } else {
+                        if (language === 'es') {
+                            plantillaEscogida = await convertirPlantillaAFileValidado(plantillasOriginales[2].url, plantillasOriginales[2].name);
+                        } else {
+                            plantillaEscogida = await convertirPlantillaAFileValidado(plantillasOriginales[3].url, plantillasOriginales[3].name);
+                        }
+                    }
+                }
+
                 if (tipo === 'Plan') {
-                    await GeneracionDelDocumentoWordPlan(dataToUse, indicadoresRealizacion, indicadoresResultado, language, t);
+                    await GeneracionDelDocumentoWordPlan(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, language, t);
                 } else {
-                    await GeneracionDelDocumentoWordMemoria(dataToUse, indicadoresRealizacion, indicadoresResultado, language, t);
+                    await GeneracionDelDocumentoWordMemoria(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, language, t);
                 }
             }}
             className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px] bg-gray-400 text-white hover:bg-gray-500`}
         >
+            <LoadingOverlayPersonalizada isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
+
             <img src={IconDownloand} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
             {t('descargarBorrador')}
         </button>

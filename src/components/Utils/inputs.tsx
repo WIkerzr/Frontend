@@ -471,15 +471,7 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                         textoBoton={t('descargar')}
                         onClick={() => {
                             if (files && files.length > 0) {
-                                const file = files[0];
-                                const url = URL.createObjectURL(file);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = file.name;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
+                                downloadFile(files[0]);
                             }
                         }}
                         className="w-1/2 h-full"
@@ -505,7 +497,7 @@ import { SingleValue } from 'react-select';
 import { EjesBBDD } from '../../types/tipadoPlan';
 import { TiposAccion } from '../../contexts/DatosAnualContext';
 import { Informes, tiposInformes } from '../../pages/Configuracion/Informes/Informes';
-import { Boton } from './utils';
+import { Boton, downloadFile } from './utils';
 interface OptionType {
     value: string;
     label: string;

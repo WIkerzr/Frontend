@@ -7,11 +7,11 @@ import { AdjuntarArchivos } from '../../components/Utils/inputs';
 import { Boton } from '../../components/Utils/utils';
 import { ApiTarget } from '../../components/Utils/data/controlDev';
 
-const plantillasOriginales = [
-    { url: '/plantillaPlanEsOriginal.docx', name: 'plantillaPlanEsOriginal.docx' },
-    { url: '/plantillaPlanEuOriginal.docx', name: 'plantillaPlanEuOriginal.docx' },
-    { url: '/plantillaMemoriaEsOriginal.docx', name: 'plantillaMemoriaEsOriginal.docx' },
-    { url: '/plantillaMemoriaEuOriginal.docx', name: 'plantillaMemoriaEuOriginal.docx' },
+export const plantillasOriginales = [
+    { url: '/Plantillas/plantillaPlanEsOriginal.docx', name: 'plantillaPlanEsOriginal.docx' },
+    { url: '/Plantillas/plantillaPlanEuOriginal.docx', name: 'plantillaPlanEuOriginal.docx' },
+    { url: '/Plantillas/plantillaMemoriaEsOriginal.docx', name: 'plantillaMemoriaEsOriginal.docx' },
+    { url: '/Plantillas/plantillaMemoriaEuOriginal.docx', name: 'plantillaMemoriaEuOriginal.docx' },
 ];
 
 const Index = () => {
@@ -52,13 +52,12 @@ const Index = () => {
         if (plantillaPlanEs.length > 0 && plantillaPlanEu.length > 0 && plantillaMemoriaEs.length > 0 && plantillaMemoriaEu.length > 0) return;
         const loadDefaultFiles = async () => {
             try {
-                const files = await Promise.all(
-                    plantillasOriginales.map(async ({ url, name }) => {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        return new File([blob], name, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-                    })
-                );
+                const files = await Promise.all([
+                    convertirPlantillaAFileValidado(plantillasOriginales[0].url, plantillasOriginales[0].name),
+                    convertirPlantillaAFileValidado(plantillasOriginales[1].url, plantillasOriginales[1].name),
+                    convertirPlantillaAFileValidado(plantillasOriginales[2].url, plantillasOriginales[2].name),
+                    convertirPlantillaAFileValidado(plantillasOriginales[3].url, plantillasOriginales[3].name),
+                ]);
 
                 if (plantillaPlanEs.length == 0) setPlantillaPlanEs([files[0]]);
                 if (plantillaPlanEu.length == 0) setPlantillaPlanEu([files[1]]);
@@ -151,15 +150,15 @@ const Index = () => {
             <div className=" panel">
                 <span className="text-center block text-xl">{t('plantillasPlanes')}</span>
                 <div className="flex gap-4">
-                    <AdjuntarArchivos files={plantillaPlanEs} setFiles={setPlantillaPlanEs} title={t('plantillaPlanEs')} borrar={false} btnPlantillas={true} />
-                    <AdjuntarArchivos files={plantillaPlanEu} setFiles={setPlantillaPlanEu} title={t('plantillaPlanEu')} borrar={false} btnPlantillas={true} />
+                    <AdjuntarArchivos files={plantillaPlanEs} setFiles={setPlantillaPlanEs} title={t('plantillaPlanEs')} borrar={true} btnPlantillas={true} />
+                    <AdjuntarArchivos files={plantillaPlanEu} setFiles={setPlantillaPlanEu} title={t('plantillaPlanEu')} borrar={true} btnPlantillas={true} />
                 </div>
             </div>
             <div className="panel">
                 <span className="text-center block text-xl">{t('plantillasMemorias')}</span>
                 <div className="flex gap-4">
-                    <AdjuntarArchivos files={plantillaMemoriaEs} setFiles={setPlantillaMemoriaEs} title={t('plantillaMemoriaEs')} borrar={false} btnPlantillas={true} />
-                    <AdjuntarArchivos files={plantillaMemoriaEu} setFiles={setPlantillaMemoriaEu} title={t('plantillaMemoriaEu')} borrar={false} btnPlantillas={true} />
+                    <AdjuntarArchivos files={plantillaMemoriaEs} setFiles={setPlantillaMemoriaEs} title={t('plantillaMemoriaEs')} borrar={true} btnPlantillas={true} />
+                    <AdjuntarArchivos files={plantillaMemoriaEu} setFiles={setPlantillaMemoriaEu} title={t('plantillaMemoriaEu')} borrar={true} btnPlantillas={true} />
                 </div>
             </div>
             <Boton tipo="guardar" textoBoton={t('guardar')} onClick={() => handleGuardar()} />
@@ -240,3 +239,43 @@ export const onSuccessFillFiles = async (
     setPlantillaMemoriaEs(downloads[2] ? [downloads[2] as File] : []);
     setPlantillaMemoriaEu(downloads[3] ? [downloads[3] as File] : []);
 };
+
+export async function convertirPlantillaAFileValidado(urlPath: string, filename?: string): Promise<File> {
+    const res = await fetch(urlPath, { method: 'GET', credentials: 'same-origin' });
+    if (!res.ok) {
+        throw new Error(`Error fetching file: ${res.status} ${res.statusText}`);
+    }
+
+    // Obtener ArrayBuffer para inspeccionar bytes
+    const arrayBuffer = await res.arrayBuffer();
+    const u8 = new Uint8Array(arrayBuffer);
+
+    // Comprobación básica de firma ZIP (docx debe empezar por PK 0x50 0x4B)
+    const isZip = u8.length >= 4 && u8[0] === 0x50 && u8[1] === 0x4b && (u8[2] === 0x03 || u8[2] === 0x05 || u8[2] === 0x07);
+    const contentType = res.headers.get('content-type') ?? '';
+
+    if (!isZip) {
+        // Si no es ZIP, intentar decodificar una porción como texto para dar info diagnóstica
+        let preview = '';
+        try {
+            const textPreview = new TextDecoder().decode(arrayBuffer.slice(0, 2048));
+            preview = textPreview.slice(0, 1000).replace(/\s+/g, ' ').trim();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (e) {
+            preview = '(no se pudo decodificar preview)';
+        }
+
+        // Mensaje útil que puedes loguear o devolver al usuario
+        const msg = `La respuesta NO es un .docx válido. Content-Type: ${contentType}. Primeros bytes hex: ${Array.from(u8.slice(0, 8))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join(' ')}. Preview: ${preview}`;
+        throw new Error(msg);
+    }
+
+    // Crear Blob y File válidos
+    const blob = new Blob([arrayBuffer], { type: contentType || 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const name = filename ?? new URL(urlPath, window.location.href).pathname.split('/').pop() ?? 'plantilla.docx';
+    const file = new File([blob], name, { type: blob.type });
+
+    return file;
+}

@@ -767,3 +767,29 @@ export function ConvertirIndicadoresServicioAAccionDTO(
         indicadoreResultado,
     };
 }
+
+export function downloadFile(file: File) {
+    if (typeof (window.navigator as any).msSaveOrOpenBlob === 'function') {
+        (window.navigator as any).msSaveOrOpenBlob(file, file.name);
+        return;
+    }
+
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = file.name || 'download';
+    a.rel = 'noopener noreferrer';
+
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+        try {
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error('Error revoking object URL:', e);
+        }
+        a.remove();
+    }, 500);
+}
