@@ -191,10 +191,35 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
-        if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-            llamadaBBDDYearData(anioSeleccionada, false);
-        }
-    }, [anioSeleccionada, nombreRegionSeleccionada]);
+        const fetchData = async () => {
+            if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
+                await llamadaBBDDYearData(anioSeleccionada, false);
+            }
+        };
+        fetchData();
+    }, [anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada]);
+
+    useEffect(() => {
+        if (anioSeleccionada === null || !yearData) return;
+
+        setEstados((prev) => {
+            const currentEstado = prev[anioSeleccionada];
+            const newPlanStatus = yearData.plan.status;
+            const newMemoriaStatus = yearData.memoria.status;
+
+            if (currentEstado?.plan === newPlanStatus && currentEstado?.memoria === newMemoriaStatus) {
+                return prev;
+            }
+
+            return {
+                ...prev,
+                [anioSeleccionada]: {
+                    plan: newPlanStatus,
+                    memoria: newMemoriaStatus,
+                },
+            };
+        });
+    }, [yearData.plan.status, yearData.memoria.status, anioSeleccionada]);
 
     const llamadaAniosXCambioRegionADR = () => {
         const fetchYears = async () => {
