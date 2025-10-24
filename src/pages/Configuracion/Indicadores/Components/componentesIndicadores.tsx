@@ -49,7 +49,7 @@ const SacarNombre = (indicadorRealizacion: IndicadorRealizacion, i18n: any) => {
         const primerPunto = nombre.indexOf('.');
         const parteIzquierda = nombre.slice(0, primerPunto);
         const parteDerecha = nombre.slice(primerPunto + 1, nombre.length);
-        return [parteIzquierda + ' ', parteDerecha];
+        return [parteIzquierda + '.', parteDerecha];
     } else if (puntos >= 2) {
         const primerPunto = nombre.indexOf('.');
         const segundoPunto = nombre.indexOf('.', primerPunto + 1);
@@ -58,12 +58,15 @@ const SacarNombre = (indicadorRealizacion: IndicadorRealizacion, i18n: any) => {
             if (/^\d+$/.test(entrePuntos)) {
                 const parteIzquierda = nombre.slice(0, segundoPunto + 1);
                 const parteDerecha = nombre.slice(segundoPunto + 1);
-                return [parteIzquierda + ' ', parteDerecha];
+                return [parteIzquierda + '.', parteDerecha];
             }
         }
+    } else if (nombre.includes(' ') && !nombre.includes('.')) {
+        const partes = nombre.split('  ');
+        return [partes[0] + '.', partes[1]];
     }
     const nameEsPart = nombre.split(' ');
-    return [nameEsPart[0] + ' ', nameEsPart[1]];
+    return [nameEsPart[0] + '.', nameEsPart[1]];
 };
 
 export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRealizacion, onChange, tipoIndicador, indicadorResultado, editandoResultadoModal, setChangeName, subIndice }) => {
@@ -128,7 +131,7 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
                 return [nameEsPart[0] + ' '];
             } else if (key.endsWith('EditandoResultado')) {
                 const nombre = SacarNombre(indicadorRealizacion, i18n);
-                return [nombre[0] + ' ', nombre[1]];
+                return [nombre[0] + '.', nombre[1]];
             }
         }
         switch (key) {
@@ -249,9 +252,9 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
             const indicadorN = SacarSiguienteEnumeracionIndicadores(indicadorRealizacion, tipoIndicador, indicadorResultadoDeterminado === undefined);
             if (indicadorN.length === 0) return;
             setIndicador(indicadorN);
-            setNombreIndicador(indicadorN[1] ?? '');
+            setNombreIndicador(indicadorN[1] ? indicadorN[1].trim() ?? '' : '');
             if (setChangeName) {
-                setChangeName(indicadorN[0]);
+                setChangeName(indicadorN[0].trimStart());
             }
         }
     }, [indicadorResultadoDeterminado, editandoResultadoModal]);
@@ -286,11 +289,11 @@ export const RellenoIndicador: React.FC<RellenoIndicadorProps> = ({ indicadorRea
     const handleChangeNombre = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setNombreIndicador(value);
-        let nameText = `${indicador[0]}.${value}`;
+        let nameText = `${indicador[0].trim()}.${value.trimStart()}`;
         if (indicador[0].endsWith(' ')) {
-            nameText = `${indicador[0]}${value}`;
+            nameText = `${indicador[0].trim()}${value.trimStart()}`;
         } else {
-            nameText = `${indicador[0]}.${value}`;
+            nameText = `${indicador[0].trim()}.${value.trimStart()}`;
         }
 
         const updatedData = { ...formData, [name]: nameText };
@@ -410,9 +413,10 @@ interface RellenoIndicadorResultadoProps {
     indicadorRealizacion: IndicadorRealizacion;
     isOpen: boolean;
     setDescripcionEditable: React.Dispatch<React.SetStateAction<IndicadorRealizacion>>;
+    onSave: () => void;
 }
 
-export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorRealizacion, setDescripcionEditable: setIndicadorRealizacion, isOpen }) => {
+export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ indicadorRealizacion, setDescripcionEditable: setIndicadorRealizacion, isOpen, onSave }) => {
     const { t, i18n } = useTranslation();
     const indicadoresResultados: IndicadorResultado[] = JSON.parse(localStorage.getItem('indicadoresResultado') || '[]');
     const [opciones] = useState(indicadoresResultados);
@@ -662,7 +666,9 @@ export const SelectorOCreador: React.FC<RellenoIndicadorResultadoProps> = ({ ind
                     </div>
                 </div>
                 {(indicadoresResultadosOrdenadosES?.length === 0 || !indicadoresResultadosOrdenadosES) && (
-                    <button className={`text-white px-4 py-2 rounded w-full bg-green-600 hover:bg-green-700'}`}>{t('Guardar Indicador Realizacion con Indicador Resultado no medible')}</button>
+                    <button className={`text-white px-4 py-2 rounded w-full bg-green-600 hover:bg-green-700'}`} onClick={() => onSave()}>
+                        {t('guardarIndicadorNoMedible')}
+                    </button>
                 )}
             </>
         );
@@ -781,6 +787,28 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
         }, 1000);
     };
 
+    const handleGuardar = async () => {
+        let mensajeError = '';
+        if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
+            mensajeError += `${t('errorMissingFields')}`;
+        }
+        try {
+            if (esNuevo) {
+                handleGuardarNuevoRealizacion();
+            } else {
+                handleEditarIndicador();
+            }
+        } catch (error) {
+            const errorInfo = gestionarErrorServidor(error);
+            setErrorMessage(errorInfo.mensaje);
+        }
+
+        if (mensajeError && mensajeError?.length > 0) {
+            setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + mensajeError : t('errorGuardar') + mensajeError));
+            return;
+        }
+    };
+
     const handleGuardarNuevoRealizacion = async () => {
         guardarNuevoRealizacionBack({
             esADR,
@@ -820,12 +848,49 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 
     const handleEditarIndicador = async () => {
         try {
+            console.log(datosIndicador);
+
+            let datosGuardado = descripcionEditable;
+            // if (descripcionEditable.RegionsId === null) {
+            //     datosGuardado = {
+            //         ...datosGuardado,
+            //         RegionsId: datosGuardado.RegionsId ?? regionSeleccionada ?? '',
+            //     };
+            // }
+            if (descripcionEditable.NameEs?.trim()) {
+                const desc = descripcionEditable.NameEs;
+                const primerPunto = desc.indexOf('.');
+                if (primerPunto !== -1) {
+                    const derecha = desc.slice(primerPunto + 1);
+                    const condicionContenidoDerecha = derecha.trim().length;
+                    if (condicionContenidoDerecha === 0) {
+                        datosGuardado = {
+                            ...datosGuardado,
+                            NameEs: datosIndicador.NameEs,
+                        };
+                    }
+                }
+            }
+            if (descripcionEditable.NameEu?.trim()) {
+                const desc = descripcionEditable.NameEu;
+                const primerPunto = desc.indexOf('.');
+                if (primerPunto !== -1) {
+                    const derecha = desc.slice(primerPunto + 1);
+                    if (derecha.trim().length === 0) {
+                        datosGuardado = {
+                            ...datosGuardado,
+                            NameEu: datosIndicador.NameEu,
+                        };
+                    }
+                }
+            }
+            setDescripcionEditable(datosGuardado);
             if (tipoIndicador === 'realizacion') {
                 const setRealizacion = esADR ? setIndicadoresRealizacionADR : setIndicadoresRealizacion;
                 const setResultado = esADR ? setIndicadoresResultadoADR : setIndicadoresResultado;
 
                 editIndicadorRealizacionBack({
-                    indicadorModificado: descripcionEditable,
+                    indicadorModificado: datosGuardado,
                     ejesIndicador,
                     setLoading,
                     onSucces: (indicadorRE: IndicadorRealizacion) => {
@@ -833,8 +898,8 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             const updated = prev.map((el) => (el.Id === indicadorRE.Id ? indicadorRE : el));
                             return updated;
                         });
-                        if (descripcionEditable.Resultados) {
-                            descripcionEditable.Resultados.forEach((resultado) => {
+                        if (datosGuardado.Resultados) {
+                            datosGuardado.Resultados.forEach((resultado) => {
                                 if (resultado.Id === 0) {
                                     if (indicadorRE.Resultados) {
                                         indicadorRE.Resultados.forEach((resultadoRS) => {
@@ -932,25 +997,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             <button
                                 disabled={validacionGuardar}
                                 onClick={() => {
-                                    let mensajeError = '';
-                                    if ((i18n.language === 'eu' && !descripcionEditable.NameEu) || (i18n.language === 'es' && !descripcionEditable.NameEs)) {
-                                        mensajeError += `${t('errorMissingFields')}`;
-                                    }
-                                    try {
-                                        if (esNuevo) {
-                                            handleGuardarNuevoRealizacion();
-                                        } else {
-                                            handleEditarIndicador();
-                                        }
-                                    } catch (error) {
-                                        const errorInfo = gestionarErrorServidor(error);
-                                        setErrorMessage(errorInfo.mensaje);
-                                    }
-
-                                    if (mensajeError && mensajeError?.length > 0) {
-                                        setMensaje((prevMensaje) => (prevMensaje ? prevMensaje + '\n' + t('errorGuardar') + mensajeError : t('errorGuardar') + mensajeError));
-                                        return;
-                                    }
+                                    handleGuardar();
                                 }}
                                 className={`text-white px-4 py-2 rounded w-full ${validacionGuardar ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
                             >
@@ -970,7 +1017,7 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
                             {t('Indicadores')} {t('Resultado')}
                         </h2>
                         <div>
-                            <SelectorOCreador indicadorRealizacion={descripcionEditable} setDescripcionEditable={setDescripcionEditable} isOpen={isOpen} />
+                            <SelectorOCreador indicadorRealizacion={descripcionEditable} setDescripcionEditable={setDescripcionEditable} isOpen={isOpen} onSave={handleGuardar} />
                         </div>
                     </div>
                 )}
