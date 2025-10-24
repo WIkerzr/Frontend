@@ -654,8 +654,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     const [block, setBlock] = useState<boolean>(false);
 
     const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, anioSeleccionada: number) => {
-        const memoriaStatus: Estado = isEstado(data.data.Memoria.Status) ? data.data.Memoria.Status : 'borrador';
-        const planStatus: Estado = isEstado(data.data.Plan.Status) ? data.data.Plan.Status : 'borrador';
+        const estadoPlan = data.data.Plan.Status.toLowerCase();
+        const estadoMemoria = data.data.Memoria.Status.toLowerCase();
+        const planStatus: Estado = isEstado(estadoPlan) ? estadoPlan : 'borrador';
+        const memoriaStatus: Estado = isEstado(estadoMemoria) ? estadoMemoria : 'borrador';
         const ejesPrioritarios: Ejes[] = [];
         const ejesRestantes: Ejes[] = [];
         const ejes: Ejes[] = [];
