@@ -106,19 +106,6 @@ export interface ImpactIndicatorDTO {
     CategoriaNameEu: string;
     Datos: ImpactIndicatorDato[];
 }
-// interface Indicador {
-//     id: number;
-//     idTemp: number;
-//     indicador: string;
-//     categoria: string;
-//     unidad: string;
-//     alcance: string;
-//     datos: DataIndicator[];
-//     valorFinal: string;
-//     mostrar?: boolean;
-//     categorias?: Categorias[];
-//     [key: string]: string | number | boolean | Categorias[] | string[] | (typeObjetivo | undefined)[] | DataIndicator[] | undefined;
-// }
 
 function getMinMaxYears(regiones: { RegionId: number; Years: number[] }[]): { minYear: number; maxYear: number } | null {
     if (!Array.isArray(regiones) || regiones.length === 0) return null;
@@ -146,86 +133,10 @@ function getMinMaxYearsIndicadores(indicadores: ListIndicador[]): { minYear: num
     return { minYear, maxYear };
 }
 
-// function convertirIndicadores(impactos: IndicadoresImpacto[]): Indicador[] {
-//     const resultados: Indicador[] = [];
-//     let num = 0;
-
-//     impactos.forEach((item) => {
-//         if (item.categorias && item.categorias.length > 0) {
-//             const multipleCategorias = item.categorias.length > 1;
-
-//             item.categorias.forEach((catId, index) => {
-//                 const categoriaEncontrada = categorias.find((cat) => cat.id === catId);
-
-//                 const fila: Indicador = {
-//                     id: num++,
-//                     idTemp: item.id,
-//                     indicador: item.nameEs,
-//                     categoria: categoriaEncontrada ? categoriaEncontrada.nameEs : `Categoría ${catId}`,
-//                     unidad: categoriaEncontrada ? `${unidadesMedida.find((med) => med.id === categoriaEncontrada.unidadMedida)?.nameEs}` : `FALLO UNIDAD MEDIDA`,
-//                     alcance: '',
-//                     datos: [
-//                         {
-//                             year: 0,
-//                             valor: 0,
-//                             objetivos: undefined,
-//                         },
-//                     ],
-//                     mostrar: !multipleCategorias && index === 0,
-//                     valorFinal: '',
-//                 };
-
-//                 resultados.push(fila);
-
-//                 if (multipleCategorias && index === item.categorias!.length - 1) {
-//                     resultados.push({
-//                         id: num++,
-//                         idTemp: item.id,
-//                         indicador: item.nameEs,
-//                         categoria: '',
-//                         unidad: '',
-//                         alcance: '',
-//                         datos: [
-//                             {
-//                                 year: 0,
-//                                 valor: 0,
-//                                 objetivos: undefined,
-//                             },
-//                         ],
-//                         valorFinal: '',
-//                         mostrar: true,
-//                         categorias: categorias.filter((cat) => item.categorias!.includes(cat.id)),
-//                     });
-//                 }
-//             });
-//         } else {
-//             const unidadMedidaEncontrada = unidadesMedida.find((med) => med.id === item.unidadMedida);
-//             resultados.push({
-//                 id: num++,
-//                 idTemp: item.id,
-//                 indicador: item.nameEs,
-//                 categoria: '-',
-//                 unidad: unidadMedidaEncontrada ? unidadMedidaEncontrada.nameEs : 'FALLO UNIDAD MEDIDA',
-//                 alcance: '',
-//                 datos: [
-//                     {
-//                         year: 0,
-//                         valor: 0,
-//                         objetivos: undefined,
-//                     },
-//                 ],
-//                 valorFinal: '',
-//                 mostrar: true,
-//             });
-//         }
-//     });
-
-//     return resultados;
-// }
-
 const Index = () => {
     const { t } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
+    const [indicadoresOriginales, setIndicadoresOriginales] = useState<Record<string, ListIndicador[]>>({});
 
     // const nuevosIndicadores = convertirIndicadores(listadoIndicadoresImpacto);
 
@@ -250,6 +161,7 @@ const Index = () => {
     const [successMessage, setSuccessMessage] = useState<string>('');
 
     useEffect(() => {
+        setIndicadoresOriginales({});
         if (!regionSeleccionada) return;
         LlamadasBBDD({
             method: 'GET',
@@ -311,6 +223,7 @@ const Index = () => {
                 }
                 const listadoMostrado = listadoCompleto.filter((f) => f.mostrar === true);
                 setIndicadores(listadoCompleto);
+                setIndicadoresOriginales((prev) => ({ ...prev, [regionSeleccionada]: listadoCompleto }));
 
                 console.log(listadoMostrado);
                 console.log(listadoCompleto.filter((f) => f.listado));
@@ -323,7 +236,17 @@ const Index = () => {
     if (!regionSeleccionada) return <SeleccioneRegion />;
 
     const handleNuevo = () => {
-        setIndicadores((prev) => prev.map((item) => (item.IdIndicador === indicadorSeleccionado && item.IdCategoria === categoriaSeleccionado ? { ...item, mostrar: true } : item)));
+        let indicadorSelect = indicadores.filter((ind) => ind.IdIndicador === indicadorSeleccionado);
+        if (categoriaSeleccionado) {
+            indicadorSelect = indicadorSelect.filter((ind) => ind.IdCategoria === categoriaSeleccionado);
+        }
+        setCategoriaSeleccionado(0);
+        setIndicadorSeleccionado(0);
+        if (indicadorSelect.length > 0) {
+            setIndicadores((prev) =>
+                prev.map((item) => (indicadorSelect.some((ind) => ind.IdIndicador === item.IdIndicador && ind.IdCategoria === item.IdCategoria) ? { ...item, mostrar: true } : item))
+            );
+        }
     };
 
     const inicializarDatosVacios = (item: ListIndicador, year: number, value: string, field: 'Valor' | 'Objetivo') => {
@@ -385,43 +308,52 @@ const Index = () => {
 
             const datosEliminados = record;
             datosEliminados.alcance = '';
-            datosEliminados.datos[0].AlcanceTerritorial = '';
-            datosEliminados.datos[0].Valores.map((v) => {
-                v.Objetivo = '';
-                v.Valor = 0;
-                return v;
-            });
+            if (datosEliminados.datos && datosEliminados.datos.length > 0) {
+                datosEliminados.datos[0].AlcanceTerritorial = '';
+                if (datosEliminados.datos[0].Valores && datosEliminados.datos[0].Valores.length > 0) {
+                    datosEliminados.datos[0].Valores.map((v) => {
+                        v.Objetivo = '';
+                        v.Valor = 0;
+                        return v;
+                    });
+                }
+            }
+            if (indicadoresOriginales[regionSeleccionada]) {
+                const datosOriginales = indicadoresOriginales[regionSeleccionada].find((item) => item.Id === idAModificar);
+                if (datosOriginales && datosOriginales.datos && datosOriginales.datos[0].Valores) {
+                    LlamadasBBDD({
+                        method: 'POST',
+                        url: `/indicators/edit/${regionSeleccionada}`,
+                        body: datosEliminados,
+                        setLoading: setLoading ?? (() => {}),
+                        onSuccess() {
+                            setIndicadores((prev) =>
+                                prev.map((item) =>
+                                    item.Id === idAModificar
+                                        ? {
+                                              ...item,
+                                              alcance: '',
+                                              mostrar: false,
+                                              valores: item.datos[0].Valores.map((v) => {
+                                                  v.Objetivo = '';
+                                                  v.Valor = 0;
+                                                  return v;
+                                              }),
+                                              objetivo: undefined,
+                                          }
+                                        : item
+                                )
+                            );
+                        },
+                    });
+                }
+            }
 
-            LlamadasBBDD({
-                method: 'POST',
-                url: `/indicators/edit/${regionSeleccionada}`,
-                body: datosEliminados,
-                setLoading: setLoading ?? (() => {}),
-                onSuccess() {
-                    setIndicadores((prev) =>
-                        prev.map((item) =>
-                            item.Id === idAModificar
-                                ? {
-                                      ...item,
-                                      alcance: '',
-                                      mostrar: false,
-                                      valores: item.datos[0].Valores.map((v) => {
-                                          v.Objetivo = '';
-                                          v.Valor = 0;
-                                          return v;
-                                      }),
-                                      objetivo: undefined,
-                                  }
-                                : item
-                        )
-                    );
-                },
-            });
             const idTemp = indicadoresMostrados[rowIndex].IdIndicador;
             setIndicadores((prev) => {
                 const indicesCoinciden = prev.map((item, index) => ({ item, index })).filter(({ item }) => item.IdIndicador === idTemp);
                 const ultimoIndex = indicesCoinciden.at(-1)?.index;
-                return prev.map((indicador, i) => (i === ultimoIndex ? { ...indicador, mostrar: true } : indicador));
+                return prev.map((indicador, i) => (i === ultimoIndex ? { ...indicador, mostrar: false } : indicador));
             });
         }
     };
@@ -652,9 +584,9 @@ const Index = () => {
                 // }
             />
             <button type="button" className="btn btn-primary w-1/4 " onClick={() => setShowModal(true)}>
-                {t('agregarFila')}
+                {t('NuevoIndicador')}
             </button>
-            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('agregarFila')}>
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('NuevoIndicador')}>
                 <div className="flex justify-center mt-4">
                     <div className="flex flex-col gap-4 items-center">
                         <SimpleDropdown
