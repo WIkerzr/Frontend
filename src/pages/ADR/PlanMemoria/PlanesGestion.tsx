@@ -125,52 +125,56 @@ const Index = () => {
                 }
                 zonaBtn={
                     <>
-                        {editarPlan && (
-                            <div className="flex flex-col items-center gap-4 justify-end ">
-                                <div className="flex items-center gap-4 justify-end ">
+                        <div className="flex flex-col items-center gap-4 justify-end ">
+                            <div className="flex items-center gap-4 justify-end ">
+                                {editarPlan && (
                                     <button className="px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]" onClick={() => setGuardado(true)}>
                                         {t('guardar')}
                                     </button>
-                                    {/* <BtnExportarDocumentoWord camposRellenos={camposRellenos} tipo="Memoria" yearData={yearData} language={i18n.language} t={t} /> */}
-                                    <BtnExportarDocumentoWord tipo="Plan" language={i18n.language} t={t} />
-                                    <button
-                                        className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
-                                        onClick={async () => {
-                                            if (!validarCamposPlanGestionAnual(yearData)) {
-                                                setMensajeError(t('faltanCamposMemoriaSeguimiento'));
-                                                return;
-                                            } else {
-                                                await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
-                                            }
-                                        }}
-                                    >
-                                        {t('validarDatosAnio')}
-                                    </button>
-                                    <NavLink
-                                        to={camposRellenos ? '/adr/planesGestion/gestionEnvio' : '#'}
-                                        state={{ pantalla: 'Plan' }}
-                                        onClick={(e) => {
-                                            if (!camposRellenos) e.preventDefault();
-                                        }}
-                                        className="min-w-[120px]"
-                                    >
+                                )}
+
+                                <BtnExportarDocumentoWord tipo="Plan" language={i18n.language} t={t} />
+                                {editarPlan && (
+                                    <>
                                         <button
-                                            disabled={!camposRellenos}
-                                            className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 w-full ${
-                                                camposRellenos ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            }`}
+                                            className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
+                                            onClick={async () => {
+                                                if (!validarCamposPlanGestionAnual(yearData)) {
+                                                    setMensajeError(t('faltanCamposMemoriaSeguimiento'));
+                                                    return;
+                                                } else {
+                                                    await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                }
+                                            }}
                                         >
-                                            <img src={IconEnviar} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
-                                            {t('enviar')}
+                                            {t('validarDatosAnio')}
                                         </button>
-                                    </NavLink>
-                                </div>
-                                <div className="flex flex-wrap gap-4 justify-end mt-2">
-                                    {visibleMessageSuperior && <div className="text-success bg-warning-ligh ">{visibleMessageSuperior}</div>}
-                                    {mensajeError && <div className="text-red-500">{mensajeError}</div>}
-                                </div>
+                                        <NavLink
+                                            to={camposRellenos ? '/adr/planesGestion/gestionEnvio' : '#'}
+                                            state={{ pantalla: 'Plan' }}
+                                            onClick={(e) => {
+                                                if (!camposRellenos) e.preventDefault();
+                                            }}
+                                            className="min-w-[120px]"
+                                        >
+                                            <button
+                                                disabled={!camposRellenos}
+                                                className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 w-full ${
+                                                    camposRellenos ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                <img src={IconEnviar} alt="PDF" className="w-5 h-5" style={{ minWidth: 20, minHeight: 20 }} />
+                                                {t('enviar')}
+                                            </button>
+                                        </NavLink>
+                                    </>
+                                )}
                             </div>
-                        )}
+                            <div className="flex flex-wrap gap-4 justify-end mt-2">
+                                {visibleMessageSuperior && <div className="text-success bg-warning-ligh ">{visibleMessageSuperior}</div>}
+                                {mensajeError && <div className="text-red-500">{mensajeError}</div>}
+                            </div>
+                        </div>
                         <BotonesAceptacionYRechazo pantalla="Plan" />
                         <BotonReapertura pantalla="Plan" />
                     </>

@@ -63,7 +63,7 @@ const generarInformeResumen = (datos: DatoEje[], i18n: { language: string }): Re
     return Array.from(mapa.values());
 };
 
-export const generarInformeAcciones = async (anios: RegionAnio[], t: TFunction<'translation'>, i18n: { language: string }) => {
+export const generarInformeAcciones = async (anios: RegionAnio[], t: TFunction<'translation'>, i18n: { language: string }, anioSeleccionado: string) => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Informe de Acciones');
 
@@ -103,5 +103,5 @@ export const generarInformeAcciones = async (anios: RegionAnio[], t: TFunction<'
     const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    saveAs(blob, `${t('InfAcciones')}${new Date().toISOString()}.xlsx`);
+    saveAs(blob, `${t('InfAcciones')}${anioSeleccionado}.xlsx`);
 };

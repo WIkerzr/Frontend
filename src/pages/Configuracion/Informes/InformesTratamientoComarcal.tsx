@@ -41,7 +41,7 @@ const generarInformeTratamientoComarcalResumen = (datos: DatosAccionDTOLiderAcci
     return resumen;
 };
 
-export const generarInformeTratamientoComarcal = async (datos: DatosAccionDTOLiderAccion[], t: TFunction<'translation'>) => {
+export const generarInformeTratamientoComarcal = async (datos: DatosAccionDTOLiderAccion[], t: TFunction<'translation'>, anioSeleccionado: string) => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Informe de Acciones');
 
@@ -72,5 +72,5 @@ export const generarInformeTratamientoComarcal = async (datos: DatosAccionDTOLid
     const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    saveAs(blob, `${t('InfTratamientoComarcal')}${new Date().toISOString()}.xlsx`);
+    saveAs(blob, `${t('InfTratamientoComarcal')}${anioSeleccionado}.xlsx`);
 };

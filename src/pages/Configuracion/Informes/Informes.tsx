@@ -28,8 +28,6 @@ const Index = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    const currentYear = new Date().getFullYear();
-
     const [years] = useState<string[]>(['TODOS', ...anios.map(String)]);
     const [anioSeleccionado, setAnioSeleccionado] = useState<string>('TODOS');
     const [informeSeleccionado, setInformeSeleccionado] = useState<Informes>('InfObjetivos');
@@ -45,21 +43,77 @@ const Index = () => {
     //     generarInformeTratamientoComarcal(data.data, t);
     // };
 
-    const handleObtenerInforme = () => {
+    const handleObtenerInforme = async () => {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         const idRegionesSeleccionadas: number[] = regionesEnDropdow.map((r) => Number(r.RegionId));
-        const body = {
-            AnioSeleccionado: anioSeleccionado === 'TODOS' ? Array.from({ length: currentYear - 2025 + 1 }, (_, i) => (2025 + i).toString()) : [anioSeleccionado],
-            InformeSeleccionado: informeSeleccionado,
-            RegionesId: idRegionesSeleccionadas,
-        };
+
+        const callForYear = (yearStr: string) =>
+            new Promise<any>((resolve) => {
+                let resultData: any = null;
+                LlamadasBBDD({
+                    method: 'POST',
+                    url: `informes`,
+                    body: {
+                        AnioSeleccionado: [yearStr],
+                        InformeSeleccionado: informeSeleccionado,
+                        RegionesId: idRegionesSeleccionadas,
+                    },
+                    setLoading: () => {},
+                    setErrorMessage: setErrorMessage,
+                    setSuccessMessage: setSuccessMessage,
+                    onSuccess: (data: any) => {
+                        resultData = data;
+                    },
+                    onFinally: () => {
+                        resolve(resultData);
+                    },
+                });
+            });
+
+        if (anioSeleccionado === 'TODOS') {
+            try {
+                setLoading(true);
+                for (const y of anios.map(String)) {
+                    const data = await callForYear(y);
+                    if (!data) continue;
+                    sessionStorage.setItem('lastInformeData', JSON.stringify(data));
+                    if (informeSeleccionado === 'InfObjetivos') {
+                        GenerarInformeObjetivos({
+                            realizacion: data.response.indicadoresRealizacion,
+                            resultado: data.response.indicadoresResultado,
+                            servicios: data.response.indicadoresServicios,
+                            ListadoNombresIdicadoresSegunADR,
+                            t,
+                            anioSeleccionado: y,
+                        });
+                    }
+                    if (informeSeleccionado === 'InfAcciones') {
+                        generarInformeAcciones(data.data, t, i18n, y);
+                    }
+                    if (informeSeleccionado === 'InfTratamientoComarcal') {
+                        generarInformeTratamientoComarcal(data.data, t, y);
+                    }
+                    if (informeSeleccionado === 'InfPresupuestos') {
+                        GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y });
+                    }
+                }
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
         LlamadasBBDD({
             method: 'POST',
             url: `informes`,
-            body: body,
+            body: {
+                AnioSeleccionado: [anioSeleccionado],
+                InformeSeleccionado: informeSeleccionado,
+                RegionesId: idRegionesSeleccionadas,
+            },
             setLoading: setLoading ?? (() => {}),
             setErrorMessage: setErrorMessage,
             setSuccessMessage: setSuccessMessage,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onSuccess: (data: any) => {
                 sessionStorage.setItem('lastInformeData', JSON.stringify(data));
                 if (informeSeleccionado === 'InfObjetivos') {
@@ -69,16 +123,17 @@ const Index = () => {
                         servicios: data.response.indicadoresServicios,
                         ListadoNombresIdicadoresSegunADR,
                         t,
+                        anioSeleccionado,
                     });
                 }
                 if (informeSeleccionado === 'InfAcciones') {
-                    generarInformeAcciones(data.data, t, i18n);
+                    generarInformeAcciones(data.data, t, i18n, anioSeleccionado);
                 }
                 if (informeSeleccionado === 'InfTratamientoComarcal') {
-                    generarInformeTratamientoComarcal(data.data, t);
+                    generarInformeTratamientoComarcal(data.data, t, anioSeleccionado);
                 }
                 if (informeSeleccionado === 'InfPresupuestos') {
-                    GenerarInformePrestamo({ resultados: data.data, t });
+                    GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado });
                 }
             },
         });

@@ -84,6 +84,7 @@ interface GenerarInformeObjetivosProps {
     // eslint-disable-next-line no-unused-vars
     ListadoNombresIdicadoresSegunADR: (tipoIndicador: TiposDeIndicadores) => ListadoNombresIdicadoresItem[];
     t: TFunction<'translation'>;
+    anioSeleccionado: string;
     // resultados: IndicadorResultadoAccionDTO[];
 }
 function calcularPorcentaje(ejecutado?: string, meta?: string): number {
@@ -91,7 +92,7 @@ function calcularPorcentaje(ejecutado?: string, meta?: string): number {
     return Math.round((Number(ejecutado) / Number(meta)) * 100);
 }
 
-export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicios, ListadoNombresIdicadoresSegunADR, t }: GenerarInformeObjetivosProps): Promise<void> => {
+export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicios, ListadoNombresIdicadoresSegunADR, t, anioSeleccionado }: GenerarInformeObjetivosProps): Promise<void> => {
     const ListadoCached = MemorizarResultadoFuncion(async (tipo: TiposDeIndicadores) => Promise.resolve(ListadoNombresIdicadoresSegunADR(tipo)));
     const nombresRealizacion: ListadoNombresIdicadoresItem[] = await ListadoCached('realizacion');
     const nombresResultado: ListadoNombresIdicadoresItem[] = await ListadoCached('resultado');
@@ -201,7 +202,7 @@ export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicio
     const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    saveAs(blob, `${t('InfObjetivos')}${new Date().toISOString()}.xlsx`);
+    saveAs(blob, `${t('InfObjetivos')}${anioSeleccionado}.xlsx`);
 };
 
 function ProcesarIndicadores(indicador: IndicadorRealizacionAccionDTO[] | IndicadorResultadoAccionDTO[]) {

@@ -28,8 +28,9 @@ function normalizeFuente(raw: string): string {
 interface GenerarInformePrestamoProps {
     resultados: Resultado[];
     t: TFunction<'translation'>;
+    anioSeleccionado: string;
 }
-export const GenerarInformePrestamo = async ({ resultados, t }: GenerarInformePrestamoProps): Promise<void> => {
+export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado }: GenerarInformePrestamoProps): Promise<void> => {
     // 1) Agregar llave para normalizar nombres de fuente y sumar por fuente
     const mapa: Record<string, number> = {};
     for (const f of FUENTES_OFICIALES) mapa[f] = 0;
@@ -112,5 +113,5 @@ export const GenerarInformePrestamo = async ({ resultados, t }: GenerarInformePr
     const blob = new Blob([buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    saveAs(blob, `${t('object:infPresupuestos')}${new Date().toISOString()}.xlsx`);
+    saveAs(blob, `${t('object:infPresupuestos')}${anioSeleccionado}.xlsx`);
 };
