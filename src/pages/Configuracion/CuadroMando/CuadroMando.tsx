@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Users/componentes';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { useYear } from '../../../contexts/DatosAnualContext';
@@ -20,11 +20,17 @@ const Index = () => {
     const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
     const { anios, anioSeleccionada } = useEstadosPorAnio();
 
+    const fetchAttemptRef = useRef<string | null>(null);
+
     useEffect(() => {
         if (!regionSeleccionada) return;
         if (loadingYearData) return;
 
+        const key = `${regionSeleccionada}-${anioSeleccionada}`;
         if (yearData.plan.ejesPrioritarios.length === 0) {
+            if (fetchAttemptRef.current === key) return;
+
+            fetchAttemptRef.current = key;
             void llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
             return;
         }
@@ -38,6 +44,7 @@ const Index = () => {
             }
         }
         if (!valida) {
+            fetchAttemptRef.current = key;
             void llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
         }
     }, [loadingYearData, regionSeleccionada, anioSeleccionada, yearData]);
