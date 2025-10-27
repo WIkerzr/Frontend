@@ -20,18 +20,34 @@ const Index = () => {
     const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
     const { anios, anioSeleccionada } = useEstadosPorAnio();
 
-    const fetchAttemptRef = useRef<string | null>(null);
+    const attemptTimestampsRef = useRef<Record<string, number>>({});
+    const inFlightRef = useRef<Record<string, boolean>>({});
 
     useEffect(() => {
         if (!regionSeleccionada) return;
         if (loadingYearData) return;
 
         const key = `${regionSeleccionada}-${anioSeleccionada}`;
-        if (yearData.plan.ejesPrioritarios.length === 0) {
-            if (fetchAttemptRef.current === key) return;
 
-            fetchAttemptRef.current = key;
-            void llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+        const shouldSkipBecauseRecent = (k: string) => {
+            const last = attemptTimestampsRef.current[k] || 0;
+            return Date.now() - last < 30000;
+        };
+
+        const tryLoad = async () => {
+            if (inFlightRef.current[key]) return;
+            inFlightRef.current[key] = true;
+            attemptTimestampsRef.current[key] = Date.now();
+            try {
+                await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+            } finally {
+                inFlightRef.current[key] = false;
+            }
+        };
+
+        if (yearData.plan.ejesPrioritarios.length === 0) {
+            if (shouldSkipBecauseRecent(key)) return;
+            void tryLoad();
             return;
         }
 
@@ -43,11 +59,12 @@ const Index = () => {
                 valida = true;
             }
         }
+
         if (!valida) {
-            fetchAttemptRef.current = key;
-            void llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+            if (shouldSkipBecauseRecent(key)) return;
+            void tryLoad();
         }
-    }, [loadingYearData, regionSeleccionada, anioSeleccionada, yearData]);
+    }, [regionSeleccionada, anioSeleccionada, loadingYearData, nombreRegionSeleccionada]);
 
     const [years] = useState<string[]>([t('TODOS'), ...anios.map(String)]);
     const [yearFilter, setYearFilter] = useState<string>(t('TODOS'));
