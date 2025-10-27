@@ -30,6 +30,43 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
         e.preventDefault();
 
         try {
+            const stored = localStorage.getItem('app_version') || null;
+
+            let current: string | undefined;
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const mod: any = await import('../../version');
+                current = (mod?.default ?? mod?.version ?? mod?.APP_VERSION ?? mod?.appVersion)?.toString();
+            } catch {
+                // Error ignorado intencionalmente
+            }
+
+            const cmp = (a?: string | null, b?: string | null) => {
+                if (!a || !b) return 0;
+                const pa = a.split('.').map((n) => Number.parseInt(n, 10) || 0);
+                const pb = b.split('.').map((n) => Number.parseInt(n, 10) || 0);
+                const len = Math.max(pa.length, pb.length);
+                for (let i = 0; i < len; i++) {
+                    const ai = pa[i] ?? 0;
+                    const bi = pb[i] ?? 0;
+                    if (ai < bi) return -1;
+                    if (ai > bi) return 1;
+                }
+                return 0;
+            };
+
+            if (stored && current && cmp(stored, current) < 0) {
+                const proceed = window.confirm('Se ha detectado una nueva versión de la aplicación.\n\nSe limpiará la caché y se recargará la página para actualizar.\n\n¿Deseas continuar?');
+                if (!proceed) {
+                    return;
+                }
+            }
+        } catch {
+            setErrorMessage(null);
+            setSuccessMessage(null);
+        }
+
+        try {
             const alreadyCleared = sessionStorage.getItem('cacheClearedForLogin') === '1';
             if (!alreadyCleared) {
                 try {
