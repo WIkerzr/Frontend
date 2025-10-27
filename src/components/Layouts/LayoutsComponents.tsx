@@ -1,7 +1,7 @@
 import { useRegionContext } from '../../contexts/RegionContext';
 import { UserRole } from '../../types/users';
 
-const logosToComarcas: Record<string, string> = {
+export const logosToComarcas: Record<string, string> = {
     AN: 'AÑANA HORIZONTAL EUSKERA',
     AL: 'LAUTADA HORIZONTAL EUSKERA',
     MA: 'IZKI HORIZONTAL EUSKERA',
@@ -42,4 +42,12 @@ export const LogoRegion_SUP: React.FC<LogoProps> = ({ role }) => {
     } else {
         return <img className="mr-5 max-h-[40px] w-auto" src="/assets/images/menekoSort.png" alt="logo" />;
     }
+};
+
+export const SaberLogoEnGenWORD = (): string => {
+    const { regionSeleccionada } = useRegionContext();
+    const { codRegiones } = useRegionContext();
+
+    const codigo = codRegiones[Number(regionSeleccionada)];
+    return `/assets/images/ADR/${logosToComarcas[codigo]}.jpg`;
 };

@@ -15,6 +15,31 @@ import { LlamadasBBDD } from './data/utilsData';
 import { useState } from 'react';
 import { LoadingOverlayPersonalizada } from '../../pages/Configuracion/Users/componentes';
 import { convertirPlantillaAFileValidado, onSuccessFillFiles, plantillasOriginales } from '../../pages/Configuracion/Plantillas';
+import { SaberLogoEnGenWORD } from '../Layouts/LayoutsComponents';
+
+// Helpers para insertar/reemplazar imágenes en el paquete .docx (ZIP)
+const getNextRId = (relsXml: string) => {
+    const regex = /rId(\d+)/g;
+    let match;
+    let max = 0;
+    while ((match = regex.exec(relsXml)) !== null) {
+        const num = parseInt(match[1], 10);
+        if (!Number.isNaN(num) && num > max) max = num;
+    }
+    return `rId${max + 1}`;
+};
+
+const addContentTypeOverride = (zip: PizZip, imagePartName: string, mimeType: string) => {
+    const typesPath = '[Content_Types].xml';
+    const typesFile = zip.file(typesPath);
+    if (!typesFile) return;
+    let xml = typesFile.asText();
+    const overrideTag = `<Override PartName='${imagePartName}' ContentType='${mimeType}'/>`;
+    if (xml.indexOf(`PartName='${imagePartName}'`) === -1) {
+        xml = xml.replace('</Types>', `\n    ${overrideTag}\n</Types>`);
+        zip.file(typesPath, xml);
+    }
+};
 
 const formatHMT = (dato: HMT | undefined) => {
     if (dato === undefined) {
@@ -42,7 +67,8 @@ export const GeneracionDelDocumentoWordPlan = async (
     plantilla: File,
     indicadoresRealizacion: IndicadorRealizacion[],
     indicadoresResultado: IndicadorResultado[],
-    t: (key: string) => string
+    t: (key: string) => string,
+    imageADR: string
 ) => {
     try {
         // 1. Cargar la plantilla desde /public
@@ -244,6 +270,78 @@ export const GeneracionDelDocumentoWordPlan = async (
             console.warn('No se pudo restaurar medias automáticamente:', err);
         }
 
+        // Reemplazar imagen en la plantilla: si existe word/media/image1.png la reemplazamos,
+        // si no existe, la añadimos y creamos la relación y el bloque <w:drawing> en document.xml.
+
+        try {
+            const imageResponse = await fetch(imageADR);
+            if (!imageResponse.ok) {
+                console.error(`Error al cargar imagen: ${imageResponse.status} ${imageResponse.statusText}`);
+                throw new Error(`No se pudo cargar la imagen: ${imageResponse.status}`);
+            }
+
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const imageData = new Uint8Array(imageBuffer);
+
+            const renderedZip = doc.getZip();
+
+            // Si la plantilla ya tiene image1.png la sustituimos
+            const existingMediaName = 'word/media/image1.png';
+            if (renderedZip.file(existingMediaName)) {
+                renderedZip.file(existingMediaName, imageData);
+                addContentTypeOverride(renderedZip, `/${existingMediaName}`, 'image/png');
+                console.log('Se ha reemplazado word/media/image1.png por la nueva imagen');
+            } else {
+                // No existe image1.png: añadimos un nuevo archivo en word/media y creamos la relación y la referencia en document.xml
+                const ext = 'jpg';
+                const imageName = `image_generated.${ext}`;
+                const imagePart = `word/media/${imageName}`;
+                renderedZip.file(imagePart, imageData);
+
+                // actualizar [Content_Types].xml
+                addContentTypeOverride(renderedZip, `/${imagePart}`, 'image/jpeg');
+
+                const relsPath = 'word/_rels/document.xml.rels';
+                let relsXml = '';
+                const relsFile = renderedZip.file(relsPath);
+                if (relsFile) {
+                    relsXml = relsFile.asText();
+                } else {
+                    relsXml = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+                }
+
+                const rId = getNextRId(relsXml);
+                const relEntry = `<Relationship Id='${rId}' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/image' Target='media/${imageName}'/>`;
+                relsXml = relsXml.replace('</Relationships>', `${relEntry}\n</Relationships>`);
+                renderedZip.file(relsPath, relsXml);
+
+                // Insertar un w:drawing sencillo al inicio del documento.xml para mostrar la imagen
+                const docPathXml = 'word/document.xml';
+                const docFile = renderedZip.file(docPathXml);
+                if (docFile) {
+                    let docXml = docFile.asText();
+                    const cx = 6000000; // ancho
+                    const cy = 2000000; // alto
+
+                    const drawingXml = `\n<w:p xmlns:w='http://schemas.openxmlformats.org/wordprocessingml/2006/main'>\n  <w:r>\n    <w:drawing>\n      <wp:inline xmlns:wp='http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing' distT='0' distB='0' distL='0' distR='0'>\n        <wp:extent cx='${cx}' cy='${cy}'/>\n        <wp:docPr id='1' name='${imageName}'/>\n        <a:graphic xmlns:a='http://schemas.openxmlformats.org/drawingml/2006/main'>\n          <a:graphicData uri='http://schemas.openxmlformats.org/drawingml/2006/picture'>\n            <pic:pic xmlns:pic='http://schemas.openxmlformats.org/drawingml/2006/picture'>\n              <pic:nvPicPr>\n                <pic:cNvPr id='0' name='${imageName}'/>\n                <pic:cNvPicPr/>\n              </pic:nvPicPr>\n              <pic:blipFill>\n                <a:blip r:embed='${rId}' xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'/>\n                <a:stretch>\n                  <a:fillRect/>\n                </a:stretch>\n              </pic:blipFill>\n              <pic:spPr/>\n            </pic:pic>\n          </a:graphicData>\n        </a:graphic>\n      </wp:inline>\n    </w:drawing>\n  </w:r>\n</w:p>\n`;
+
+                    // Insertar justo después de <w:body> si existe
+                    const bodyIndex = docXml.indexOf('<w:body>');
+                    if (bodyIndex !== -1) {
+                        const insertAt = bodyIndex + '<w:body>'.length;
+                        docXml = docXml.slice(0, insertAt) + drawingXml + docXml.slice(insertAt);
+                        renderedZip.file(docPathXml, docXml);
+                    } else {
+                        // fallback: añadir al final
+                        docXml = docXml + drawingXml;
+                        renderedZip.file(docPathXml, docXml);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('No se pudo agregar la imagen de la ADR:', err);
+        }
+
         // 6. Generar blob final
         const out = doc.getZip().generate({
             type: 'blob',
@@ -268,7 +366,8 @@ export const GeneracionDelDocumentoWordMemoria = async (
     plantilla: File,
     indicadoresRealizacion: IndicadorRealizacion[],
     indicadoresResultado: IndicadorResultado[],
-    t: (key: string) => string
+    t: (key: string) => string,
+    imageADR: string
 ) => {
     try {
         // 1. Cargar la plantilla desde /public
@@ -494,6 +593,78 @@ export const GeneracionDelDocumentoWordMemoria = async (
             console.warn('No se pudo restaurar medias automáticamente (Memoria):', err);
         }
 
+        // Reemplazar imagen en la plantilla: si existe word/media/image1.png la reemplazamos,
+        // si no existe, la añadimos y creamos la relación y el bloque <w:drawing> en document.xml.
+
+        try {
+            const imageResponse = await fetch(imageADR);
+            if (!imageResponse.ok) {
+                console.error(`Error al cargar imagen: ${imageResponse.status} ${imageResponse.statusText}`);
+                throw new Error(`No se pudo cargar la imagen: ${imageResponse.status}`);
+            }
+
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const imageData = new Uint8Array(imageBuffer);
+
+            const renderedZip = doc.getZip();
+
+            // Si la plantilla ya tiene image1.png la sustituimos
+            const existingMediaName = 'word/media/image1.png';
+            if (renderedZip.file(existingMediaName)) {
+                renderedZip.file(existingMediaName, imageData);
+                addContentTypeOverride(renderedZip, `/${existingMediaName}`, 'image/png');
+                console.log('Se ha reemplazado word/media/image1.png por la nueva imagen');
+            } else {
+                // No existe image1.png: añadimos un nuevo archivo en word/media y creamos la relación y la referencia en document.xml
+                const ext = 'jpg';
+                const imageName = `image_generated.${ext}`;
+                const imagePart = `word/media/${imageName}`;
+                renderedZip.file(imagePart, imageData);
+
+                // actualizar [Content_Types].xml
+                addContentTypeOverride(renderedZip, `/${imagePart}`, 'image/jpeg');
+
+                const relsPath = 'word/_rels/document.xml.rels';
+                let relsXml = '';
+                const relsFile = renderedZip.file(relsPath);
+                if (relsFile) {
+                    relsXml = relsFile.asText();
+                } else {
+                    relsXml = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+                }
+
+                const rId = getNextRId(relsXml);
+                const relEntry = `<Relationship Id='${rId}' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/image' Target='media/${imageName}'/>`;
+                relsXml = relsXml.replace('</Relationships>', `${relEntry}\n</Relationships>`);
+                renderedZip.file(relsPath, relsXml);
+
+                // Insertar un w:drawing sencillo al inicio del documento.xml para mostrar la imagen
+                const docPathXml = 'word/document.xml';
+                const docFile = renderedZip.file(docPathXml);
+                if (docFile) {
+                    let docXml = docFile.asText();
+                    const cx = 6000000; // ancho
+                    const cy = 2000000; // alto
+
+                    const drawingXml = `\n<w:p xmlns:w='http://schemas.openxmlformats.org/wordprocessingml/2006/main'>\n  <w:r>\n    <w:drawing>\n      <wp:inline xmlns:wp='http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing' distT='0' distB='0' distL='0' distR='0'>\n        <wp:extent cx='${cx}' cy='${cy}'/>\n        <wp:docPr id='1' name='${imageName}'/>\n        <a:graphic xmlns:a='http://schemas.openxmlformats.org/drawingml/2006/main'>\n          <a:graphicData uri='http://schemas.openxmlformats.org/drawingml/2006/picture'>\n            <pic:pic xmlns:pic='http://schemas.openxmlformats.org/drawingml/2006/picture'>\n              <pic:nvPicPr>\n                <pic:cNvPr id='0' name='${imageName}'/>\n                <pic:cNvPicPr/>\n              </pic:nvPicPr>\n              <pic:blipFill>\n                <a:blip r:embed='${rId}' xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'/>\n                <a:stretch>\n                  <a:fillRect/>\n                </a:stretch>\n              </pic:blipFill>\n              <pic:spPr/>\n            </pic:pic>\n          </a:graphicData>\n        </a:graphic>\n      </wp:inline>\n    </w:drawing>\n  </w:r>\n</w:p>\n`;
+
+                    // Insertar justo después de <w:body> si existe
+                    const bodyIndex = docXml.indexOf('<w:body>');
+                    if (bodyIndex !== -1) {
+                        const insertAt = bodyIndex + '<w:body>'.length;
+                        docXml = docXml.slice(0, insertAt) + drawingXml + docXml.slice(insertAt);
+                        renderedZip.file(docPathXml, docXml);
+                    } else {
+                        // fallback: añadir al final
+                        docXml = docXml + drawingXml;
+                        renderedZip.file(docPathXml, docXml);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('No se pudo agregar la imagen de la ADR:', err);
+        }
+
         // 6. Generar blob final
         const out = doc.getZip().generate({
             type: 'blob',
@@ -522,6 +693,7 @@ interface BtnExportarDocumentoWordProps {
 export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> = ({ tipo, language, t }) => {
     const { indicadoresRealizacion, indicadoresResultado } = useIndicadoresContext();
     const { yearData, llamadaBBDDYearDataAll } = useYear();
+    const imageADR = SaberLogoEnGenWORD();
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -576,11 +748,10 @@ export const BtnExportarDocumentoWord: React.FC<BtnExportarDocumentoWordProps> =
                         }
                     }
                 }
-
                 if (tipo === 'Plan') {
-                    await GeneracionDelDocumentoWordPlan(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, t);
+                    await GeneracionDelDocumentoWordPlan(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, t, imageADR);
                 } else {
-                    await GeneracionDelDocumentoWordMemoria(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, t);
+                    await GeneracionDelDocumentoWordMemoria(dataToUse, plantillaEscogida, indicadoresRealizacion, indicadoresResultado, t, imageADR);
                 }
             }}
             className={`px-4 py-2 rounded flex items-center justify-center gap-1 font-medium h-10 min-w-[120px] bg-gray-400 text-white hover:bg-gray-500`}
