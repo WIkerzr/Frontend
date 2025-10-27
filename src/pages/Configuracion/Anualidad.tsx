@@ -23,8 +23,8 @@ const BotonNuevoAnio: React.FC<BotonNuevoAnioProps> = (props) => {
         if (aniosRegion) {
             const aniosParsed = JSON.parse(aniosRegion) as { RegionId: number; Years: number[] }[];
             const aniosMax = Math.max(...aniosParsed.flatMap((region) => region.Years));
-            const currentYear = new Date().getFullYear();
-            if (aniosMax === currentYear) {
+            const aniosMin = Math.min(...aniosParsed.flatMap((region) => region.Years));
+            if (aniosMax === aniosMin) {
                 setBtnAnioNew(true);
             }
         }

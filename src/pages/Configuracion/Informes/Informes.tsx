@@ -30,7 +30,7 @@ const Index = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    const [years] = useState<string[]>(['TODOS', ...anios.map(String)]);
+    const [years, setYears] = useState<string[]>(['TODOS', ...anios.map(String)]);
     const [anioSeleccionado, setAnioSeleccionado] = useState<string>('TODOS');
     const [informeSeleccionado, setInformeSeleccionado] = useState<Informes>('InfObjetivos');
     const [regionesEnDropdow, setRegionesEnDropdow] = useState<RegionInterface[]>([]);
@@ -42,6 +42,27 @@ const Index = () => {
         if (user && user.role === 'ADR') {
             const region = regiones.find((r) => r.RegionId.toString() === regionSeleccionada);
             setRegionesEnDropdow(region ? [region] : []);
+        } else {
+            const aniosRegion = sessionStorage.getItem('aniosRegion');
+            if (aniosRegion) {
+                const anioRegiones: { RegionId: number; Years: number[] }[] = JSON.parse(aniosRegion);
+                if (regionSeleccionada) {
+                    const data: { RegionId: number; Years: number[] } | undefined = anioRegiones.find((a: { RegionId: number; Years: number[] }) => a.RegionId.toString() === regionSeleccionada);
+                    if (data && data.Years) {
+                        setYears(['TODOS', ...data.Years.map(String)]);
+                    }
+                } else {
+                    if (anioRegiones) {
+                        const aniosMax = Math.max(...anioRegiones.flatMap((region) => region.Years));
+                        const aniosMin = Math.min(...anioRegiones.flatMap((region) => region.Years));
+                        const yearsRange = [];
+                        for (let y = aniosMin; y <= aniosMax; y++) {
+                            yearsRange.push(String(y));
+                        }
+                        setYears(['TODOS', ...yearsRange]);
+                    }
+                }
+            }
         }
     }, [regionSeleccionada]);
 
