@@ -632,7 +632,7 @@ export const SelectorAnio: React.FC<SelectorAnioProps> = ({ years, yearFilter, s
     const { t } = useTranslation();
 
     return (
-        <div className={`${className ? className : 'w-[200px]'}`}>
+        <div className={`${className ? className : 'w-[300px]'}`}>
             <label className="block mb-1">{t('CuadroMandoSelectorYear')}</label>
             <select className="w-full border rounded p-2 resize-y" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
                 {years.map((anio) => (
@@ -653,7 +653,7 @@ export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ infor
     const { t } = useTranslation();
 
     return (
-        <div className="w-[350px]">
+        <div className="w-[450px]">
             <label className="block mb-1">{t('SeleccionTipoInforme')}</label>
             <select className="w-full border rounded p-2 resize-y" value={informeSeleccionado} onChange={(e) => setInformeSeleccionado(e.target.value as Informes)}>
                 {tiposInformes.map((informe) => (

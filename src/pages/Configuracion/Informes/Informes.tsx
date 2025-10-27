@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { SelectorAnio, SelectorInformes } from '../../../components/Utils/inputs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Multiselect from 'multiselect-react-dropdown';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { RegionInterface } from '../../../components/Utils/data/getRegiones';
@@ -13,6 +13,7 @@ import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 import { generarInformeAcciones } from './informeAcciones';
 import { generarInformeTratamientoComarcal } from './InformesTratamientoComarcal';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useUser } from '../../../contexts/UserContext';
 
 export type Informes = 'InfObjetivos' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfPresupuestos';
 
@@ -20,9 +21,10 @@ export const tiposInformes: Informes[] = ['InfObjetivos', 'InfAcciones', 'InfTra
 
 const Index = () => {
     const { t, i18n } = useTranslation();
-    const { regiones } = useRegionContext();
+    const { regiones, regionSeleccionada } = useRegionContext();
     const { ListadoNombresIdicadoresSegunADR } = useIndicadoresContext();
     const { anios } = useEstadosPorAnio();
+    const { user } = useUser();
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -35,6 +37,13 @@ const Index = () => {
     const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
         setRegionesEnDropdow(selected);
     };
+
+    useEffect(() => {
+        if (user && user.role === 'ADR') {
+            const region = regiones.find((r) => r.RegionId.toString() === regionSeleccionada);
+            setRegionesEnDropdow(region ? [region] : []);
+        }
+    }, [regionSeleccionada]);
 
     // const handlePruebas = () => {
     //     //TODO borrar
@@ -161,38 +170,45 @@ const Index = () => {
             <div className="panel flex flex-row gap-x-4">
                 <SelectorAnio years={years} yearFilter={t(`${anioSeleccionado}`)} setYearFilter={setAnioSeleccionado} />
                 <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} />
-                <div className="w-full resize-y ">
-                    <label className="block mb-1">{t('seleccionaComarca')}</label>
-                    <div className="flex flex-row gap-x-4 w-full">
-                        {regionesEnDropdow.length === regiones.length ? (
-                            <Boton tipo="cerrar" textoBoton={t('borrar')} onClick={() => setRegionesEnDropdow([])} />
-                        ) : (
-                            <Boton tipo="guardar" textoBoton={t('TODOS')} onClick={() => setRegionesEnDropdow(regiones)} />
-                        )}
-                        <div style={{ width: '100%' }}>
-                            <Multiselect
-                                placeholder={t('seleccionaMultiOpcion')}
-                                options={regiones}
-                                selectedValues={regionesEnDropdow}
-                                displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
-                                onSelect={handleChangeRegionsSupracomarcal}
-                                onRemove={handleChangeRegionsSupracomarcal}
-                                emptyRecordMsg={t('error:errorNoOpciones')}
-                                style={{
-                                    multiselectContainer: {
-                                        width: '100%',
-                                    },
-                                    searchBox: {
-                                        width: '100%',
-                                    },
-                                    optionContainer: {
-                                        width: '100%',
-                                    },
-                                }}
-                            />
+                {user && user.role === 'HAZI' && (
+                    <div className="w-full resize-y ">
+                        <label className="block mb-1">{t('seleccionaComarca')}</label>
+                        <div className="flex flex-row gap-x-4 w-full">
+                            {regionesEnDropdow.length === regiones.length ? (
+                                <Boton tipo="cerrar" textoBoton={t('borrar')} onClick={() => setRegionesEnDropdow([])} />
+                            ) : (
+                                <Boton tipo="guardar" textoBoton={t('TODOS')} onClick={() => setRegionesEnDropdow(regiones)} />
+                            )}
+                            <div style={{ width: '100%' }}>
+                                <Multiselect
+                                    placeholder={t('seleccionaMultiOpcion')}
+                                    options={regiones}
+                                    selectedValues={regionesEnDropdow}
+                                    displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
+                                    onSelect={handleChangeRegionsSupracomarcal}
+                                    onRemove={handleChangeRegionsSupracomarcal}
+                                    emptyRecordMsg={t('error:errorNoOpciones')}
+                                    style={{
+                                        multiselectContainer: {
+                                            width: '100%',
+                                        },
+                                        searchBox: {
+                                            width: '100%',
+                                        },
+                                        optionContainer: {
+                                            width: '100%',
+                                        },
+                                    }}
+                                />
+                            </div>
+                            {/* <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} /> */}
                         </div>
+                    </div>
+                )}
+                <div className="w-full resize-y ">
+                    <label className="block mb-1">{t('descargarInforme')}</label>
+                    <div className="flex flex-row gap-x-4 w-full">
                         <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handleObtenerInforme} />
-                        {/* <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} /> */}
                     </div>
                 </div>
             </div>
