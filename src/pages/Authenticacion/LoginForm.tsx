@@ -28,6 +28,54 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        try {
+            const alreadyCleared = sessionStorage.getItem('cacheClearedForLogin') === '1';
+            if (!alreadyCleared) {
+                try {
+                    sessionStorage.setItem('autoLoginAfterReload', '1');
+                    sessionStorage.setItem('autoLoginEmail', email ?? '');
+                    sessionStorage.setItem('autoLoginPassword', password ?? '');
+                } catch (err) {
+                    void err;
+                }
+                if (typeof window !== 'undefined' && 'caches' in window) {
+                    try {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+                    } catch (err) {
+                        console.warn('Error clearing caches before login:', err);
+                    }
+                }
+
+                if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+                    try {
+                        const regs = await navigator.serviceWorker.getRegistrations();
+                        await Promise.all(regs.map((reg) => reg.unregister()));
+                    } catch (err) {
+                        console.warn('Error unregistering service workers before login:', err);
+                    }
+                }
+
+                try {
+                    sessionStorage.setItem('cacheClearedForLogin', '1');
+                } catch (err) {
+                    void err;
+                }
+
+                window.location.reload();
+                return;
+            } else {
+                try {
+                    sessionStorage.removeItem('cacheClearedForLogin');
+                } catch (err) {
+                    void err;
+                }
+            }
+        } catch (err) {
+            console.warn('Cache clearance step failed, continuing with login.', err);
+        }
+
         if (isBrowserIncompatible) {
             const continuar = window.confirm(`${t('browserWarningTitle')}\n\n${t('browserWarningMessage')}`);
             if (!continuar) {
@@ -42,6 +90,47 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail, password, setPas
             setIsSubmitting(false);
         }
     };
+
+    React.useEffect(() => {
+        try {
+            const auto = sessionStorage.getItem('autoLoginAfterReload') === '1';
+            if (!auto) return;
+            const storedEmail = sessionStorage.getItem('autoLoginEmail') ?? '';
+            const storedPassword = sessionStorage.getItem('autoLoginPassword') ?? '';
+
+            try {
+                setEmail(storedEmail);
+                setPassword(storedPassword);
+            } catch (err) {
+                void err;
+            }
+
+            try {
+                sessionStorage.removeItem('autoLoginAfterReload');
+                sessionStorage.removeItem('autoLoginEmail');
+                sessionStorage.removeItem('autoLoginPassword');
+            } catch (err) {
+                void err;
+            }
+
+            setTimeout(() => {
+                try {
+                    const form = document.querySelector('form');
+                    if (form && form instanceof HTMLFormElement) {
+                        if (typeof (form as HTMLFormElement).requestSubmit === 'function') {
+                            (form as HTMLFormElement).requestSubmit();
+                        } else {
+                            (form as HTMLFormElement).submit();
+                        }
+                    }
+                } catch (err) {
+                    void err;
+                }
+            }, 300);
+        } catch (err) {
+            void err;
+        }
+    }, []);
 
     useEffect(() => {
         if (!recordar) return;
