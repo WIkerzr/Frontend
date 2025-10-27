@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ZonaTitulo } from '../Users/componentes';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { useYear } from '../../../contexts/DatosAnualContext';
@@ -16,7 +16,6 @@ const actions: Actions[] = ['TODOS', 'Acciones', 'AccionesAccesorias', 'Servicio
 const Index = () => {
     const { t } = useTranslation();
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const ultimaLlamadaRef = useRef<number | null>(null);
 
     const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
     const { anios, anioSeleccionada } = useEstadosPorAnio();
@@ -24,7 +23,12 @@ const Index = () => {
     useEffect(() => {
         if (!regionSeleccionada) return;
         if (loadingYearData) return;
-        if (yearData.plan.ejesPrioritarios.length === 0) return;
+
+        if (yearData.plan.ejesPrioritarios.length === 0) {
+            void llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+            return;
+        }
+
         let valida = false;
         const accionesPrio = yearData.plan.ejesPrioritarios[0].acciones;
         if (yearData.plan.ejesRestantes) {
@@ -34,17 +38,9 @@ const Index = () => {
             }
         }
         if (!valida) {
-            const ahora = Date.now();
-            const haceDiezSec = 10 * 1000;
-
-            const tiempoCumplido = !ultimaLlamadaRef.current || ahora - ultimaLlamadaRef.current > haceDiezSec;
-
-            if (tiempoCumplido) {
-                llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
-                ultimaLlamadaRef.current = ahora;
-            }
+            void llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
         }
-    }, [loadingYearData]);
+    }, [loadingYearData, regionSeleccionada, anioSeleccionada, yearData]);
 
     const [years] = useState<string[]>([t('TODOS'), ...anios.map(String)]);
     const [yearFilter, setYearFilter] = useState<string>(t('TODOS'));
@@ -61,9 +57,12 @@ const Index = () => {
         if (yearData.plan.ejesPrioritarios.length === 0) return;
         if (yearData.nombreRegion != nombreRegionSeleccionada) return;
         const datoAnio: DatosAnioCuadroMando = TransformarYearDataACuadro(yearData);
-        if (!datosAnios.includes(datoAnio) && datosAnios.every((da) => da.nombreRegion !== datoAnio.nombreRegion)) {
-            setDatosAnios([...datosAnios, datoAnio]);
-        }
+        setDatosAnios((prev) => {
+            if (prev.every((da) => da.nombreRegion !== datoAnio.nombreRegion)) {
+                return [...prev, datoAnio];
+            }
+            return prev.map((da) => (da.nombreRegion === datoAnio.nombreRegion ? datoAnio : da));
+        });
     }, [yearData]);
 
     useEffect(() => {
