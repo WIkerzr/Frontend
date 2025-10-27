@@ -62,9 +62,19 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
                 const datosRecibidos: Nodo = response.data;
                 const archivoFirma: Nodo = BuscarNodo(datosRecibidos, 'Firma');
                 if (archivoFirma.RutaRelativa === 'Firma') {
-                    const fileRaiz = TransformarArchivosAFile(archivoFirma);
-                    if (fileRaiz.length > 0) {
-                        setFirma(fileRaiz);
+                    for (let index = 0; index < archivoFirma.Hijos.length; index++) {
+                        const firma = archivoFirma.Hijos[index];
+                        console.log(firma);
+
+                        const name = `A8${yearData.year}${datosEditandoAccion.accion}${nombreRegionSeleccionada}${index > 0 ? index : ''}.pdf`;
+                        console.log(name);
+
+                        if (firma.Nombre === name) {
+                            const fileRaiz = TransformarArchivosAFile(archivoFirma);
+                            if (fileRaiz.length > 0) {
+                                setFirma(fileRaiz);
+                            }
+                        }
                     }
                 }
             },
@@ -134,7 +144,9 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
 
                 {firma.length === 0 && (
                     <div className="flex justify-center">
-                        <span className="text-red-600 font-semibold">{t('noFirmaSubida')}</span>
+                        <span className="text-red-600 font-semibold">
+                            {t('noFirmaSubida')} {`A8${yearData.year}${datosEditandoAccion.accion}${nombreRegionSeleccionada}.pdf`}
+                        </span>
                     </div>
                 )}
                 <div className="flex justify-center">

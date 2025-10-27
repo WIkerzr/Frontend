@@ -233,7 +233,7 @@
     "NoAplica": "No Aplica",
     "noComarcaSeleccionada": "Sin comarca seleccionada",
     "noData": "No hay datos para mostrar",
-    "noFirmaSubida": "No se ha subido ninguna firma",
+    "noFirmaSubida": "No se ha subido ninguna firma con el nombre de la acción",
     "nombre": "Nombre",
     "NombreAccion": "Nombre de la accion",
     "nombreDeLaAccionNoVacio": "El nombre de la acción no puede estar vacío",

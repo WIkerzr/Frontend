@@ -221,12 +221,12 @@ const Index = () => {
                         listIndex.listado = true;
                     }
                 }
-                const listadoMostrado = listadoCompleto.filter((f) => f.mostrar === true);
+                // const listadoMostrado = listadoCompleto.filter((f) => f.mostrar === true);
                 setIndicadores(listadoCompleto);
                 setIndicadoresOriginales((prev) => ({ ...prev, [regionSeleccionada]: listadoCompleto }));
 
-                console.log(listadoMostrado);
-                console.log(listadoCompleto.filter((f) => f.listado));
+                // console.log(listadoMostrado);
+                // console.log(listadoCompleto.filter((f) => f.listado));
             },
         });
     }, [regionSeleccionada]);
