@@ -132,8 +132,7 @@ const Index = () => {
                                         {t('guardar')}
                                     </button>
                                 )}
-
-                                <BtnExportarDocumentoWord tipo="Plan" language={i18n.language} t={t} />
+                                {yearData.plan.status === 'borrador' && <BtnExportarDocumentoWord tipo="Plan" language={i18n.language} t={t} />}
                                 {editarPlan && (
                                     <>
                                         <button
