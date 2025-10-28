@@ -1,3 +1,4 @@
+import { RegionInterface } from '../components/Utils/data/getRegiones';
 import { TiposDeIndicadores } from './Indicadores';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -41,7 +42,11 @@ export type Comarcal = (typeof opcionesComarcal)[number];
 export const opcionesSupraComarcal = ['Territorio histórico', 'Euskadi', 'Otros'];
 
 export type SupraComarcal = (typeof opcionesSupraComarcal)[number];
-
+export interface ServiciosCompartida {
+    idCompartida?: number;
+    regionLider: RegionInterface;
+    regiones: RegionInterface[];
+}
 export interface Servicios {
     id: number;
     nombre: string;
@@ -50,7 +55,10 @@ export interface Servicios {
     idEje: string | number;
     lineaActuaccion: string;
     dSeguimiento?: string;
+    supraComarcal: SupraComarcal | string;
     valFinal?: string;
+    serviciosCompartidas?: ServiciosCompartida;
+    serviciosCompartidaId?: number;
 }
 export interface HMTServicios {
     hombres?: string;
@@ -77,6 +85,15 @@ export interface IndicadoresServiciosDTO {
     Tipo: TiposDeIndicadores;
 }
 
+export interface ServiciosCompartidaRegionDTO {
+    RegionId: number;
+}
+export interface ServiciosCompartidaDTO {
+    Id?: number;
+    RegionLiderId: number;
+    ServiciosCompartidaRegiones?: ServiciosCompartidaRegionDTO[];
+}
+
 export interface ServiciosDTO {
     Id?: number;
     Nombre: string;
@@ -89,6 +106,9 @@ export interface ServiciosDTO {
     LineaActuaccion: string;
     EjeGlobalId: string;
     EjeGlobalIdInt: number;
+    ServiciosCompartidaId?: number;
+    ServiciosCompartida?: ServiciosCompartidaDTO;
+    SupraComarcal: SupraComarcal | string;
 }
 export interface ServiciosDTOConvertIndicadores {
     Id?: number;
@@ -102,4 +122,7 @@ export interface ServiciosDTOConvertIndicadores {
     LineaActuaccion: string;
     EjeGlobalId: string;
     EjeGlobalIdInt: number;
+    Supracomarcal: SupraComarcal | string;
+    ServiciosCompartidaId: number;
+    ServiciosCompartida?: ServiciosCompartidaDTO;
 }

@@ -185,6 +185,7 @@ export const servicioIniciadoVacio: Servicios = {
             },
         },
     ],
+    supraComarcal: '',
 };
 
 export const yearIniciadoVacio: YearData = {

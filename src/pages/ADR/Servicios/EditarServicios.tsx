@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
+import { Checkbox } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
+import { DropdownTraducido, InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
-import { Servicios } from '../../../types/GeneralTypes';
+import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { Loading } from '../../../components/Utils/animations';
@@ -21,6 +22,8 @@ import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesA
 import { EjesBBDDToEjes } from '../EjesHelpers';
 import { PestanaIndicadores } from '../Acciones/EditarAccion/EditarAccionIndicadores';
 import { ConvertirIndicadoresAccionAServicio } from '../../../components/Utils/utils';
+import Multiselect from 'multiselect-react-dropdown';
+import { RegionInterface } from '../../../components/Utils/data/getRegiones';
 export const ejeGeneralServicios: EjesBBDD = {
     EjeId: 'general',
     NameEs: 'General',
@@ -44,6 +47,7 @@ const Index: React.FC = () => {
     const isFetchingRef = useRef(false);
 
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
+    const [bloqueo, setBloqueo] = useState<{ editarPlan: boolean; editarMemoria: boolean }>({ editarPlan, editarMemoria });
 
     useEffect(() => {
         if (!loading && ejesPlan.length === 0) {
@@ -60,6 +64,11 @@ const Index: React.FC = () => {
             });
         }
     }, [yearData, loading]);
+
+    useEffect(() => {
+        const propietario = datosEditandoServicio?.serviciosCompartidas?.regionLider.RegionId === regionSeleccionada;
+        setBloqueo({ editarPlan: propietario && editarPlan, editarMemoria: propietario && editarMemoria });
+    }, [datosEditandoServicio, regionSeleccionada]);
 
     useEffect(() => {
         if (!ejesPlan.some((e) => e.EjeId === ejeGeneralServicios.EjeId)) {
@@ -219,7 +228,7 @@ const Index: React.FC = () => {
                     </h2>
                 }
                 zonaBtn={
-                    (editarPlan || editarMemoria) && (
+                    (bloqueo.editarPlan || bloqueo.editarMemoria) && (
                         <div className="ml-auto flex gap-4 items-center justify-end">
                             <button className="px-4 py-2 bg-primary text-white rounded" onClick={validarAntesDeGuardar}>
                                 {t('guardar')}{' '}
@@ -235,12 +244,12 @@ const Index: React.FC = () => {
                         <small style={{ color: '#666' }}>{t('camposObligatoriosLeyenda')}</small>
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
-                                {editarPlan ? (
+                                {bloqueo.editarPlan ? (
                                     <InputField
                                         nombreInput="Servicio"
                                         className={`${erroresGenerales.nombre && 'border-red-500 border-2'}`}
                                         required
-                                        disabled={!editarPlan}
+                                        disabled={!bloqueo.editarPlan}
                                         value={datosEditandoServicio.nombre}
                                         onChange={(e) => handleChangeCampos('nombre', e)}
                                     />
@@ -256,7 +265,7 @@ const Index: React.FC = () => {
 
                             <>
                                 <div className="w-1/2 flex flex-col gap-2 justify-center">
-                                    {editarPlan ? (
+                                    {bloqueo.editarPlan ? (
                                         <SelectorEje
                                             idEjeSeleccionado={`${datosEditandoServicio.idEje}`}
                                             setIdEjeSeleccionado={(id) => {
@@ -282,7 +291,7 @@ const Index: React.FC = () => {
                                         <span className="block  font-semibold">
                                             <span className="font-normal text-col">{t('LineaActuaccion')}</span>
                                         </span>
-                                        {editarPlan ? (
+                                        {bloqueo.editarPlan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
                                                 idEjeSeleccionado={`${datosEditandoServicio.idEje}`}
@@ -344,7 +353,7 @@ const Index: React.FC = () => {
                 <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                     <TabPanels>
                         <TabPanel>
-                            <PestanaIndicadores />
+                            <PestanaIndicadores bloqueo={bloqueo} />
                         </TabPanel>
                         <TabPanel>
                             <div className="p-5 flex flex-col gap-4 w-full">
@@ -356,12 +365,13 @@ const Index: React.FC = () => {
                                             className={`h-[114px] w-full ${erroresGenerales.descripcion ? 'border-red-500 border-2' : ''}`}
                                             required
                                             noTitle
-                                            disabled={!editarPlan}
+                                            disabled={!bloqueo.editarPlan}
                                             value={datosEditandoServicio.descripcion}
                                             onChange={(e) => handleChangeCampos('descripcion', e)}
                                         />
                                         {erroresGenerales.descripcion && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
                                     </div>
+                                    <Supracomarcal bloqueo={bloqueo} />
                                 </div>
                             </div>
                         </TabPanel>
@@ -370,12 +380,12 @@ const Index: React.FC = () => {
                                 <div className="panel">
                                     <div className="p-2 flex-1">
                                         <span>
-                                            {!editarPlan ? '*' : ''}
+                                            {!bloqueo.editarPlan ? '*' : ''}
                                             {t('dSeguimiento').toUpperCase()}
                                         </span>
                                         <TextArea
                                             nombreInput="dSeguimiento"
-                                            disabled={!editarPlan && !editarMemoria}
+                                            disabled={!bloqueo.editarPlan && !bloqueo.editarMemoria}
                                             className={`h-[114px] w-full ${erroresGenerales.dSeguimiento ? 'border-red-500 border-2' : ''}`}
                                             value={datosEditandoServicio!.dSeguimiento}
                                             noTitle
@@ -386,12 +396,12 @@ const Index: React.FC = () => {
 
                                     <div className="p-2 flex-1">
                                         <span>
-                                            {!editarPlan ? '*' : ''}
+                                            {!bloqueo.editarPlan ? '*' : ''}
                                             {t('valFinal').toUpperCase()}
                                         </span>
                                         <TextArea
                                             nombreInput="valFinal"
-                                            disabled={!editarPlan && !editarMemoria}
+                                            disabled={!bloqueo.editarPlan && !bloqueo.editarMemoria}
                                             className={`h-[114px] w-full ${erroresGenerales.valFinal ? 'border-red-500 border-2' : ''}`}
                                             value={datosEditandoServicio!.valFinal}
                                             noTitle
@@ -420,3 +430,169 @@ const Index: React.FC = () => {
     );
 };
 export default Index;
+
+interface RegionSelectProps {
+    disabled?: boolean;
+    header?: boolean;
+    noInput?: boolean;
+    bloqueo: { editarPlan: boolean; editarMemoria: boolean };
+}
+const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
+    const { t, i18n } = useTranslation();
+    const { datosEditandoServicio, setDatosEditandoServicio } = useYear();
+    const { regiones, regionActual } = useRegionContext();
+    const [regionesSupracomarcal, setRegionesSupracomarcal] = useState<boolean>(false);
+    const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
+    const [dataMultiselect, setDataMultiselect] = useState<RegionInterface[]>();
+    const [bloqueoSupracomarcal, setBloqueoSupracomarcal] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (datosEditandoServicio?.serviciosCompartidaId) {
+            if (bloqueo.editarPlan) {
+                setBloqueoSupracomarcal(false);
+            } else {
+                setBloqueoSupracomarcal(true);
+            }
+        }
+    }, [bloqueo]);
+
+    useEffect(() => {
+        if (!datosEditandoServicio) return;
+        if (datosEditandoServicio.serviciosCompartidas && datosEditandoServicio.serviciosCompartidas.regionLider && Number(datosEditandoServicio.serviciosCompartidas.regionLider.RegionId) > 0) {
+            setRegionesSupracomarcal(true);
+        }
+        const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoServicio.serviciosCompartidas?.regiones ?? [];
+        const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
+            const regionIdNormalizado = r.RegionId.padStart(2, '0');
+
+            const regionCompleta = regiones.find((reg) => reg.RegionId.padStart(2, '0') === regionIdNormalizado);
+
+            return {
+                RegionId: regionIdNormalizado,
+                NameEs: regionCompleta?.NameEs || '',
+                NameEu: regionCompleta?.NameEu || '',
+            };
+        });
+        setDataMultiselect(regionesCompletadas);
+    }, []);
+
+    if (!datosEditandoServicio) return;
+
+    const handleChangeCheckboxSupracomarcal = (supracomarcal: boolean) => {
+        if (bloqueoSupracomarcal) return;
+        if (supracomarcal) {
+            if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
+                alert(t('error:errorFaltaRegionLider'));
+                return;
+            }
+            if (!datosEditandoServicio?.serviciosCompartidaId) {
+                setDatosEditandoServicio({
+                    ...datosEditandoServicio,
+                    serviciosCompartidas: {
+                        idCompartida: datosEditandoServicio?.serviciosCompartidaId,
+                        regionLider: {
+                            id: regionActual.RegionId,
+                            RegionId: regionActual.RegionId,
+                            NameEs: '',
+                            NameEu: '',
+                        },
+                        regiones: [],
+                    },
+                });
+            }
+        } else {
+            if (!datosEditandoServicio?.serviciosCompartidaId) {
+                setDatosEditandoServicio({
+                    ...datosEditandoServicio,
+                    serviciosCompartidas: undefined,
+                });
+            } else {
+                setDatosEditandoServicio({
+                    ...datosEditandoServicio,
+                    serviciosCompartidas: {
+                        idCompartida: datosEditandoServicio?.serviciosCompartidaId,
+                        regiones: [],
+                        regionLider: datosEditandoServicio.serviciosCompartidas!.regionLider,
+                    },
+                });
+            }
+            setDataMultiselect([]);
+        }
+        setRegionesSupracomarcal(supracomarcal);
+    };
+
+    const handleChangeSupraComarcal = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        if (bloqueoSupracomarcal) return;
+        setDatosEditandoServicio({
+            ...datosEditandoServicio,
+            supraComarcal: e.target.value || '',
+        });
+    };
+
+    const handleChangeRegionsSupracomarcal = (selectedList: RegionInterface[]) => {
+        if (bloqueoSupracomarcal) return;
+        setDataMultiselect(selectedList);
+
+        setDatosEditandoServicio({
+            ...datosEditandoServicio,
+            serviciosCompartidas: {
+                regionLider: {
+                    RegionId: regionActual?.RegionId ?? '0',
+                    NameEs: '',
+                    NameEu: '',
+                },
+                regiones: selectedList,
+            },
+        });
+    };
+    const opcionesSupraComarcalSinOtros = opcionesSupraComarcal.filter((op) => op !== 'Otros');
+
+    return (
+        <>
+            <div className="flex flex-col items-center">
+                <label>{t('esSupracomarcalServicio')}</label>
+                <Checkbox checked={regionesSupracomarcal} disabled={bloqueoSupracomarcal} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
+            </div>
+            {regionesSupracomarcal && (
+                <div className="w-full resize-y">
+                    <div className="flex gap-4">
+                        <DropdownTraducido
+                            title={'supracomarcal'}
+                            disabled={bloqueoSupracomarcal}
+                            value={
+                                regionesSupracomarcal
+                                    ? opcionesSupraComarcalSinOtros.includes(datosEditandoServicio.supraComarcal || '')
+                                        ? datosEditandoServicio.supraComarcal
+                                        : 'Otros'
+                                    : `${t('sinOpcionesSupraComarcal')}`
+                            }
+                            options={opcionesSupraComarcal}
+                            visualOptions={opcionesSupraComarcalSegunIdioma}
+                            onChange={(e) => handleChangeSupraComarcal(e)}
+                        />
+                        {!opcionesSupraComarcalSinOtros.includes(datosEditandoServicio.supraComarcal || '') && (
+                            <InputField
+                                disabled={bloqueoSupracomarcal}
+                                nombreInput="supracomarcal"
+                                required
+                                value={datosEditandoServicio.supraComarcal != 'Otros' ? datosEditandoServicio.supraComarcal : ''}
+                                onChange={(e) => handleChangeSupraComarcal(e)}
+                            />
+                        )}
+                    </div>
+                    <label>{t('comarcasIncluidasSupracomarcal')} </label>
+                    <Multiselect
+                        disable={bloqueoSupracomarcal}
+                        placeholder={t('seleccionaMultiOpcion')}
+                        options={regiones}
+                        selectedValues={dataMultiselect}
+                        displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
+                        onSelect={handleChangeRegionsSupracomarcal}
+                        onRemove={handleChangeRegionsSupracomarcal}
+                        emptyRecordMsg={t('error:errorNoOpciones')}
+                    />
+                </div>
+            )}
+        </>
+    );
+};

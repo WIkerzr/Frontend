@@ -6,17 +6,18 @@ import { NewModal } from '../../../../components/Utils/utils';
 import { TablaIndicadorAccion, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
 import React from 'react';
 import { useYear } from '../../../../contexts/DatosAnualContext';
-import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { sortBy } from 'lodash';
 
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
+interface PestanaIndicadoresProps {
+    bloqueo: { editarPlan: boolean; editarMemoria: boolean };
+}
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo }) => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
     const { ListadoNombresIdicadoresSegunADR, indicadoresRealizacion, indicadoresResultado, PrimeraLlamada } = useIndicadoresContext();
-    const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const [carga, setCarga] = useState<boolean>(false);
 
     const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(sortBy(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion, 'id') ?? []);
@@ -243,7 +244,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
     };
 
     const handleOpenModal = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'NuevoIndicador', t, editarPlan ? 'Plan' : 'Memoria')) {
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, bloqueo.editarPlan, bloqueo.editarMemoria, 'NuevoIndicador', t, bloqueo.editarPlan ? 'Plan' : 'Memoria')) {
             setOpen(true);
         }
     };
@@ -262,7 +263,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement>(() => {
                     indicadoresRealizacionTabla={indicadoresRealizacionTabla}
                     indicadoresResultadoTabla={indicadoresResultadoTabla}
                     block={block}
-                    editarPlan={editarPlan}
+                    editarPlan={bloqueo.editarPlan}
                     open={open}
                     setOpen={setOpen}
                     handleOpenModal={handleOpenModal}

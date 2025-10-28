@@ -14,6 +14,7 @@ import {
     EstadoLabel,
 } from '../../../../types/TipadoAccion';
 import { EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, OperationalIndicatorsDTO, YearData, YearDataDTO } from '../../../../types/tipadoPlan';
+import { RegionInterface } from '../getRegiones';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const checkData = (value: any, name: string, defaultValue = ''): any => {
@@ -369,17 +370,49 @@ export const convertirIndicadoresServicios = (indicadores: IndicadoresServiciosD
         tipo: i.Tipo,
     }));
 
-export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[]): Servicios[] =>
-    (serviciosDTO ?? []).map((s) => ({
-        id: s.Id ?? 0,
-        nombre: s.Nombre,
-        descripcion: s.Descripcion,
-        dSeguimiento: s.DSeguimiento ?? '',
-        valFinal: s.ValFinal ?? '',
-        indicadores: convertirIndicadoresServicios(s.Indicadores ?? []),
-        idEje: s.EjeGlobalId === '' ? s.EjeGlobalIdInt : s.EjeGlobalId,
-        lineaActuaccion: s.LineaActuaccion,
-    }));
+export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[], regionesDisponibles: RegionInterface[]): Servicios[] => {
+    return serviciosDTO.map((dto) => {
+        const regionLider = regionesDisponibles.find((r) => r.RegionId === dto.ServiciosCompartida?.RegionLiderId?.toString());
+
+        const regionesCompartidas: RegionInterface[] =
+            dto.ServiciosCompartida?.ServiciosCompartidaRegiones?.map((reg) => {
+                const region = regionesDisponibles.find((r) => r.RegionId === reg.RegionId.toString());
+                return (
+                    region || {
+                        RegionId: reg.RegionId.toString(),
+                        NameEs: '',
+                        NameEu: '',
+                    }
+                );
+            }) || [];
+
+        const servicio: Servicios = {
+            id: dto.Id ?? 0,
+            nombre: dto.Nombre,
+            descripcion: dto.Descripcion,
+            indicadores: convertirIndicadoresServicios(dto.Indicadores ?? []),
+            idEje: dto.EjeGlobalIdInt || dto.EjeGlobalId,
+            lineaActuaccion: dto.LineaActuaccion,
+            dSeguimiento: dto.DSeguimiento,
+            supraComarcal: dto.Supracomarcal,
+            valFinal: dto.ValFinal,
+            serviciosCompartidaId: dto.ServiciosCompartidaId,
+            serviciosCompartidas: dto.ServiciosCompartida
+                ? {
+                      idCompartida: dto.ServiciosCompartida.Id,
+                      regionLider: regionLider || {
+                          RegionId: dto.ServiciosCompartida.RegionLiderId.toString(),
+                          NameEs: '',
+                          NameEu: '',
+                      },
+                      regiones: regionesCompartidas,
+                  }
+                : undefined,
+        };
+
+        return servicio;
+    });
+};
 
 export const convertirEje = (eje: EjeBBDD2): Ejes => ({
     Id: `${eje.Id}`,
@@ -408,6 +441,9 @@ export const normalizarServicios = (servicios: ServiciosDTO[] | ServiciosDTOConv
             EjeGlobalId: s.EjeGlobalId,
             EjeGlobalIdInt: s.EjeGlobalIdInt,
             LineaActuaccion: s.LineaActuaccion,
+            ServiciosCompartidaId: s.ServiciosCompartidaId !== undefined ? s.ServiciosCompartidaId : 0,
+            ServiciosCompartida: s.ServiciosCompartida,
+            Supracomarcal: s.SupraComarcal,
         };
     });
 };
@@ -421,10 +457,11 @@ export const construirYearData = (
     ejesRestantes: Ejes[],
     ejesPrioritarios: Ejes[],
     ejes: Ejes[],
-    anioSeleccionada: number
+    anioSeleccionada: number,
+    regionesDisponibles: RegionInterface[]
 ): YearData => {
     const serviciosConvertidos: ServiciosDTOConvertIndicadores[] = normalizarServicios(data.Servicios);
-    const servicios: Servicios[] = convertirServicios(serviciosConvertidos);
+    const servicios: Servicios[] = convertirServicios(serviciosConvertidos, regionesDisponibles);
 
     return {
         nombreRegion: nombreRegionSeleccionada ?? '',

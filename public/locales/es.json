@@ -137,6 +137,7 @@
     "esperaADRMemoria": "Memoria en borrador a la espera del ADR",
     "esperaADRPlan": "Plan en borrador a la espera del ADR",
     "esSupracomarcal": "¿La acción es supracomarcal?",
+    "esSupracomarcalServicio": "¿El servicio es supracomarcal?",
     "estadoBorrador": "BORRADOR",
     "estadoCerrado": "CERRADO",
     "explicacionAccion": "Se podrán definir hasta 5 acciones, las cuales deberán enmarcarse dentro de los ejes prioritarios ya establecidos.",

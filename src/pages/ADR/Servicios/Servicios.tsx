@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import IconEye from '../../../components/Icon/IconEye';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
-import { Boton } from '../../../components/Utils/utils';
+import { Boton, formateaConCeroDelante } from '../../../components/Utils/utils';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { Servicios } from '../../../types/GeneralTypes';
@@ -15,6 +15,7 @@ import { eliminarServicio } from '../../../components/Utils/data/dataServices';
 import { ErrorMessage } from '../../../components/Utils/animations';
 import { MostrarAvisoCamposServicios } from './ComponentesServicios';
 import { ejeGeneralServicios } from './EditarServicios';
+import { useRegionContext } from '../../../contexts/RegionContext';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -24,6 +25,7 @@ const Index: React.FC = () => {
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const { regionSeleccionada } = useRegionContext();
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
@@ -94,7 +96,7 @@ const Index: React.FC = () => {
                 {serviciosGrup.map((fila: Servicios[], filaIndex: number) => (
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((servicio: Servicios) => {
-                            const editable = editarPlan || editarMemoria;
+                            let editable = editarPlan || editarMemoria;
                             let nombreEje = '';
                             if (servicio.idEje === 'general') {
                                 nombreEje = i18n.language === 'eu' ? ejeGeneralServicios.NameEu : ejeGeneralServicios.NameEs;
@@ -102,8 +104,25 @@ const Index: React.FC = () => {
                                 const eje = yearData.plan.ejes.find((e) => e.Id == servicio.idEje);
                                 nombreEje = i18n.language === 'eu' ? eje?.NameEu ?? '' : eje?.NameEs ?? '';
                             }
+                            let colorAccion = 'bg-white';
+
+                            if (servicio.serviciosCompartidas?.regionLider) {
+                                const regionLider = formateaConCeroDelante(`${servicio.serviciosCompartidas.regionLider.RegionId}`) === regionSeleccionada;
+                                if (regionLider) {
+                                    colorAccion = 'bg-teal-100';
+                                    editable = editable ? true : false;
+                                }
+                                const regionCooperando = servicio.serviciosCompartidas.regiones?.some((region) => formateaConCeroDelante(`${region.RegionId}`) === regionSeleccionada);
+                                if (regionCooperando) {
+                                    colorAccion = 'bg-gray-300';
+                                    editable = false;
+                                }
+                            }
                             return (
-                                <div key={servicio.id} className="flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col">
+                                <div
+                                    key={servicio.id}
+                                    className={`flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col ${colorAccion}`}
+                                >
                                     <span className="text-base">{servicio.nombre}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('Eje')}: {nombreEje}

@@ -65,7 +65,7 @@ interface YearContextType {
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, nombreRegionSeleccionada, regiones } = useRegionContext();
 
     const [errorMessageYearData, setErrorMessageYearData] = useState<string>('');
     const [successMessageYearData, setSuccessMessageYearData] = useState<string>('');
@@ -722,7 +722,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             ejesRestantes,
             ejesPrioritarios,
             ejes,
-            anioSeleccionada
+            anioSeleccionada,
+            regiones
         );
         setYearData(dotosAnio);
         if (retornarDatos) {

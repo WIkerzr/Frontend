@@ -46,9 +46,20 @@ export const gestionarServicio = async ({
         EjeGlobalId: typeof datosEditandoServicio.idEje === 'string' ? datosEditandoServicio.idEje : '',
         EjeGlobalIdInt: typeof datosEditandoServicio.idEje === 'number' ? datosEditandoServicio.idEje : 0,
         LineaActuaccion: datosEditandoServicio.lineaActuaccion,
+        ServiciosCompartida: datosEditandoServicio.serviciosCompartidas
+            ? {
+                  Id: datosEditandoServicio.serviciosCompartidas.idCompartida,
+                  RegionLiderId: Number(datosEditandoServicio.serviciosCompartidas.regionLider.RegionId),
+                  ServiciosCompartidaRegiones: datosEditandoServicio.serviciosCompartidas.regiones.map((e) => ({
+                      RegionId: Number(e.RegionId),
+                  })),
+              }
+            : undefined,
+        ServiciosCompartidaId: datosEditandoServicio.serviciosCompartidas ? datosEditandoServicio.serviciosCompartidas.idCompartida ?? 0 : 0,
+        SupraComarcal: datosEditandoServicio.supraComarcal,
     };
 
-    const url = method === 'POST' ? `/services/newService` : `/services/${idServicio}/updateService`;
+    const url = method === 'POST' ? `services/newService` : `services/${idServicio}/updateService`;
 
     let resultado: Servicios | undefined = undefined;
 
@@ -70,6 +81,22 @@ export const gestionarServicio = async ({
                     valFinal: data.ValFinal ?? undefined,
                     idEje: data.EjeGlobalIdInt,
                     lineaActuaccion: data.LineaActuaccion,
+                    serviciosCompartidaId: data.ServiciosCompartidaId,
+                    serviciosCompartidas: data.ServiciosCompartida
+                        ? {
+                              idCompartida: data.ServiciosCompartida.Id,
+                              regionLider: data.ServiciosCompartida.RegionLiderId
+                                  ? { RegionId: String(data.ServiciosCompartida.RegionLiderId), NameEs: '', NameEu: '' }
+                                  : { RegionId: '', NameEs: '', NameEu: '' },
+                              regiones:
+                                  data.ServiciosCompartida.ServiciosCompartidaRegiones?.map((r) => ({
+                                      RegionId: String(r.RegionId),
+                                      NameEs: '',
+                                      NameEu: '',
+                                  })) ?? [],
+                          }
+                        : undefined,
+                    supraComarcal: data.SupraComarcal,
                     indicadores: data.IndicadoresServicios.map((i) => ({
                         id: i.Id ?? 0,
                         indicador: i.Indicador,
