@@ -64,10 +64,8 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
                 if (archivoFirma.RutaRelativa === 'Firma') {
                     for (let index = 0; index < archivoFirma.Hijos.length; index++) {
                         const firma = archivoFirma.Hijos[index];
-                        console.log(firma);
 
-                        const name = `A8${yearData.year}${datosEditandoAccion.accion}${nombreRegionSeleccionada}${index > 0 ? index : ''}.pdf`;
-                        console.log(name);
+                        const name = `A8${yearData.year}${datosEditandoAccion.accion}${nombreRegionSeleccionada}.pdf`;
 
                         if (firma.Nombre === name) {
                             const fileRaiz = TransformarArchivosAFile(archivoFirma);
