@@ -171,6 +171,11 @@ const Index: React.FC = () => {
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('LineaActuaccion')}: {accion.lineaActuaccion}
                                     </span>
+                                    {accion.accionCompartida?.regiones?.some((region) => formateaConCeroDelante(`${region.RegionId}`) === regionSeleccionada) && (
+                                        <span className="block text-sm text-gray-500 text-left font-medium mb-1">
+                                            {t('accionPropietaria')}: {accion.accionCompartida?.regionLider?.NameEs}
+                                        </span>
+                                    )}
                                     <div className="flex gap-2 justify-end mt-2">
                                         <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => handleEdit(accion)}>
                                             {editable ? <IconPencil /> : <IconEye />}

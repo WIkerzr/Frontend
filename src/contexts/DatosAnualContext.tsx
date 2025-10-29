@@ -426,9 +426,12 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
         let ejeSeleccionado: Ejes | undefined = undefined;
+        let accionPrioritaria = false;
         if (tipo === 'AccionesAccesorias') {
+            accionPrioritaria = false;
             ejeSeleccionado = yearData.plan.ejes.find((e) => `${e.Id}` === idEje);
         } else {
+            accionPrioritaria = true;
             const eje = yearData.plan.ejesPrioritarios.find((eje) => `${eje.Id}` === idEje);
             ejeSeleccionado = eje ? eje : undefined;
         }
@@ -446,6 +449,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 Nombre: nuevaAccion,
                 LineaActuaccion: nuevaLineaActuaccion,
                 Plurianual: plurianual,
+                AccionPrioritaria: accionPrioritaria,
             },
             onSuccess: (response) => {
                 const nuevaAccionObj: DatosAccion = {
@@ -653,7 +657,36 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const [block, setBlock] = useState<boolean>(false);
 
-    const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, anioSeleccionada: number) => {
+    function crearEje(eje: EjeBBDD2, acciones: DatosAccion[], ejesPrioritarios: Ejes[], ejesRestantes: Ejes[]) {
+        const nuevoEje = {
+            Id: `${eje.Id}`,
+            NameEs: eje.EjeGlobal.NameEs,
+            NameEu: eje.EjeGlobal.NameEu,
+            IsActive: eje.EjeGlobal.IsActive,
+            IsPrioritarios: eje.IsPrioritario,
+            IsAccessory: eje.IsAccessory,
+            acciones: acciones,
+        };
+        if (eje.IsAccessory && eje.IsPrioritario) {
+            const ejeAccionesPrioritarias = {
+                ...nuevoEje,
+                IsAccessory: false,
+                acciones: acciones.filter((accion) => accion.accionPrioritaria === true),
+            };
+            const ejeAccionesNoPrioritarias = {
+                ...nuevoEje,
+                IsPrioritarios: false,
+                acciones: acciones.filter((accion) => accion.accionPrioritaria === false || accion.accionPrioritaria === undefined),
+            };
+            ejesPrioritarios.push(ejeAccionesPrioritarias);
+            ejesRestantes.push(ejeAccionesNoPrioritarias);
+        } else if (eje.IsPrioritario) {
+            ejesPrioritarios.push(nuevoEje);
+        } else {
+            ejesRestantes.push(nuevoEje);
+        }
+    }
+    const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, anioSeleccionada: number, datosModificadorCompartidos: EjeBBDD2[]) => {
         const estadoPlan = data.data.Plan.Status.toLowerCase();
         const estadoMemoria = data.data.Memoria.Status.toLowerCase();
         const planStatus: Estado = isEstado(estadoPlan) ? estadoPlan : 'borrador';
@@ -677,6 +710,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     lineaActuaccion: accion.LineaActuaccion,
                     plurianual: accion.Plurianual,
                     camposFaltantes: accion.CamposFaltantes,
+                    accionPrioritaria: accion.AccionPrioritaria,
                     accionCompartida: {
                         regionLider: accion.RegionLiderId,
                         regiones: [],
@@ -684,20 +718,25 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 }));
             }
 
-            const nuevoEje = {
-                Id: `${eje.Id}`,
-                NameEs: eje.EjeGlobal.NameEs,
-                NameEu: eje.EjeGlobal.NameEu,
-                IsActive: eje.EjeGlobal.IsActive,
-                IsPrioritarios: eje.IsPrioritario,
-                IsAccessory: eje.IsAccessory,
-                acciones: acciones,
-            };
-            if (eje.IsPrioritario) {
-                ejesPrioritarios.push(nuevoEje);
-            } else {
-                ejesRestantes.push(nuevoEje);
-            }
+            crearEje(eje, acciones, ejesPrioritarios, ejesRestantes);
+        });
+
+        datosModificadorCompartidos.forEach((eje) => {
+            const acciones: DatosAccion[] = eje.Acciones.map((accion: any) => ({
+                id: `${accion.Id}`,
+                accion: accion.Nombre,
+                ejeEs: eje.EjeGlobal.NameEs,
+                ejeEu: eje.EjeGlobal.NameEu,
+                lineaActuaccion: accion.LineaActuaccion,
+                plurianual: accion.Plurianual,
+                camposFaltantes: accion.CamposFaltantes,
+                accionPrioritaria: accion.AccionPrioritaria,
+                accionCompartida: {
+                    regionLider: accion.RegionLiderId,
+                    regiones: [],
+                },
+            }));
+            crearEje(eje, acciones, ejesPrioritarios, ejesRestantes);
         });
         data.data.EjesGlobales.forEach((eje: EjeBBDD) => {
             const nuevoEje: Ejes = {
@@ -749,8 +788,11 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setErrorMessage: setErrorMessageYearData,
             setSuccessMessage: setSuccessMessageYearData,
             onSuccess: (data: any) => {
+                const datosModificadorCompartidos: EjeBBDD2[] = data.accionesParticipante;
+
                 sessionStorage.setItem('lastInformeData', JSON.stringify(data));
-                onSuccessYearData(data, false, false, anioSeleccionada);
+
+                onSuccessYearData(data, false, false, anioSeleccionada, datosModificadorCompartidos);
             },
         });
     };
@@ -773,7 +815,9 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 setErrorMessage: setErrorMessageYearData,
                 setSuccessMessage: setSuccessMessageYearData,
                 onSuccess: (data: any) => {
-                    const datosAnio: YearData | undefined = onSuccessYearData(data, true, true, anioSeleccionada);
+                    const datosModificadorCompartidos: EjeBBDD2[] = data.accionesParticipante;
+
+                    const datosAnio: YearData | undefined = onSuccessYearData(data, true, true, anioSeleccionada, datosModificadorCompartidos);
                     if (datosAnio) {
                         if (retornarDatos) resolve(datosAnio);
                     }

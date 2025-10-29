@@ -81,6 +81,7 @@ export interface DatosAccion {
     accionCompartida?: AccionCompartida;
     accionCompartidaid?: number;
     camposFaltantes?: string;
+    accionPrioritaria?: boolean;
 }
 
 export const datosInicializadosAccion: DatosAccion = {

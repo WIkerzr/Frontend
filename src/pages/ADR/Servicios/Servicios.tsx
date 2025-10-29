@@ -132,6 +132,11 @@ const Index: React.FC = () => {
                                             {t('LineaActuaccion')}: {servicio.lineaActuaccion}
                                         </span>
                                     )}
+                                    {servicio.serviciosCompartidas?.regiones?.some((region) => formateaConCeroDelante(`${region.RegionId}`) === regionSeleccionada) && (
+                                        <span className="block text-sm text-gray-500 text-left font-medium mb-1">
+                                            {t('servicioAdministrador')}: {servicio.serviciosCompartidas?.regionLider?.NameEs}
+                                        </span>
+                                    )}
                                     <div className="flex gap-2 justify-end mt-2">
                                         <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
                                             <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio(servicio)}>
