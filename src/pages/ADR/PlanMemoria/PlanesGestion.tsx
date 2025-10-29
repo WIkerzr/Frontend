@@ -29,7 +29,6 @@ const Index = () => {
     const guardadoProps = { value: guardado, set: setGuardado };
     const { t, i18n } = useTranslation();
     const [visibleMessageSuperior, setVisibleMessageSuperior] = useState('');
-    const [validarDatos, setValidarDatos] = useState<boolean>(false);
 
     const [planGuardado, setPlanGuardado] = useState<Archivo[]>();
     const [loading, setLoading] = useState<boolean>(false);
@@ -51,26 +50,8 @@ const Index = () => {
             prevLoadingRef.current = loadingYearData;
             return;
         }
-        if (!loadingYearData) {
-            setValidarDatos(true);
-        }
         prevLoadingRef.current = loadingYearData;
     }, [LoadingYearData]);
-
-    useEffect(() => {
-        if (!validarDatos) return;
-        ValidacionAnualPlanMemoria({
-            yearData,
-            editarPlan,
-            editarMemoria: false,
-            tipoPM: 'Plan',
-            t,
-            setMensajeError,
-            setCamposRellenos,
-            setVisibleMessageSuperior,
-        });
-        setValidarDatos(false);
-    }, [validarDatos]);
 
     useEffect(() => {
         if (yearData.plan.status != 'borrador') {
@@ -138,12 +119,25 @@ const Index = () => {
                                         <button
                                             className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                             onClick={async () => {
-                                                if (!validarCamposPlanGestionAnual(yearData)) {
-                                                    setMensajeError(t('faltanCamposMemoriaSeguimiento'));
-                                                    return;
-                                                } else {
+                                                let datosValidados = validarCamposPlanGestionAnual(yearData);
+                                                if (!datosValidados) {
                                                     await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                    datosValidados = validarCamposPlanGestionAnual(yearData);
+                                                    if (!datosValidados) {
+                                                        setMensajeError(t('faltanCamposMemoriaSeguimiento'));
+                                                        return;
+                                                    }
                                                 }
+                                                ValidacionAnualPlanMemoria({
+                                                    yearData,
+                                                    editarPlan,
+                                                    editarMemoria: false,
+                                                    tipoPM: 'Plan',
+                                                    t,
+                                                    setMensajeError,
+                                                    setCamposRellenos,
+                                                    setVisibleMessageSuperior,
+                                                });
                                             }}
                                         >
                                             {t('validarDatosAnio')}

@@ -33,8 +33,6 @@ const Index = () => {
     const [tablaIndicadoresOperativos, setTablaIndicadoresOperativos] = useState<GeneralOperationADR>(yearData.plan.generalOperationADR);
     const [camposMemoria, setCamposMemoria] = useState<Memoria>(yearData.memoria);
 
-    const [validarDatos, setValidarDatos] = useState<boolean>(false);
-
     const [memoriaGuardado, setMemoriaGuardado] = useState<Archivo[]>();
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -55,9 +53,6 @@ const Index = () => {
             prevLoadingRef.current = loadingYearData;
             return;
         }
-        if (!loadingYearData) {
-            setValidarDatos(true);
-        }
         prevLoadingRef.current = loadingYearData;
     }, [LoadingYearData]);
 
@@ -71,24 +66,7 @@ const Index = () => {
     }, [yearData]);
 
     useEffect(() => {
-        if (!validarDatos) return;
-        ValidacionAnualPlanMemoria({
-            yearData,
-            editarPlan,
-            editarMemoria,
-            tipoPM: 'Memoria',
-            t,
-            setMensajeError,
-            setCamposRellenos,
-            setVisibleMessageSuperior,
-        });
-        setValidarDatos(false);
-    }, [validarDatos]);
-
-    useEffect(() => {
-        if (yearData.memoria.status === 'borrador') {
-            setValidarDatos(false);
-        } else {
+        if (yearData.memoria.status != 'borrador') {
             if (regionSeleccionada && yearData.year) {
                 LlamadaArbolArchivos({
                     regionSeleccionada,
@@ -150,13 +128,26 @@ const Index = () => {
                                         <button
                                             className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                             onClick={async () => {
-                                                if (!validarCamposMemoriaSeguimientoAnual(yearData)) {
-                                                    setMensajeError(t('faltanCamposMemoriaSeguimiento'));
-                                                    setCamposRellenos(false);
-                                                    return;
-                                                } else {
+                                                let datosValidados = validarCamposMemoriaSeguimientoAnual(yearData);
+                                                if (!datosValidados) {
                                                     await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                    datosValidados = validarCamposMemoriaSeguimientoAnual(yearData);
+                                                    if (!datosValidados) {
+                                                        setMensajeError(t('faltanCamposMemoriaSeguimiento'));
+                                                        setCamposRellenos(false);
+                                                        return;
+                                                    }
                                                 }
+                                                ValidacionAnualPlanMemoria({
+                                                    yearData,
+                                                    editarPlan,
+                                                    editarMemoria,
+                                                    tipoPM: 'Memoria',
+                                                    t,
+                                                    setMensajeError,
+                                                    setCamposRellenos,
+                                                    setVisibleMessageSuperior,
+                                                });
                                             }}
                                         >
                                             {t('validarDatosAnio')}
