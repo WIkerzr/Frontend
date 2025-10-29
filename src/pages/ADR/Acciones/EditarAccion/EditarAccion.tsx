@@ -346,7 +346,7 @@ const Index: React.FC = () => {
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
                             <TabPanel>
-                                <PestanaIndicadores />
+                                <PestanaIndicadores bloqueoSupracomarcal={bloqueo} />
                             </TabPanel>
                             <TabPanel>
                                 <PestanaPlan />

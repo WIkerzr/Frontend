@@ -383,7 +383,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                         const regionLider = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) === regionSeleccionada;
                         if (regionLider) {
                             colorAccion = 'bg-teal-100';
-                            editable = true;
+                            editable = editarPlan ? true : false;
                         }
                         const regionCooperando = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) != regionSeleccionada;
                         if (regionCooperando) {

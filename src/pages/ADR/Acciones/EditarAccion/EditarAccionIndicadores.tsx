@@ -9,12 +9,14 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { sortBy } from 'lodash';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 
 interface PestanaIndicadoresProps {
-    bloqueo: { editarPlan: boolean; editarMemoria: boolean };
+    bloqueoSupracomarcal: boolean;
 }
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo }) => {
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueoSupracomarcal }) => {
     const { t } = useTranslation();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
     const { ListadoNombresIdicadoresSegunADR, indicadoresRealizacion, indicadoresResultado, PrimeraLlamada } = useIndicadoresContext();
@@ -27,6 +29,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
 
     const [reglasEspeciales, setReglasEspeciales] = useState<{ realizacion: number[]; resultado: number[] }>({ realizacion: [], resultado: [] });
+    const [bloqueo] = useState<boolean>(bloqueoSupracomarcal && editarPlan);
 
     useEffect(() => {
         if (indicadoresRealizacion.length === 0) {
@@ -244,7 +247,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     };
 
     const handleOpenModal = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, bloqueo.editarPlan, bloqueo.editarMemoria, 'NuevoIndicador', t, bloqueo.editarPlan ? 'Plan' : 'Memoria')) {
+        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'NuevoIndicador', t, editarPlan ? 'Plan' : 'Memoria')) {
             setOpen(true);
         }
     };
@@ -258,12 +261,14 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
             handleEliminarIndicador={handleEliminarIndicador}
             plurianual={datosEditandoAccion.plurianual}
             reglasEspeciales={reglasEspeciales}
+            bloqueo={bloqueo}
+            editarMemoria={bloqueoSupracomarcal && editarMemoria}
             botonNuevoIndicadorAccion={
                 <BtnNuevoIndicadorAccion
                     indicadoresRealizacionTabla={indicadoresRealizacionTabla}
                     indicadoresResultadoTabla={indicadoresResultadoTabla}
                     block={block}
-                    editarPlan={bloqueo.editarPlan}
+                    editarPlan={bloqueo}
                     open={open}
                     setOpen={setOpen}
                     handleOpenModal={handleOpenModal}

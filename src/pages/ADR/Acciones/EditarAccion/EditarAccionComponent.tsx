@@ -7,7 +7,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { isEqual, sortBy } from 'lodash';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { editableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
-import { TiposAccion, useYear } from '../../../../contexts/DatosAnualContext';
+import { TiposAccion } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
 import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
@@ -300,6 +300,8 @@ interface TablaIndicadorAccionProps {
     botonNuevoIndicadorAccion: React.ReactNode;
     handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
     servicios?: boolean;
+    bloqueo: boolean;
+    editarMemoria: boolean;
 }
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
@@ -314,33 +316,23 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             servicios,
             botonNuevoIndicadorAccion,
             handleEliminarIndicador,
+            bloqueo,
+            editarMemoria,
         },
         ref
     ) => {
         const { t } = useTranslation();
-        const { block } = useYear();
-        const { editarPlan, editarMemoria } = useEstadosPorAnio();
+        const { editarPlan } = useEstadosPorAnio();
 
         const [dataRealizacion, setDataRealizacion] = useState(indicadoresRealizacion);
         const [dataResultado, setDataResultado] = useState(indicadoresResultado);
 
-        const [bloqueo, setBloqueo] = useState<boolean>(block);
         const [searchRealizacion, setSearchRealizacion] = useState('');
         const [searchResultado, setSearchResultado] = useState('');
         const [sortStatusRealizacion, setSortStatusRealizacion] = useState<DataTableSortStatus<IndicadorRealizacionAccion>>({ columnAccessor: 'id', direction: 'asc' });
         const [sortStatusResultado, setSortStatusResultado] = useState<DataTableSortStatus<IndicadorResultadoAccion>>({ columnAccessor: 'id', direction: 'asc' });
         const [editableRowIndexRealizacion, setEditableRowIndexRealizacion] = useState(-1);
         const [editableRowIndexResultado, setEditableRowIndexResultado] = useState(-1);
-
-        useEffect(() => {
-            if (!editarPlan && !editarMemoria) {
-                setBloqueo(true);
-            } else {
-                if (!block) {
-                    setBloqueo(false);
-                }
-            }
-        }, []);
 
         const filtrarIndicadores = <T extends { descripcion?: string; metaAnual?: any; ejecutado?: any; metaFinal?: any; hipotesis?: string }>(lista: T[], search: string) => {
             if (!search.trim()) return sortBy(lista, 'id');
@@ -406,9 +398,9 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
 
             const columnMetaAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, editarPlan, reglasEspeciales, plurianual),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarPlan, reglasEspeciales, plurianual),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, editarPlan, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, bloqueo, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, bloqueo, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, bloqueo, reglasEspeciales, plurianual),
             ];
 
             const columnEjecutadoAnual = [
@@ -418,15 +410,15 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             ];
 
             const columnMetaFinal = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, plurianual ? editarPlan : false, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, plurianual ? editarPlan : false, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, plurianual ? editarPlan : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, plurianual ? bloqueo : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, plurianual ? bloqueo : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, plurianual ? bloqueo : false, reglasEspeciales),
             ];
             const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
 
             const columns = [
                 editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
-                ...(!bloqueo
+                ...(bloqueo
                     ? [
                           {
                               accessor: 'acciones',
