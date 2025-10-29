@@ -47,6 +47,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                 NameEu: regionCompleta?.NameEu || '',
             };
         });
+
         setDataMultiselect(regionesCompletadas);
     }, []);
 
@@ -144,6 +145,8 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     };
     const opcionesComarcalSinOtros = opcionesComarcal.filter((op) => op !== 'Otros');
     const opcionesSupraComarcalSinOtros = opcionesSupraComarcal.filter((op) => op !== 'Otros');
+
+    const opcionesRegionesMultiselect = regiones?.filter((r) => r.RegionId !== (regionActual?.RegionId ?? '')) ?? [];
     return (
         <div className="p-5 flex flex-col gap-4 w-full">
             <div className="flex gap-4 panel flex-col">
@@ -202,7 +205,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <label>{t('comarcasIncluidasSupracomarcal')} </label>
                         <Multiselect
                             placeholder={t('seleccionaMultiOpcion')}
-                            options={regiones}
+                            options={opcionesRegionesMultiselect}
                             selectedValues={dataMultiselect}
                             displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
                             onSelect={handleChangeRegionsSupracomarcal}
