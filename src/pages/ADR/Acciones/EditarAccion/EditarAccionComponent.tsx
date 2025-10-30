@@ -398,9 +398,9 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
 
             const columnMetaAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, bloqueo, reglasEspeciales, plurianual),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, bloqueo, reglasEspeciales, plurianual),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, bloqueo, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, !bloqueo, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, !bloqueo, reglasEspeciales, plurianual),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, !bloqueo, reglasEspeciales, plurianual),
             ];
 
             const columnEjecutadoAnual = [
@@ -410,15 +410,15 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             ];
 
             const columnMetaFinal = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, plurianual ? bloqueo : false, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, plurianual ? bloqueo : false, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, plurianual ? bloqueo : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, plurianual ? !bloqueo : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, plurianual ? !bloqueo : false, reglasEspeciales),
+                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, plurianual ? !bloqueo : false, reglasEspeciales),
             ];
             const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
 
             const columns = [
                 editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
-                ...(bloqueo
+                ...(!bloqueo
                     ? [
                           {
                               accessor: 'acciones',

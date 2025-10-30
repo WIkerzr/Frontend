@@ -29,7 +29,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
 
     const [reglasEspeciales, setReglasEspeciales] = useState<{ realizacion: number[]; resultado: number[] }>({ realizacion: [], resultado: [] });
-    const [bloqueo] = useState<boolean>(bloqueoSupracomarcal && editarPlan);
+    const [bloqueo] = useState<boolean>(bloqueoSupracomarcal && !editarPlan);
 
     useEffect(() => {
         if (indicadoresRealizacion.length === 0) {
@@ -268,7 +268,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
                     indicadoresRealizacionTabla={indicadoresRealizacionTabla}
                     indicadoresResultadoTabla={indicadoresResultadoTabla}
                     block={block}
-                    editarPlan={bloqueo}
+                    editarPlan={!bloqueo}
                     open={open}
                     setOpen={setOpen}
                     handleOpenModal={handleOpenModal}

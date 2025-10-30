@@ -792,7 +792,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             onSuccess: (data: any) => {
                 const datosModificadorCompartidos: EjeBBDD2[] = data.accionesParticipante;
 
-                sessionStorage.setItem('lastInformeData', JSON.stringify(data));
+                // sessionStorage.setItem('lastInformeData', JSON.stringify(data));
 
                 ProcesarYearData(data, false, false, datosModificadorCompartidos);
             },
