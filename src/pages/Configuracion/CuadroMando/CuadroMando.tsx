@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../Users/componentes';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { useEffect, useState, useRef } from 'react';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
@@ -8,6 +8,7 @@ import { DatosAnioCuadroMando, Ejes } from '../../../types/tipadoPlan';
 import { SelectorTipoAccionCuadroMando, TransformarYearDataACuadro, TablasCuadroMando } from './ConversorCuadroMando';
 import { InputBuscador, SelectorAnio } from '../../../components/Utils/inputs';
 import { SeleccioneRegion, SinDatos } from '../../../components/Utils/utils';
+import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
 
 export type Actions = 'TODOS' | 'Acciones' | 'AccionesAccesorias' | 'Servicios';
 
@@ -17,7 +18,7 @@ const Index = () => {
     const { t } = useTranslation();
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
 
-    const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData } = useYear();
+    const { yearData, llamadaBBDDYearDataAll, LoadingYearData, loadingYearData, ProcesarYearData } = useYear();
     const { anios, anioSeleccionada } = useEstadosPorAnio();
 
     const attemptTimestampsRef = useRef<Record<string, number>>({});
@@ -67,7 +68,7 @@ const Index = () => {
     }, [regionSeleccionada, anioSeleccionada, loadingYearData, nombreRegionSeleccionada]);
 
     const [years] = useState<string[]>([t('TODOS'), ...anios.map(String)]);
-    const [yearFilter, setYearFilter] = useState<string>(t('TODOS'));
+    const [yearFilter, setYearFilter] = useState<string>(anioSeleccionada ? String(anioSeleccionada) : t('TODOS'));
     const [search, setSearch] = useState('');
 
     const [actionsDisponibles, setActionsDisponibles] = useState<Actions[]>(actions);
@@ -76,18 +77,52 @@ const Index = () => {
 
     const [datosOk, setDatosOk] = useState<boolean>(false);
 
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
     useEffect(() => {
         if (!regionSeleccionada) return;
         if (yearData.plan.ejesPrioritarios.length === 0) return;
         if (yearData.nombreRegion != nombreRegionSeleccionada) return;
+        setYearFilter(anioSeleccionada ? String(anioSeleccionada) : t('TODOS'));
         const datoAnio: DatosAnioCuadroMando = TransformarYearDataACuadro(yearData);
+        datoAnio.year = anioSeleccionada!;
         setDatosAnios((prev) => {
             if (prev.every((da) => da.nombreRegion !== datoAnio.nombreRegion)) {
                 return [...prev, datoAnio];
             }
             return prev.map((da) => (da.nombreRegion === datoAnio.nombreRegion ? datoAnio : da));
         });
-    }, [yearData]);
+    }, [yearData, regionSeleccionada, nombreRegionSeleccionada, anioSeleccionada, t]);
+
+    useEffect(() => {
+        let yearsArray = years.slice(1);
+        if (yearFilter === t('TODOS') && datosAnios.length != yearsArray.length) {
+            yearsArray = yearsArray.filter((year) => year !== yearFilter);
+            for (const year of yearsArray) {
+                LlamadasBBDD({
+                    method: 'GET',
+                    url: `yearData/${Number(regionSeleccionada)}/${year}/all`,
+                    setLoading: setLoading,
+                    setErrorMessage: setErrorMessage,
+                    setSuccessMessage: setSuccessMessage,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onSuccess: (data: any) => {
+                        const procesarYearData = ProcesarYearData(data, true, true, [], false);
+                        const datoAnio: DatosAnioCuadroMando = TransformarYearDataACuadro(procesarYearData!);
+                        setDatosAnios((prev) => {
+                            if (prev.every((da) => da.year !== datoAnio.year)) {
+                                return [...prev, datoAnio];
+                            }
+                            return prev.map((da) => (da.year === datoAnio.year ? datoAnio : da));
+                        });
+                        return undefined;
+                    },
+                });
+            }
+        }
+    }, [yearFilter]);
 
     useEffect(() => {
         if (!regionSeleccionada) return;
@@ -122,6 +157,7 @@ const Index = () => {
     }
     if (datosAnios.length === 0) return;
     if (!datosOk) return <SinDatos />;
+
     return (
         <div className="panel">
             <ZonaTitulo
@@ -131,7 +167,15 @@ const Index = () => {
                     </div>
                 }
             />
-
+            <LoadingOverlayPersonalizada
+                isLoading={loading}
+                message={{
+                    errorMessage,
+                    setErrorMessage,
+                    successMessage,
+                    setSuccessMessage,
+                }}
+            />
             <div className="p-5 flex flex-col gap-4 w-full paneln0">
                 <div className="flex-1 flex justify-end gap-4">
                     <InputBuscador setSearch={setSearch} />

@@ -121,7 +121,7 @@ export const SelectorTipoAccionCuadroMando: React.FC<SelectorTipoAccionProps> = 
             <label className="block mb-1">{t('CuadroMandoSelectorTipeAction')}</label>
             <select
                 className="w-full border rounded p-2 resize-y"
-                value={t(tipeAction)}
+                value={tipeAction}
                 onChange={(e) => {
                     if (e.target.value) {
                         setTipeAction(e.target.value as Actions);
@@ -291,6 +291,7 @@ interface TablasCuadroMandoProps {
     search: string;
     planStatus: Estado;
 }
+
 export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoProps>(({ tipeAction, Datayear, search, planStatus }, ref) => {
     const { t } = useTranslation();
 
@@ -313,7 +314,7 @@ export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoPro
                     return (
                         <div key={`${Datayear.year}-${accion.id ?? index}`} className="panel mt-6" ref={ref}>
                             <span>
-                                {t(tipeAction === 'Acciones' ? 'Acciones' : 'AccionesAccesorias')}: {/*{Datayear.nombreRegion} {Datayear.year} */}
+                                {t(tipeAction === 'Acciones' ? 'Acciones' : 'AccionesAccesorias')}: {Datayear.nombreRegion} {Datayear.year}
                             </span>
                             <h5 className="font-semibold text-lg dark:text-white-light mb-5">{accion.nombreAccion}</h5>
 
@@ -336,7 +337,7 @@ export const TablasCuadroMando = forwardRef<HTMLDivElement, TablasCuadroMandoPro
                 return (
                     <div key={servicioIdx} className="panel mt-6" ref={ref}>
                         <span>
-                            {t('Servicios')}: {Datayear.nombreRegion} + {Datayear.year}
+                            {t('Servicios')}: {Datayear.nombreRegion} {Datayear.year}
                         </span>
                         <h5 className="font-semibold text-lg dark:text-white-light mb-5">{servicio.nombre}</h5>
                         {realizacionFiltrados.length > 0 && <TablaCuadroMandoServicios indicador={realizacionFiltrados} titulo={t('indicadoresDeRealizacion')} />}

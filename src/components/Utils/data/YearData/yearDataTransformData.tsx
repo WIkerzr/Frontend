@@ -19,7 +19,7 @@ import { RegionInterface } from '../getRegiones';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const checkData = (value: any, name: string, defaultValue = ''): any => {
     if (value === null || value === undefined || value === '' || value === '\n') {
-        console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
+        // console.warn(`Aviso: el dato ${name} no se encuentra. Se usará valor por defecto.`);
         return defaultValue;
     }
     return value;

@@ -44,7 +44,7 @@ interface YearContextType {
     SeleccionEditarGuardarAccesoria: () => void;
     llamadaBBDDYearData: (anioSeleccionada: number, ignorarStorage: boolean) => void;
     llamadaBBDDYearDataAll: (anioSeleccionada: number, retornarDatos: boolean, ignorarStorage?: boolean) => Promise<YearData | undefined>;
-
+    ProcesarYearData: (data: any, todasLasAcciones: boolean, retornarDatos: boolean, datosModificadorCompartidos: EjeBBDD2[], hacerSet?: boolean) => void;
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
     AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
@@ -686,7 +686,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             ejesRestantes.push(nuevoEje);
         }
     }
-    const onSuccessYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, anioSeleccionada: number, datosModificadorCompartidos: EjeBBDD2[]) => {
+    const ProcesarYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, datosModificadorCompartidos: EjeBBDD2[], hacerSet = true) => {
         const estadoPlan = data.data.Plan.Status.toLowerCase();
         const estadoMemoria = data.data.Memoria.Status.toLowerCase();
         const planStatus: Estado = isEstado(estadoPlan) ? estadoPlan : 'borrador';
@@ -761,10 +761,12 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             ejesRestantes,
             ejesPrioritarios,
             ejes,
-            anioSeleccionada,
+            data.data.Year,
             regiones
         );
-        setYearData(dotosAnio);
+        if (hacerSet) {
+            setYearData(dotosAnio);
+        }
         if (retornarDatos) {
             return dotosAnio;
         }
@@ -792,7 +794,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
                 sessionStorage.setItem('lastInformeData', JSON.stringify(data));
 
-                onSuccessYearData(data, false, false, anioSeleccionada, datosModificadorCompartidos);
+                ProcesarYearData(data, false, false, datosModificadorCompartidos);
             },
         });
     };
@@ -817,7 +819,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 onSuccess: (data: any) => {
                     const datosModificadorCompartidos: EjeBBDD2[] = data.accionesParticipante;
 
-                    const datosAnio: YearData | undefined = onSuccessYearData(data, true, true, anioSeleccionada, datosModificadorCompartidos);
+                    const datosAnio: YearData | undefined = ProcesarYearData(data, true, true, datosModificadorCompartidos);
                     if (datosAnio) {
                         if (retornarDatos) resolve(datosAnio);
                     }
@@ -945,6 +947,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 SeleccionEditarGuardar,
                 SeleccionEditarGuardarAccesoria,
                 SeleccionEditarServicio,
+                ProcesarYearData,
                 llamadaBBDDYearData,
                 llamadaBBDDYearDataAll,
                 LoadingYearData,
