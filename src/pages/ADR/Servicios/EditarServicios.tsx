@@ -9,7 +9,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import { Loading } from '../../../components/Utils/animations';
+import { ComprobacionYAvisosDeCambios, Loading } from '../../../components/Utils/animations';
 import { gestionarServicio } from '../../../components/Utils/data/dataServices';
 import React from 'react';
 import { Tab, TabList, TabGroup, TabPanel, TabPanels } from '@headlessui/react';
@@ -93,55 +93,7 @@ const Index: React.FC = () => {
             navigate('/adr/servicios');
         }
     }, [controlguardado]);
-
-    const initialDataRef = useRef<string | null>(null);
-    const stableTimerRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        if (!datosEditandoServicio || datosEditandoServicio.id === 0 || initialDataRef.current !== null) return;
-        if (stableTimerRef.current) {
-            clearTimeout(stableTimerRef.current);
-        }
-        stableTimerRef.current = window.setTimeout(() => {
-            try {
-                initialDataRef.current = JSON.stringify(datosEditandoServicio);
-            } catch {
-                initialDataRef.current = null;
-            }
-            stableTimerRef.current = null;
-        }, 500);
-
-        return () => {
-            if (stableTimerRef.current) {
-                clearTimeout(stableTimerRef.current);
-                stableTimerRef.current = null;
-            }
-        };
-    }, [datosEditandoServicio]);
-
-    const aSidoModificado = (() => {
-        if (!datosEditandoServicio || datosEditandoServicio.id === 0) return false;
-        try {
-            if (!initialDataRef.current) return false;
-            const currentData = JSON.stringify(datosEditandoServicio);
-            return currentData !== initialDataRef.current;
-        } catch {
-            return false;
-        }
-    })();
-
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (aSidoModificado) {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            }
-            return undefined;
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [aSidoModificado]);
+    const { aSidoModificado, restablecer } = ComprobacionYAvisosDeCambios(datosEditandoServicio, { debounceMs: 500, message: t('object:cambioPagina') });
 
     if (!datosEditandoServicio) return;
     const [lineaActuaccion, setLineaActuaccion] = useState(datosEditandoServicio.lineaActuaccion || '');
@@ -242,6 +194,11 @@ const Index: React.FC = () => {
                     ...yearData,
                     servicios: [...(yearData.servicios || []), nuevoServicio],
                 });
+                try {
+                    if (restablecer) restablecer(nuevoServicio);
+                } catch {
+                    // ignore
+                }
             }
         } else {
             const editadoServicio = await gestionarServicio({
@@ -259,6 +216,11 @@ const Index: React.FC = () => {
                     ...yearData,
                     servicios: [...(yearData.servicios?.filter((s) => s.id !== editadoServicio.id) || []), editadoServicio],
                 });
+                try {
+                    if (restablecer) restablecer(editadoServicio);
+                } catch {
+                    // ignore
+                }
             }
         }
     };

@@ -22,6 +22,7 @@ import { Servicios } from '../../../types/GeneralTypes';
 import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal, VerificadorIndicadores } from '../Acciones/EditarAccion/EditarAccionComponent';
 import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
 import React from 'react';
+import { ComprobacionYAvisosDeCambios } from '../../../components/Utils/animations';
 
 export type PlanOMemoria = 'Plan' | 'Memoria';
 
@@ -136,6 +137,15 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
         setDataMemoria(yearData.memoria);
     }, [yearData]);
 
+    const { restablecer: restablecerPlan } = ComprobacionYAvisosDeCambios(dataPlan, {
+        debounceMs: 500,
+        message: t('object:cambioPagina'),
+    });
+    const { restablecer: restablecerMemoria } = ComprobacionYAvisosDeCambios(dataMemoria, {
+        debounceMs: 500,
+        message: t('object:cambioPagina'),
+    });
+
     useEffect(() => {
         if (guardado) {
             if (pantalla === 'Plan') {
@@ -144,6 +154,11 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                     ...yearData,
                     plan: dataPlan,
                 });
+                try {
+                    if (restablecerPlan) restablecerPlan(dataPlan);
+                } catch {
+                    // ignore
+                }
                 setGuardado(false);
             } else if (pantalla === 'Memoria') {
                 const dataMemoriaConGOADR: MemoriaLlamadaGestion = {
@@ -160,6 +175,16 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                     plan: dataPlan,
                     memoria: dataMemoria,
                 });
+                try {
+                    if (restablecerPlan) restablecerPlan(dataPlan);
+                } catch {
+                    // ignore
+                }
+                try {
+                    if (restablecerMemoria) restablecerMemoria(dataMemoria);
+                } catch {
+                    // ignore
+                }
                 setGuardado(false);
             }
         }

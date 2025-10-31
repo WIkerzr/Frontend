@@ -12,6 +12,7 @@ import { useRegionContext } from '../../contexts/RegionContext';
 import { LlamadaBBDDEjesRegion } from '../../components/Utils/data/dataEjes';
 import { useUser } from '../../contexts/UserContext';
 import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
+import { ComprobacionYAvisosDeCambios } from '../../components/Utils/animations';
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -58,6 +59,11 @@ const Index = () => {
         }
     }, [yearData]);
 
+    const { restablecer: restablecerEjes } = ComprobacionYAvisosDeCambios(ejesEstrategicos || [], {
+        debounceMs: 500,
+        message: t('object:cambioPagina'),
+    });
+
     const llamadaEjes = () => {
         LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesEstrategicos, setFechaUltimoActualizadoBBDD);
     };
@@ -96,6 +102,11 @@ const Index = () => {
             body: body,
             async onSuccess() {
                 await llamadaBBDDYearData(anioSeleccionada, true);
+                try {
+                    if (restablecerEjes) restablecerEjes(ejesEstrategicos || []);
+                } catch {
+                    // ignore
+                }
             },
         });
     };

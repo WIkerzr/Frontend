@@ -19,7 +19,7 @@ import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../../components
 import { Ejes, EjesBBDD } from '../../../../types/tipadoPlan';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../../EjesHelpers';
-import { Loading } from '../../../../components/Utils/animations';
+import { Loading, ComprobacionYAvisosDeCambios } from '../../../../components/Utils/animations';
 import { PestanaFirma } from './Firma';
 
 const Index: React.FC = () => {
@@ -158,54 +158,7 @@ const Index: React.FC = () => {
         }
     }, [controlguardado]);
 
-    const initialDataRef = useRef<string | null>(null);
-    const stableTimerRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        if (!datosEditandoAccion || datosEditandoAccion.id === '0' || initialDataRef.current !== null) return;
-        if (stableTimerRef.current) {
-            clearTimeout(stableTimerRef.current);
-        }
-        stableTimerRef.current = window.setTimeout(() => {
-            try {
-                initialDataRef.current = JSON.stringify(datosEditandoAccion);
-            } catch {
-                initialDataRef.current = null;
-            }
-            stableTimerRef.current = null;
-        }, 500);
-
-        return () => {
-            if (stableTimerRef.current) {
-                clearTimeout(stableTimerRef.current);
-                stableTimerRef.current = null;
-            }
-        };
-    }, [datosEditandoAccion]);
-
-    const aSidoModificado = (() => {
-        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return false;
-        try {
-            if (!initialDataRef.current) return false;
-            const currentData = JSON.stringify(datosEditandoAccion);
-            return currentData !== initialDataRef.current;
-        } catch {
-            return false;
-        }
-    })();
-
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (aSidoModificado) {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            }
-            return undefined;
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [aSidoModificado]);
+    const { aSidoModificado, restablecer } = ComprobacionYAvisosDeCambios(datosEditandoAccion, { debounceMs: 500, message: t('object:cambioPagina') });
 
     if (!datosEditandoAccion) {
         return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
@@ -216,6 +169,13 @@ const Index: React.FC = () => {
     }
 
     const handleFinalize = () => {
+        try {
+            if (restablecer) {
+                restablecer(datosEditandoAccion);
+            }
+        } catch {
+            // ignore
+        }
         setControlguardado(true);
         SeleccionEditarGuardar();
     };
