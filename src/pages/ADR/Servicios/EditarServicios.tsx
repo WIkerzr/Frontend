@@ -71,7 +71,7 @@ const Index: React.FC = () => {
     useEffect(() => {
         let propietario = false;
 
-        if (datosEditandoServicio?.serviciosCompartidas === null) {
+        if (!datosEditandoAccion?.accionCompartida) {
             propietario = true;
         } else if (datosEditandoServicio?.serviciosCompartidas?.regionLider?.RegionId === regionSeleccionada) {
             propietario = true;
