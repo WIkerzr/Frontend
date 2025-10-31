@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Checkbox } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { DropdownTraducido, InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
 import { Fragment, useEffect, useRef, useState } from 'react';
@@ -21,7 +21,7 @@ import { EjesBBDD } from '../../../types/tipadoPlan';
 import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
 import { EjesBBDDToEjes } from '../EjesHelpers';
 import { PestanaIndicadores } from '../Acciones/EditarAccion/EditarAccionIndicadores';
-import { ConvertirIndicadoresAccionAServicio } from '../../../components/Utils/utils';
+import { Boton, ConvertirIndicadoresAccionAServicio } from '../../../components/Utils/utils';
 import Multiselect from 'multiselect-react-dropdown';
 import { RegionInterface } from '../../../components/Utils/data/getRegiones';
 export const ejeGeneralServicios: EjesBBDD = {
@@ -93,6 +93,55 @@ const Index: React.FC = () => {
             navigate('/adr/servicios');
         }
     }, [controlguardado]);
+
+    const initialDataRef = useRef<string | null>(null);
+    const stableTimerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!datosEditandoServicio || datosEditandoServicio.id === 0 || initialDataRef.current !== null) return;
+        if (stableTimerRef.current) {
+            clearTimeout(stableTimerRef.current);
+        }
+        stableTimerRef.current = window.setTimeout(() => {
+            try {
+                initialDataRef.current = JSON.stringify(datosEditandoServicio);
+            } catch {
+                initialDataRef.current = null;
+            }
+            stableTimerRef.current = null;
+        }, 500);
+
+        return () => {
+            if (stableTimerRef.current) {
+                clearTimeout(stableTimerRef.current);
+                stableTimerRef.current = null;
+            }
+        };
+    }, [datosEditandoServicio]);
+
+    const aSidoModificado = (() => {
+        if (!datosEditandoServicio || datosEditandoServicio.id === 0) return false;
+        try {
+            if (!initialDataRef.current) return false;
+            const currentData = JSON.stringify(datosEditandoServicio);
+            return currentData !== initialDataRef.current;
+        } catch {
+            return false;
+        }
+    })();
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (aSidoModificado) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+            return undefined;
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [aSidoModificado]);
 
     if (!datosEditandoServicio) return;
     const [lineaActuaccion, setLineaActuaccion] = useState(datosEditandoServicio.lineaActuaccion || '');
@@ -242,13 +291,20 @@ const Index: React.FC = () => {
                 zonaBtn={
                     <div className="ml-auto flex gap-4 items-center justify-end">
                         {!bloqueo.bloqueoTotal && (
-                            <button className="px-4 py-2 bg-primary text-white rounded" onClick={validarAntesDeGuardar}>
-                                {t('guardar')}{' '}
-                            </button>
+                            <Boton tipo="guardar" textoBoton={t('guardar')} onClick={validarAntesDeGuardar} title={!datosEditandoAccion.accion ? t('nombreDeLaAccionNoVacio') : ''} />
                         )}
-                        <NavLink to="/adr/servicios" className="group">
-                            <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
-                        </NavLink>
+
+                        <Boton
+                            tipo="cerrar"
+                            textoBoton={t('cerrar')}
+                            onClick={() => {
+                                if (aSidoModificado) {
+                                    const confirmar = window.confirm(t('object:cambioPagina'));
+                                    if (!confirmar) return;
+                                }
+                                navigate('/adr/servicios');
+                            }}
+                        />
                     </div>
                 }
                 zonaExtra={

@@ -4,12 +4,10 @@ import IconLogout from '../../components/Icon/IconLogout';
 import { useAuth } from '../../contexts/AuthContext'; // Asegúrate de que la ruta es correcta
 import { RootContext } from '../../main';
 import { useContext } from 'react';
-import { useAvisoSalirEditando } from '../../components/Layouts/DefaultLayout';
 
 const LogoutItem = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const AvisoSalirEditando = useAvisoSalirEditando();
 
     const { t } = useTranslation();
     const { logout } = useAuth();
@@ -24,7 +22,7 @@ const LogoutItem = () => {
         const partesRuta = location.pathname.split('/').filter(Boolean);
 
         if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
-            const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
+            const confirmar = window.confirm(t('object:cambioPagina'));
             if (confirmar) {
                 logoutNav();
             }

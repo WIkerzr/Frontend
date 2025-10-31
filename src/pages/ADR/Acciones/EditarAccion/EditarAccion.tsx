@@ -7,7 +7,7 @@ import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
 import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
 import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PestanaIndicadores } from './EditarAccionIndicadores';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { useYear } from '../../../../contexts/DatosAnualContext';
@@ -158,6 +158,55 @@ const Index: React.FC = () => {
         }
     }, [controlguardado]);
 
+    const initialDataRef = useRef<string | null>(null);
+    const stableTimerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0' || initialDataRef.current !== null) return;
+        if (stableTimerRef.current) {
+            clearTimeout(stableTimerRef.current);
+        }
+        stableTimerRef.current = window.setTimeout(() => {
+            try {
+                initialDataRef.current = JSON.stringify(datosEditandoAccion);
+            } catch {
+                initialDataRef.current = null;
+            }
+            stableTimerRef.current = null;
+        }, 500);
+
+        return () => {
+            if (stableTimerRef.current) {
+                clearTimeout(stableTimerRef.current);
+                stableTimerRef.current = null;
+            }
+        };
+    }, [datosEditandoAccion]);
+
+    const aSidoModificado = (() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return false;
+        try {
+            if (!initialDataRef.current) return false;
+            const currentData = JSON.stringify(datosEditandoAccion);
+            return currentData !== initialDataRef.current;
+        } catch {
+            return false;
+        }
+    })();
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (aSidoModificado) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+            return undefined;
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [aSidoModificado]);
+
     if (!datosEditandoAccion) {
         return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
     }
@@ -222,9 +271,17 @@ const Index: React.FC = () => {
                                 title={!datosEditandoAccion.accion ? t('nombreDeLaAccionNoVacio') : ''}
                             />
                         )}
-                        <NavLink to={rutaAnterior} className={() => ''}>
-                            <Boton tipo="cerrar" textoBoton={t('cerrar')} onClick={() => navigate(rutaAnterior)} />
-                        </NavLink>
+                        <Boton
+                            tipo="cerrar"
+                            textoBoton={t('cerrar')}
+                            onClick={() => {
+                                if (aSidoModificado) {
+                                    const confirmar = window.confirm(t('object:cambioPagina'));
+                                    if (!confirmar) return;
+                                }
+                                navigate(rutaAnterior);
+                            }}
+                        />
                     </div>
                 }
                 zonaExtra={

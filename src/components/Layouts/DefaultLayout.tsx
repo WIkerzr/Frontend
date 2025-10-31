@@ -7,51 +7,13 @@ import Header from './Header';
 import Setting from './Setting';
 import Sidebar from './Sidebar';
 import Portals from '../../components/Portals';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useRegionContext } from '../../contexts/RegionContext';
-import { useTranslation } from 'react-i18next';
-import { useYear } from '../../contexts/DatosAnualContext';
-import { useEstadosPorAnio } from '../../contexts/EstadosPorAnioContext';
-
-export const useAvisoSalirEditando = () => {
-    const { t } = useTranslation();
-
-    return t('object:AvisoSalirEditando', { returnObjects: true }) as Record<string, string>;
-};
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { controlguardado, setControlguardado } = useYear();
-    const { regionSeleccionada, setRegionSeleccionada } = useRegionContext();
-    const { editarPlan, editarMemoria } = useEstadosPorAnio();
-
-    const [regionAnterior, setRegionAnterior] = useState<string | null>(() => {
-        const savedRegion = sessionStorage.getItem('regionSeleccionada');
-        const parsedRegion = savedRegion ? JSON.parse(savedRegion) : null;
-        return parsedRegion ? parsedRegion.id : null;
-    });
-    const [rutaAnterior, setRutaAnterior] = useState<string | null>(() => {
-        const savedRute = sessionStorage.getItem('rutaAnterior');
-        const parsedRute = savedRute ? JSON.parse(savedRute) : null;
-        return parsedRute;
-    });
-    const [rutaRutaActual, setRutaActual] = useState<string>(() => {
-        const savedRute = sessionStorage.getItem('rutaActual');
-        const parsedRute = savedRute ? JSON.parse(savedRute) : null;
-        return parsedRute;
-    });
-
-    const [confirmado, setConfirmado] = useState(false);
-    const AvisoSalirEditando = useAvisoSalirEditando();
-
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
 
     const [showLoader, setShowLoader] = useState(true);
     const [showTopButton, setShowTopButton] = useState(false);
-
-    const excepcionesMensajeReenvio: string[] = ['gestionEnvio'];
 
     const goToTop = () => {
         document.body.scrollTop = 0;
@@ -82,61 +44,37 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
         };
     }, []);
 
-    useEffect(() => {
-        if (editarPlan || editarMemoria) {
-            if (regionSeleccionada != regionAnterior) {
-                if (!regionSeleccionada) {
-                    // const rutaAceptada = `/configuracion/`;
-                    // if (location.pathname.includes(rutaAceptada)) {
-                    //     navigate('/configuracion/indicadoresADR');
-                    // }
-                } else {
-                    const partesRuta = location.pathname.split('/').filter(Boolean);
-                    if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
-                        const confirmar = window.confirm(AvisoSalirEditando.cambioRegion);
-                        if (confirmar) {
-                            navigate(`/${partesRuta[0]}/${partesRuta[1]}`);
-                        } else {
-                            setRegionSeleccionada(regionAnterior ? Number(regionAnterior) : null);
-                        }
-                    }
-                }
-            }
-        }
-        setRegionAnterior(regionSeleccionada);
-    }, [regionSeleccionada, regionAnterior]);
-
-    useEffect(() => {
-        const partesRuta = location.pathname.split('/').filter(Boolean);
-        if (editarPlan || editarMemoria) {
-            if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
-                setRutaAnterior(location.pathname);
-                setConfirmado(false);
-            } else if (partesRuta.length <= 2 && rutaAnterior && !confirmado) {
-                if (controlguardado) {
-                    setControlguardado(false);
-                    setConfirmado(true);
-                } else {
-                    const ultimoSegmento: string = rutaRutaActual.split('/').filter(Boolean).pop() ?? '';
-                    if (!excepcionesMensajeReenvio.includes(ultimoSegmento)) {
-                        if (rutaRutaActual != location.pathname) {
-                            const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
-                            if (confirmar) {
-                                setRutaAnterior(null);
-                                setConfirmado(true);
-                                sessionStorage.setItem('rutaAnterior', JSON.stringify(location.pathname));
-                            } else {
-                                sessionStorage.setItem('rutaAnterior', JSON.stringify(rutaAnterior));
-                                navigate(rutaAnterior);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
-        setRutaActual(location.pathname);
-    }, [location, confirmado, rutaAnterior]);
+    // useEffect(() => {
+    //     const partesRuta = location.pathname.split('/').filter(Boolean);
+    //     if (editarPlan || editarMemoria) {
+    //         if (partesRuta.length > 2 && partesRuta[0] != 'configuracion') {
+    //             setRutaAnterior(location.pathname);
+    //             setConfirmado(false);
+    //         } else if (partesRuta.length <= 2 && rutaAnterior && !confirmado) {
+    //             if (controlguardado) {
+    //                 setControlguardado(false);
+    //                 setConfirmado(true);
+    //             } else {
+    //                 const ultimoSegmento: string = rutaRutaActual.split('/').filter(Boolean).pop() ?? '';
+    //                 if (!excepcionesMensajeReenvio.includes(ultimoSegmento)) {
+    //                     if (rutaRutaActual != location.pathname) {
+    //                         const confirmar = window.confirm(AvisoSalirEditando.cambioPagina);
+    //                         if (confirmar) {
+    //                             setRutaAnterior(null);
+    //                             setConfirmado(true);
+    //                             sessionStorage.setItem('rutaAnterior', JSON.stringify(location.pathname));
+    //                         } else {
+    //                             sessionStorage.setItem('rutaAnterior', JSON.stringify(rutaAnterior));
+    //                             navigate(rutaAnterior);
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     sessionStorage.setItem('rutaActual', JSON.stringify(location.pathname));
+    //     setRutaActual(location.pathname);
+    // }, [location, confirmado, rutaAnterior]);
 
     return (
         <App>

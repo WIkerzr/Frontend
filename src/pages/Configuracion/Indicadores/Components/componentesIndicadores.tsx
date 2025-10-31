@@ -17,7 +17,6 @@ import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
 import IconEye from '../../../../components/Icon/IconEye';
 import { LoadingOverlayPersonalizada } from '../../Users/componentes';
-import { useAvisoSalirEditando } from '../../../../components/Layouts/DefaultLayout';
 
 export type TipoIndicador = 'realizacion' | 'resultado';
 
@@ -1043,7 +1042,6 @@ export const TablaIndicadores: React.FC = () => {
     const bloqueoHazi = location.pathname.endsWith('ADR') ? lockedHazi : false;
 
     const esPaginaPorDefecto = location.pathname === '/';
-    const AvisoSalirEditando = useAvisoSalirEditando();
 
     const esADR = esPaginaPorDefecto || location.pathname.includes('ADR');
     const { regionSeleccionada } = useRegionContext();
@@ -1371,7 +1369,7 @@ export const TablaIndicadores: React.FC = () => {
                             isOpen={modalEditarRealizacion}
                             onClose={(save: boolean) => {
                                 if (!save && !bloqueoHazi) {
-                                    const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                    const confirmar = window.confirm(t('object:cierreVentanaFlotante'));
                                     if (confirmar) {
                                         setModalEditarRealizacion(false);
                                         setIndicadorSeleccionado(null);
@@ -1460,7 +1458,7 @@ export const TablaIndicadores: React.FC = () => {
                             isOpen={modalEditarResultado}
                             onClose={(save: boolean) => {
                                 if (!save) {
-                                    const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                    const confirmar = window.confirm(t('object:cierreVentanaFlotante'));
                                     if (confirmar) {
                                         setModalEditarResultado(false);
                                         setIndicadorSeleccionado(null);

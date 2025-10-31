@@ -52,16 +52,16 @@
     "Comunicación de la ADR (difusión de actividades propias, elaboración de notas de prensa, recepción de inscripciones para eventos, redes sociales, ayudas, noticias de interés de la comarca, organización de ruedas de prensa, etc.)"
   ],
 
-   "AvisoSalirEditando": {
-    "cambioRegion": "Ha cambiado de región. Los cambios no guardados se perderán y será redirigido a la página principal de su ubicación. ¿Desea continuar?",
-    "cambioPagina": "Se dispone a navegar a otra página sin guardar los cambios. Los datos no guardados se perderán. ¿Desea continuar?",
-    "cierreVentanaFlotante": "Se dispone a cerrar la ventana flotante. Los datos no guardados se perderán. ¿Desea continuar?"
-  },
 
   "infFuente":"Fuente de financiación",
   "infFuentes":"Informe de presupuestos",
   "infTotalAportado":"TOTAL APORTADO",
   "infCantidadAportada":"Cantidad aportada",
-  "infPresupuestos":"Informe_Presupuestos_"
+  "infPresupuestos":"Informe_Presupuestos_",
+
+  "cambioPagina": "Va a salir de esta página sin guardar los cambios. Los datos no guardados se perderán. ¿Desea continuar?",
+  "cierreVentanaFlotante": "Se dispone a cerrar la ventana flotante. Los datos no guardados se perderán. ¿Desea continuar?",
+  "cambioRegion": "Ha cambiado de región. Los cambios no guardados se perderán y será redirigido a la página principal de su ubicación. ¿Desea continuar?"
+
 
 }

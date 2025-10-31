@@ -9,7 +9,6 @@ import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 import { PrintFecha } from '../../../components/Utils/utils';
 import { indicadorInicial } from '../../../types/Indicadores';
 import { useLocation } from 'react-router-dom';
-import { useAvisoSalirEditando } from '../../../components/Layouts/DefaultLayout';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -28,7 +27,6 @@ const Index = () => {
     const location = useLocation();
 
     const [modalNuevo, setModalNuevo] = useState(false);
-    const AvisoSalirEditando = useAvisoSalirEditando();
 
     useEffect(() => {
         if (location.pathname === '/configuracion/indicadores') {
@@ -62,7 +60,7 @@ const Index = () => {
                                 isOpen={modalNuevo}
                                 onClose={(save: boolean) => {
                                     if (!save) {
-                                        const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                        const confirmar = window.confirm(t('object:cierreVentanaFlotante'));
                                         if (confirmar) {
                                             setModalNuevo(false);
                                         }

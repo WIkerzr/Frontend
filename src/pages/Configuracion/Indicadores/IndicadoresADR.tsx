@@ -11,7 +11,6 @@ import { UserRole } from '../../../types/users';
 import { PrintFecha } from '../../../components/Utils/utils';
 import { indicadorInicial } from '../../../types/Indicadores';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import { useAvisoSalirEditando } from '../../../components/Layouts/DefaultLayout';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -31,7 +30,6 @@ const Index = () => {
     const { regionSeleccionada } = useRegionContext();
     const { user, lockedHazi } = useUser();
     const role: UserRole = user!.role as UserRole;
-    const AvisoSalirEditando = useAvisoSalirEditando();
 
     useEffect(() => {
         if (location.pathname === '/configuracion/indicadoresADR') {
@@ -73,7 +71,7 @@ const Index = () => {
                                         isOpen={modalNuevo}
                                         onClose={(save: boolean) => {
                                             if (!save) {
-                                                const confirmar = window.confirm(AvisoSalirEditando.cierreVentanaFlotante);
+                                                const confirmar = window.confirm(t('object:cierreVentanaFlotante'));
                                                 if (confirmar) {
                                                     setModalNuevo(false);
                                                 }
