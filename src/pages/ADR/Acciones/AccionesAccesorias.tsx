@@ -47,7 +47,7 @@ const Index: React.FC = () => {
         // Solo navega si datosEditandoAccion.id no es 0
         if (hasNavigated.current) return;
         if (navigated && !hasNavigated.current && datosEditandoAccion && datosEditandoAccion.id !== '0') {
-            navigate('/adr/acciones/editando', {
+            navigate('/adr/accionesYproyectos/editando', {
                 state: {
                     tipo: 'accesoria',
                     ejeId: datosEditandoAccion.ejeId,

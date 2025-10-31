@@ -8,6 +8,7 @@ import Informes from '../pages/Configuracion/Informes/Informes';
 const Ejes = lazy(() => import('../pages/ADR/Ejes'));
 const Acciones = lazy(() => import('../pages/ADR/Acciones/Acciones'));
 const EditarAccion = lazy(() => import('../pages/ADR/Acciones/EditarAccion/EditarAccion'));
+const EditarAccionYProyectos = lazy(() => import('../pages/ADR/Acciones/EditarAccion/EditarAccion'));
 const EditarServicios = lazy(() => import('../pages/ADR/Servicios/EditarServicios'));
 const AccionesAccesorias = lazy(() => import('../pages/ADR/Acciones/AccionesAccesorias'));
 const MemoriasAnuales = lazy(() => import('../pages/ADR/PlanMemoria/MemoriasAnuales'));
@@ -109,7 +110,7 @@ const routes = [
         path: '/adr/accionesYproyectos/editando',
         element: (
             <OnlyIfLoggedIn>
-                <EditarAccion />
+                <EditarAccionYProyectos />
             </OnlyIfLoggedIn>
         ),
         layout: 'EditarAccion',
