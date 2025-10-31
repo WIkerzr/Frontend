@@ -432,25 +432,25 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                                               const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
                                               const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
                                               let valido = false;
-                                              let errorAlert = '';
+                                              //   let errorAlert = '';
                                               if (editarMemoria) {
                                                   if (ejecutadoOk) {
                                                       valido = true;
                                                   } else {
-                                                      errorAlert = t('alertTotalesMemoriaActivo');
+                                                      //   errorAlert = t('alertTotalesMemoriaActivo');
                                                   }
                                               }
                                               if (editarPlan) {
                                                   if (metaAnualOk && metaFinalOk) {
                                                       valido = true;
                                                   } else {
-                                                      errorAlert = t('alertTotalesPlanActivo');
+                                                      //   errorAlert = t('alertTotalesPlanActivo');
                                                   }
                                               }
                                               if (valido) {
                                                   setEditableRowIndex(-1);
                                               } else {
-                                                  alert(t('alertIndicadores', { totales: errorAlert }));
+                                                  //   alert(t('alertIndicadores', { totales: errorAlert }));
                                               }
                                           }}
                                       >

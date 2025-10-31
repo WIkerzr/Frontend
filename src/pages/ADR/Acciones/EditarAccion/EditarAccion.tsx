@@ -25,7 +25,10 @@ import { PestanaFirma } from './Firma';
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
-    const { tipo, nombreEjeES, nombreEjeEU } = location.state as { tipo: 'accesoria' | 'accion'; datosEditandoAccion: DatosAccion; ejeId: string; nombreEjeES: string; nombreEjeEU: string };
+    if (!location.state) {
+        location.state = { tipo: 'acciones', datosEditandoAccion: null, ejeId: '', nombreEjeES: '', nombreEjeEU: '' };
+    }
+    const { tipo, nombreEjeES, nombreEjeEU } = location.state as { tipo: 'accesoria' | 'acciones'; datosEditandoAccion: DatosAccion; ejeId: string; nombreEjeES: string; nombreEjeEU: string };
 
     const accionAccesoria = tipo === 'accesoria';
     const titulo = t('accionTituloEditado');
@@ -133,7 +136,7 @@ const Index: React.FC = () => {
         if (datosEditandoAccion.id === '0') {
             return;
         }
-        const accionConLinea = (tipo === 'accion' && lineaActuaccion !== '') || accionAccesoria;
+        const accionConLinea = (tipo === 'acciones' && lineaActuaccion !== '') || accionAccesoria;
         if (accionConLinea && lineaActuaccion != datosEditandoAccion.lineaActuaccion) {
             if (datosEditandoAccion && datosEditandoAccion.lineaActuaccion != null && datosEditandoAccion?.lineaActuaccion !== lineaActuaccion) {
                 setDatosEditandoAccion((prev) => ({

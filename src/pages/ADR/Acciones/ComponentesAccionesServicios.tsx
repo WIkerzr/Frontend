@@ -380,13 +380,15 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     let colorAccion = 'bg-white';
 
                     if (accion.accionCompartida?.regionLider) {
-                        const regionLider = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) === regionSeleccionada;
-                        if (regionLider) {
+                        const regionLider = formateaConCeroDelante(
+                            typeof accion.accionCompartida.regionLider === 'object' ? accion.accionCompartida.regionLider.RegionId : accion.accionCompartida.regionLider
+                        );
+                        if (regionLider === regionSeleccionada) {
                             colorAccion = 'bg-teal-100';
                             editable = editarPlan ? true : false;
                         }
-                        const regionCooperando = formateaConCeroDelante(`${accion.accionCompartida.regionLider}`) != regionSeleccionada;
-                        if (regionCooperando) {
+
+                        if (regionLider != regionSeleccionada) {
                             colorAccion = 'bg-gray-300';
                             editable = false;
                         }

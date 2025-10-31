@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../../../components/Utils/utils';
-import { TablaIndicadorAccion, VerificarCamposIndicadoresPorRellenar } from './EditarAccionComponent';
+import { TablaIndicadorAccion } from './EditarAccionComponent';
 import React from 'react';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
@@ -247,9 +247,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     };
 
     const handleOpenModal = () => {
-        if (VerificarCamposIndicadoresPorRellenar(datosEditandoAccion, editarPlan, editarMemoria, 'NuevoIndicador', t, editarPlan ? 'Plan' : 'Memoria')) {
-            setOpen(true);
-        }
+        setOpen(true);
     };
 
     return (
@@ -338,9 +336,9 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
     const listadoNombresIndicadoresRealizacion = ListadoNombresIdicadoresSegunADR('realizacion');
     const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
 
-    const handleToggleResultado = (id: number) => {
-        setResultadosRelacionados((prevResultados) => prevResultados.map((resultado) => (resultado.id === id ? { ...resultado, checked: !resultado.checked } : resultado)));
-    };
+    // const handleToggleResultado = (id: number) => {
+    //     setResultadosRelacionados((prevResultados) => prevResultados.map((resultado) => (resultado.id === id ? { ...resultado, checked: !resultado.checked } : resultado)));
+    // };
 
     const handleChangeRealizacion = (id: number) => {
         setIndicadorRealizacionId(id);
@@ -389,7 +387,7 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                         {resultadosRelacionados.map((res) => (
                             <li key={res.id} className="mb-2">
                                 <label className="flex items-center">
-                                    <input type="checkbox" checked={res.checked} onChange={() => handleToggleResultado(res.id)} className="mr-2" />
+                                    <input type="checkbox" checked={res.checked} disabled className="mr-2" />
                                     {res.nombre}
                                 </label>
                             </li>
