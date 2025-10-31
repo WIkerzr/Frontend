@@ -304,6 +304,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
 
     const SeleccionVaciarEditarAccion = () => {
         sessionStorage.removeItem('datosAccionModificado');
+        sessionStorage.removeItem('datosEditandoServicio');
         setDatosEditandoAccion({
             id: '0',
             accion: '',
@@ -337,8 +338,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
     });
 
     useEffect(() => {
-        sessionStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
         if (datosEditandoServicio) {
+            sessionStorage.setItem('datosEditandoServicio', JSON.stringify(datosEditandoServicio));
             const indicadorAccion = ConvertirIndicadoresServicioAAccion(datosEditandoServicio.indicadores);
             const datosAccionTransformados: DatosAccion = {
                 accion: datosEditandoServicio.descripcion,

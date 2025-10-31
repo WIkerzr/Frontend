@@ -385,7 +385,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                         );
                         if (regionLider === regionSeleccionada) {
                             colorAccion = 'bg-teal-100';
-                            editable = editarPlan ? true : false;
+                            editable = editable ? true : false;
                         }
 
                         if (regionLider != regionSeleccionada) {

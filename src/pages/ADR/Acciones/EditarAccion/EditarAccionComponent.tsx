@@ -6,10 +6,10 @@ import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../../types/Tipado
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { isEqual, sortBy } from 'lodash';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
-import { editableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
+import { useEditableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
 import { TiposAccion } from '../../../../contexts/DatosAnualContext';
 import { Estado } from '../../../../types/GeneralTypes';
-import { StatusColorsFonds, useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
+import { StatusColorsFonds } from '../../../../contexts/EstadosPorAnioContext';
 import React from 'react';
 import { PlanOMemoria } from '../../PlanMemoria/PlanMemoriaComponents';
 interface TabCardProps {
@@ -287,9 +287,6 @@ export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPla
     return camposPendientes;
 }
 
-interface TablasIndicadoresProps {
-    tipoIndicador: TiposDeIndicadores;
-}
 interface TablaIndicadorAccionProps {
     indicadoresRealizacion: IndicadorRealizacionAccion[];
     setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
@@ -300,9 +297,250 @@ interface TablaIndicadorAccionProps {
     botonNuevoIndicadorAccion: React.ReactNode;
     handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
     servicios?: boolean;
-    bloqueo: boolean;
+    editarPlan: boolean;
     editarMemoria: boolean;
 }
+
+interface TablasIndicadoresComponentProps {
+    tipoIndicador: TiposDeIndicadores;
+    dataRealizacion: IndicadorRealizacionAccion[];
+    dataResultado: IndicadorResultadoAccion[];
+    setIndicadoresRealizacion: React.Dispatch<React.SetStateAction<IndicadorRealizacionAccion[]>>;
+    setIndicadoresResultado: React.Dispatch<React.SetStateAction<IndicadorResultadoAccion[]>>;
+    plurianual: boolean;
+    reglasEspeciales: { realizacion: number[]; resultado: number[] };
+    // botonNuevoIndicadorAccion removed: not used inside this component
+    handleEliminarIndicador: (tipoIndicador: TiposDeIndicadores, rowIndex: number) => void;
+    servicios?: boolean;
+    editarPlan: boolean;
+    editarMemoria: boolean;
+    editableRowIndexRealizacion: number;
+    editableRowIndexResultado: number;
+    setEditableRowIndexRealizacion: React.Dispatch<React.SetStateAction<number>>;
+    setEditableRowIndexResultado: React.Dispatch<React.SetStateAction<number>>;
+    sortStatusRealizacion: DataTableSortStatus<IndicadorRealizacionAccion>;
+    sortStatusResultado: DataTableSortStatus<IndicadorResultadoAccion>;
+    setSortStatusRealizacion: React.Dispatch<React.SetStateAction<DataTableSortStatus<IndicadorRealizacionAccion>>>;
+    setSortStatusResultado: React.Dispatch<React.SetStateAction<DataTableSortStatus<IndicadorResultadoAccion>>>;
+    serviciosFlag?: boolean;
+    t: (key: string, options?: any) => string;
+}
+
+export const TablasIndicadoresComponent = forwardRef<HTMLDivElement, TablasIndicadoresComponentProps>(
+    (
+        {
+            tipoIndicador,
+            dataRealizacion,
+            dataResultado,
+            setIndicadoresRealizacion,
+            setIndicadoresResultado,
+            plurianual,
+            reglasEspeciales,
+
+            handleEliminarIndicador,
+            servicios,
+            editarPlan,
+            editarMemoria,
+            editableRowIndexRealizacion,
+            editableRowIndexResultado,
+            setEditableRowIndexRealizacion,
+            setEditableRowIndexResultado,
+            sortStatusRealizacion,
+            sortStatusResultado,
+            setSortStatusRealizacion,
+            setSortStatusResultado,
+            t,
+        },
+        ref
+    ) => {
+        const records = tipoIndicador === 'realizacion' ? dataRealizacion : (dataResultado as any);
+        if (!records || records.length === 0) return null;
+        for (let i = records.length - 1; i >= 0; i--) {
+            const desc = records[i]?.descripcion;
+            if (typeof desc !== 'string' || desc.trim() === '') {
+                records.splice(i, 1);
+            }
+        }
+        const setIndicador = tipoIndicador === 'realizacion' ? setIndicadoresRealizacion : setIndicadoresResultado;
+        const editableRowIndex = tipoIndicador === 'realizacion' ? editableRowIndexRealizacion : editableRowIndexResultado;
+        const setEditableRowIndex = tipoIndicador === 'realizacion' ? setEditableRowIndexRealizacion : setEditableRowIndexResultado;
+        const sortStatus = tipoIndicador === 'realizacion' ? sortStatusRealizacion : sortStatusResultado;
+        const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
+
+        const columnMetaAnual = [
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'metaAnual.hombres',
+                t('Hombre'),
+                setIndicador as any,
+                editableRowIndex,
+                editarPlan,
+                reglasEspeciales,
+                plurianual,
+                setEditableRowIndex as any
+            ),
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'metaAnual.mujeres',
+                t('Mujer'),
+                setIndicador as any,
+                editableRowIndex,
+                editarPlan,
+                reglasEspeciales,
+                plurianual,
+                setEditableRowIndex as any
+            ),
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'metaAnual.total',
+                t('Total'),
+                setIndicador as any,
+                editableRowIndex,
+                editarPlan,
+                reglasEspeciales,
+                plurianual,
+                setEditableRowIndex as any
+            ),
+        ];
+
+        const columnEjecutadoAnual = [
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'ejecutado.hombres',
+                t('Hombre'),
+                setIndicador as any,
+                editableRowIndex,
+                editarMemoria,
+                reglasEspeciales,
+                undefined,
+                setEditableRowIndex as any
+            ),
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'ejecutado.mujeres',
+                t('Mujer'),
+                setIndicador as any,
+                editableRowIndex,
+                editarMemoria,
+                reglasEspeciales,
+                undefined,
+                setEditableRowIndex as any
+            ),
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'ejecutado.total',
+                t('Total'),
+                setIndicador as any,
+                editableRowIndex,
+                editarMemoria,
+                reglasEspeciales,
+                undefined,
+                setEditableRowIndex as any
+            ),
+        ];
+
+        const columnMetaFinal = [
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'metaFinal.hombres',
+                t('Hombre'),
+                setIndicador as any,
+                editableRowIndex,
+                plurianual ? editarPlan : false,
+                reglasEspeciales,
+                undefined,
+                setEditableRowIndex as any
+            ),
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'metaFinal.mujeres',
+                t('Mujer'),
+                setIndicador as any,
+                editableRowIndex,
+                plurianual ? editarPlan : false,
+                reglasEspeciales,
+                undefined,
+                setEditableRowIndex as any
+            ),
+            useEditableColumnByPath<IndicadorRealizacionAccion>(
+                'metaFinal.total',
+                t('Total'),
+                setIndicador as any,
+                editableRowIndex,
+                plurianual ? editarPlan : false,
+                reglasEspeciales,
+                undefined,
+                setEditableRowIndex as any
+            ),
+        ];
+        const columnNombre = [
+            useEditableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador as any, editableRowIndex, false, undefined, undefined, setEditableRowIndex as any),
+        ];
+
+        const columns = [
+            useEditableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador as any, editableRowIndex, editarPlan, undefined, undefined, setEditableRowIndex as any),
+            ...(editarPlan || editarMemoria
+                ? [
+                      {
+                          accessor: 'acciones',
+                          title: t('Acciones'),
+                          render: (_row: IndicadorRealizacionAccion, index: number) => {
+                              return editableRowIndex === index ? (
+                                  <button
+                                      className="bg-green-500 text-white px-2 py-1 rounded"
+                                      onMouseDown={() => {
+                                          const active = document.activeElement as HTMLElement | null;
+                                          try {
+                                              if (active && typeof active.blur === 'function') {
+                                                  active.blur();
+                                              }
+                                          } catch {
+                                              // ignore
+                                          }
+                                          setTimeout(() => setEditableRowIndex(-1), 0);
+                                      }}
+                                  >
+                                      {t('guardar')}
+                                  </button>
+                              ) : (
+                                  <div className="flex gap-2 w-full">
+                                      <button className="bg-primary text-white px-2 py-1 rounded" onMouseDown={() => setEditableRowIndex(index)}>
+                                          {t('editar')}
+                                      </button>
+                                      <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarIndicador(tipoIndicador, index)}>
+                                          {t('Eliminar')}
+                                      </button>
+                                  </div>
+                              );
+                          },
+                      },
+                  ]
+                : []),
+        ];
+
+        const columnGroups = [
+            { id: 'descripcion', title: '', columns: columnNombre },
+            { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
+            { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+            { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
+            { id: 'final', title: '', columns: columns },
+        ];
+        const columnGroupsServicios = [
+            { id: 'descripcion', title: '', columns: columnNombre },
+            { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
+            { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
+            { id: 'final', title: '', columns: [columns[1]] },
+        ];
+        return (
+            <div ref={ref}>
+                <DataTable
+                    className={`datatable-pagination-horizontal `}
+                    records={records}
+                    groups={servicios ? columnGroupsServicios : columnGroups}
+                    withRowBorders={false}
+                    withColumnBorders={true}
+                    striped={true}
+                    highlightOnHover={true}
+                    sortStatus={sortStatus}
+                    onSortStatusChange={setSortStatus}
+                    minHeight={200}
+                />
+            </div>
+        );
+    }
+);
 
 export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAccionProps>(
     (
@@ -316,13 +554,12 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             servicios,
             botonNuevoIndicadorAccion,
             handleEliminarIndicador,
-            bloqueo,
+            editarPlan,
             editarMemoria,
         },
         ref
     ) => {
         const { t } = useTranslation();
-        const { editarPlan } = useEstadosPorAnio();
 
         const [dataRealizacion, setDataRealizacion] = useState(indicadoresRealizacion);
         const [dataResultado, setDataResultado] = useState(indicadoresResultado);
@@ -389,118 +626,6 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             }
         }, [sortStatusResultado, dataResultado]);
 
-        const TablasIndicadores = forwardRef<HTMLDivElement, TablasIndicadoresProps>(({ tipoIndicador }, ref) => {
-            const records = tipoIndicador === 'realizacion' ? dataRealizacion : dataResultado;
-            const setIndicador = tipoIndicador === 'realizacion' ? setIndicadoresRealizacion : setIndicadoresResultado;
-            const editableRowIndex = tipoIndicador === 'realizacion' ? editableRowIndexRealizacion : editableRowIndexResultado;
-            const setEditableRowIndex = tipoIndicador === 'realizacion' ? setEditableRowIndexRealizacion : setEditableRowIndexResultado;
-            const sortStatus = tipoIndicador === 'realizacion' ? sortStatusRealizacion : sortStatusResultado;
-            const setSortStatus = tipoIndicador === 'realizacion' ? setSortStatusRealizacion : setSortStatusResultado;
-
-            const columnMetaAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.hombres', t('Hombre'), setIndicador, editableRowIndex, !bloqueo, reglasEspeciales, plurianual),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.mujeres', t('Mujer'), setIndicador, editableRowIndex, !bloqueo, reglasEspeciales, plurianual),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaAnual.total', t('Total'), setIndicador, editableRowIndex, !bloqueo, reglasEspeciales, plurianual),
-            ];
-
-            const columnEjecutadoAnual = [
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.hombres', t('Hombre'), setIndicador, editableRowIndex, editarMemoria, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.mujeres', t('Mujer'), setIndicador, editableRowIndex, editarMemoria, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('ejecutado.total', t('Total'), setIndicador, editableRowIndex, editarMemoria, reglasEspeciales),
-            ];
-
-            const columnMetaFinal = [
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.hombres', t('Hombre'), setIndicador, editableRowIndex, plurianual ? !bloqueo : false, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.mujeres', t('Mujer'), setIndicador, editableRowIndex, plurianual ? !bloqueo : false, reglasEspeciales),
-                editableColumnByPath<IndicadorRealizacionAccion>('metaFinal.total', t('Total'), setIndicador, editableRowIndex, plurianual ? !bloqueo : false, reglasEspeciales),
-            ];
-            const columnNombre = [editableColumnByPath<IndicadorRealizacionAccion>('descripcion', t('nombre'), setIndicador, editableRowIndex, false)];
-
-            const columns = [
-                editableColumnByPath<IndicadorRealizacionAccion>('hipotesis', t('hipotesis'), setIndicador, editableRowIndex, true),
-                ...(!bloqueo
-                    ? [
-                          {
-                              accessor: 'acciones',
-                              title: t('Acciones'),
-                              render: (_row: IndicadorRealizacionAccion, index: number) => {
-                                  return editableRowIndex === index ? (
-                                      <button
-                                          className="bg-green-500 text-white px-2 py-1 rounded"
-                                          onClick={() => {
-                                              const metaAnualOk = _row.metaAnual && _row.metaAnual.total !== 0;
-                                              const metaFinalOk = _row.metaFinal && _row.metaFinal.total !== 0;
-                                              const ejecutadoOk = _row.ejecutado && _row.ejecutado.total !== 0;
-                                              let valido = false;
-                                              //   let errorAlert = '';
-                                              if (editarMemoria) {
-                                                  if (ejecutadoOk) {
-                                                      valido = true;
-                                                  } else {
-                                                      //   errorAlert = t('alertTotalesMemoriaActivo');
-                                                  }
-                                              }
-                                              if (editarPlan) {
-                                                  if (metaAnualOk && metaFinalOk) {
-                                                      valido = true;
-                                                  } else {
-                                                      //   errorAlert = t('alertTotalesPlanActivo');
-                                                  }
-                                              }
-                                              if (valido) {
-                                                  setEditableRowIndex(-1);
-                                              } else {
-                                                  //   alert(t('alertIndicadores', { totales: errorAlert }));
-                                              }
-                                          }}
-                                      >
-                                          {t('guardar')}
-                                      </button>
-                                  ) : (
-                                      <div className="flex gap-2 w-full">
-                                          <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                                              {t('editar')}
-                                          </button>
-                                          <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarIndicador(tipoIndicador, index)}>
-                                              {t('Eliminar')}
-                                          </button>
-                                      </div>
-                                  );
-                              },
-                          },
-                      ]
-                    : []),
-            ];
-            const columnGroups = [
-                { id: 'descripcion', title: '', columns: columnNombre },
-                { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
-                { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
-                { id: 'metaFinal', title: t('metaFinal'), textAlignment: 'center', columns: columnMetaFinal },
-                { id: 'final', title: '', columns: columns },
-            ];
-            const columnGroupsServicios = [
-                { id: 'descripcion', title: '', columns: columnNombre },
-                { id: 'metaAnual', title: t('metaAnual'), textAlignment: 'center', columns: columnMetaAnual },
-                { id: 'ejecutado', title: t('ejecutado'), textAlignment: 'center', columns: columnEjecutadoAnual },
-                { id: 'final', title: '', columns: [columns[1]] },
-            ];
-            return (
-                <div ref={ref}>
-                    <DataTable
-                        className={`datatable-pagination-horizontal `}
-                        records={records}
-                        groups={servicios ? columnGroupsServicios : columnGroups}
-                        withRowBorders={false}
-                        withColumnBorders={true}
-                        striped={true}
-                        highlightOnHover={true}
-                        sortStatus={sortStatus}
-                        onSortStatusChange={setSortStatus}
-                        minHeight={200}
-                    />
-                </div>
-            );
-        });
         return (
             <div ref={ref}>
                 <div className="panel mt-6">
@@ -515,7 +640,28 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                         />
                         {botonNuevoIndicadorAccion}
                     </div>
-                    <TablasIndicadores tipoIndicador="realizacion" />
+                    <TablasIndicadoresComponent
+                        tipoIndicador="realizacion"
+                        dataRealizacion={dataRealizacion}
+                        dataResultado={dataResultado}
+                        setIndicadoresRealizacion={setIndicadoresRealizacion}
+                        setIndicadoresResultado={setIndicadoresResultado}
+                        plurianual={plurianual}
+                        reglasEspeciales={reglasEspeciales}
+                        handleEliminarIndicador={handleEliminarIndicador}
+                        servicios={servicios}
+                        editarPlan={editarPlan}
+                        editarMemoria={editarMemoria}
+                        editableRowIndexRealizacion={editableRowIndexRealizacion}
+                        editableRowIndexResultado={editableRowIndexResultado}
+                        setEditableRowIndexRealizacion={setEditableRowIndexRealizacion}
+                        setEditableRowIndexResultado={setEditableRowIndexResultado}
+                        sortStatusRealizacion={sortStatusRealizacion}
+                        sortStatusResultado={sortStatusResultado}
+                        setSortStatusRealizacion={setSortStatusRealizacion}
+                        setSortStatusResultado={setSortStatusResultado}
+                        t={t}
+                    />
                 </div>
                 <div className="panel mt-6">
                     <span className="text-xl">{t('indicadorTipo', { tipo: t('ResultadoMin') })}</span>
@@ -528,7 +674,28 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                             onChange={(e) => setSearchResultado(e.target.value)}
                         />
                     </div>
-                    <TablasIndicadores tipoIndicador="resultado" />
+                    <TablasIndicadoresComponent
+                        tipoIndicador="resultado"
+                        dataRealizacion={dataRealizacion}
+                        dataResultado={dataResultado}
+                        setIndicadoresRealizacion={setIndicadoresRealizacion}
+                        setIndicadoresResultado={setIndicadoresResultado}
+                        plurianual={plurianual}
+                        reglasEspeciales={reglasEspeciales}
+                        handleEliminarIndicador={handleEliminarIndicador}
+                        servicios={servicios}
+                        editarPlan={editarPlan}
+                        editarMemoria={editarMemoria}
+                        editableRowIndexRealizacion={editableRowIndexRealizacion}
+                        editableRowIndexResultado={editableRowIndexResultado}
+                        setEditableRowIndexRealizacion={setEditableRowIndexRealizacion}
+                        setEditableRowIndexResultado={setEditableRowIndexResultado}
+                        sortStatusRealizacion={sortStatusRealizacion}
+                        sortStatusResultado={sortStatusResultado}
+                        setSortStatusRealizacion={setSortStatusRealizacion}
+                        setSortStatusResultado={setSortStatusResultado}
+                        t={t}
+                    />
                 </div>
             </div>
         );

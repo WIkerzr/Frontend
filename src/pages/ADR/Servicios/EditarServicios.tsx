@@ -38,7 +38,7 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
-    const { datosEditandoAccion, datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData, controlguardado, setControlguardado, block } = useYear();
+    const { datosEditandoAccion, datosEditandoServicio, setDatosEditandoServicio, setYearData, yearData, controlguardado, setControlguardado } = useYear();
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const { regionSeleccionada } = useRegionContext();
@@ -47,7 +47,10 @@ const Index: React.FC = () => {
     const isFetchingRef = useRef(false);
 
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
-    const [bloqueo, setBloqueo] = useState<boolean>(block);
+    const [bloqueo, setBloqueo] = useState<{ plan: boolean; memoria: boolean; bloqueoTotal: boolean }>({ plan: true, memoria: true, bloqueoTotal: true });
+
+    //const jsonString = JSON.stringify(datosEditandoServicio);
+    //const jsonString = JSON.stringify(yearData);
 
     useEffect(() => {
         if (!loading && ejesPlan.length === 0) {
@@ -66,9 +69,18 @@ const Index: React.FC = () => {
     }, [yearData, loading]);
 
     useEffect(() => {
-        const propietario = datosEditandoServicio?.serviciosCompartidas?.regionLider.RegionId === regionSeleccionada;
-        setBloqueo(propietario && (editarPlan || editarMemoria));
-    }, [datosEditandoServicio, regionSeleccionada]);
+        let propietario = false;
+
+        if (datosEditandoServicio?.serviciosCompartidas === null) {
+            propietario = true;
+        } else if (datosEditandoServicio?.serviciosCompartidas?.regionLider?.RegionId === regionSeleccionada) {
+            propietario = true;
+        }
+        const planEditable = editarPlan ? propietario : editarPlan;
+        const memoriaEditable = editarMemoria ? propietario : editarMemoria;
+
+        setBloqueo({ plan: !planEditable, memoria: !memoriaEditable, bloqueoTotal: !planEditable && !memoriaEditable });
+    }, [datosEditandoServicio, regionSeleccionada, editarPlan, editarMemoria]);
 
     useEffect(() => {
         if (!ejesPlan.some((e) => e.EjeId === ejeGeneralServicios.EjeId)) {
@@ -120,7 +132,7 @@ const Index: React.FC = () => {
     const validarAntesDeGuardar = () => {
         if (!datosEditandoServicio) return;
 
-        //TODO Sin validacion servicios hasta nuevo aviso
+        //Sin validacion servicios hasta nuevo aviso
         setErroresGenerales({
             nombre: false,
             descripcion: false,
@@ -153,7 +165,6 @@ const Index: React.FC = () => {
 
         const indicadoresModificados = ConvertirIndicadoresAccionAServicio(datosEditandoAccion.indicadorAccion);
         const indicadoresCombinados = indicadoresModificados;
-
         setServicio((prev) => {
             const actualizado: Servicios = {
                 ...prev,
@@ -217,6 +228,7 @@ const Index: React.FC = () => {
         }
         return nombreEje;
     };
+
     return (
         <div className="panel">
             <ZonaTitulo
@@ -228,28 +240,27 @@ const Index: React.FC = () => {
                     </h2>
                 }
                 zonaBtn={
-                    bloqueo && (
-                        <div className="ml-auto flex gap-4 items-center justify-end">
+                    <div className="ml-auto flex gap-4 items-center justify-end">
+                        {!bloqueo.bloqueoTotal && (
                             <button className="px-4 py-2 bg-primary text-white rounded" onClick={validarAntesDeGuardar}>
                                 {t('guardar')}{' '}
                             </button>
-                            <NavLink to="/adr/servicios" className="group">
-                                <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
-                            </NavLink>
-                        </div>
-                    )
+                        )}
+                        <NavLink to="/adr/servicios" className="group">
+                            <button className="px-4 py-2 bg-danger text-white rounded">{t('cerrar')}</button>
+                        </NavLink>
+                    </div>
                 }
                 zonaExtra={
                     <div className="w-full">
                         <small style={{ color: '#666' }}>{t('camposObligatoriosLeyenda')}</small>
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
-                                {bloqueo ? (
+                                {!bloqueo.plan ? (
                                     <InputField
                                         nombreInput="Servicio"
                                         className={`${erroresGenerales.nombre && 'border-red-500 border-2'}`}
                                         required
-                                        disabled={!bloqueo}
                                         value={datosEditandoServicio.nombre}
                                         onChange={(e) => handleChangeCampos('nombre', e)}
                                     />
@@ -265,7 +276,7 @@ const Index: React.FC = () => {
 
                             <>
                                 <div className="w-1/2 flex flex-col gap-2 justify-center">
-                                    {bloqueo ? (
+                                    {!bloqueo.plan ? (
                                         <SelectorEje
                                             idEjeSeleccionado={`${datosEditandoServicio.idEje}`}
                                             setIdEjeSeleccionado={(id) => {
@@ -291,7 +302,7 @@ const Index: React.FC = () => {
                                         <span className="block  font-semibold">
                                             <span className="font-normal text-col">{t('LineaActuaccion')}</span>
                                         </span>
-                                        {bloqueo ? (
+                                        {!bloqueo.plan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
                                                 idEjeSeleccionado={`${datosEditandoServicio.idEje}`}
@@ -353,7 +364,7 @@ const Index: React.FC = () => {
                 <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                     <TabPanels>
                         <TabPanel>
-                            <PestanaIndicadores bloqueoSupracomarcal={bloqueo} />
+                            <PestanaIndicadores bloqueo={bloqueo} />
                         </TabPanel>
                         <TabPanel>
                             <div className="p-5 flex flex-col gap-4 w-full">
@@ -365,13 +376,13 @@ const Index: React.FC = () => {
                                             className={`h-[114px] w-full ${erroresGenerales.descripcion ? 'border-red-500 border-2' : ''}`}
                                             required
                                             noTitle
-                                            disabled={!bloqueo}
+                                            disabled={bloqueo.plan}
                                             value={datosEditandoServicio.descripcion}
                                             onChange={(e) => handleChangeCampos('descripcion', e)}
                                         />
                                         {erroresGenerales.descripcion && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
                                     </div>
-                                    <Supracomarcal bloqueo={bloqueo} />
+                                    <Supracomarcal bloqueo={bloqueo.plan} />
                                 </div>
                             </div>
                         </TabPanel>
@@ -380,12 +391,12 @@ const Index: React.FC = () => {
                                 <div className="panel">
                                     <div className="p-2 flex-1">
                                         <span>
-                                            {!bloqueo ? '*' : ''}
+                                            {bloqueo.memoria ? '' : '*'}
                                             {t('dSeguimiento').toUpperCase()}
                                         </span>
                                         <TextArea
                                             nombreInput="dSeguimiento"
-                                            disabled={!bloqueo}
+                                            disabled={bloqueo.memoria}
                                             className={`h-[114px] w-full ${erroresGenerales.dSeguimiento ? 'border-red-500 border-2' : ''}`}
                                             value={datosEditandoServicio!.dSeguimiento}
                                             noTitle
@@ -396,12 +407,12 @@ const Index: React.FC = () => {
 
                                     <div className="p-2 flex-1">
                                         <span>
-                                            {!bloqueo ? '*' : ''}
+                                            {bloqueo.memoria ? '' : '*'}
                                             {t('valFinal').toUpperCase()}
                                         </span>
                                         <TextArea
                                             nombreInput="valFinal"
-                                            disabled={!bloqueo}
+                                            disabled={bloqueo.memoria}
                                             className={`h-[114px] w-full ${erroresGenerales.valFinal ? 'border-red-500 border-2' : ''}`}
                                             value={datosEditandoServicio!.valFinal}
                                             noTitle
@@ -444,17 +455,6 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
     const [regionesSupracomarcal, setRegionesSupracomarcal] = useState<boolean>(false);
     const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
     const [dataMultiselect, setDataMultiselect] = useState<RegionInterface[]>();
-    const [bloqueoSupracomarcal, setBloqueoSupracomarcal] = useState<boolean>(true);
-
-    useEffect(() => {
-        if (datosEditandoServicio?.serviciosCompartidaId) {
-            if (bloqueo) {
-                setBloqueoSupracomarcal(false);
-            } else {
-                setBloqueoSupracomarcal(true);
-            }
-        }
-    }, [bloqueo]);
 
     useEffect(() => {
         if (!datosEditandoServicio) return;
@@ -479,7 +479,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
     if (!datosEditandoServicio) return;
 
     const handleChangeCheckboxSupracomarcal = (supracomarcal: boolean) => {
-        if (bloqueoSupracomarcal) return;
+        if (bloqueo) return;
         if (supracomarcal) {
             if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
                 alert(t('error:errorFaltaRegionLider'));
@@ -522,7 +522,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
     };
 
     const handleChangeSupraComarcal = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        if (bloqueoSupracomarcal) return;
+        if (bloqueo) return;
         setDatosEditandoServicio({
             ...datosEditandoServicio,
             supraComarcal: e.target.value || '',
@@ -530,7 +530,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
     };
 
     const handleChangeRegionsSupracomarcal = (selectedList: RegionInterface[]) => {
-        if (bloqueoSupracomarcal) return;
+        if (bloqueo) return;
         setDataMultiselect(selectedList);
 
         setDatosEditandoServicio({
@@ -551,14 +551,14 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
         <>
             <div className="flex flex-col items-center">
                 <label>{t('esSupracomarcalServicio')}</label>
-                <Checkbox checked={regionesSupracomarcal} disabled={bloqueoSupracomarcal} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
+                <Checkbox checked={regionesSupracomarcal} disabled={bloqueo} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
             </div>
             {regionesSupracomarcal && (
                 <div className="w-full resize-y">
                     <div className="flex gap-4">
                         <DropdownTraducido
                             title={'supracomarcal'}
-                            disabled={bloqueoSupracomarcal}
+                            disabled={bloqueo}
                             value={
                                 regionesSupracomarcal
                                     ? opcionesSupraComarcalSinOtros.includes(datosEditandoServicio.supraComarcal || '')
@@ -572,7 +572,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
                         />
                         {!opcionesSupraComarcalSinOtros.includes(datosEditandoServicio.supraComarcal || '') && (
                             <InputField
-                                disabled={bloqueoSupracomarcal}
+                                disabled={bloqueo}
                                 nombreInput="supracomarcal"
                                 required
                                 value={datosEditandoServicio.supraComarcal != 'Otros' ? datosEditandoServicio.supraComarcal : ''}
@@ -582,7 +582,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
                     </div>
                     <label>{t('comarcasIncluidasSupracomarcal')} </label>
                     <Multiselect
-                        disable={bloqueoSupracomarcal}
+                        disable={bloqueo}
                         placeholder={t('seleccionaMultiOpcion')}
                         options={regiones}
                         selectedValues={dataMultiselect}

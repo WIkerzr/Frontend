@@ -12,14 +12,15 @@ const totalKeys = {
     'ejecutado.total': { root: 'ejecutado', hombres: 'ejecutado.hombres', mujeres: 'ejecutado.mujeres', total: 'ejecutado.total' },
 };
 
-export function editableColumnByPath<T extends object>(
+export function useEditableColumnByPath<T extends object>(
     accessor: string,
     title: string,
     setIndicadores: React.Dispatch<React.SetStateAction<T[]>>,
     editableRowIndex: number | null,
     editable = true,
     reglasEspeciales?: { realizacion: number[]; resultado: number[] },
-    plurianual?: boolean
+    plurianual?: boolean,
+    onActivate?: (index: number) => void
 ) {
     const { t } = useTranslation();
 
@@ -52,6 +53,7 @@ export function editableColumnByPath<T extends object>(
         alignItems: 'start',
     };
     const [tempValue, setTempValue] = useState<string>('');
+    const [mostrarAviso, setMostrarAviso] = useState(false);
 
     return {
         accessor,
@@ -95,8 +97,6 @@ export function editableColumnByPath<T extends object>(
                 const mujeres = Number(get(row, keys.mujeres)) || 0;
                 const total = Number(get(row, keys.total)) || 0;
                 const ambosCero = hombres === 0 && mujeres === 0;
-                const [mostrarAviso, setMostrarAviso] = useState(false);
-
                 const handleAviso = () => {
                     if (esDesagregacionSexo) {
                         setMostrarAviso(true);
@@ -119,6 +119,7 @@ export function editableColumnByPath<T extends object>(
                                     onChange={(e) => {
                                         setTempValue(e.target.value);
                                     }}
+                                    autoFocus
                                     onBlur={(e) => {
                                         setTempValue('');
                                         if (!plurianual && accessor.startsWith('metaAnual')) {
@@ -150,7 +151,7 @@ export function editableColumnByPath<T extends object>(
                                 )}
                             </div>
                         ) : (
-                            <span style={commonStyleNumber}>{ambosCero ? total : hombres + mujeres}</span>
+                            <span style={commonStyleNumber} onMouseDown={() => onActivate?.(index)}>{ambosCero ? total : hombres + mujeres}</span>
                         )}
                     </div>
                 );
@@ -168,6 +169,7 @@ export function editableColumnByPath<T extends object>(
                                 onChange={(e) => {
                                     setTempValue(e.target.value);
                                 }}
+                                autoFocus
                                 onBlur={(e) => {
                                     setTempValue('');
                                     const nuevoValor = Number(e.target.value) || 0;
@@ -196,7 +198,7 @@ export function editableColumnByPath<T extends object>(
                                 }}
                             />
                         ) : (
-                            <span style={commonStyleNumber}>{visual}</span>
+                            <span style={commonStyleNumber} onMouseDown={() => onActivate?.(index)}>{visual}</span>
                         )}
                     </div>
                 );
@@ -213,6 +215,7 @@ export function editableColumnByPath<T extends object>(
                             onChange={(e) => {
                                 setTempValue(e.target.value);
                             }}
+                            autoFocus
                             onBlur={(e) => {
                                 setTempValue('');
                                 setIndicadores((prevRows) => {
@@ -225,7 +228,7 @@ export function editableColumnByPath<T extends object>(
                             }}
                         />
                     ) : (
-                        <span style={commonStyleText}>{visual}</span>
+                        <span style={commonStyleText} onMouseDown={() => onActivate?.(index)}>{visual}</span>
                     )}
                 </div>
             );
@@ -286,7 +289,7 @@ export function editableColumnByPathInput<T extends { id: number }, V = unknown>
                     return customEditor(value, onChange, row, index);
                 }
 
-                return <input className="border p-1 rounded text-left" value={String(value ?? '')} required style={style} onChange={(e) => onChange(e.target.value as V)} />;
+                return <input className="border p-1 rounded text-left" value={String(value ?? '')} required style={style} onChange={(e) => onChange(e.target.value as V)} autoFocus />;
             } else {
                 if (accessor === 'objetivo') {
                     if (value && (value === 'Aumentar' || value === 'Mantener' || value === 'Disminuir')) {

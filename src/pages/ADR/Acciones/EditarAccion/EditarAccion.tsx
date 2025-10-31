@@ -35,11 +35,10 @@ const Index: React.FC = () => {
     const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : '/adr/acciones/';
     const { regionSeleccionada } = useRegionContext();
 
-    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, controlguardado, setControlguardado, block, GuardarLaEdicionAccion } = useYear();
+    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, controlguardado, setControlguardado, GuardarLaEdicionAccion } = useYear();
     const navigate = useNavigate();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
-    const [bloqueo, setBloqueo] = useState<boolean>(block);
 
     const [ejeSeleccionado, setEjeSeleccionado] = useState<EjesBBDD>();
 
@@ -53,6 +52,8 @@ const Index: React.FC = () => {
 
     const yearDataDir = accionAccesoria ? yearData.plan.ejesRestantes!.filter((eje: Ejes) => eje.IsAccessory) : yearData.plan.ejesPrioritarios.filter((eje: Ejes) => eje.IsPrioritarios);
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
+
+    const [bloqueo, setBloqueo] = useState<{ plan: boolean; memoria: boolean; bloqueoTotal: boolean }>({ plan: true, memoria: true, bloqueoTotal: true });
 
     useEffect(() => {
         if (!loading && !isFetchingRef.current) {
@@ -123,14 +124,18 @@ const Index: React.FC = () => {
     }, [datosEditandoAccion]);
 
     useEffect(() => {
-        if (!editarPlan && !editarMemoria) {
-            setBloqueo(true);
-        } else {
-            if (!block) {
-                setBloqueo(false);
-            }
+        let propietario = false;
+
+        if (datosEditandoAccion?.accionCompartida === null) {
+            propietario = true;
+        } else if (datosEditandoAccion?.accionCompartida?.regionLider?.RegionId === regionSeleccionada) {
+            propietario = true;
         }
-    }, []);
+        const planEditable = editarPlan ? propietario : editarPlan;
+        const memoriaEditable = editarMemoria ? propietario : editarMemoria;
+
+        setBloqueo({ plan: !planEditable, memoria: !memoriaEditable, bloqueoTotal: !planEditable && !memoriaEditable });
+    }, [datosEditandoAccion, regionSeleccionada, editarPlan, editarMemoria]);
 
     useEffect(() => {
         if (datosEditandoAccion.id === '0') {
@@ -208,7 +213,7 @@ const Index: React.FC = () => {
                 }
                 zonaBtn={
                     <div className="ml-auto flex flex-row items-center justify-end gap-4">
-                        {!bloqueo && (
+                        {!bloqueo.bloqueoTotal && (
                             <Boton
                                 tipo="guardar"
                                 textoBoton={t('guardar')}
@@ -228,12 +233,12 @@ const Index: React.FC = () => {
                         <div className="flex gap-4 w-full">
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="block text-sm font-medium mb-1">{'*' + t('Accion')}</label>
-                                {bloqueo ? (
+                                {!bloqueo.plan ? (
+                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={(e) => handleAccionChange(e)} />
+                                ) : (
                                     <span className="block  font-semibold">
                                         <span className="font-normal text-col">{datosEditandoAccion.accion}</span>
                                     </span>
-                                ) : (
-                                    <input type="text" className="form-input w-full" value={datosEditandoAccion.accion} onChange={(e) => handleAccionChange(e)} />
                                 )}
                             </div>
 
@@ -243,9 +248,7 @@ const Index: React.FC = () => {
                                         <span className="font-normal text-lg">{i18n.language === 'eu' ? nombreEjeEU : nombreEjeES}</span>
                                     </span>
                                     <span className="block  font-semibold">
-                                        {bloqueo ? (
-                                            <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
-                                        ) : (
+                                        {!bloqueo.plan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
                                                 idEjeSeleccionado={ejeSeleccionado.EjeId}
@@ -253,6 +256,8 @@ const Index: React.FC = () => {
                                                 ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                                 tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
                                             />
+                                        ) : (
+                                            <span className="w-3/4 text-info">{datosEditandoAccion.lineaActuaccion}</span>
                                         )}
                                     </span>
                                 </div>
@@ -269,7 +274,7 @@ const Index: React.FC = () => {
                                         type="checkbox"
                                         className="form-checkbox h-5 w-5 "
                                         checked={datosEditandoAccion.plurianual}
-                                        disabled={bloqueo}
+                                        disabled={bloqueo.plan}
                                     />
                                     <label>{t('plurianual')}</label>
                                 </div>
@@ -349,7 +354,7 @@ const Index: React.FC = () => {
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
                             <TabPanel>
-                                <PestanaIndicadores bloqueoSupracomarcal={bloqueo} />
+                                <PestanaIndicadores bloqueo={bloqueo} />
                             </TabPanel>
                             <TabPanel>
                                 <PestanaPlan />

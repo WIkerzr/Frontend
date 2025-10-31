@@ -77,7 +77,7 @@ const Index: React.FC = () => {
                 zonaBtn={
                     editarPlan && (
                         <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
-                            <Boton tipo="guardar" textoBoton={t('anadirServicio')} onClick={() => setDatosEditandoServicio(servicioIniciadoVacio)} />
+                            <Boton tipo="guardar" textoBoton={t('anadirServicio')} onClick={() => setDatosEditandoServicio({ ...servicioIniciadoVacio })} />
                         </NavLink>
                     )
                 }
@@ -139,7 +139,7 @@ const Index: React.FC = () => {
                                     )}
                                     <div className="flex gap-2 justify-end mt-2">
                                         <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
-                                            <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio(servicio)}>
+                                            <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio({ ...servicio })}>
                                                 {editable ? <IconPencil /> : <IconEye />}
                                             </button>
                                         </NavLink>

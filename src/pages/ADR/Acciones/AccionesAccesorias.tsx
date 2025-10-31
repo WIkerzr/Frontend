@@ -153,7 +153,7 @@ const Index: React.FC = () => {
                                 );
                                 if (regionLider === regionSeleccionada) {
                                     colorAccion = 'bg-teal-100';
-                                    editable = editarPlan ? true : false;
+                                    editable = editable ? true : false;
                                 }
 
                                 if (regionLider != regionSeleccionada) {

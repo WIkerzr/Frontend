@@ -9,14 +9,12 @@ import { useYear } from '../../../../contexts/DatosAnualContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
 import { sortBy } from 'lodash';
-import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 
 interface PestanaIndicadoresProps {
-    bloqueoSupracomarcal: boolean;
+    bloqueo: { plan: boolean; memoria: boolean; bloqueoTotal: boolean };
 }
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueoSupracomarcal }) => {
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo }) => {
     const { t } = useTranslation();
-    const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
     const { ListadoNombresIdicadoresSegunADR, indicadoresRealizacion, indicadoresResultado, PrimeraLlamada } = useIndicadoresContext();
@@ -29,9 +27,9 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     const listadoNombresIndicadoresResultado = ListadoNombresIdicadoresSegunADR('resultado');
 
     const [reglasEspeciales, setReglasEspeciales] = useState<{ realizacion: number[]; resultado: number[] }>({ realizacion: [], resultado: [] });
-    const [bloqueo] = useState<boolean>(bloqueoSupracomarcal && !editarPlan);
 
     useEffect(() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return;
         if (indicadoresRealizacion.length === 0) {
             PrimeraLlamada(null);
         } else {
@@ -48,6 +46,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     }, [indicadoresRealizacion]);
 
     useEffect(() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return;
         if (datosEditandoAccion.indicadorAccion?.indicadoreRealizacion) {
             setCarga(true);
         }
@@ -68,6 +67,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     }, [datosEditandoAccion]);
 
     useEffect(() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return;
         if (listadoNombresIndicadoresRealizacion.length === 0) return;
         const indicadorActualizado = indicadoresRealizacionTabla.map((ind) => {
             const nombre = listadoNombresIndicadoresRealizacion.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
@@ -113,6 +113,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     }, [indicadoresRealizacionTabla, listadoNombresIndicadoresRealizacion]);
 
     useEffect(() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return;
         if (listadoNombresIndicadoresResultado.length === 0) return;
         const indicadorActualizado = indicadoresResultadoTabla.map((ind) => {
             const nombre = listadoNombresIndicadoresResultado.find((item) => item.id === ind.id)?.nombre || ind.descripcion;
@@ -130,6 +131,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     }, [indicadoresResultadoTabla, listadoNombresIndicadoresResultado]);
 
     useEffect(() => {
+        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return;
         if (
             JSON.stringify(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion) !== JSON.stringify(indicadoresRealizacionTabla) &&
             JSON.stringify(datosEditandoAccion.indicadorAccion?.indicadoreResultado) !== JSON.stringify(indicadoresResultadoTabla)
@@ -144,6 +146,9 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
         }
     }, [indicadoresRealizacionTabla, indicadoresResultadoTabla]);
 
+    if (!datosEditandoAccion || datosEditandoAccion.id === '0') {
+        return null;
+    }
     if (!carga) {
         return;
     }
@@ -259,14 +264,14 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
             handleEliminarIndicador={handleEliminarIndicador}
             plurianual={datosEditandoAccion.plurianual}
             reglasEspeciales={reglasEspeciales}
-            bloqueo={bloqueo}
-            editarMemoria={bloqueoSupracomarcal && editarMemoria}
+            editarPlan={!bloqueo.plan}
+            editarMemoria={!bloqueo.memoria}
             botonNuevoIndicadorAccion={
                 <BtnNuevoIndicadorAccion
                     indicadoresRealizacionTabla={indicadoresRealizacionTabla}
                     indicadoresResultadoTabla={indicadoresResultadoTabla}
                     block={block}
-                    editarPlan={!bloqueo}
+                    editarPlan={!bloqueo.plan}
                     open={open}
                     setOpen={setOpen}
                     handleOpenModal={handleOpenModal}
