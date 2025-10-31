@@ -528,9 +528,6 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
 
-        if (datosEditandoAccion.accionCompartida?.regiones.every((r) => r.RegionId === undefined)) {
-            console.log('NOP');
-        }
         LlamadasBBDD<any, DatosAccionDTO>({
             method: 'POST',
             url: `actionData/editAction/${datosEditandoAccion.id}`,
@@ -562,7 +559,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             },
             onSuccess: (response) => {
                 if (tipo === 'AccionesAccesorias') {
-                    const eje = yearData.plan.ejes.find((eje) => eje.Id === datosEditandoAccion.ejeId);
+                    const eje = yearData.plan.ejesRestantes!.find((eje) => eje.Id === datosEditandoAccion.ejeId);
                     if (eje) {
                         const accionTranformada = accionTransformadaBackAFront(response.data, eje.NameEs, eje.NameEu, eje.Id);
                         setYearData({
@@ -573,7 +570,9 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                                     eje.NameEs === eje.NameEs
                                         ? {
                                               ...eje,
-                                              acciones: eje.acciones!.map((accion) => (`${accion.id}` === `${response.data.Id}` ? accionTranformada : accion)),
+                                              acciones: eje.acciones!.map((accion) =>
+                                                  `${accion.id}` === `${response.data.Id}` ? { ...accionTranformada, camposFaltantes: response.CamposFaltantes ?? '' } : accion
+                                              ),
                                           }
                                         : eje
                                 ),

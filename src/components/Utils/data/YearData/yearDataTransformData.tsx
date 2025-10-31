@@ -334,6 +334,24 @@ export const accionTransformadaBackAFront = (accion: DatosAccionDTO, ejeEs: stri
         datosPlan: dataPlan,
         datosMemoria: dataMemoria,
         ejeId,
+        accionCompartidaid: accion.AccionCompartida?.Id,
+        accionCompartida: accion.AccionCompartida
+            ? {
+                  idCompartida: accion.AccionCompartida.Id,
+                  regionLider: {
+                      RegionId: accion.AccionCompartida.RegionLiderId ? `${accion.AccionCompartida.RegionLiderId}` : '',
+                      NameEs: '',
+                      NameEu: '',
+                  },
+                  regiones: accion.AccionCompartida.AccionCompartidaRegiones
+                      ? accion.AccionCompartida.AccionCompartidaRegiones.map((r) => ({
+                            RegionId: `${r.RegionId}`,
+                            NameEs: '',
+                            NameEu: '',
+                        }))
+                      : [],
+              }
+            : undefined,
     };
 };
 
