@@ -73,11 +73,10 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     const { login } = useAuth();
     const token = sessionStorage.getItem('access_token');
 
-    const anioActual = new Date().getFullYear();
     const [anioSeleccionada, setAnio] = useState<number | null>(null);
     const [anios, setAnios] = useState<number[]>([]);
     const [estados, setEstados] = useState<EstadosPorAnio>({
-        [anioActual]: { plan: yearData.plan.status, memoria: yearData.memoria.status },
+        [`${anioSeleccionada ?? ''}`]: { plan: yearData.plan.status, memoria: yearData.memoria.status },
     });
     const [planState, setPlanState] = useState<Estado | null>(null);
     const [memoriaState, setMemoriaState] = useState<Estado | null>(null);
@@ -136,8 +135,9 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
     }, [anios, estados]);
 
     useEffect(() => {
-        const planStatus = estados[anioActual].plan;
-        const memoriaStatus = estados[anioActual].memoria;
+        if (anioSeleccionada === null) return;
+        const planStatus = estados[anioSeleccionada ?? anios[-1]].plan;
+        const memoriaStatus = estados[anioSeleccionada ?? anios[-1]].memoria;
 
         if (planStatus !== yearData.plan.status || memoriaStatus !== yearData.memoria.status) {
             setYearData({
