@@ -63,19 +63,62 @@ export const DivInputFieldMulti = ({ camposTextos, handleBorrar, nombreInput, pl
                 {t(nombreInput)}
             </label>
             {!disabled && (
-                <input
-                    disabled={disabled}
-                    type="text"
-                    placeholder={placeholder}
-                    required={required}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            handleNueva(e.currentTarget.value);
-                            e.currentTarget.value = '';
-                        }
-                    }}
-                    className={`w-full border rounded p-2 resize-y`}
-                />
+                <>
+                    <input
+                        disabled={disabled}
+                        type="text"
+                        placeholder={placeholder}
+                        required={required}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleNueva(e.currentTarget.value);
+                                e.currentTarget.value = '';
+                            }
+                        }}
+                        onBlur={(e) => {
+                            if (e.currentTarget.value.length > 0) {
+                                e.currentTarget.classList.add('border-red-500', 'border-2');
+                            } else {
+                                e.currentTarget.classList.remove('border-red-500', 'border-2');
+                            }
+                            const existing = document.getElementById('enter-tip');
+                            if (existing) {
+                                existing.remove();
+                            }
+                        }}
+                        className={`w-full border rounded p-2 resize-y`}
+                        onFocus={(e) => {
+                            const prev = document.getElementById('enter-tip');
+                            if (prev) prev.remove();
+
+                            const alert = document.createElement('div');
+                            alert.id = 'enter-tip';
+                            alert.innerText = t('enterAlmacenar');
+                            alert.className = 'bg-yellow-200 text-black p-1 rounded shadow';
+                            alert.style.position = 'fixed';
+                            alert.style.opacity = '1';
+                            alert.style.transition = 'opacity 0.3s, transform 0.15s';
+                            alert.style.zIndex = '1000';
+                            document.body.appendChild(alert);
+                            try {
+                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                const alertHeight = alert.offsetHeight || 28;
+                                let top = rect.top - alertHeight - 8;
+                                const desiredLeft = rect.left + (rect.width - alert.offsetWidth) / 2;
+                                const minLeft = 8;
+                                const maxLeft = window.innerWidth - alert.offsetWidth - 8;
+                                const left = Math.min(Math.max(desiredLeft, minLeft), maxLeft);
+                                if (top < 8) top = rect.bottom + 8; // if not enough space above, place below
+                                alert.style.top = `${top}px`;
+                                alert.style.left = `${left}px`;
+                            } catch {
+                                alert.style.top = '8px';
+                                alert.style.left = '8px';
+                            }
+                        }}
+                    />
+                </>
             )}
             <div className={`w-full border rounded p-2 resize-y input ${disabled ? 'bg-[#fafafa] ' : 'bg-white'}`}>
                 {camposTextos.map((e, i) => (

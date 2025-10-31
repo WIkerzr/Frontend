@@ -119,6 +119,7 @@
     "EmailRestaurarEnviado": "Hemos enviado un enlace para restaurar tu contraseña.",
     "EmailRestaurarRevisa": "Revisa tu correo electrónico.",
     "emailYaRegistrado": "El email ya está registrado.",
+    "enterAlmacenar": "Pulsa ENTER tras escribir cada entidad para almacenar",
     "Entrando": "Entrando...",
     "Entrar": "Entrar",
     "enviadoNoSePodraEditar": "Una vez enviado {{txtPantalla}}, no podrá ser editado a menos que Hazi lo permita.",
