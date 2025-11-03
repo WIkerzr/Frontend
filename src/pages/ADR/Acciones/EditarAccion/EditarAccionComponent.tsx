@@ -492,7 +492,7 @@ export const TablasIndicadoresComponent = forwardRef<HTMLDivElement, TablasIndic
                                           setTimeout(() => setEditableRowIndex(-1), 0);
                                       }}
                                   >
-                                      {t('guardar')}
+                                      {t('guardarFila')}
                                   </button>
                               ) : (
                                   <div className="flex gap-2 w-full">
