@@ -83,7 +83,7 @@ const Sidebar = () => {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedYear = Number(e.target.value);
         const selectedData = regionData?.data.find((d) => d.year === selectedYear);
-
+        sessionStorage.removeItem('DataYear');
         setAnio(Number(e.target.value));
         if (selectedData) {
             setEstados({
