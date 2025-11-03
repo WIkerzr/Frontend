@@ -70,6 +70,8 @@ export const GeneracionDelDocumentoWordPlan = async (
     t: (key: string) => string,
     imageADR: string
 ) => {
+    const rutaNormalizada = imageADR.replaceAll('\\', '/');
+    const match = rutaNormalizada.match(/ADR\/([^/]+)/);
     try {
         // 1. Cargar la plantilla desde /public
         const arrayBuffer = await plantilla.arrayBuffer();
@@ -86,40 +88,41 @@ export const GeneracionDelDocumentoWordPlan = async (
         });
 
         // Funcion para generar las acciones
-        const Acciones = (ejes: Ejes[]) => {
+        const Acciones = (ejes: Ejes[], nivel: string) => {
+            let contAccion = 1;
             return ejes?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
-                    accion: `${contAccion++}: ${accion.accion}`,
-                    eje: item.NameEs,
-                    lineaActuaccion: accion.lineaActuaccion,
-                    ejecutora: Ejecutoras(accion.datosPlan?.ejecutora),
-                    implicadas: accion.datosPlan?.implicadas,
-                    comarcal: accion.datosPlan?.comarcal,
-                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : `${t('sinTratamientoTerritorialSupracomarcal')}`,
-                    plurianual: accion.plurianual ? 'Si' : 'No',
-                    oAccion: accion.datosPlan?.oAccion,
-                    dAccion: accion.datosPlan?.dAccion,
-                    iMujHom: accion.datosPlan?.iMujHom,
-                    uEuskera: accion.datosPlan?.uEuskera,
-                    sostenibilidad: accion.datosPlan?.sostenibilidad,
-                    dInteligent: accion.datosPlan?.dInteligent,
-                    ods: accion.datosPlan?.ods,
-                    presupuesto: accion.datosPlan?.presupuesto,
+                    accion: `${nivel}.${contAccion++}: ${accion.accion ?? ''}`,
+                    eje: item.NameEs ?? '',
+                    lineaActuaccion: accion.lineaActuaccion ?? '',
+                    ejecutora: Ejecutoras(accion.datosPlan?.ejecutora) ?? '',
+                    implicadas: accion.datosPlan?.implicadas ?? '',
+                    comarcal: accion.datosPlan?.comarcal ?? '',
+                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : ` `,
+                    plurianual: accion.plurianual ? t('Si') : t('No'),
+                    oAccion: accion.datosPlan?.oAccion ?? '',
+                    dAccion: accion.datosPlan?.dAccion ?? '',
+                    iMujHom: accion.datosPlan?.iMujHom ?? '',
+                    uEuskera: accion.datosPlan?.uEuskera ?? '',
+                    sostenibilidad: accion.datosPlan?.sostenibilidad ?? '',
+                    dInteligent: accion.datosPlan?.dInteligent ?? '',
+                    ods: accion.datosPlan?.ods ?? '',
+                    presupuesto: accion.datosPlan?.presupuesto ?? '',
                     indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
-                        nombre: iR.descripcion,
-                        unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
-                        metaAnual: formatHMT(iR.metaAnual),
-                        metaFinal: formatHMT(iR.metaFinal),
-                        anualidadMetaFinal: 'anualidadMetaFinal', //TODO
+                        nombre: iR.descripcion ?? '',
+                        unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed ?? '',
+                        metaAnual: formatHMT(iR.metaAnual) ?? '',
+                        metaFinal: formatHMT(iR.metaFinal) ?? '',
+                        anualidadMetaFinal: ' ',
                     })),
                     indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
-                        nombre: iR.descripcion,
-                        unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
-                        metaAnual: formatHMT(iR.metaAnual),
-                        metaFinal: formatHMT(iR.metaFinal),
-                        anualidadMetaFinal: 'anualidadMetaFinal', //TODO
+                        nombre: iR.descripcion ?? '',
+                        unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed ?? '',
+                        metaAnual: formatHMT(iR.metaAnual) ?? '',
+                        metaFinal: formatHMT(iR.metaFinal) ?? '',
+                        anualidadMetaFinal: ' ',
                     })),
-                    observaciones: accion.datosPlan?.observaciones,
+                    observaciones: accion.datosPlan?.observaciones ?? '',
                 }))
             );
         };
@@ -176,40 +179,43 @@ export const GeneracionDelDocumentoWordPlan = async (
         };
         const [hipotesisRA, hipotesisRS] = hipotesis();
 
+        console.log(match ? match[1] : '');
+
         // 4. Datos a sustituir
-        let contAccion = 1;
+
         const data = {
-            nComarca: datos.nombreRegion,
+            nADR: match ? match[1].match(/^\S+/)?.[0] ?? '' : '',
+            nComarca: datos.nombreRegion ?? '',
             anioComarca: datos.year,
             //2.
-            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
+            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks ?? '',
             indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
-                nombre: item.nameEs,
-                value: item.value,
+                nombre: item.nameEs ?? '',
+                value: item.value ?? '',
             })),
             //3.
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
-                nombre: `S. ${index + 1}.- ${item.nombre}`,
-                descripcion: item.descripcion,
+                nombre: `S. ${index + 1}.- ${item.nombre ?? ''}`,
+                descripcion: item.descripcion ?? '',
                 indicadoresRealizacion: item.indicadores
                     .filter((iR: IndicadoresServicios) => iR.tipo === 'realizacion')
                     .map((iR) => ({
-                        indicador: iR.indicador,
-                        previsto: iR.previsto.valor,
+                        indicador: iR.indicador ?? '',
+                        previsto: iR.previsto?.valor ?? '',
                     })),
                 indicadoresResultado: item.indicadores
                     .filter((iR: IndicadoresServicios) => iR.tipo === 'resultado')
                     .map((iR) => ({
-                        indicador: iR.indicador,
-                        previsto: iR.previsto.valor,
+                        indicador: iR.indicador ?? '',
+                        previsto: iR.previsto?.valor ?? '',
                     })),
             })),
             //4.1
-            proceso: datos.plan.proceso,
+            proceso: datos.plan.proceso ?? '',
             //4.2
-            eje1: accionesPrioritarias[0]?.NameEs,
-            eje2: accionesPrioritarias[1] ? accionesPrioritarias[1].NameEs : '',
-            eje3: accionesPrioritarias[2] ? accionesPrioritarias[2].NameEs : '',
+            eje1: accionesPrioritarias[0]?.NameEs ?? '',
+            eje2: accionesPrioritarias[1] ? accionesPrioritarias[1].NameEs ?? '' : '',
+            eje3: accionesPrioritarias[2] ? accionesPrioritarias[2].NameEs ?? '' : '',
             //4.3
             acciones: accionesPrioritarias?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
@@ -219,9 +225,9 @@ export const GeneracionDelDocumentoWordPlan = async (
                 }))
             ),
             //4.4
-            resumenAccion: Acciones(accionesPrioritarias),
+            resumenAccion: Acciones(accionesPrioritarias, '4.4'),
             //5.
-            resumenAccionYProyectos: Acciones(accionesYProyectos),
+            resumenAccionYProyectos: Acciones(accionesYProyectos, '5'),
             //6.1
             iRAAnexo1: hipotesisRA.length > 0 ? hipotesisRA : [{ nombre: '', hipo: '' }],
             iRSAnexo1: hipotesisRS.length > 0 ? hipotesisRS : [{ nombre: '', hipo: '' }],
@@ -290,7 +296,6 @@ export const GeneracionDelDocumentoWordPlan = async (
             if (renderedZip.file(existingMediaName)) {
                 renderedZip.file(existingMediaName, imageData);
                 addContentTypeOverride(renderedZip, `/${existingMediaName}`, 'image/png');
-                console.log('Se ha reemplazado word/media/image1.png por la nueva imagen');
             } else {
                 // No existe image1.png: añadimos un nuevo archivo en word/media y creamos la relación y la referencia en document.xml
                 const ext = 'jpg';
@@ -369,6 +374,8 @@ export const GeneracionDelDocumentoWordMemoria = async (
     t: (key: string) => string,
     imageADR: string
 ) => {
+    const rutaNormalizada = imageADR.replaceAll('\\', '/');
+    const match = rutaNormalizada.match(/ADR\/([^/]+)/);
     try {
         // 1. Cargar la plantilla desde /public
         const arrayBuffer = await plantilla.arrayBuffer();
@@ -388,50 +395,51 @@ export const GeneracionDelDocumentoWordMemoria = async (
         const accionesYProyectos: Ejes[] = (datos.plan.ejesRestantes ?? []).filter((eje: Ejes) => eje.IsAccessory);
 
         // Funcion para generar las acciones
-        const Acciones = (ejes: Ejes[]) => {
+        const Acciones = (ejes: Ejes[], nivel: string) => {
+            let contAccion = 1;
             return ejes?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
-                    accion: `${contAccion++}: ${accion.accion}`,
-                    eje: item.NameEs,
-                    lineaActuaccion: accion.lineaActuaccion,
-                    ejecutora: Ejecutoras(accion.datosPlan?.ejecutora),
-                    implicadas: accion.datosPlan?.implicadas,
-                    comarcal: accion.datosPlan?.comarcal,
-                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : `${t('sinTratamientoTerritorialSupracomarcal')}`,
-                    plurianual: accion.plurianual ? 'Si' : 'No',
-                    situacion: accion.datosMemoria?.sActual,
-                    oAccion: accion.datosPlan?.oAccion,
-                    dAccion: accion.datosPlan?.dAccion,
-                    iMujHom: accion.datosPlan?.iMujHom,
-                    uEuskera: accion.datosPlan?.uEuskera,
-                    sostenibilidad: accion.datosPlan?.sostenibilidad,
-                    dInteligent: accion.datosPlan?.dInteligent,
-                    ods: accion.datosPlan?.ods,
-                    presupuestoCuantia: accion.datosMemoria?.presupuestoEjecutado.cuantia,
-                    presupuestoFuenteDeFinanciacion: accion.datosMemoria?.presupuestoEjecutado.fuenteDeFinanciacion,
-                    presupuestoObservaciones: accion.datosMemoria?.presupuestoEjecutado.observaciones,
-                    presupuestoPrevisto: accion.datosMemoria?.ejecucionPresupuestaria.previsto,
-                    presupuestoEjecutado: accion.datosMemoria?.ejecucionPresupuestaria.ejecutado,
-                    presupuestoPorcentajeEjecución: accion.datosMemoria?.ejecucionPresupuestaria.porcentaje,
+                    accion: `${nivel}.${contAccion++}: ${accion.accion ?? ''}`,
+                    eje: item.NameEs ?? '',
+                    lineaActuaccion: accion.lineaActuaccion ?? '',
+                    ejecutora: Ejecutoras(accion.datosPlan?.ejecutora) ?? '',
+                    implicadas: accion.datosPlan?.implicadas ?? '',
+                    comarcal: accion.datosPlan?.comarcal ?? '',
+                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : ` `,
+                    plurianual: accion.plurianual ? t('Si') : t('No'),
+                    situacion: accion.datosMemoria?.sActual ?? '',
+                    oAccion: accion.datosPlan?.oAccion ?? '',
+                    dAccion: accion.datosPlan?.dAccion ?? '',
+                    iMujHom: accion.datosPlan?.iMujHom ?? '',
+                    uEuskera: accion.datosPlan?.uEuskera ?? '',
+                    sostenibilidad: accion.datosPlan?.sostenibilidad ?? '',
+                    dInteligent: accion.datosPlan?.dInteligent ?? '',
+                    ods: accion.datosPlan?.ods ?? '',
+                    presupuestoCuantia: accion.datosMemoria?.presupuestoEjecutado.cuantia ?? '',
+                    presupuestoFuenteDeFinanciacion: accion.datosMemoria?.presupuestoEjecutado.fuenteDeFinanciacion ?? '',
+                    presupuestoObservaciones: accion.datosMemoria?.presupuestoEjecutado.observaciones ?? '',
+                    presupuestoPrevisto: accion.datosMemoria?.ejecucionPresupuestaria.previsto ?? '',
+                    presupuestoEjecutado: accion.datosMemoria?.ejecucionPresupuestaria.ejecutado ?? '',
+                    presupuestoPorcentajeEjecución: accion.datosMemoria?.ejecucionPresupuestaria.porcentaje ?? '',
                     indicadoresRealizacion: accion.indicadorAccion?.indicadoreRealizacion.map((iR: IndicadorRealizacionAccion) => ({
-                        nombre: iR.descripcion,
-                        unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
-                        metaAnual: formatHMT(iR.metaAnual),
-                        valorAlcanzado: formatHMT(iR.ejecutado),
-                        metaFinal: formatHMT(iR.metaFinal),
-                        anualidadMetaFinal: '', //TODO
+                        nombre: iR.descripcion ?? '',
+                        unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed ?? '',
+                        metaAnual: formatHMT(iR.metaAnual) ?? '',
+                        valorAlcanzado: formatHMT(iR.ejecutado) ?? '',
+                        metaFinal: formatHMT(iR.metaFinal) ?? '',
+                        anualidadMetaFinal: ' ',
                     })),
                     indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
-                        nombre: iR.descripcion,
-                        unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed,
-                        metaAnual: formatHMT(iR.metaAnual),
-                        valorAlcanzado: formatHMT(iR.ejecutado),
-                        metaFinal: formatHMT(iR.metaFinal),
-                        anualidadMetaFinal: '', //TODO
+                        nombre: iR.descripcion ?? '',
+                        unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed ?? '',
+                        metaAnual: formatHMT(iR.metaAnual) ?? '',
+                        valorAlcanzado: formatHMT(iR.ejecutado) ?? '',
+                        metaFinal: formatHMT(iR.metaFinal) ?? '',
+                        anualidadMetaFinal: ' ',
                     })),
-                    observaciones: accion.datosPlan?.observaciones,
-                    dSeguimiento: accion.datosMemoria?.dSeguimiento,
-                    valFinal: accion.datosMemoria?.valFinal,
+                    observaciones: accion.datosPlan?.observaciones ?? '',
+                    dSeguimiento: accion.datosMemoria?.dSeguimiento ?? '',
+                    valFinal: accion.datosMemoria?.valFinal ?? '',
                 }))
             );
         };
@@ -472,10 +480,10 @@ export const GeneracionDelDocumentoWordMemoria = async (
         const cuadroMandoResultado = [...(cuadroAcciones[1] || []), ...(cuadroAccionesAccesorias[1] || []), ...(cuadroServicios[1] || [])];
 
         // 4. Datos a sustituir
-        let contAccion = 1;
         const data = {
-            nComarca: datos.nombreRegion,
-            anioComarca: datos.year,
+            nADR: match ? match[1].match(/^\S+/)?.[0] ?? '' : '',
+            nComarca: datos.nombreRegion ?? '',
+            anioComarca: datos.year ?? '',
             //2.
             //3.
             tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
@@ -523,9 +531,9 @@ export const GeneracionDelDocumentoWordMemoria = async (
                 }))
             ),
             //5.4
-            resumenAccion: Acciones(accionesPrioritarias),
+            resumenAccion: Acciones(accionesPrioritarias, '5.4'),
             //6.
-            resumenAccionYProyectos: Acciones(accionesYProyectos),
+            resumenAccionYProyectos: Acciones(accionesYProyectos, '6'),
             //7
 
             cuadroMandoRealizacion: cuadroMandoRealizacion.map((item) => ({
@@ -613,7 +621,6 @@ export const GeneracionDelDocumentoWordMemoria = async (
             if (renderedZip.file(existingMediaName)) {
                 renderedZip.file(existingMediaName, imageData);
                 addContentTypeOverride(renderedZip, `/${existingMediaName}`, 'image/png');
-                console.log('Se ha reemplazado word/media/image1.png por la nueva imagen');
             } else {
                 // No existe image1.png: añadimos un nuevo archivo en word/media y creamos la relación y la referencia en document.xml
                 const ext = 'jpg';
