@@ -167,13 +167,12 @@ const Index = () => {
                     </section>
 
                     <div className="panel p-4 shadow-sm">
-                        <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('finalizarYEnviar', { zona: txtPantalla })}</h3>
                         {planFiles.length != 1 && <Aviso textoAviso={t('faltanArchivosObligatorios')} />}
                         {pantalla !== 'Plan' && editarPlan && <Aviso textoAviso={t('faltanEnviarAntesPlan')} />}
                         <div className="flex justify-center">
                             <Boton
                                 tipo="guardar"
-                                textoBoton={t('finalizar', { zona: txtPantalla })}
+                                textoBoton={t('finalizarYEnviar', { zona: txtPantalla })}
                                 disabled={pantalla === 'Plan' ? planFiles.length != 1 : editarPlan || planFiles.length != 1}
                                 onClick={handleGuardarFicheros}
                             />

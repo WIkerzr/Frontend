@@ -141,7 +141,8 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         const mensaje: string[] = [];
         for (let index = 0; index < accionesPorEje.length; index++) {
             if (accionesPorEje[index] === 0) {
-                mensaje.push(` (${t('completaEjeVacio')})`);
+                // mensaje.push(` (${t('completaEjeVacio')})`);
+                mensaje.push(``);
             } else if (bloqueo[index] === false) {
                 mensaje.push('');
             } else {

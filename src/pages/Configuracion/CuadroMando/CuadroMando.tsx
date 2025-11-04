@@ -98,7 +98,7 @@ const Index = () => {
 
     useEffect(() => {
         let yearsArray = years.slice(1);
-        if (yearFilter === t('TODOS') && datosAnios.length != yearsArray.length) {
+        if (datosAnios.length != yearsArray.length) {
             yearsArray = yearsArray.filter((year) => year !== yearFilter);
             for (const year of yearsArray) {
                 LlamadasBBDD({

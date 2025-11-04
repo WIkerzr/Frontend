@@ -38,13 +38,17 @@ const Index: React.FC = () => {
     }
 
     const hasNavigated = useRef(false);
+
     useEffect(() => {
         SeleccionVaciarEditarAccion();
         setNavigated(true);
-    }, []);
+        hasNavigated.current = false;
+        return () => {
+            hasNavigated.current = false;
+        };
+    }, [anioSeleccionada]);
 
     useEffect(() => {
-        // Solo navega si datosEditandoAccion.id no es 0
         if (hasNavigated.current) return;
         if (navigated && !hasNavigated.current && datosEditandoAccion && datosEditandoAccion.id !== '0') {
             navigate('/adr/accionesYproyectos/editando', {
@@ -60,14 +64,15 @@ const Index: React.FC = () => {
     }, [datosEditandoAccion, navigate]);
 
     useEffect(() => {
-        if (hasNavigated.current) return;
         const ejesRestantes = yearData.plan.ejesRestantes;
         if (!ejesRestantes) {
+            setAccionesGrup([]);
             return;
         }
         const ejesFiltrados: Ejes[] | undefined = ejesRestantes.filter((r) => r.IsAccessory === true);
 
         if (!ejesFiltrados) {
+            setAccionesGrup([]);
             return;
         }
         const data = ejesFiltrados.flatMap((eje) =>
@@ -77,8 +82,7 @@ const Index: React.FC = () => {
             }))
         );
         setAccionesGrup(grup5(data, 4));
-    }, [yearData]);
-    if (hasNavigated.current) return;
+    }, [yearData, anioSeleccionada]);
 
     const handleDelete = (id: string, idEje: string | undefined) => {
         const data = yearData.plan.ejesRestantes!.flatMap((eje) => eje.acciones);
