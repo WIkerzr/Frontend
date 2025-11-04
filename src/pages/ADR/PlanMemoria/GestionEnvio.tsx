@@ -90,7 +90,7 @@ const Index = () => {
                         }
                         const archivos: File[] = TransformarArchivosAFile(archivosFiltrado);
                         if (archivos && archivos.length > 0) {
-                            const archivoPlan = archivos.find((a) => (a.name || '').toLowerCase().includes('plan'));
+                            const archivoPlan = archivos.find((a) => (a.name || '').toLowerCase().includes(pantalla.toLowerCase()));
                             if (archivoPlan) {
                                 setPlanFiles([archivoPlan]);
                                 const anexos = archivos.filter((a) => a !== archivoPlan);

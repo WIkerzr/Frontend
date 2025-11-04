@@ -219,9 +219,9 @@ export const GeneracionDelDocumentoWordPlan = async (
             //4.3
             acciones: accionesPrioritarias?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
-                    nombreEje: item.NameEs,
-                    lineaActuaccion: accion.lineaActuaccion,
-                    accion: accion.accion,
+                    nombreEje: item.NameEs ?? '',
+                    lineaActuaccion: accion.lineaActuaccion ?? '',
+                    accion: accion.accion ?? '',
                 }))
             ),
             //4.4
@@ -486,48 +486,48 @@ export const GeneracionDelDocumentoWordMemoria = async (
             anioComarca: datos.year ?? '',
             //2.
             //3.
-            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks,
+            tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks ?? '',
             indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
-                nombre: item.nameEs,
-                value: item.value,
-                valueAlcanzado: item.valueAchieved,
+                nombre: item.nameEs ?? '',
+                value: item.value ?? '',
+                valueAlcanzado: item.valueAchieved ?? '',
             })),
-            dSeguimiento: datos.plan.generalOperationADR.dSeguimiento,
-            valFinal: datos.plan.generalOperationADR.valFinal,
+            dSeguimiento: datos.plan.generalOperationADR.dSeguimiento ?? '',
+            valFinal: datos.plan.generalOperationADR.valFinal ?? '',
             //4.
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
-                nombre: `S. ${index + 1}.- ${item.nombre}`,
-                descripcion: item.descripcion,
+                nombre: `S. ${index + 1}.- ${item.nombre ?? ''}`,
+                descripcion: item.descripcion ?? '',
                 indicadoresRealizacion: item.indicadores
                     .filter((iR: IndicadoresServicios) => iR.tipo === 'realizacion')
                     .map((iR) => ({
-                        indicador: iR.indicador,
-                        previsto: iR.previsto.valor,
-                        alcanzado: iR.alcanzado?.valor,
+                        indicador: iR.indicador ?? '',
+                        previsto: iR.previsto?.valor ?? '',
+                        alcanzado: iR.alcanzado?.valor ?? '',
                     })),
                 indicadoresResultado: item.indicadores
                     .filter((iR: IndicadoresServicios) => iR.tipo === 'resultado')
                     .map((iR) => ({
-                        indicador: iR.indicador,
-                        previsto: iR.previsto.valor,
-                        alcanzado: iR.alcanzado?.valor,
+                        indicador: iR.indicador ?? '',
+                        previsto: iR.previsto?.valor ?? '',
+                        alcanzado: iR.alcanzado?.valor ?? '',
                     })),
-                dSeguimiento: item.dSeguimiento,
-                valFinal: item.valFinal,
+                dSeguimiento: item.dSeguimiento ?? '',
+                valFinal: item.valFinal ?? '',
             })),
             //5.1
-            proceso: datos.plan.proceso,
+            proceso: datos.plan.proceso ?? '',
             //5.2
-            eje1: accionesPrioritarias[0]?.NameEs,
-            eje2: accionesPrioritarias[1] ? accionesPrioritarias[1].NameEs : '',
-            eje3: accionesPrioritarias[2] ? accionesPrioritarias[2].NameEs : '',
+            eje1: accionesPrioritarias[0]?.NameEs ?? '',
+            eje2: accionesPrioritarias[1] ? accionesPrioritarias[1].NameEs ?? '' : '',
+            eje3: accionesPrioritarias[2] ? accionesPrioritarias[2].NameEs ?? '' : '',
             //5.3
             acciones: accionesPrioritarias.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
-                    nombreEje: item.NameEs,
-                    lineaActuaccion: accion.lineaActuaccion,
-                    accion: accion.accion,
-                    situacion: accion.datosMemoria?.sActual,
+                    nombreEje: item.NameEs ?? '',
+                    lineaActuaccion: accion.lineaActuaccion ?? '',
+                    accion: accion.accion ?? '',
+                    situacion: accion.datosMemoria?.sActual ?? '',
                 }))
             ),
             //5.4
@@ -563,8 +563,8 @@ export const GeneracionDelDocumentoWordMemoria = async (
 
         // Restaurar imágenes/medios si docxtemplater las hubiera eliminado
         try {
-            const renderedZip2 = doc.getZip();
-            const renderedMedia2 = Object.keys(renderedZip2.files).filter((f) => f.startsWith('word/media/'));
+            const renderedZip = doc.getZip();
+            const renderedMedia2 = Object.keys(renderedZip.files).filter((f) => f.startsWith('word/media/'));
             const missing2 = originalMediaFiles2.filter((f) => !renderedMedia2.includes(f));
             if (missing2.length > 0) {
                 console.warn('Se detectaron medias faltantes tras render (Memoria). Restaurando:', missing2);
@@ -593,7 +593,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
                         content = combined;
                     }
                     if (content) {
-                        renderedZip2.file(fname, content);
+                        renderedZip.file(fname, content);
                     }
                 }
             }

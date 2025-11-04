@@ -537,28 +537,63 @@ export interface Archivo {
 
 export const TransformarArchivos = (datosRecibidos: Nodo, carpetaObjetio?: 'Plan' | 'Memoria' | 'Firma'): Archivo[] => {
     const resultado: Archivo[] = [];
-    const primerNodo = carpetaObjetio ? BuscarNodoPorRuta(datosRecibidos.Hijos, carpetaObjetio) ?? datosRecibidos : datosRecibidos;
-    if (primerNodo.Hijos && primerNodo.Hijos.length > 0) {
-        const archivoPrincipal = primerNodo.Hijos.find((h) => !h.EsCarpeta);
-        if (archivoPrincipal) {
-            resultado.push({
-                nombre: archivoPrincipal.Nombre,
-                url: archivoPrincipal.RutaRelativa,
-            });
+
+    // Si se especifica una carpeta objetivo, buscar solo en esa carpeta
+    if (carpetaObjetio) {
+        const nodoEncontrado = BuscarNodoPorRuta(datosRecibidos.Hijos, carpetaObjetio);
+
+        // Si no se encuentra la carpeta específica, devolver array vacío
+        if (!nodoEncontrado) {
+            return resultado;
         }
 
-        primerNodo.Hijos.forEach((h) => {
-            if (h.EsCarpeta && h.Hijos.length > 0) {
-                h.Hijos.forEach((sub) => {
-                    if (!sub.EsCarpeta) {
-                        resultado.push({
-                            nombre: sub.Nombre,
-                            url: sub.RutaRelativa,
-                        });
-                    }
+        // Procesar solo los archivos de la carpeta encontrada
+        if (nodoEncontrado.Hijos && nodoEncontrado.Hijos.length > 0) {
+            const archivoPrincipal = nodoEncontrado.Hijos.find((h) => !h.EsCarpeta);
+            if (archivoPrincipal) {
+                resultado.push({
+                    nombre: archivoPrincipal.Nombre,
+                    url: archivoPrincipal.RutaRelativa,
                 });
             }
-        });
+
+            nodoEncontrado.Hijos.forEach((h) => {
+                if (h.EsCarpeta && h.Hijos.length > 0) {
+                    h.Hijos.forEach((sub) => {
+                        if (!sub.EsCarpeta) {
+                            resultado.push({
+                                nombre: sub.Nombre,
+                                url: sub.RutaRelativa,
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    } else {
+        // Si no se especifica carpeta, procesar todo datosRecibidos
+        if (datosRecibidos.Hijos && datosRecibidos.Hijos.length > 0) {
+            const archivoPrincipal = datosRecibidos.Hijos.find((h) => !h.EsCarpeta);
+            if (archivoPrincipal) {
+                resultado.push({
+                    nombre: archivoPrincipal.Nombre,
+                    url: archivoPrincipal.RutaRelativa,
+                });
+            }
+
+            datosRecibidos.Hijos.forEach((h) => {
+                if (h.EsCarpeta && h.Hijos.length > 0) {
+                    h.Hijos.forEach((sub) => {
+                        if (!sub.EsCarpeta) {
+                            resultado.push({
+                                nombre: sub.Nombre,
+                                url: sub.RutaRelativa,
+                            });
+                        }
+                    });
+                }
+            });
+        }
     }
 
     return resultado;
