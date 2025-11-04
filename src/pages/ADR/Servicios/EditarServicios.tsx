@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { DropdownTraducido, InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
@@ -45,12 +45,20 @@ const Index: React.FC = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
     const isFetchingRef = useRef(false);
+    const isFirstMount = useRef(true);
 
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
     const [bloqueo, setBloqueo] = useState<{ plan: boolean; memoria: boolean; bloqueoTotal: boolean }>({ plan: true, memoria: true, bloqueoTotal: true });
 
     //const jsonString = JSON.stringify(datosEditandoServicio);
     //const jsonString = JSON.stringify(yearData);
+
+    useLayoutEffect(() => {
+        if (controlguardado) {
+            setControlguardado(false);
+        }
+        isFirstMount.current = true;
+    }, []);
 
     useEffect(() => {
         if (!loading && ejesPlan.length === 0) {
@@ -89,8 +97,11 @@ const Index: React.FC = () => {
     }, [ejesPlan]);
 
     useEffect(() => {
-        if (controlguardado) {
+        if (controlguardado && !isFirstMount.current) {
             navigate('/adr/servicios');
+        }
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
         }
     }, [controlguardado]);
     const { aSidoModificado, restablecer } = ComprobacionYAvisosDeCambios(datosEditandoServicio, { debounceMs: 500, message: t('object:cambioPagina') });
