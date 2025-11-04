@@ -109,20 +109,27 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (anios && anios.length > 0) {
-            let newAnio = Math.max(...anios) ?? null;
-            const dataYear = sessionStorage.getItem('DataYear');
-            if (dataYear) {
-                const parsedDataYear: YearData = JSON.parse(dataYear);
-                if (parsedDataYear.year > 2000) {
-                    setAnio(parsedDataYear.year);
-                    newAnio = parsedDataYear.year;
+            // Solo establecemos un año por defecto si no hay ninguno seleccionado
+            if (anioSeleccionada === null) {
+                let newAnio = Math.max(...anios) ?? null;
+                const dataYear = sessionStorage.getItem('DataYear');
+                if (dataYear) {
+                    try {
+                        const parsedDataYear: YearData = JSON.parse(dataYear);
+                        if (parsedDataYear.year > 2000 && anios.includes(parsedDataYear.year)) {
+                            newAnio = parsedDataYear.year;
+                        }
+                    } catch {
+                        // Si hay error al parsear, usamos el año máximo
+                    }
                 }
+                setAnio(newAnio);
             }
-            setAnio(newAnio);
 
-            if (newAnio !== null && estados[newAnio]) {
-                setPlanState(estados[newAnio].plan);
-                setMemoriaState(estados[newAnio].memoria);
+            // Actualizamos los estados de plan y memoria
+            if (anioSeleccionada !== null && estados[anioSeleccionada]) {
+                setPlanState(estados[anioSeleccionada].plan);
+                setMemoriaState(estados[anioSeleccionada].memoria);
             } else {
                 setPlanState(null);
                 setMemoriaState(null);

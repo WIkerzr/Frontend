@@ -3,7 +3,7 @@ import AnimateHeight from 'react-animate-height';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { toggleSidebar } from '../../store/themeConfigSlice';
 import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
@@ -26,10 +26,9 @@ import { useRegionContext } from '../../contexts/RegionContext';
 import { Loading } from '../Utils/animations';
 
 const Sidebar = () => {
-    const { regionSeleccionada, regionData } = useRegionContext();
-    const { anioSeleccionada, anios, setEstados, setAnio } = useEstadosPorAnioContext();
-    const { yearData, setYearData, loadingYearData } = useYear();
-    const navigate = useNavigate();
+    const { regionSeleccionada } = useRegionContext();
+    const { anioSeleccionada, anios, setAnio } = useEstadosPorAnioContext();
+    const { yearData, loadingYearData } = useYear();
     const { user } = useUser();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
@@ -82,15 +81,14 @@ const Sidebar = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedYear = Number(e.target.value);
-        const selectedData = regionData?.data.find((d) => d.year === selectedYear);
-        sessionStorage.removeItem('DataYear');
-        setAnio(Number(e.target.value));
-        if (selectedData) {
-            setEstados({
-                [selectedData.year]: { plan: selectedData.plan.status, memoria: selectedData.memoria.status },
-            });
-            setYearData(selectedData);
-            navigate('/');
+        
+        if (selectedYear && selectedYear !== anioSeleccionada) {
+            // Limpiamos el sessionStorage antes de cambiar
+            sessionStorage.removeItem('DataYear');
+            sessionStorage.removeItem('datosAccionModificado');
+            
+            // Actualizamos el año - el useEffect en EstadosPorAnioContext se encargará de cargar los datos
+            setAnio(selectedYear);
         }
     };
 
