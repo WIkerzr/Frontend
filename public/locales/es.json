@@ -283,6 +283,8 @@
     "presupuestoEjecutado": "Presupuesto ejecutado",
     "proceso": "Proceso",
     "rangoAnios": "Rango de años (Plurianualidad)",
+    "anioInicio": "Año inicio",
+    "anioFin": "Año fin",
     "ReabrirPlan": "Antes de reabrir el plan, el estado de la memoria debe estar en borrador.",
     "reabrirPlanOMemoria": "Reabrir {{zona}} {{fecha}}",
     "Realizacion": "Realización",

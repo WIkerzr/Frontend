@@ -13,7 +13,8 @@ import { sortBy } from 'lodash';
 interface PestanaIndicadoresProps {
     bloqueo: { plan: boolean; memoria: boolean; bloqueoTotal: boolean };
 }
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo }) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo }, _ref) => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);

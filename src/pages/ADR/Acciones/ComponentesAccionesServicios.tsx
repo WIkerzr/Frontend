@@ -317,6 +317,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     useEffect(() => {
         // Solo navega si datosEditandoAccion.id no es 0
         if (navigated && !hasNavigated.current && datosEditandoAccion && datosEditandoAccion.id !== '0') {
+            hasNavigated.current = true;
             navigate('/adr/acciones/editando', {
                 state: {
                     tipo: 'acciones',
@@ -325,7 +326,6 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     nombreEjeEU: datosEditandoAccion.ejeEu,
                 },
             });
-            hasNavigated.current = true;
         }
     }, [datosEditandoAccion, navigate]);
 
@@ -336,15 +336,18 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
     };
 
     const handleEdit = async (accion: DatosAccion) => {
+        hasNavigated.current = false; // Reset para permitir nueva navegación
         let hacerLlamada = true;
         const dataYearLocal = JSON.parse(sessionStorage.getItem('DataYear') || '{}');
-        if (dataYearLocal) {
+        if (dataYearLocal && dataYearLocal.plan && dataYearLocal.plan.ejesPrioritarios) {
             const eje = dataYearLocal.plan.ejesPrioritarios.find((e: Ejes) => e.Id === idEje);
-            const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${accion.id}`);
-            if (accionDelEje.datosPlan) {
-                hacerLlamada = false;
-                setIdEjeEditado(idEje);
-                setDatosEditandoAccion(accionDelEje);
+            if (eje && eje.acciones) {
+                const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${accion.id}`);
+                if (accionDelEje && accionDelEje.datosPlan) {
+                    hacerLlamada = false;
+                    setIdEjeEditado(idEje);
+                    setDatosEditandoAccion(accionDelEje);
+                }
             }
         }
         if (hacerLlamada) {

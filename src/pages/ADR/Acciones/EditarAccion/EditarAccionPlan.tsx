@@ -77,13 +77,87 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     };
 
     const handleChangeCampos = (campo: keyof DatosPlan, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        let valor = e.target.value || '';
+
+        if (campo === 'presupuesto') {
+            valor = valor.replace(/[^0-9]/g, '');
+        }
+
         setDatosEditandoAccion({
             ...datosEditandoAccion,
             datosPlan: {
                 ...datosEditandoAccion.datosPlan!,
-                [campo]: e.target.value || '',
+                [campo]: valor,
             },
         });
+    };
+
+    const handleChangeRangoAnio = (valor: string) => {
+        let valorLimpio = valor.replace(/[^0-9]/g, '');
+
+        if (valorLimpio.length > 8) {
+            valorLimpio = valorLimpio.slice(0, 8);
+        }
+        let valorFormateado = valorLimpio;
+        if (valorLimpio.length > 4) {
+            valorFormateado = `${valorLimpio.slice(0, 4)}-${valorLimpio.slice(4)}`;
+        }
+
+        setDatosEditandoAccion({
+            ...datosEditandoAccion,
+            datosPlan: {
+                ...datosEditandoAccion.datosPlan!,
+                rangoAnios: valorFormateado,
+            },
+        });
+    };
+
+    const validarRangoAnios = () => {
+        const rangoActual = datosEditandoAccion.datosPlan?.rangoAnios || '';
+
+        if (!rangoActual || rangoActual === '-' || rangoActual === '') {
+            return;
+        }
+
+        const partes = rangoActual.split('-');
+        const anioInicio = partes[0] || '';
+        const anioFin = partes[1] || '';
+
+        if (anioInicio.length !== 4 || anioFin.length !== 4) {
+            setDatosEditandoAccion({
+                ...datosEditandoAccion,
+                datosPlan: {
+                    ...datosEditandoAccion.datosPlan!,
+                    rangoAnios: '',
+                },
+            });
+            return;
+        }
+
+        const anioInicioNum = parseInt(anioInicio);
+        const anioFinNum = parseInt(anioFin);
+
+        if (anioInicioNum <= 2020 || anioFinNum <= 2020) {
+            setDatosEditandoAccion({
+                ...datosEditandoAccion,
+                datosPlan: {
+                    ...datosEditandoAccion.datosPlan!,
+                    rangoAnios: '',
+                },
+            });
+            return;
+        }
+
+        if (anioFinNum <= anioInicioNum) {
+            setDatosEditandoAccion({
+                ...datosEditandoAccion,
+                datosPlan: {
+                    ...datosEditandoAccion.datosPlan!,
+                    rangoAnios: '',
+                },
+            });
+            return;
+        }
     };
 
     const handleChangeCheckboxSupracomarcal = (supracomarcal: boolean) => {
@@ -154,7 +228,21 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                     <DivInputFieldMulti nombreInput="ejecutora" required disabled={bloqueo} camposTextos={entidades} handleBorrar={handleBorrarEntidad} handleNueva={handleNuevaEntidad} />
                     <InputField nombreInput="implicadas" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.implicadas} onChange={(e) => handleChangeCampos('implicadas', e)} />
                     {datosEditandoAccion.plurianual && (
-                        <InputField nombreInput="rangoAnios" required disabled={bloqueo} value={datosEditandoAccion.datosPlan.rangoAnios} onChange={(e) => handleChangeCampos('rangoAnios', e)} />
+                        <div className="flex-1 flex flex-col">
+                            <label className="text-sm font-medium mb-2">
+                                {t('rangoAnios')} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="2024-2028"
+                                disabled={bloqueo}
+                                maxLength={9}
+                                value={datosEditandoAccion.datosPlan.rangoAnios || ''}
+                                onChange={(e) => handleChangeRangoAnio(e.target.value)}
+                                onBlur={validarRangoAnios}
+                            />
+                        </div>
                     )}
                 </div>
                 <div className="flex gap-4">

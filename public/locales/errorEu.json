@@ -18,5 +18,9 @@
   "errorNoSePudoConectarServidor": "Ezin izan da zerbitzarira konektatu. Saiatu berriro geroago.",
   "errorPeticionIncorrecta": "Eskaera okerra. Berrikusi bidalitako datuak.",
   "errorArchivosRecibidos": "Errorea: fitxategiak ez dira jaso",
+  "errorAnioMenor2020": "Urteak 2020 baino handiagoak izan behar dira",
+  "errorAnioFinMenorInicio": "Amaiera urtea hasiera urtea baino handiagoa izan behar da",
+  "errorAnioInicioMayorFin": "Hasiera urtea amaiera urtea baino txikiagoa izan behar da",
+  "errorDebeRellenarAmbosAnios": "Tarteko bi urteak bete behar dituzu",
   "localStorageNotFound": "Error al leer usuario de localStorage"
 }

@@ -1,6 +1,6 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { TabCard } from './EditarAccionComponent';
 import { PestanaPlan } from './EditarAccionPlan';
 import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
@@ -13,7 +13,7 @@ import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../../Configuracion/
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { Boton } from '../../../../components/Utils/utils';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
-import { DropdownLineaActuaccion, ErrorFullScreen } from '../ComponentesAccionesServicios';
+import { DropdownLineaActuaccion } from '../ComponentesAccionesServicios';
 import { DatosAccion } from '../../../../types/TipadoAccion';
 import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../../components/Utils/data/dataEjes';
 import { Ejes, EjesBBDD } from '../../../../types/tipadoPlan';
@@ -49,11 +49,20 @@ const Index: React.FC = () => {
     const [successMessage, setSuccessMessage] = useState<string>('');
 
     const isFetchingRef = useRef(false);
+    const isFirstMount = useRef(true);
 
     const yearDataDir = accionAccesoria ? yearData.plan.ejesRestantes!.filter((eje: Ejes) => eje.IsAccessory) : yearData.plan.ejesPrioritarios.filter((eje: Ejes) => eje.IsPrioritarios);
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
 
     const [bloqueo, setBloqueo] = useState<{ plan: boolean; memoria: boolean; bloqueoTotal: boolean }>({ plan: true, memoria: true, bloqueoTotal: true });
+
+    // Resetear controlguardado al montar el componente (useLayoutEffect se ejecuta síncronamente antes del render)
+    useLayoutEffect(() => {
+        if (controlguardado) {
+            setControlguardado(false);
+        }
+        isFirstMount.current = true;
+    }, []);
 
     useEffect(() => {
         if (!loading && !isFetchingRef.current) {
@@ -153,19 +162,29 @@ const Index: React.FC = () => {
     }, [lineaActuaccion, datosEditandoAccion]);
 
     useEffect(() => {
-        if (controlguardado) {
+        if (controlguardado && !isFirstMount.current) {
             navigate(rutaAnterior);
+        }
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
         }
     }, [controlguardado]);
 
+    useEffect(() => {
+        if (datosEditandoAccion.datosMemoria && !datosEditandoAccion.datosMemoria.sActual) {
+            setDatosEditandoAccion({
+                ...datosEditandoAccion,
+                datosMemoria: {
+                    ...datosEditandoAccion.datosMemoria,
+                    sActual: 'Actuación en ejecución',
+                },
+            });
+        }
+    }, []);
     const { aSidoModificado, restablecer } = ComprobacionYAvisosDeCambios(datosEditandoAccion, { debounceMs: 500, message: t('object:cambioPagina') });
 
-    if (!datosEditandoAccion) {
-        return <ErrorFullScreen mensaje={t('falloAlCargarAccion')} irA={rutaAnterior} />;
-    }
-
-    if (datosEditandoAccion.id === '0') {
-        return;
+    if (!datosEditandoAccion || datosEditandoAccion.id === '0') {
+        return <Loading />;
     }
 
     const handleFinalize = () => {

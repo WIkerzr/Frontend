@@ -281,6 +281,8 @@
     "presupuestoEjecutado": "Aurrekontu gauzatua",
     "proceso": "Prozesua",
     "rangoAnios": "Urteen barrutia (plurianualtasuna)",
+    "anioInicio": "Hasiera urtea",
+    "anioFin": "Amaiera urtea",
     "ReabrirPlan": "Plana berriro ireki aurretik, memoriaren egoera zirriborroan egon behar da.",
     "reabrirPlanOMemoria": "{{zona}} {{fecha}} berriro ireki",
     "Realizacion": "Egikaritzea",
