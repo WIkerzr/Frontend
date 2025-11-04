@@ -119,17 +119,19 @@ const Index = () => {
                                         <button
                                             className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                             onClick={async () => {
-                                                let datosValidados = validarCamposPlanGestionAnual(yearData);
-                                                if (!datosValidados) {
-                                                    await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
-                                                    datosValidados = validarCamposPlanGestionAnual(yearData);
-                                                    if (!datosValidados) {
-                                                        setMensajeError(t('faltanCamposMemoriaSeguimiento'));
-                                                        return;
-                                                    }
+                                                const yearDate = await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                if (!yearDate) {
+                                                    setMensajeError(t('errorCargandoDatos'));
+                                                    return;
                                                 }
+                                                const datosValidados = validarCamposPlanGestionAnual(yearDate);
+                                                if (!datosValidados) {
+                                                    setMensajeError(t('faltanCamposMemoriaSeguimiento'));
+                                                    return;
+                                                }
+
                                                 ValidacionAnualPlanMemoria({
-                                                    yearData,
+                                                    yearData: yearDate,
                                                     editarPlan,
                                                     editarMemoria: false,
                                                     tipoPM: 'Plan',

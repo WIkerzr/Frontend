@@ -128,20 +128,22 @@ const Index = () => {
                                         <button
                                             className={`px-4 py-2 bg-primary text-white rounded flex items-center justify-center font-medium h-10 min-w-[120px]`}
                                             onClick={async () => {
-                                                let datosValidados = validarCamposMemoriaSeguimientoAnual(yearData);
-                                                if (!datosValidados) {
-                                                    await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
-                                                    datosValidados = validarCamposMemoriaSeguimientoAnual(yearData);
-                                                    if (!datosValidados) {
-                                                        setMensajeError(t('faltanCamposMemoriaSeguimiento'));
-                                                        setCamposRellenos(false);
-                                                        return;
-                                                    }
+                                                const yearDate = await llamadaBBDDYearDataAll(anioSeleccionada!, true, true);
+                                                if (!yearDate) {
+                                                    setMensajeError(t('errorCargandoDatos'));
+                                                    return;
                                                 }
+                                                const datosValidados = validarCamposMemoriaSeguimientoAnual(yearDate);
+                                                if (!datosValidados) {
+                                                    setMensajeError(t('faltanCamposMemoriaSeguimiento'));
+                                                    setCamposRellenos(false);
+                                                    return;
+                                                }
+
                                                 ValidacionAnualPlanMemoria({
-                                                    yearData,
+                                                    yearData: yearDate,
                                                     editarPlan,
-                                                    editarMemoria,
+                                                    editarMemoria: false,
                                                     tipoPM: 'Memoria',
                                                     t,
                                                     setMensajeError,
