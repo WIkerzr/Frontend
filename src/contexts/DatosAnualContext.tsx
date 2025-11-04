@@ -687,8 +687,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }
     const ProcesarYearData = (data: any, todasLasAcciones: boolean, retornarDatos: boolean, datosModificadorCompartidos: EjeBBDD2[], hacerSet = true) => {
-        const estadoPlan = data.data.Plan.Status.toLowerCase();
-        const estadoMemoria = data.data.Memoria.Status.toLowerCase();
+        const estadoPlan = (data.data?.Plan?.Status || 'borrador').toLowerCase();
+        const estadoMemoria = (data.data?.Memoria?.Status || 'borrador').toLowerCase();
         const planStatus: Estado = isEstado(estadoPlan) ? estadoPlan : 'borrador';
         const memoriaStatus: Estado = isEstado(estadoMemoria) ? estadoMemoria : 'borrador';
         const ejesPrioritarios: Ejes[] = [];

@@ -25,7 +25,7 @@ interface ResumenAcciones {
 const incrementar = (mapa: ConteoPorTipo, clave: Comarcal | string | null | undefined) => {
     if (!clave) return;
     const key = String(clave).trim();
-    if (!key || key.toLowerCase().startsWith('sin tratamiento')) return;
+    if (!key || (key || '').toLowerCase().startsWith('sin tratamiento')) return;
     mapa[key] = (mapa[key] ?? 0) + 1;
 };
 

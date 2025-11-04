@@ -463,7 +463,7 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, PantallaProp
     const { yearData } = useYear();
     const { user } = useUser();
 
-    const zona = t(pantalla.toLowerCase()).toUpperCase();
+    const zona = t((pantalla || '').toLowerCase()).toUpperCase();
     const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'proceso' : yearData.memoria.status === 'proceso';
     if (condicionPantalla && user?.role === 'HAZI') {
         return (
@@ -507,7 +507,7 @@ export const BotonReapertura = forwardRef<HTMLDivElement, PantallaProps>(({ pant
     const { yearData } = useYear();
 
     const { user } = useUser();
-    const zona = t(pantalla.toLowerCase()).toUpperCase();
+    const zona = t((pantalla || '').toLowerCase()).toUpperCase();
 
     const condicionPantalla = pantalla === 'Plan' ? yearData.plan.status === 'aceptado' : yearData.memoria.status === 'aceptado';
     if (condicionPantalla && user?.role === 'HAZI') {

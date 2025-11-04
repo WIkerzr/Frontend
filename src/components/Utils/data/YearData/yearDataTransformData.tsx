@@ -513,7 +513,7 @@ export interface Nodo {
 
 function BuscarNodoPorRuta(nodos: Nodo[], rutaBuscada?: 'Plan' | 'Memoria' | 'Firma'): Nodo | undefined {
     for (const nodo of nodos) {
-        if (rutaBuscada && nodo.RutaRelativa.toLowerCase() === rutaBuscada.toLowerCase()) {
+        if (rutaBuscada && (nodo.RutaRelativa || '').toLowerCase() === (rutaBuscada || '').toLowerCase()) {
             return nodo;
         }
         if (nodo.Hijos.length > 0) {
@@ -525,7 +525,7 @@ function BuscarNodoPorRuta(nodos: Nodo[], rutaBuscada?: 'Plan' | 'Memoria' | 'Fi
 }
 export function BuscarNodo(datosRecibidos: Nodo, rutaBuscada?: 'Plan' | 'Memoria' | 'Firma'): Nodo {
     if (!rutaBuscada) {
-        return datosRecibidos.Hijos.find((h) => h.RutaRelativa.toLowerCase() === '') ?? datosRecibidos;
+        return datosRecibidos.Hijos.find((h) => (h.RutaRelativa || '').toLowerCase() === '') ?? datosRecibidos;
     }
     return BuscarNodoPorRuta(datosRecibidos.Hijos, rutaBuscada) ?? datosRecibidos;
 }

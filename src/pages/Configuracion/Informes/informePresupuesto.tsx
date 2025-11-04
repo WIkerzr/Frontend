@@ -20,9 +20,9 @@ function parseNumber(value: string | number | null): number {
     return isNaN(n) ? 0 : n;
 }
 function normalizeFuente(raw: string): string {
-    const s = raw.trim();
+    const s = (raw || '').trim();
     if (!s) return 'No especificada';
-    const match = FUENTES_OFICIALES.find((fo) => fo.toLowerCase() === s.toLowerCase());
+    const match = FUENTES_OFICIALES.find((fo) => (fo || '').toLowerCase() === s.toLowerCase());
     return match ?? 'Otros';
 }
 interface GenerarInformePrestamoProps {

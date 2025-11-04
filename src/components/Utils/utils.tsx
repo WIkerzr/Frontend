@@ -323,7 +323,7 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
                 console.error(`500:${t('error:errorInternoServidor')}`);
                 return { mensaje: t('error:errorInternoServidor'), tipo: 'error' };
             default:
-                console.error(t('error:errorDesconocidoConCodigo'));
+                console.error(t('error:errorDesconocidoConCodigo', { codigo: error.status }));
                 return { mensaje: t('error:errorDesconocidoConCodigo', { codigo: error.status }), tipo: 'error' };
         }
     }
@@ -337,9 +337,10 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
     }
 
     if (error instanceof Error) {
-        console.error(t('error:errorGenericoConMensaje'));
+        const mensajeError = error.message || t('error:errorGenerico');
+        console.error(t('error:errorGenericoConMensaje', { mensaje: mensajeError }));
         return {
-            mensaje: t('error:errorGenericoConMensaje', { mensaje: error.message }),
+            mensaje: t('error:errorGenericoConMensaje', { mensaje: mensajeError }),
             tipo: 'error',
         };
     }
@@ -347,14 +348,14 @@ export function gestionarErrorServidor(error: unknown, data?: any): ErrorTraduci
     if (error) {
         const errorProcesando = error as FetchErrorResult;
         if (errorProcesando.data && 'ExceptionMessage' in errorProcesando.data) {
-            const ExceptionMessage = errorProcesando.data?.ExceptionMessage;
+            const ExceptionMessage = errorProcesando.data?.ExceptionMessage || t('error:errorGenerico');
             console.error(ExceptionMessage);
             return {
                 mensaje: t('error:errorGenericoConMensaje', { mensaje: ExceptionMessage }),
                 tipo: 'error',
             };
         } else if (errorProcesando.data && 'Message' in errorProcesando.data) {
-            const Message = errorProcesando.data?.Message;
+            const Message = errorProcesando.data?.Message || t('error:errorGenerico');
             console.error(Message);
             return {
                 mensaje: t('error:errorGenericoConMensaje', { mensaje: Message }),

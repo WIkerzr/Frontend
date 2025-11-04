@@ -63,9 +63,22 @@ const Index = () => {
                     message: { setErrorMessage, setSuccessMessage },
                     onSuccess: (response) => {
                         const datosRecibidos: Nodo = response.data;
-                        const archivos: Archivo[] = TransformarArchivos(datosRecibidos, 'Plan');
-                        const archivoFirma: Archivo[] = TransformarArchivos(datosRecibidos, 'Firma');
-                        const archivosCombinados: Archivo[] = [...archivos, ...archivoFirma];
+                        const archivosPlan: Archivo[] = TransformarArchivos(datosRecibidos, 'Plan');
+                        const archivosFirma: Archivo[] = TransformarArchivos(datosRecibidos, 'Firma');
+
+                        const archivosMap = new Map<string, Archivo>();
+
+                        archivosPlan.forEach((archivo) => {
+                            archivosMap.set(archivo.nombre, archivo);
+                        });
+
+                        archivosFirma.forEach((archivo) => {
+                            if (!archivosMap.has(archivo.nombre)) {
+                                archivosMap.set(archivo.nombre, archivo);
+                            }
+                        });
+
+                        const archivosCombinados: Archivo[] = Array.from(archivosMap.values());
                         setPlanGuardado(archivosCombinados);
                     },
                 });

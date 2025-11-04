@@ -49,11 +49,11 @@ const Index = () => {
         const s = search.toLowerCase();
         return users.filter(
             (user) =>
-                user.name.toLowerCase().includes(s) ||
-                user.lastName.toLowerCase().includes(s) ||
-                user.secondSurname.toLowerCase().includes(s) ||
-                user.email.toLowerCase().includes(s) ||
-                user.role.toLowerCase().includes(s)
+                (user.name || '').toLowerCase().includes(s) ||
+                (user.lastName || '').toLowerCase().includes(s) ||
+                (user.secondSurname || '').toLowerCase().includes(s) ||
+                (user.email || '').toLowerCase().includes(s) ||
+                (user.role || '').toLowerCase().includes(s)
         );
     }, [search, users]);
 

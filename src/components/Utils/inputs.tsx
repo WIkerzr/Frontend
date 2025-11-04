@@ -471,7 +471,7 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                                 tipoArchivosAceptables
                                     ? tipoArchivosAceptables.startsWith('.') || tipoArchivosAceptables.includes('/')
                                         ? tipoArchivosAceptables
-                                        : `.${tipoArchivosAceptables.toLowerCase()}`
+                                        : `.${(tipoArchivosAceptables || '').toLowerCase()}`
                                     : '*'
                             }
                             multiple={multiple}
@@ -556,7 +556,7 @@ interface MyEditableDropdownProps {
 export default function MyEditableDropdown({ options, setOpcion, placeholder, value }: MyEditableDropdownProps) {
     const optionList: OptionType[] = options.map((opt) => ({
         value: opt,
-        label: opt.charAt(0).toUpperCase() + opt.slice(1).toLowerCase(),
+        label: (opt || '').charAt(0).toUpperCase() + (opt || '').slice(1).toLowerCase(),
     }));
     const initialSelected: SingleValue<OptionType> = value != null ? optionList.find((o) => o.value === value) || { value, label: value } : null;
     const [selected, setSelected] = useState<SingleValue<OptionType>>(initialSelected);
