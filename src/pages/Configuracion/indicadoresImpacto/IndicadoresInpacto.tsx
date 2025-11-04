@@ -7,6 +7,13 @@ import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { NewModal, SeleccioneRegion } from '../../../components/Utils/utils';
+export interface Relaciones {
+    IdIndicator: string;
+    IdCategoria: string;
+    Year: number;
+    Valor: number;
+    Objetivo: string;
+}
 export interface ListIndicador {
     Id: number;
     IdIndicador: number;
@@ -21,7 +28,12 @@ export interface ListIndicador {
     alcance: string;
     datos: Dato[];
     listado: boolean;
+    LineBase?: number;
+    Year?: number;
+    ImpactType?: number;
+    Relaciones?: Relaciones;
 }
+
 export interface ListIndicadorComodin {
     IdIndicador: number;
     comodin: {
@@ -133,6 +145,16 @@ function getMinMaxYearsIndicadores(indicadores: ListIndicador[]): { minYear: num
     return { minYear, maxYear };
 }
 
+function transformarObjetivoIndicadores(indicadores: ListIndicador) {
+    if (indicadores.ImpactType && indicadores.ImpactType === 1) {
+        return 'Aumentar';
+    } else if (indicadores.ImpactType && indicadores.ImpactType === 2) {
+        return 'Disminuir';
+    } else {
+        return 'Mantener';
+    }
+}
+
 const Index = () => {
     const { t } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
@@ -181,6 +203,7 @@ const Index = () => {
                             idCategoria: item.IdCategoria,
                         });
                     }
+
                     return acc;
                 }, {} as Record<number, { nombreCategoria: string; idCategoria: number }[]>);
 
@@ -388,11 +411,95 @@ const Index = () => {
 
     const displayedRecords = indicadores.filter((fila) => fila.mostrar);
 
+    // Generar columnas de años dinámicamente
+    const yearColumns: DataTableColumn<ListIndicador>[] = yearsArray.flatMap((y, index) => [
+        //año
+        {
+            accessor: `year_label_${y}`,
+            title: 'Año',
+            width: 100,
+            cellsClassName: index % 2 === 0 ? 'bg-blue-50' : 'bg-green-50',
+            render: (record: ListIndicador, rowIndex: number) => {
+                const isEditing = editableRowIndex === rowIndex;
+                return (
+                    <div key={`year-label-${y}-${record.Id}`}>
+                        {isEditing ? (
+                            <input type="number" className="border p-1 rounded w-20" value={y} readOnly />
+                        ) : (
+                            <>
+                                <div>{y}</div>
+                            </>
+                        )}
+                    </div>
+                );
+            },
+        },
+        //valor
+        {
+            accessor: `year_valor_${y}`,
+            title: `Valor`,
+            width: 100,
+            cellsClassName: index % 2 === 0 ? 'bg-blue-50' : 'bg-green-50',
+            render: (record: ListIndicador, rowIndex: number) => {
+                const valor = record.datos?.[0]?.Valores?.find((v) => v.Year === y);
+                const isEditing = editableRowIndex === rowIndex;
+                return (
+                    <div key={`year-valor-${y}-${record.Id}`}>
+                        {isEditing ? (
+                            <input
+                                type="number"
+                                className="border p-1 rounded w-20"
+                                value={valor ? String(valor.Valor) : ''}
+                                onChange={(e) => {
+                                    handleYearValueChange(record, y, e.target.value);
+                                }}
+                            />
+                        ) : (
+                            <div>{valor ? valor.Valor : ''}</div>
+                        )}
+                    </div>
+                );
+            },
+        },
+        //objetivo
+        {
+            accessor: `year_objetivo_${y}`,
+            title: `Objetivo`,
+            width: 120,
+            cellsClassName: index % 2 === 0 ? 'bg-blue-50' : 'bg-green-50',
+            render: (record: ListIndicador, rowIndex: number) => {
+                const valor = record.datos?.[0]?.Valores?.find((v) => v.Year === y);
+                const isEditing = editableRowIndex === rowIndex;
+                return (
+                    <div key={`year-objetivo-${y}-${record.Id}`}>
+                        {isEditing ? (
+                            <select
+                                className="border p-1 rounded text-sm w-full max-w-[110px]"
+                                value={valor?.Objetivo ?? ''}
+                                onChange={(e) => {
+                                    handleYearObjetivoChange(record, y, (e.target.value as typeObjetivo) || undefined);
+                                }}
+                            >
+                                <option value="">{t('seleccionaOpciones')}</option>
+                                <option value="Aumentar">{t('aumentar')}</option>
+                                <option value="Mantener">{t('mantener')}</option>
+                                <option value="Disminuir">{t('disminuir')}</option>
+                            </select>
+                        ) : (
+                            <div className="text-sm">{valor ? valor.Objetivo ?? '' : ''}</div>
+                        )}
+                    </div>
+                );
+            },
+        },
+    ]);
+
     const columns: DataTableColumn<ListIndicador>[] = [
+        //indicador
         {
             accessor: 'indicador',
             title: 'Indicador',
-            width: 400,
+            width: 200,
             render: (record: ListIndicador, index) => {
                 const indicador = record.IndiadorNameEs;
                 const isFirst = displayedRecords.findIndex((r) => r.IndiadorNameEs === indicador) === index;
@@ -413,10 +520,11 @@ const Index = () => {
                 }
             },
         },
+        //categoria
         {
             accessor: 'categoria',
             title: 'Categoria',
-            width: 200,
+            width: 150,
             render: (record: ListIndicador) => {
                 const categoria = record.CategoriaNameEs;
                 if (categoria === 'Sin categoria') {
@@ -433,17 +541,18 @@ const Index = () => {
                 );
             },
         },
-        { accessor: 'UnitEs', title: 'Unidad de medida', width: 100 },
+        //unidad de medida
+        { accessor: 'UnitEs', title: 'Unidad de medida', width: 150 },
         {
             accessor: 'alcance',
             title: 'Alcance Territorial',
-            width: 300,
+            width: 200,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;
                 return (
                     <div>
                         {isEditing ? (
-                            <select className="border p-1 rounded" value={record.alcance ?? ''} onChange={(e) => handleChangeTerritorial(e, record)}>
+                            <select className="border p-1 rounded w-full max-w-[180px]" value={record.alcance ?? ''} onChange={(e) => handleChangeTerritorial(e, record)}>
                                 <option value="" disabled>
                                     {t('seleccionaopcion')}
                                 </option>
@@ -461,54 +570,99 @@ const Index = () => {
                 );
             },
         },
-        ...yearsArray.map((y) => ({
-            accessor: `year_${y}`,
-            title: `${y}`,
-            width: 160,
+        //año inicial
+        {
+            accessor: 'yearInicial',
+            title: 'Año Inicial',
+            width: 100,
             render: (record: ListIndicador, rowIndex: number) => {
-                const valor = record.datos?.[0]?.Valores?.find((v) => v.Year === y);
                 const isEditing = editableRowIndex === rowIndex;
+                const valorMostrar = record.Relaciones?.Year || record.Year || '';
                 return (
-                    <div className="min-h-[40px]">
+                    <div>
                         {isEditing ? (
-                            <div className="flex flex-col">
-                                <input
-                                    type="number"
-                                    className="border p-1 rounded mb-1"
-                                    value={valor ? String(valor.Valor) : ''}
-                                    onChange={(e) => {
-                                        handleYearValueChange(record, y, e.target.value);
-                                    }}
-                                />
-                                <select
-                                    className="border p-1 rounded text-sm"
-                                    value={valor?.Objetivo ?? ''}
-                                    onChange={(e) => {
-                                        handleYearObjetivoChange(record, y, (e.target.value as typeObjetivo) || undefined);
-                                    }}
-                                >
-                                    <option value="">{t('seleccionaOpciones')}</option>
-                                    <option value="Aumentar">{t('aumentar')}</option>
-                                    <option value="Mantener">{t('mantener')}</option>
-                                    <option value="Disminuir">{t('disminuir')}</option>
-                                </select>
-                            </div>
+                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} />
                         ) : (
                             <>
-                                <div>{valor ? valor.Valor : ''}</div>
-                                <div className="text-sm text-gray-500">{valor ? valor.Objetivo ?? '' : ''}</div>
+                                <div>{valorMostrar}</div>
                             </>
                         )}
                     </div>
                 );
             },
-        })),
-        { accessor: 'valorFinal', title: 'valorFinal', width: 60 },
-
+        },
+        //Valor Inicial
+        {
+            accessor: 'valorInicial',
+            title: 'Valor Inicial',
+            width: 100,
+            render: (record: ListIndicador, rowIndex: number) => {
+                const isEditing = editableRowIndex === rowIndex;
+                const valorMostrar = record.Relaciones?.Valor || record.LineBase || '';
+                return (
+                    <div>
+                        {isEditing ? (
+                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} />
+                        ) : (
+                            <>
+                                <div>{valorMostrar}</div>
+                            </>
+                        )}
+                    </div>
+                );
+            },
+        },
+        //Objetivo Inicial
+        {
+            accessor: 'objetivoInicial',
+            title: 'Objetivo Inicial',
+            width: 120,
+            render: (record: ListIndicador, rowIndex: number) => {
+                const isEditing = editableRowIndex === rowIndex;
+                const valorMostrar = record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record);
+                return (
+                    <div>
+                        {isEditing ? (
+                            <select className="border p-1 rounded text-sm" value={valorMostrar}>
+                                <option value="">{t('seleccionaOpciones')}</option>
+                                <option value="Aumentar">{t('aumentar')}</option>
+                                <option value="Mantener">{t('mantener')}</option>
+                                <option value="Disminuir">{t('disminuir')}</option>
+                            </select>
+                        ) : (
+                            <>
+                                <div>{valorMostrar}</div>
+                            </>
+                        )}
+                    </div>
+                );
+            },
+        },
+        ...yearColumns,
+        {
+            accessor: 'valorFinal',
+            title: 'Valor Final',
+            width: 100,
+            render: (record: ListIndicador, rowIndex: number) => {
+                const isEditing = editableRowIndex === rowIndex;
+                const valor = record.datos?.[record.datos.length - 1]?.Valores[record.datos[record.datos.length - 1].Valores.length - 1];
+                return (
+                    <div>
+                        {isEditing ? (
+                            <input type="number" className="border p-1 rounded w-20" value={valor?.Valor ?? ''} />
+                        ) : (
+                            <>
+                                <div>{valor?.Valor ?? ''}</div>
+                            </>
+                        )}
+                    </div>
+                );
+            },
+        },
         {
             accessor: 'acciones',
             title: t('Acciones'),
-            width: 130,
+            width: 180,
             render: (record: ListIndicador, index) => {
                 const isFirst = displayedRecords.findIndex((r) => r.IndiadorNameEs === record.IndiadorNameEs) === index;
 
@@ -518,11 +672,21 @@ const Index = () => {
                             <button
                                 className="bg-success text-white px-2 py-1 rounded"
                                 onClick={() => {
+                                    const relaciones: Relaciones = {
+                                        IdIndicator: String(record.IdIndicador),
+                                        IdCategoria: String(record.IdCategoria),
+                                        Year: record.Relaciones?.Year || record.Year || 0,
+                                        Valor: record.Relaciones?.Valor || record.LineBase || 0,
+                                        Objetivo: record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record) || '',
+                                    };
+                                    const body = record;
+                                    body.Relaciones = relaciones;
+
                                     setEditableRowIndex(null);
                                     LlamadasBBDD({
                                         method: 'POST',
                                         url: `/indicators/edit/${regionSeleccionada}`,
-                                        body: record,
+                                        body: body,
                                         setLoading: setLoading ?? (() => {}),
                                         onSuccess(response) {
                                             const data = response.data as { parentId: number; valores: Valor[] };
@@ -646,7 +810,11 @@ const Index = () => {
                     </div>
                 </div>
             </NewModal>
-            <DataTable<ListIndicador> records={displayedRecords} columns={columns} withRowBorders={false} withColumnBorders striped highlightOnHover minHeight={200} />
+            <div className="overflow-x-auto w-full">
+                <div style={{ minWidth: 'max-content' }}>
+                    <DataTable<ListIndicador> records={displayedRecords} columns={columns} idAccessor="Id" withRowBorders={false} withColumnBorders striped highlightOnHover minHeight={200} />
+                </div>
+            </div>
             {/* <DataTable<Indicador> records={indicadores} columns={columns} withRowBorders={false} withColumnBorders striped highlightOnHover minHeight={200} /> */}
         </div>
     );
