@@ -357,7 +357,7 @@ export const GeneracionDelDocumentoWordPlan = async (
         const url = URL.createObjectURL(out);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${t('Plan')}_${datos.year}_${datos.nombreRegion}`;
+        a.download = `${t('PlanG')}_${datos.year}_${datos.nombreRegion}`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
@@ -682,7 +682,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
         const url = URL.createObjectURL(out);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${t('Memoria')}_${datos.year}_${datos.nombreRegion}`;
+        a.download = `${t('MemoriaSA')}_${datos.year}_${datos.nombreRegion}`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
