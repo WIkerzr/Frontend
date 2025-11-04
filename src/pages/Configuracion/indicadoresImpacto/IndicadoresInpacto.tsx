@@ -409,6 +409,75 @@ const Index = () => {
         );
     };
 
+    const handleChangeYearInicial = (record: ListIndicador, value: string) => {
+        const IdCategoria = record.IdCategoria;
+        const IdIndicador = record.IdIndicador;
+        setIndicadores((prev) =>
+            prev.map((item) => {
+                if (item.IdIndicador === IdIndicador && item.IdCategoria === IdCategoria) {
+                    return {
+                        ...item,
+                        Relaciones: {
+                            ...item.Relaciones,
+                            IdIndicator: String(item.IdIndicador),
+                            IdCategoria: String(item.IdCategoria),
+                            Year: Number(value) || 0,
+                            Valor: item.Relaciones?.Valor || item.LineBase || 0,
+                            Objetivo: item.Relaciones?.Objetivo || transformarObjetivoIndicadores(item) || '',
+                        },
+                    };
+                }
+                return item;
+            })
+        );
+    };
+
+    const handleChangeValorInicial = (record: ListIndicador, value: string) => {
+        const IdCategoria = record.IdCategoria;
+        const IdIndicador = record.IdIndicador;
+        setIndicadores((prev) =>
+            prev.map((item) => {
+                if (item.IdIndicador === IdIndicador && item.IdCategoria === IdCategoria) {
+                    return {
+                        ...item,
+                        Relaciones: {
+                            ...item.Relaciones,
+                            IdIndicator: String(item.IdIndicador),
+                            IdCategoria: String(item.IdCategoria),
+                            Year: item.Relaciones?.Year || item.Year || 0,
+                            Valor: Number(value) || 0,
+                            Objetivo: item.Relaciones?.Objetivo || transformarObjetivoIndicadores(item) || '',
+                        },
+                    };
+                }
+                return item;
+            })
+        );
+    };
+
+    const handleChangeObjetivoInicial = (record: ListIndicador, value: string) => {
+        const IdCategoria = record.IdCategoria;
+        const IdIndicador = record.IdIndicador;
+        setIndicadores((prev) =>
+            prev.map((item) => {
+                if (item.IdIndicador === IdIndicador && item.IdCategoria === IdCategoria) {
+                    return {
+                        ...item,
+                        Relaciones: {
+                            ...item.Relaciones,
+                            IdIndicator: String(item.IdIndicador),
+                            IdCategoria: String(item.IdCategoria),
+                            Year: item.Relaciones?.Year || item.Year || 0,
+                            Valor: item.Relaciones?.Valor || item.LineBase || 0,
+                            Objetivo: value,
+                        },
+                    };
+                }
+                return item;
+            })
+        );
+    };
+
     const displayedRecords = indicadores.filter((fila) => fila.mostrar);
 
     // Generar columnas de años dinámicamente
@@ -581,7 +650,12 @@ const Index = () => {
                 return (
                     <div>
                         {isEditing ? (
-                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} />
+                            <input 
+                                type="number" 
+                                className="border p-1 rounded w-20" 
+                                value={valorMostrar} 
+                                onChange={(e) => handleChangeYearInicial(record, e.target.value)}
+                            />
                         ) : (
                             <>
                                 <div>{valorMostrar}</div>
@@ -602,7 +676,12 @@ const Index = () => {
                 return (
                     <div>
                         {isEditing ? (
-                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} />
+                            <input 
+                                type="number" 
+                                className="border p-1 rounded w-20" 
+                                value={valorMostrar} 
+                                onChange={(e) => handleChangeValorInicial(record, e.target.value)}
+                            />
                         ) : (
                             <>
                                 <div>{valorMostrar}</div>
@@ -623,7 +702,11 @@ const Index = () => {
                 return (
                     <div>
                         {isEditing ? (
-                            <select className="border p-1 rounded text-sm" value={valorMostrar}>
+                            <select 
+                                className="border p-1 rounded text-sm" 
+                                value={valorMostrar}
+                                onChange={(e) => handleChangeObjetivoInicial(record, e.target.value)}
+                            >
                                 <option value="">{t('seleccionaOpciones')}</option>
                                 <option value="Aumentar">{t('aumentar')}</option>
                                 <option value="Mantener">{t('mantener')}</option>
