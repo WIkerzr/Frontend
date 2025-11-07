@@ -63,9 +63,43 @@ const generarInformeResumen = (datos: DatoEje[], i18n: { language: string }): Re
     return Array.from(mapa.values());
 };
 
-export const generarInformeAcciones = async (anios: RegionAnio[], t: TFunction<'translation'>, i18n: { language: string }, anioSeleccionado: string) => {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Informe de Acciones');
+export const generarInformeAcciones = async (
+    anios: RegionAnio[],
+    t: TFunction<'translation'>,
+    i18n: { language: string },
+    anioSeleccionado: string,
+    worksheet?: ExcelJS.Worksheet,
+    workbook?: ExcelJS.Workbook,
+    metadatos?: {
+        nombreInforme: string;
+        anio: string;
+        regiones: string;
+        fechaHora: string;
+    }
+) => {
+    const workbookInterno = workbook || new ExcelJS.Workbook();
+    const sheet = worksheet || workbookInterno.addWorksheet('Informe de Acciones');
+
+    if (metadatos) {
+        const filaInforme = sheet.addRow([metadatos.nombreInforme]);
+        filaInforme.getCell(1).font = { bold: true, size: 16 };
+        filaInforme.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+        sheet.mergeCells(`A${filaInforme.number}:F${filaInforme.number}`);
+
+        const filaAnio = sheet.addRow([`${t('Ano')}: ${metadatos.anio}`]);
+        filaAnio.getCell(1).font = { bold: true };
+        sheet.mergeCells(`A${filaAnio.number}:F${filaAnio.number}`);
+
+        const filaRegiones = sheet.addRow([`${t('comarcas')}: ${metadatos.regiones}`]);
+        filaRegiones.getCell(1).font = { bold: true };
+        sheet.mergeCells(`A${filaRegiones.number}:F${filaRegiones.number}`);
+
+        const filaFecha = sheet.addRow([`${t('fecha')}: ${metadatos.fechaHora}`]);
+        filaFecha.getCell(1).font = { bold: true };
+        sheet.mergeCells(`A${filaFecha.number}:F${filaFecha.number}`);
+
+        sheet.addRow([]);
+    }
 
     sheet.columns = [
         { header: t('comarca'), key: 'RegionId', width: 20 },
@@ -99,9 +133,11 @@ export const generarInformeAcciones = async (anios: RegionAnio[], t: TFunction<'
     sheet.eachRow((row) => (row.alignment = { vertical: 'middle', horizontal: 'center' }));
     sheet.columns.forEach((col) => (col.alignment = { horizontal: 'center' }));
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-    saveAs(blob, `${t('InfAcciones')}${anioSeleccionado}.xlsx`);
+    if (!workbook) {
+        const buffer = await workbookInterno.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        saveAs(blob, `${t('InfAcciones')}${anioSeleccionado}.xlsx`);
+    }
 };

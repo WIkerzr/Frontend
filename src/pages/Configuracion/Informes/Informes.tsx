@@ -14,6 +14,8 @@ import { generarInformeAcciones } from './informeAcciones';
 import { generarInformeTratamientoComarcal } from './InformesTratamientoComarcal';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useUser } from '../../../contexts/UserContext';
+import ExcelJS from 'exceljs';
+import saveAs from 'file-saver';
 
 export type Informes = 'InfObjetivos' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfPresupuestos';
 
@@ -103,30 +105,55 @@ const Index = () => {
         if (anioSeleccionado === 'TODOS') {
             try {
                 setLoading(true);
+
+                const workbook = new ExcelJS.Workbook();
+
+                // Preparar información de filtros
+                const regionesNombres = regionesEnDropdow.map((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs)).join(', ');
+                const metadatos = {
+                    nombreInforme: t(informeSeleccionado),
+                    anio: 'TODOS',
+                    regiones: regionesNombres || t('todasLasComarcas'),
+                    fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
+                };
+
                 for (const y of anios.map(String)) {
                     const data = await callForYear(y);
                     if (!data) continue;
                     sessionStorage.setItem('lastInformeData', JSON.stringify(data));
+
+                    const worksheet = workbook.addWorksheet(`Año ${y}`);
+
+                    // Actualizar metadatos con el año específico
+                    const metadatosAnio = { ...metadatos, anio: y };
+
                     if (informeSeleccionado === 'InfObjetivos') {
-                        GenerarInformeObjetivos({
+                        await GenerarInformeObjetivos({
                             realizacion: data.response.indicadoresRealizacion,
                             resultado: data.response.indicadoresResultado,
                             servicios: data.response.indicadoresServicios,
                             ListadoNombresIdicadoresSegunADR,
                             t,
                             anioSeleccionado: y,
+                            worksheet,
+                            workbook,
+                            metadatos: metadatosAnio,
                         });
                     }
                     if (informeSeleccionado === 'InfAcciones') {
-                        generarInformeAcciones(data.data, t, i18n, y);
+                        await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio);
                     }
                     if (informeSeleccionado === 'InfTratamientoComarcal') {
-                        generarInformeTratamientoComarcal(data.data, t, y);
+                        await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
                     }
                     if (informeSeleccionado === 'InfPresupuestos') {
-                        GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y });
+                        await GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y, worksheet, workbook, metadatos: metadatosAnio });
                     }
                 }
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                saveAs(blob, `Informe_${informeSeleccionado}_Todos_los_años.xlsx`);
             } finally {
                 setLoading(false);
             }

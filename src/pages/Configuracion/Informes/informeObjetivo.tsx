@@ -5,8 +5,23 @@ import { IndicadorRealizacionAccionDTO, IndicadorResultadoAccionDTO } from '../.
 import { TiposDeIndicadores } from '../../../types/Indicadores';
 import { ConvertirIndicadoresServicioAAccionDTO, MemorizarResultadoFuncion } from '../../../components/Utils/utils';
 import { IndicadoresServiciosDTO } from '../../../types/GeneralTypes';
+import i18n from '../../../i18n';
 
 export type ListadoNombresIdicadoresItem = { id: number; nombre: string; idsResultados?: number[] | undefined };
+
+interface IndicadorRealizacionConNombre extends IndicadorRealizacionAccionDTO {
+    IndicadorRealizacion?: {
+        NameEs?: string;
+        NameEu?: string;
+    };
+}
+
+interface IndicadorResultadoConNombre extends IndicadorResultadoAccionDTO {
+    IndicadorResultado?: {
+        NameEs?: string;
+        NameEu?: string;
+    };
+}
 
 interface ColumnasAccionDTO {
     Nombre: string;
@@ -23,7 +38,8 @@ interface ColumnasAccionDTO {
 const CreacionDatosIndicador = (
     indicador: IndicadorRealizacionAccionDTO[] | IndicadorResultadoAccionDTO[],
     tipo: TiposDeIndicadores,
-    listadoNombres: ListadoNombresIdicadoresItem[]
+    listadoNombres: ListadoNombresIdicadoresItem[],
+    idioma: string
 ): ColumnasAccionDTO[] => {
     const filasIndicador: ColumnasAccionDTO[] = [];
     indicador = ProcesarIndicadores(indicador);
@@ -31,17 +47,31 @@ const CreacionDatosIndicador = (
     for (const r of indicador) {
         let nombre = '';
         if (tipo === 'realizacion') {
-            const realizacion = r as IndicadorRealizacionAccionDTO;
-            if (realizacion.IndicadorRealizacionId === 10) {
-                console.log(r.NameEs);
+            const realizacion = r as IndicadorRealizacionConNombre;
+            const nombreEncontrado = listadoNombres.find((re) => re.id === realizacion.IndicadorRealizacionId)?.nombre;
+            if (nombreEncontrado) {
+                nombre = nombreEncontrado;
+            } else {
+                const indicador = realizacion.IndicadorRealizacion;
+                if (indicador) {
+                    nombre = idioma === 'eu' ? indicador.NameEu || indicador.NameEs || `id-${realizacion.IndicadorRealizacionId}` : indicador.NameEs || `id-${realizacion.IndicadorRealizacionId}`;
+                } else {
+                    nombre = `id-${realizacion.IndicadorRealizacionId}`;
+                }
             }
-            nombre = listadoNombres.find((re) => re.id === realizacion.IndicadorRealizacionId)?.nombre ?? `id-${realizacion.IndicadorRealizacionId}`;
         } else if (tipo === 'resultado') {
-            const resultado = r as IndicadorResultadoAccionDTO;
-            if (resultado.IndicadorResultadoId === 11) {
-                console.log(r.NameEs);
+            const resultado = r as IndicadorResultadoConNombre;
+            const nombreEncontrado = listadoNombres.find((re) => re.id === resultado.IndicadorResultadoId)?.nombre;
+            if (nombreEncontrado) {
+                nombre = nombreEncontrado;
+            } else {
+                const indicador = resultado.IndicadorResultado;
+                if (indicador) {
+                    nombre = idioma === 'eu' ? indicador.NameEu || indicador.NameEs || `id-${resultado.IndicadorResultadoId}` : indicador.NameEs || `id-${resultado.IndicadorResultadoId}`;
+                } else {
+                    nombre = `id-${resultado.IndicadorResultadoId}`;
+                }
             }
-            nombre = listadoNombres.find((re) => re.id === resultado.IndicadorResultadoId)?.nombre ?? `id-${resultado.IndicadorResultadoId}`;
         }
 
         const indexExiste = filasIndicador.findIndex((f) => f.Nombre === nombre);
@@ -85,6 +115,14 @@ interface GenerarInformeObjetivosProps {
     ListadoNombresIdicadoresSegunADR: (tipoIndicador: TiposDeIndicadores) => ListadoNombresIdicadoresItem[];
     t: TFunction<'translation'>;
     anioSeleccionado: string;
+    worksheet?: ExcelJS.Worksheet;
+    workbook?: ExcelJS.Workbook;
+    metadatos?: {
+        nombreInforme: string;
+        anio: string;
+        regiones: string;
+        fechaHora: string;
+    };
     // resultados: IndicadorResultadoAccionDTO[];
 }
 function calcularPorcentaje(ejecutado?: string, meta?: string): number {
@@ -92,7 +130,17 @@ function calcularPorcentaje(ejecutado?: string, meta?: string): number {
     return Math.round((Number(ejecutado) / Number(meta)) * 100);
 }
 
-export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicios, ListadoNombresIdicadoresSegunADR, t, anioSeleccionado }: GenerarInformeObjetivosProps): Promise<void> => {
+export const GenerarInformeObjetivos = async ({
+    realizacion,
+    resultado,
+    servicios,
+    ListadoNombresIdicadoresSegunADR,
+    t,
+    anioSeleccionado,
+    worksheet,
+    workbook,
+    metadatos,
+}: GenerarInformeObjetivosProps): Promise<void> => {
     const ListadoCached = MemorizarResultadoFuncion(async (tipo: TiposDeIndicadores) => Promise.resolve(ListadoNombresIdicadoresSegunADR(tipo)));
     const nombresRealizacion: ListadoNombresIdicadoresItem[] = await ListadoCached('realizacion');
     const nombresResultado: ListadoNombresIdicadoresItem[] = await ListadoCached('resultado');
@@ -101,12 +149,12 @@ export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicio
     realizacion.push(...serviciosConvertidos.indicadoreRealizacion);
     resultado.push(...serviciosConvertidos.indicadoreResultado);
 
-    const filasIndicadorRealizacion: ColumnasAccionDTO[] = CreacionDatosIndicador(realizacion, 'realizacion', nombresRealizacion);
-    const filasIndicadorResultado: ColumnasAccionDTO[] = CreacionDatosIndicador(resultado, 'resultado', nombresResultado);
+    const idiomaActual = i18n.language;
+    const filasIndicadorRealizacion: ColumnasAccionDTO[] = CreacionDatosIndicador(realizacion, 'realizacion', nombresRealizacion, idiomaActual);
+    const filasIndicadorResultado: ColumnasAccionDTO[] = CreacionDatosIndicador(resultado, 'resultado', nombresResultado, idiomaActual);
 
-    //crear workbook
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Informe Objetivos');
+    const workbookInterno = workbook || new ExcelJS.Workbook();
+    const sheet = worksheet || workbookInterno.addWorksheet('Informe Objetivos');
 
     const Columnas = [
         { header: 'Nombre del indicador', key: 'Nombre_del_indicador', width: 40 },
@@ -126,6 +174,27 @@ export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicio
         style: { alignment: { wrapText: false } },
     }));
     sheet.spliceRows(1, 1);
+
+    if (metadatos) {
+        const filaInforme = sheet.addRow([metadatos.nombreInforme, '', '', '', '', '', '', '', '', '']);
+        sheet.mergeCells(`A${filaInforme.number}:J${filaInforme.number}`);
+        filaInforme.getCell(1).font = { bold: true, size: 16 };
+        filaInforme.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+
+        const filaAnio = sheet.addRow([`${t('Ano')}: ${metadatos.anio}`, '', '', '', '', '', '', '', '', '']);
+        sheet.mergeCells(`A${filaAnio.number}:J${filaAnio.number}`);
+        filaAnio.getCell(1).font = { bold: true };
+
+        const filaRegiones = sheet.addRow([`${t('comarcas')}: ${metadatos.regiones}`, '', '', '', '', '', '', '', '', '']);
+        sheet.mergeCells(`A${filaRegiones.number}:J${filaRegiones.number}`);
+        filaRegiones.getCell(1).font = { bold: true };
+
+        const filaFecha = sheet.addRow([`${t('fecha')}: ${metadatos.fechaHora}`, '', '', '', '', '', '', '', '', '']);
+        sheet.mergeCells(`A${filaFecha.number}:J${filaFecha.number}`);
+        filaFecha.getCell(1).font = { bold: true };
+
+        sheet.addRow([]);
+    }
 
     function genFilasIndicadores(indicadores: ColumnasAccionDTO[], titulo: string) {
         const filaTitulo = sheet.addRow([titulo]);
@@ -198,11 +267,13 @@ export const GenerarInformeObjetivos = async ({ realizacion, resultado, servicio
     sheet.addRow([]);
     genFilasIndicadores(filasIndicadorResultado, t('indicadoresDeResultado'));
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-    saveAs(blob, `${t('InfObjetivos')}${anioSeleccionado}.xlsx`);
+    if (!workbook) {
+        const buffer = await workbookInterno.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        saveAs(blob, `${t('InfObjetivos')}${anioSeleccionado}.xlsx`);
+    }
 };
 
 function ProcesarIndicadores(indicador: IndicadorRealizacionAccionDTO[] | IndicadorResultadoAccionDTO[]) {

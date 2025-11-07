@@ -41,9 +41,50 @@ const generarInformeTratamientoComarcalResumen = (datos: DatosAccionDTOLiderAcci
     return resumen;
 };
 
-export const generarInformeTratamientoComarcal = async (datos: DatosAccionDTOLiderAccion[], t: TFunction<'translation'>, anioSeleccionado: string) => {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Informe de Acciones');
+export const generarInformeTratamientoComarcal = async (
+    datos: DatosAccionDTOLiderAccion[],
+    t: TFunction<'translation'>,
+    anioSeleccionado: string,
+    worksheet?: ExcelJS.Worksheet,
+    workbook?: ExcelJS.Workbook,
+    metadatos?: {
+        nombreInforme: string;
+        anio: string;
+        regiones: string;
+        fechaHora: string;
+    }
+) => {
+    const workbookInterno = workbook || new ExcelJS.Workbook();
+    const sheet = worksheet || workbookInterno.addWorksheet('Informe de Acciones');
+
+    if (metadatos) {
+        const filaInforme = sheet.addRow([]);
+        sheet.mergeCells(`A${filaInforme.number}:C${filaInforme.number}`);
+        const celdaInforme = sheet.getCell(`A${filaInforme.number}`);
+        celdaInforme.value = metadatos.nombreInforme;
+        celdaInforme.font = { bold: true, size: 16 };
+        celdaInforme.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        const filaAnio = sheet.addRow([]);
+        sheet.mergeCells(`A${filaAnio.number}:C${filaAnio.number}`);
+        const celdaAnio = sheet.getCell(`A${filaAnio.number}`);
+        celdaAnio.value = `${t('Ano')}: ${metadatos.anio}`;
+        celdaAnio.font = { bold: true };
+
+        const filaRegiones = sheet.addRow([]);
+        sheet.mergeCells(`A${filaRegiones.number}:C${filaRegiones.number}`);
+        const celdaRegiones = sheet.getCell(`A${filaRegiones.number}`);
+        celdaRegiones.value = `${t('comarcas')}: ${metadatos.regiones}`;
+        celdaRegiones.font = { bold: true };
+
+        const filaFecha = sheet.addRow([]);
+        sheet.mergeCells(`A${filaFecha.number}:C${filaFecha.number}`);
+        const celdaFecha = sheet.getCell(`A${filaFecha.number}`);
+        celdaFecha.value = `${t('fecha')}: ${metadatos.fechaHora}`;
+        celdaFecha.font = { bold: true };
+
+        sheet.addRow([]);
+    }
 
     const acciones = generarInformeTratamientoComarcalResumen(datos);
 
@@ -68,9 +109,11 @@ export const generarInformeTratamientoComarcal = async (datos: DatosAccionDTOLid
 
     sheet.getColumn('A').width = 40;
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-    saveAs(blob, `${t('InfTratamientoComarcal')}${anioSeleccionado}.xlsx`);
+    if (!workbook) {
+        const buffer = await workbookInterno.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        saveAs(blob, `${t('InfTratamientoComarcal')}${anioSeleccionado}.xlsx`);
+    }
 };

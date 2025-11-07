@@ -29,8 +29,16 @@ interface GenerarInformePrestamoProps {
     resultados: Resultado[];
     t: TFunction<'translation'>;
     anioSeleccionado: string;
+    worksheet?: ExcelJS.Worksheet;
+    workbook?: ExcelJS.Workbook;
+    metadatos?: {
+        nombreInforme: string;
+        anio: string;
+        regiones: string;
+        fechaHora: string;
+    };
 }
-export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado }: GenerarInformePrestamoProps): Promise<void> => {
+export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado, worksheet, workbook, metadatos }: GenerarInformePrestamoProps): Promise<void> => {
     // 1) Agregar llave para normalizar nombres de fuente y sumar por fuente
     const mapa: Record<string, number> = {};
     for (const f of FUENTES_OFICIALES) mapa[f] = 0;
@@ -63,9 +71,29 @@ export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado }
         }
     }
 
-    // crear workbook
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Informe Presupuestos');
+    const workbookInterno = workbook || new ExcelJS.Workbook();
+    const sheet = worksheet || workbookInterno.addWorksheet('Informe Presupuestos');
+
+    if (metadatos) {
+        const filaInforme = sheet.addRow([metadatos.nombreInforme]);
+        filaInforme.getCell(1).font = { bold: true, size: 16 };
+        filaInforme.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+        sheet.mergeCells(`A${filaInforme.number}:C${filaInforme.number}`);
+
+        const filaAnio = sheet.addRow([`${t('Ano')}: ${metadatos.anio}`]);
+        filaAnio.getCell(1).font = { bold: true };
+        sheet.mergeCells(`A${filaAnio.number}:C${filaAnio.number}`);
+
+        const filaRegiones = sheet.addRow([`${t('comarcas')}: ${metadatos.regiones}`]);
+        filaRegiones.getCell(1).font = { bold: true };
+        sheet.mergeCells(`A${filaRegiones.number}:C${filaRegiones.number}`);
+
+        const filaFecha = sheet.addRow([`${t('fecha')}: ${metadatos.fechaHora}`]);
+        filaFecha.getCell(1).font = { bold: true };
+        sheet.mergeCells(`A${filaFecha.number}:C${filaFecha.number}`);
+
+        sheet.addRow([]);
+    }
 
     sheet.columns = [
         { header: t('object:infFuentes'), key: 'fuente', width: 35 },
@@ -108,10 +136,11 @@ export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado }
         to: { row: header.number, column: 3 },
     };
 
-    // descargar
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-    saveAs(blob, `${t('object:infPresupuestos')}${anioSeleccionado}.xlsx`);
+    if (!workbook) {
+        const buffer = await workbookInterno.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        saveAs(blob, `${t('object:infPresupuestos')}${anioSeleccionado}.xlsx`);
+    }
 };
