@@ -166,6 +166,7 @@
     "faltanCamposPlanGestion": "Urteko kudeaketa planaren eremuak falta dira",
     "faltanCamposServicios": "Zerbitzuen eremuak falta dira",
     "faltanEnviarAntesPlan": "Ezin da memoria bidali plana aurrez bidali gabe",
+    "noHayArchivos": "LGEk ez du dokumenturik erantsi",
     "faltaPorSeleccionarEjesPrioritarios": "Lehentasunezko ardatzak hautatzeko falta da",
     "finalizar": "{{zona}} amaitu",
     "finalizarYEnviar": "{{zona}} amaitu eta bidali",
