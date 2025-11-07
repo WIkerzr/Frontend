@@ -7,6 +7,7 @@ import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { NewModal, SeleccioneRegion } from '../../../components/Utils/utils';
+import { useUser } from '../../../contexts/UserContext';
 export interface Relaciones {
     IdIndicator: string;
     IdCategoria: string;
@@ -158,6 +159,8 @@ function transformarObjetivoIndicadores(indicadores: ListIndicador) {
 const Index = () => {
     const { t } = useTranslation();
     const { regionSeleccionada } = useRegionContext();
+    const { user } = useUser();
+    const permisosEditar = user?.role === 'ADR';
     const [indicadoresOriginales, setIndicadoresOriginales] = useState<Record<string, ListIndicador[]>>({});
 
     const [showModal, setShowModal] = useState(false);
@@ -690,11 +693,18 @@ const Index = () => {
             width: 100,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;
-                const valorMostrar = record.Relaciones?.Valor || record.LineBase || '';
+                const valorOriginal = record.Relaciones?.Valor ?? record.LineBase ?? '';
+
+                // Convertir valor a numérico si es posible
+                const valorNumerico = typeof valorOriginal === 'number' ? valorOriginal : !isNaN(Number(valorOriginal)) && valorOriginal !== '' ? Number(valorOriginal) : null;
+
+                // Si no hay permisos y el valor no es numérico, mostrar vacío
+                const valorMostrar = !permisosEditar && valorNumerico === null ? '' : valorNumerico ?? valorOriginal;
+
                 return (
                     <div>
                         {isEditing ? (
-                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} onChange={(e) => handleChangeValorInicial(record, e.target.value)} />
+                            <input type="number" className="border p-1 rounded w-20" value={valorNumerico ?? ''} onChange={(e) => handleChangeValorInicial(record, e.target.value)} />
                         ) : (
                             <>
                                 <div>{valorMostrar}</div>
@@ -751,97 +761,101 @@ const Index = () => {
                 );
             },
         },
-        {
-            accessor: 'acciones',
-            title: t('Acciones'),
-            width: 180,
-            render: (record: ListIndicador, index) => {
-                const isFirst = displayedRecords.findIndex((r) => r.IndiadorNameEs === record.IndiadorNameEs) === index;
+        ...(permisosEditar
+            ? [
+                  {
+                      accessor: 'acciones',
+                      title: t('Acciones'),
+                      width: 180,
+                      render: (record: ListIndicador, index: number) => {
+                          const isFirst = displayedRecords.findIndex((r) => r.IndiadorNameEs === record.IndiadorNameEs) === index;
 
-                if ((isFirst && record.CategoriaNameEs) || record.CategoriaNameEs) {
-                    if (editableRowIndex === index) {
-                        return (
-                            <div className="flex gap-2 w-full">
-                                <button
-                                    className="bg-success text-white px-2 py-1 rounded"
-                                    onClick={() => {
-                                        const relaciones: Relaciones = {
-                                            IdIndicator: String(record.IdIndicador),
-                                            IdCategoria: String(record.IdCategoria),
-                                            Year: record.Relaciones?.Year || record.Year || 0,
-                                            Valor: record.Relaciones?.Valor || record.LineBase || 0,
-                                            Objetivo: record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record) || '',
-                                        };
-                                        const body = record;
-                                        body.Relaciones = relaciones;
+                          if ((isFirst && record.CategoriaNameEs) || record.CategoriaNameEs) {
+                              if (editableRowIndex === index) {
+                                  return (
+                                      <div className="flex gap-2 w-full">
+                                          <button
+                                              className="bg-success text-white px-2 py-1 rounded"
+                                              onClick={() => {
+                                                  const relaciones: Relaciones = {
+                                                      IdIndicator: String(record.IdIndicador),
+                                                      IdCategoria: String(record.IdCategoria),
+                                                      Year: record.Relaciones?.Year || record.Year || 0,
+                                                      Valor: record.Relaciones?.Valor || record.LineBase || 0,
+                                                      Objetivo: record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record) || '',
+                                                  };
+                                                  const body = record;
+                                                  body.Relaciones = relaciones;
 
-                                        setEditableRowIndex(null);
-                                        LlamadasBBDD({
-                                            method: 'POST',
-                                            url: `/indicators/edit/${regionSeleccionada}`,
-                                            body: body,
-                                            setLoading: setLoading ?? (() => {}),
-                                            onSuccess(response) {
-                                                const data = response.data as { parentId: number; valores: Valor[] };
-                                                setIndicadores((prev) =>
-                                                    prev.map((item) =>
-                                                        item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
-                                                            ? {
-                                                                  ...item,
-                                                                  datos: item.datos.map((d, idx) =>
-                                                                      idx === 0
-                                                                          ? {
-                                                                                ...d,
-                                                                                Id: data.parentId,
-                                                                                Valores: data.valores,
-                                                                            }
-                                                                          : d
-                                                                  ),
-                                                              }
-                                                            : item
-                                                    )
-                                                );
-                                            },
-                                        });
-                                    }}
-                                >
-                                    {t('guardar')}
-                                </button>
-                                <button
-                                    className="bg-warning text-white px-2 py-1 rounded"
-                                    onClick={() => {
-                                        setEditableRowIndex(null);
-                                        if (indicadoresOriginales[regionSeleccionada]) {
-                                            const datosOriginales = indicadoresOriginales[regionSeleccionada].find(
-                                                (item) => item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
-                                            );
-                                            if (datosOriginales) {
-                                                setIndicadores((prev) =>
-                                                    prev.map((item) => (item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria ? { ...datosOriginales } : item))
-                                                );
-                                            }
-                                        }
-                                    }}
-                                >
-                                    {t('cancelar')}
-                                </button>
-                            </div>
-                        );
-                    } else {
-                        return (
-                            <div className="flex gap-2 w-full">
-                                <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
-                                    {t('editar')}
-                                </button>
-                                <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index, record)}>
-                                    {t('Eliminar')}
-                                </button>
-                            </div>
-                        );
-                    }
-                }
-            },
-        },
+                                                  setEditableRowIndex(null);
+                                                  LlamadasBBDD({
+                                                      method: 'POST',
+                                                      url: `/indicators/edit/${regionSeleccionada}`,
+                                                      body: body,
+                                                      setLoading: setLoading ?? (() => {}),
+                                                      onSuccess(response) {
+                                                          const data = response.data as { parentId: number; valores: Valor[] };
+                                                          setIndicadores((prev) =>
+                                                              prev.map((item) =>
+                                                                  item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
+                                                                      ? {
+                                                                            ...item,
+                                                                            datos: item.datos.map((d, idx) =>
+                                                                                idx === 0
+                                                                                    ? {
+                                                                                          ...d,
+                                                                                          Id: data.parentId,
+                                                                                          Valores: data.valores,
+                                                                                      }
+                                                                                    : d
+                                                                            ),
+                                                                        }
+                                                                      : item
+                                                              )
+                                                          );
+                                                      },
+                                                  });
+                                              }}
+                                          >
+                                              {t('guardar')}
+                                          </button>
+                                          <button
+                                              className="bg-warning text-white px-2 py-1 rounded"
+                                              onClick={() => {
+                                                  setEditableRowIndex(null);
+                                                  if (indicadoresOriginales[regionSeleccionada]) {
+                                                      const datosOriginales = indicadoresOriginales[regionSeleccionada].find(
+                                                          (item) => item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
+                                                      );
+                                                      if (datosOriginales) {
+                                                          setIndicadores((prev) =>
+                                                              prev.map((item) => (item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria ? { ...datosOriginales } : item))
+                                                          );
+                                                      }
+                                                  }
+                                              }}
+                                          >
+                                              {t('cancelar')}
+                                          </button>
+                                      </div>
+                                  );
+                              } else {
+                                  return (
+                                      <div className="flex gap-2 w-full">
+                                          <button className="bg-primary text-white px-2 py-1 rounded" onClick={() => setEditableRowIndex(index)}>
+                                              {t('editar')}
+                                          </button>
+                                          <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarFila(index, record)}>
+                                              {t('Eliminar')}
+                                          </button>
+                                      </div>
+                                  );
+                              }
+                          }
+                      },
+                  } as DataTableColumn<ListIndicador>,
+              ]
+            : []),
     ];
 
     return (
@@ -859,9 +873,11 @@ const Index = () => {
                 // </button>
                 // }
             />
-            <button type="button" className="btn btn-primary w-1/4 " onClick={() => setShowModal(true)}>
-                {t('NuevoIndicador')}
-            </button>
+            {permisosEditar && (
+                <button type="button" className="btn btn-primary w-1/4 " onClick={() => setShowModal(true)}>
+                    {t('NuevoIndicador')}
+                </button>
+            )}
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('NuevoIndicador')}>
                 <div className="flex justify-center mt-4">
                     <div className="flex flex-col gap-4 items-center">
