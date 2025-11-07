@@ -63,6 +63,7 @@ export const LlamadaBBDDActualizarMemoria = async (
         DSeguimiento: body.dSeguimiento,
         ValFinal: body.valFinal,
         GeneralOperationADR: convertirGeneralOperationADR,
+        ValGeneral: body.valGeneral,
     };
 
     LlamadasBBDD({

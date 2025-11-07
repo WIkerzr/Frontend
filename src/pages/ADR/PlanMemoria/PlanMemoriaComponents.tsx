@@ -146,6 +146,13 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
         message: t('object:cambioPagina'),
     });
 
+    const handleChangeValGeneral = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setDataMemoria({
+            ...dataMemoria,
+            valGeneral: e.target.value || '',
+        });
+    };
+
     useEffect(() => {
         if (guardado) {
             if (pantalla === 'Plan') {
@@ -166,8 +173,8 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                     dSeguimiento: dataMemoria.dSeguimiento,
                     valFinal: dataMemoria.dSeguimiento,
                     generalOperationADR: dataPlan.generalOperationADR,
+                    valGeneral: dataMemoria.valGeneral,
                 };
-                console.log(Number(regionSeleccionada));
 
                 LlamadaBBDDActualizarMemoria(Number(regionSeleccionada), anioSeleccionada!, setLoading, { setErrorMessage, setSuccessMessage }, dataPlan.generalOperationADR, dataMemoriaConGOADR);
                 setYearData({
@@ -203,6 +210,12 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                 timeDelay={false}
             />
             <Campos campo="proceso" mostrar={pantalla === 'Plan'} plan={planProps} memoria={memoriaProps} t={t} />
+            {pantalla === 'Memoria' && (
+                <div>
+                    <label>*{t('ValGeneral')}</label>
+                    <textarea name={'ValGeneral'} className="w-full border rounded p-2 h-[114px] resize-y" value={dataMemoria.valGeneral ?? ''} onChange={(e) => handleChangeValGeneral(e)} />
+                </div>
+            )}
             <div className="panel">
                 <span className="text-xl  font-semibold text-gray-700 tracking-wide block mb-2">{t('funcionamientoGeneral')}</span>
                 <div className="mb-[10px]">

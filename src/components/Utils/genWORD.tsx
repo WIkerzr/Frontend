@@ -485,6 +485,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
             nComarca: datos.nombreRegion ?? '',
             anioComarca: datos.year ?? '',
             //2.
+            valGeneral: datos.memoria.valGeneral ?? '',
             //3.
             tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks ?? '',
             indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({

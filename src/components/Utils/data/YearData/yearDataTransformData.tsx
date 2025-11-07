@@ -499,6 +499,7 @@ export const construirYearData = (
             status: memoriaStatus as Estado,
             dSeguimiento: data.Memoria.DSeguimiento,
             valFinal: data.Memoria.ValFinal,
+            valGeneral: data.Memoria.ValGeneral,
         },
         servicios,
     };

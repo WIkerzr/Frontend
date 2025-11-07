@@ -127,17 +127,20 @@ export interface Memoria {
     status: Estado;
     dSeguimiento: string;
     valFinal: string;
+    valGeneral: string;
 }
 export interface MemoriaLlamadaGestion {
     id: string;
     dSeguimiento: string;
     valFinal: string;
+    valGeneral: string;
     generalOperationADR: GeneralOperationADR;
 }
 export interface MemoriaDTO {
     Id: string;
     DSeguimiento: string;
     ValFinal: string;
+    ValGeneral: string;
     GeneralOperationADR: GeneralOperationADRDTOMemoria;
     Status?: boolean;
 }
@@ -208,6 +211,7 @@ export const yearIniciadoVacio: YearData = {
         status: 'borrador',
         dSeguimiento: '',
         valFinal: '',
+        valGeneral: '',
     },
     accionesAccesorias: [],
     servicios: [],
