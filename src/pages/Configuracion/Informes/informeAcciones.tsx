@@ -18,17 +18,26 @@ interface ResumenEje {
     RegionId: string;
     NombreEje: string;
     NumeroAcciones: number;
-    NumeroObjetivos: number;
-    NumeroGenerales: number;
-    NumeroSectoriales: number;
 }
+
+interface ResumenObjetivo {
+    NombreObjetivo: string;
+    NumeroAcciones: number;
+}
+
 interface RegionAnio {
     RegionId: number;
     Anio: number;
     Datos: DatoEje[];
 }
 
-const generarInformeResumen = (datos: DatoEje[], i18n: { language: string }): ResumenEje[] => {
+interface RegionInfo {
+    RegionId: string | number;
+    NameEs: string;
+    NameEu: string;
+}
+
+const generarInformeResumenComarcaEje = (datos: DatoEje[], i18n: { language: string }, regiones: RegionInfo[]): ResumenEje[] => {
     const mapa = new Map<string, ResumenEje>();
 
     for (const item of datos) {
@@ -36,28 +45,38 @@ const generarInformeResumen = (datos: DatoEje[], i18n: { language: string }): Re
         let resumen = mapa.get(key);
 
         if (!resumen) {
+            const region = regiones.find((r) => r.RegionId.toString() === item.RegionId.toString());
+            const nombreRegion = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : item.RegionId;
+
             resumen = {
-                RegionId: item.RegionId,
+                RegionId: nombreRegion,
                 NombreEje: i18n.language === 'es' ? item.NombreEje : item.IzenaEje,
                 NumeroAcciones: item.NumeroAcciones,
-                NumeroObjetivos: 0,
-                NumeroGenerales: 0,
-                NumeroSectoriales: 0,
             };
             mapa.set(key, resumen);
         }
     }
 
-    for (const [key, resumen] of mapa.entries()) {
-        const [regionId, ejeId] = key.split('-');
-        const registros = datos.filter((d) => d.RegionId === regionId && d.EjeId === Number(ejeId));
+    return Array.from(mapa.values());
+};
 
-        const objetivos = new Set(registros.map((o) => o.ObjetivoId));
-        resumen.NumeroObjetivos = objetivos.size;
+const generarInformeResumenObjetivos = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1): ResumenObjetivo[] => {
+    const mapa = new Map<number, ResumenObjetivo>();
 
-        resumen.NumeroGenerales = new Set(registros.filter((o) => o.AxisType === 0).map((o) => o.ObjetivoId)).size;
+    const datosFiltrados = datos.filter((d) => d.AxisType === tipoEje);
 
-        resumen.NumeroSectoriales = new Set(registros.filter((o) => o.AxisType === 1).map((o) => o.ObjetivoId)).size;
+    for (const item of datosFiltrados) {
+        let resumen = mapa.get(item.ObjetivoId);
+
+        if (!resumen) {
+            resumen = {
+                NombreObjetivo: i18n.language === 'es' ? item.NombreObjetivo : item.IzenaObjetivo,
+                NumeroAcciones: item.NumeroAcciones,
+            };
+            mapa.set(item.ObjetivoId, resumen);
+        } else {
+            resumen.NumeroAcciones += item.NumeroAcciones;
+        }
     }
 
     return Array.from(mapa.values());
@@ -75,7 +94,8 @@ export const generarInformeAcciones = async (
         anio: string;
         regiones: string;
         fechaHora: string;
-    }
+    },
+    regiones?: RegionInfo[]
 ) => {
     const workbookInterno = workbook || new ExcelJS.Workbook();
     const sheet = worksheet || workbookInterno.addWorksheet('Informe de Acciones');
@@ -101,14 +121,23 @@ export const generarInformeAcciones = async (
         sheet.addRow([]);
     }
 
+    // Tabla 1: COMARCA | EJE | ACCIONES
+    const filaTitulo1 = sheet.addRow([i18n.language === 'es' ? 'RESUMEN POR COMARCA Y EJE' : 'LABURPENA ESKUALDEKA ETA ARDATZEKA']);
+    sheet.mergeCells(`A${filaTitulo1.number}:C${filaTitulo1.number}`);
+    filaTitulo1.getCell(1).font = { bold: true, size: 14 };
+    filaTitulo1.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+
     sheet.columns = [
-        { header: t('comarca'), key: 'RegionId', width: 20 },
+        { header: t('comarca'), key: 'RegionId', width: 30 },
         { header: t('Eje'), key: 'NombreEje', width: 40 },
         { header: t('Acciones'), key: 'NumeroAcciones', width: 15 },
-        { header: t('Objetivos'), key: 'NumeroObjetivos', width: 15 },
-        { header: t('Generales'), key: 'NumeroGenerales', width: 15 },
-        { header: t('Sectoriales'), key: 'NumeroSectoriales', width: 15 },
     ];
+
+    const filaEncabezado1 = sheet.addRow([t('comarca'), t('Eje'), t('Acciones')]);
+    filaEncabezado1.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
 
     const datosPorAnio = anios.reduce((acc, item) => {
         if (!acc[item.Anio]) acc[item.Anio] = [];
@@ -118,20 +147,80 @@ export const generarInformeAcciones = async (
 
     for (const anioStr in datosPorAnio) {
         const fila = sheet.addRow([anioStr]);
-        sheet.mergeCells(`A${fila.number}:F${fila.number}`);
-        fila.font = { bold: true, size: 14 };
+        sheet.mergeCells(`A${fila.number}:C${fila.number}`);
+        fila.font = { bold: true, size: 12 };
+        fila.alignment = { horizontal: 'center', vertical: 'middle' };
 
         for (let index = 0; index < anios.length; index++) {
             const datos = anios[index].Datos;
-
-            const resumenes = generarInformeResumen(datos, i18n);
+            const resumenes = generarInformeResumenComarcaEje(datos, i18n, regiones || []);
             resumenes.forEach((r) => sheet.addRow(r));
         }
     }
 
-    sheet.getRow(1).font = { bold: true };
-    sheet.eachRow((row) => (row.alignment = { vertical: 'middle', horizontal: 'center' }));
-    sheet.columns.forEach((col) => (col.alignment = { horizontal: 'center' }));
+    sheet.addRow([]);
+    sheet.addRow([]);
+
+    // Tabla 2: OBJETIVOS GENERALES | ACCIONES
+    const filaTitulo2 = sheet.addRow([i18n.language === 'es' ? 'OBJETIVOS GENERALES' : 'HELBURU OROKORRAK']);
+    sheet.mergeCells(`A${filaTitulo2.number}:C${filaTitulo2.number}`);
+    filaTitulo2.getCell(1).font = { bold: true, size: 14 };
+    filaTitulo2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const filaEncabezado2 = sheet.addRow([i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones'), '']);
+    filaEncabezado2.getCell(1).font = { bold: true };
+    filaEncabezado2.getCell(2).font = { bold: true };
+    filaEncabezado2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaEncabezado2.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    for (const anioStr in datosPorAnio) {
+        const fila = sheet.addRow([anioStr]);
+        sheet.mergeCells(`A${fila.number}:C${fila.number}`);
+        fila.font = { bold: true, size: 12 };
+        fila.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        for (let index = 0; index < anios.length; index++) {
+            const datos = anios[index].Datos;
+            const resumenesGenerales = generarInformeResumenObjetivos(datos, i18n, 0);
+            resumenesGenerales.forEach((r) => {
+                sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
+            });
+        }
+    }
+
+    sheet.addRow([]);
+    sheet.addRow([]);
+
+    // Tabla 3: OBJETIVOS SECTORIALES | ACCIONES
+    const filaTitulo3 = sheet.addRow([i18n.language === 'es' ? 'OBJETIVOS SECTORIALES' : 'SEKTORE HELBURUAK']);
+    sheet.mergeCells(`A${filaTitulo3.number}:C${filaTitulo3.number}`);
+    filaTitulo3.getCell(1).font = { bold: true, size: 14 };
+    filaTitulo3.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const filaEncabezado3 = sheet.addRow([i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones'), '']);
+    filaEncabezado3.getCell(1).font = { bold: true };
+    filaEncabezado3.getCell(2).font = { bold: true };
+    filaEncabezado3.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaEncabezado3.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    for (const anioStr in datosPorAnio) {
+        const fila = sheet.addRow([anioStr]);
+        sheet.mergeCells(`A${fila.number}:C${fila.number}`);
+        fila.font = { bold: true, size: 12 };
+        fila.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        for (let index = 0; index < anios.length; index++) {
+            const datos = anios[index].Datos;
+            const resumenesSectoriales = generarInformeResumenObjetivos(datos, i18n, 1);
+            resumenesSectoriales.forEach((r) => {
+                sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
+            });
+        }
+    }
+
+    sheet.eachRow((row) => {
+        row.alignment = { vertical: 'middle', horizontal: 'left' };
+    });
 
     if (!workbook) {
         const buffer = await workbookInterno.xlsx.writeBuffer();

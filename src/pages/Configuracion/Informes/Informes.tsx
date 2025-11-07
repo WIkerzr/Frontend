@@ -198,7 +198,7 @@ const Index = () => {
                             });
                         }
                         if (informeSeleccionado === 'InfAcciones') {
-                            await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio);
+                            await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio, regionesEnDropdow);
                         }
                         if (informeSeleccionado === 'InfTratamientoComarcal') {
                             await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
@@ -284,7 +284,7 @@ const Index = () => {
                     });
                 }
                 if (informeSeleccionado === 'InfAcciones') {
-                    generarInformeAcciones(data.data, t, i18n, anioSeleccionado);
+                    generarInformeAcciones(data.data, t, i18n, anioSeleccionado, undefined, undefined, undefined, regionesEnDropdow);
                 }
                 if (informeSeleccionado === 'InfTratamientoComarcal') {
                     generarInformeTratamientoComarcal(data.data, t, anioSeleccionado);
