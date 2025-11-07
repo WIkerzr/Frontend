@@ -160,8 +160,6 @@ const Index = () => {
     const { regionSeleccionada } = useRegionContext();
     const [indicadoresOriginales, setIndicadoresOriginales] = useState<Record<string, ListIndicador[]>>({});
 
-    // const nuevosIndicadores = convertirIndicadores(listadoIndicadoresImpacto);
-
     const [showModal, setShowModal] = useState(false);
 
     const [indicadores, setIndicadores] = useState<ListIndicador[]>([]);
@@ -170,17 +168,46 @@ const Index = () => {
     const [categoriaSeleccionado, setCategoriaSeleccionado] = useState<number>(0);
 
     const [indicadoresComodin, setIndicadoresComodin] = useState<ListIndicadorComodin[]>([]);
+
+    const [aniosHabilitados, setAniosHabilitados] = useState<number[]>([]);
+
     let aniosIndicadores = getMinMaxYearsIndicadores(indicadores) || { minYear: 2025, maxYear: 2025 };
     const aniosRegion = sessionStorage.getItem('aniosRegion');
     if (aniosRegion && !aniosIndicadores) {
         const aniosParsed = JSON.parse(aniosRegion) as { RegionId: number; Years: number[] }[];
         aniosIndicadores = getMinMaxYears(aniosParsed) || aniosIndicadores;
     }
-    const yearsArray: number[] = aniosIndicadores ? Array.from({ length: aniosIndicadores.maxYear - aniosIndicadores.minYear + 1 }, (_, i) => aniosIndicadores.minYear + i) : [];
+
+    const yearsArray: number[] =
+        aniosHabilitados.length > 0
+            ? aniosHabilitados.sort((a, b) => a - b)
+            : aniosIndicadores
+            ? Array.from({ length: aniosIndicadores.maxYear - aniosIndicadores.minYear + 1 }, (_, i) => aniosIndicadores.minYear + i)
+            : [];
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
+
+    useEffect(() => {
+        LlamadasBBDD({
+            method: 'GET',
+            url: 'impactIndicatorYears',
+            setLoading: () => {},
+            setSuccessMessage: () => {},
+            setErrorMessage: () => {},
+            onSuccess: (data: { data: { Id: number; Year: number; Status: boolean }[] }) => {
+                const aniosActivos = data.data
+                    .filter((year) => year.Status === true)
+                    .map((year) => year.Year)
+                    .sort((a, b) => a - b);
+                setAniosHabilitados(aniosActivos);
+            },
+            onError: () => {
+                console.warn('No se pudieron cargar los años habilitados de indicadores de impacto');
+            },
+        });
+    }, []);
 
     useEffect(() => {
         setIndicadoresOriginales({});
@@ -244,12 +271,8 @@ const Index = () => {
                         listIndex.listado = true;
                     }
                 }
-                // const listadoMostrado = listadoCompleto.filter((f) => f.mostrar === true);
                 setIndicadores(listadoCompleto);
                 setIndicadoresOriginales((prev) => ({ ...prev, [regionSeleccionada]: listadoCompleto }));
-
-                // console.log(listadoMostrado);
-                // console.log(listadoCompleto.filter((f) => f.listado));
             },
         });
     }, [regionSeleccionada]);
@@ -650,12 +673,7 @@ const Index = () => {
                 return (
                     <div>
                         {isEditing ? (
-                            <input 
-                                type="number" 
-                                className="border p-1 rounded w-20" 
-                                value={valorMostrar} 
-                                onChange={(e) => handleChangeYearInicial(record, e.target.value)}
-                            />
+                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} onChange={(e) => handleChangeYearInicial(record, e.target.value)} />
                         ) : (
                             <>
                                 <div>{valorMostrar}</div>
@@ -676,12 +694,7 @@ const Index = () => {
                 return (
                     <div>
                         {isEditing ? (
-                            <input 
-                                type="number" 
-                                className="border p-1 rounded w-20" 
-                                value={valorMostrar} 
-                                onChange={(e) => handleChangeValorInicial(record, e.target.value)}
-                            />
+                            <input type="number" className="border p-1 rounded w-20" value={valorMostrar} onChange={(e) => handleChangeValorInicial(record, e.target.value)} />
                         ) : (
                             <>
                                 <div>{valorMostrar}</div>
@@ -702,11 +715,7 @@ const Index = () => {
                 return (
                     <div>
                         {isEditing ? (
-                            <select 
-                                className="border p-1 rounded text-sm" 
-                                value={valorMostrar}
-                                onChange={(e) => handleChangeObjetivoInicial(record, e.target.value)}
-                            >
+                            <select className="border p-1 rounded text-sm" value={valorMostrar} onChange={(e) => handleChangeObjetivoInicial(record, e.target.value)}>
                                 <option value="">{t('seleccionaOpciones')}</option>
                                 <option value="Aumentar">{t('aumentar')}</option>
                                 <option value="Mantener">{t('mantener')}</option>
@@ -752,51 +761,71 @@ const Index = () => {
                 if ((isFirst && record.CategoriaNameEs) || record.CategoriaNameEs) {
                     if (editableRowIndex === index) {
                         return (
-                            <button
-                                className="bg-success text-white px-2 py-1 rounded"
-                                onClick={() => {
-                                    const relaciones: Relaciones = {
-                                        IdIndicator: String(record.IdIndicador),
-                                        IdCategoria: String(record.IdCategoria),
-                                        Year: record.Relaciones?.Year || record.Year || 0,
-                                        Valor: record.Relaciones?.Valor || record.LineBase || 0,
-                                        Objetivo: record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record) || '',
-                                    };
-                                    const body = record;
-                                    body.Relaciones = relaciones;
+                            <div className="flex gap-2 w-full">
+                                <button
+                                    className="bg-success text-white px-2 py-1 rounded"
+                                    onClick={() => {
+                                        const relaciones: Relaciones = {
+                                            IdIndicator: String(record.IdIndicador),
+                                            IdCategoria: String(record.IdCategoria),
+                                            Year: record.Relaciones?.Year || record.Year || 0,
+                                            Valor: record.Relaciones?.Valor || record.LineBase || 0,
+                                            Objetivo: record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record) || '',
+                                        };
+                                        const body = record;
+                                        body.Relaciones = relaciones;
 
-                                    setEditableRowIndex(null);
-                                    LlamadasBBDD({
-                                        method: 'POST',
-                                        url: `/indicators/edit/${regionSeleccionada}`,
-                                        body: body,
-                                        setLoading: setLoading ?? (() => {}),
-                                        onSuccess(response) {
-                                            const data = response.data as { parentId: number; valores: Valor[] };
-                                            setIndicadores((prev) =>
-                                                prev.map((item) =>
-                                                    item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
-                                                        ? {
-                                                              ...item,
-                                                              datos: item.datos.map((d, idx) =>
-                                                                  idx === 0
-                                                                      ? {
-                                                                            ...d,
-                                                                            Id: data.parentId,
-                                                                            Valores: data.valores,
-                                                                        }
-                                                                      : d
-                                                              ),
-                                                          }
-                                                        : item
-                                                )
+                                        setEditableRowIndex(null);
+                                        LlamadasBBDD({
+                                            method: 'POST',
+                                            url: `/indicators/edit/${regionSeleccionada}`,
+                                            body: body,
+                                            setLoading: setLoading ?? (() => {}),
+                                            onSuccess(response) {
+                                                const data = response.data as { parentId: number; valores: Valor[] };
+                                                setIndicadores((prev) =>
+                                                    prev.map((item) =>
+                                                        item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
+                                                            ? {
+                                                                  ...item,
+                                                                  datos: item.datos.map((d, idx) =>
+                                                                      idx === 0
+                                                                          ? {
+                                                                                ...d,
+                                                                                Id: data.parentId,
+                                                                                Valores: data.valores,
+                                                                            }
+                                                                          : d
+                                                                  ),
+                                                              }
+                                                            : item
+                                                    )
+                                                );
+                                            },
+                                        });
+                                    }}
+                                >
+                                    {t('guardar')}
+                                </button>
+                                <button
+                                    className="bg-warning text-white px-2 py-1 rounded"
+                                    onClick={() => {
+                                        setEditableRowIndex(null);
+                                        if (indicadoresOriginales[regionSeleccionada]) {
+                                            const datosOriginales = indicadoresOriginales[regionSeleccionada].find(
+                                                (item) => item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria
                                             );
-                                        },
-                                    });
-                                }}
-                            >
-                                {t('guardar')}
-                            </button>
+                                            if (datosOriginales) {
+                                                setIndicadores((prev) =>
+                                                    prev.map((item) => (item.IdIndicador === record.IdIndicador && item.IdCategoria === record.IdCategoria ? { ...datosOriginales } : item))
+                                                );
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {t('cancelar')}
+                                </button>
+                            </div>
                         );
                     } else {
                         return (
