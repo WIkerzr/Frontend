@@ -149,12 +149,17 @@ const Index = () => {
     return (
         <div className="flex flex-col gap-4 panel items-center justify-center">
             <LoadingOverlayPersonalizada isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
-            <BotonNuevoAnio btnAnioNew={btnAnioNew} setLoading={setLoading} setErrorMessage={setErrorMessage} setSuccessMessage={setSuccessMessage} />
+            <div className="flex flex-col gap-4 w-full max-w-md">
+                <div>
+                    <h3 className="text-lg font-semibold mb-1">{t('genAnio')}</h3>
+                </div>
+                <BotonNuevoAnio btnAnioNew={btnAnioNew} setLoading={setLoading} setErrorMessage={setErrorMessage} setSuccessMessage={setSuccessMessage} />
+            </div>
 
             <div className="flex flex-col gap-4 w-full max-w-md">
                 <div>
-                    <h3 className="text-lg font-semibold mb-1">Años para Indicadores de Impacto</h3>
-                    <p className="text-sm text-gray-500 mb-3">Seleccione los años que estarán disponibles en los indicadores de impacto</p>
+                    <h3 className="text-lg font-semibold mb-1">{t('yearsIndicadoresImpacto')}</h3>
+                    <p className="text-sm text-gray-500 mb-3">{t('yearsIndicadoresImpactoDescription')}</p>
                 </div>
 
                 <div className="flex flex-col gap-2">
