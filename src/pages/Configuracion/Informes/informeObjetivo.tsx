@@ -9,6 +9,30 @@ import i18n from '../../../i18n';
 
 export type ListadoNombresIdicadoresItem = { id: number; nombre: string; idsResultados?: number[] | undefined };
 
+export const crearGeneradorNombresUnicos = () => {
+    const nombresUsados = new Set<string>();
+
+    const sanitizarNombrePestana = (nombre: string): string => {
+        return nombre.replace(/[*?:\\/[\]]/g, '-').substring(0, 31);
+    };
+
+    const obtenerNombreUnico = (nombreBase: string): string => {
+        let nombre = sanitizarNombrePestana(nombreBase);
+        let contador = 1;
+        const nombreOriginal = nombre;
+
+        while (nombresUsados.has(nombre)) {
+            nombre = `${nombreOriginal.substring(0, 28)}-${contador}`;
+            contador++;
+        }
+
+        nombresUsados.add(nombre);
+        return nombre;
+    };
+
+    return { obtenerNombreUnico };
+};
+
 interface IndicadorRealizacionConNombre extends IndicadorRealizacionAccionDTO {
     IndicadorRealizacion?: {
         NameEs?: string;
@@ -209,6 +233,10 @@ export const GenerarInformeObjetivos = async ({
             cell.font = { bold: true };
             cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
         });
+
+        let cumplidos = 0;
+        const totalIndicadores = indicadores.length;
+
         indicadores.forEach((re) => {
             const fila = sheet.addRow({
                 Nombre_del_indicador: re.Nombre,
@@ -257,9 +285,28 @@ export const GenerarInformeObjetivos = async ({
                         pattern: 'solid',
                         fgColor: { argb: 'FFC6EFCE' },
                     };
+
+                    if (colKey === 'Grado_de_ejecución_Total') {
+                        cumplidos++;
+                    }
                 }
             });
         });
+
+        if (totalIndicadores > 0) {
+            const porcentajeCumplimiento = Math.round((cumplidos / totalIndicadores) * 100);
+            const filaPorcentaje = sheet.addRow(['', '', '', '', '', '', '', '', '', `${cumplidos}/${totalIndicadores} (${porcentajeCumplimiento}%)`]);
+
+            const celdaPorcentaje = filaPorcentaje.getCell('Grado_de_ejecución_Total');
+            celdaPorcentaje.font = { bold: true };
+            celdaPorcentaje.alignment = { horizontal: 'center', vertical: 'middle' };
+
+            sheet.mergeCells(`A${filaPorcentaje.number}:I${filaPorcentaje.number}`);
+            const celdaTexto = filaPorcentaje.getCell(1);
+            celdaTexto.value = 'Porcentaje de cumplimiento';
+            celdaTexto.font = { bold: true };
+            celdaTexto.alignment = { horizontal: 'right', vertical: 'middle' };
+        }
     }
 
     genFilasIndicadores(filasIndicadorRealizacion, t('indicadoresDeRealizacion'));

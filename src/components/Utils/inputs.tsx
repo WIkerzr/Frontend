@@ -702,7 +702,7 @@ export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ infor
     const { t } = useTranslation();
 
     return (
-        <div className="w-[450px]">
+        <div className="w-[850px]">
             <label className="block mb-1">{t('SeleccionTipoInforme')}</label>
             <select className="w-full border rounded p-2 resize-y" value={informeSeleccionado} onChange={(e) => setInformeSeleccionado(e.target.value as Informes)}>
                 {tiposInformes.map((informe) => (
