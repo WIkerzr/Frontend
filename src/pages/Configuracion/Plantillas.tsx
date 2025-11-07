@@ -26,6 +26,11 @@ const Index = () => {
     const [plantillaMemoriaEs, setPlantillaMemoriaEs] = useState<File[]>([]);
     const [plantillaMemoriaEu, setPlantillaMemoriaEu] = useState<File[]>([]);
 
+    const [isPlanEsOriginal, setIsPlanEsOriginal] = useState<boolean>(true);
+    const [isPlanEuOriginal, setIsPlanEuOriginal] = useState<boolean>(true);
+    const [isMemoriaEsOriginal, setIsMemoriaEsOriginal] = useState<boolean>(true);
+    const [isMemoriaEuOriginal, setIsMemoriaEuOriginal] = useState<boolean>(true);
+
     const [primeraLlamada, setPrimeraLlamada] = useState<boolean>(true);
 
     useEffect(() => {
@@ -38,7 +43,17 @@ const Index = () => {
             setSuccessMessage,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onSuccess: async (data: any) => {
-                await onSuccessFillFiles(data, setPlantillaPlanEs, setPlantillaPlanEu, setPlantillaMemoriaEs, setPlantillaMemoriaEu);
+                await onSuccessFillFiles(
+                    data,
+                    setPlantillaPlanEs,
+                    setPlantillaPlanEu,
+                    setPlantillaMemoriaEs,
+                    setPlantillaMemoriaEu,
+                    setIsPlanEsOriginal,
+                    setIsPlanEuOriginal,
+                    setIsMemoriaEsOriginal,
+                    setIsMemoriaEuOriginal
+                );
                 setPrimeraLlamada(false);
             },
             onError: () => {
@@ -110,9 +125,23 @@ const Index = () => {
 
     const handleGuardar = async () => {
         const formData = new FormData();
-        const archivos = [plantillaPlanEs, plantillaPlanEu, plantillaMemoriaEs, plantillaMemoriaEu].flat();
-        archivos.forEach((file) => {
-            formData.append('files', file);
+
+        const archivosAGuardar: { file: File; slot: string; isOriginal: boolean }[] = [
+            { file: plantillaPlanEs[0], slot: 'planES', isOriginal: isPlanEsOriginal },
+            { file: plantillaPlanEu[0], slot: 'planEU', isOriginal: isPlanEuOriginal },
+            { file: plantillaMemoriaEs[0], slot: 'memoriaEs', isOriginal: isMemoriaEsOriginal },
+            { file: plantillaMemoriaEu[0], slot: 'memoriaEu', isOriginal: isMemoriaEuOriginal },
+        ];
+
+        const archivosNoOriginales = archivosAGuardar.filter((item) => item.file && !item.isOriginal);
+
+        if (archivosNoOriginales.length === 0) {
+            setSuccessMessage('No hay plantillas personalizadas para guardar');
+            return;
+        }
+
+        archivosNoOriginales.forEach((item) => {
+            formData.append(item.slot, item.file);
         });
 
         setLoading(true);
@@ -144,21 +173,103 @@ const Index = () => {
         }
     };
 
+    const handleRestaurarPlantilla = async (tipo: 'planES' | 'planEU' | 'memoriaEs' | 'memoriaEu') => {
+        const mapping = {
+            planES: { setter: setPlantillaPlanEs, original: plantillasOriginales[0], setOriginal: setIsPlanEsOriginal },
+            planEU: { setter: setPlantillaPlanEu, original: plantillasOriginales[1], setOriginal: setIsPlanEuOriginal },
+            memoriaEs: { setter: setPlantillaMemoriaEs, original: plantillasOriginales[2], setOriginal: setIsMemoriaEsOriginal },
+            memoriaEu: { setter: setPlantillaMemoriaEu, original: plantillasOriginales[3], setOriginal: setIsMemoriaEuOriginal },
+        };
+
+        const config = mapping[tipo];
+
+        try {
+            setLoading(true);
+
+            const file = await convertirPlantillaAFileValidado(config.original.url, config.original.name);
+            config.setter([file]);
+            config.setOriginal(true);
+
+            const accessToken = sessionStorage.getItem('access_token');
+            const res = await fetch(`${ApiTarget}/plantillas/delete/${tipo}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            if (!res.ok) {
+                console.warn(`No se pudo eliminar la plantilla del backend: ${res.status}`);
+            }
+
+            setSuccessMessage('Plantilla restaurada correctamente');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            setErrorMessage(`Error al restaurar plantilla: ${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-4 panel items-center justify-center">
             <LoadingOverlayPersonalizada isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
             <div className=" panel">
                 <span className="text-center block text-xl">{t('plantillasPlanes')}</span>
                 <div className="flex gap-4">
-                    <AdjuntarArchivos files={plantillaPlanEs} setFiles={setPlantillaPlanEs} title={t('plantillaPlanEs')} borrar={false} btnPlantillas={true} />
-                    <AdjuntarArchivos files={plantillaPlanEu} setFiles={setPlantillaPlanEu} title={t('plantillaPlanEu')} borrar={false} btnPlantillas={true} />
+                    <AdjuntarArchivos
+                        files={plantillaPlanEs}
+                        setFiles={(files) => {
+                            setPlantillaPlanEs(files);
+                            if (files.length > 0) setIsPlanEsOriginal(false);
+                        }}
+                        title={t('plantillaPlanEs')}
+                        borrar={false}
+                        btnPlantillas={true}
+                        onRestaurar={() => handleRestaurarPlantilla('planES')}
+                        hideRestaurar={isPlanEsOriginal}
+                    />
+                    <AdjuntarArchivos
+                        files={plantillaPlanEu}
+                        setFiles={(files) => {
+                            setPlantillaPlanEu(files);
+                            if (files.length > 0) setIsPlanEuOriginal(false);
+                        }}
+                        title={t('plantillaPlanEu')}
+                        borrar={false}
+                        btnPlantillas={true}
+                        onRestaurar={() => handleRestaurarPlantilla('planEU')}
+                        hideRestaurar={isPlanEuOriginal}
+                    />
                 </div>
             </div>
             <div className="panel">
                 <span className="text-center block text-xl">{t('plantillasMemorias')}</span>
                 <div className="flex gap-4">
-                    <AdjuntarArchivos files={plantillaMemoriaEs} setFiles={setPlantillaMemoriaEs} title={t('plantillaMemoriaEs')} borrar={false} btnPlantillas={true} />
-                    <AdjuntarArchivos files={plantillaMemoriaEu} setFiles={setPlantillaMemoriaEu} title={t('plantillaMemoriaEu')} borrar={false} btnPlantillas={true} />
+                    <AdjuntarArchivos
+                        files={plantillaMemoriaEs}
+                        setFiles={(files) => {
+                            setPlantillaMemoriaEs(files);
+                            if (files.length > 0) setIsMemoriaEsOriginal(false);
+                        }}
+                        title={t('plantillaMemoriaEs')}
+                        borrar={false}
+                        btnPlantillas={true}
+                        onRestaurar={() => handleRestaurarPlantilla('memoriaEs')}
+                        hideRestaurar={isMemoriaEsOriginal}
+                    />
+                    <AdjuntarArchivos
+                        files={plantillaMemoriaEu}
+                        setFiles={(files) => {
+                            setPlantillaMemoriaEu(files);
+                            if (files.length > 0) setIsMemoriaEuOriginal(false);
+                        }}
+                        title={t('plantillaMemoriaEu')}
+                        borrar={false}
+                        btnPlantillas={true}
+                        onRestaurar={() => handleRestaurarPlantilla('memoriaEu')}
+                        hideRestaurar={isMemoriaEuOriginal}
+                    />
                 </div>
             </div>
             <Boton tipo="guardar" textoBoton={t('guardar')} onClick={() => handleGuardar()} />
@@ -190,7 +301,11 @@ export const onSuccessFillFiles = async (
     setPlantillaPlanEs: (v: File[]) => void,
     setPlantillaPlanEu: (v: File[]) => void,
     setPlantillaMemoriaEs: (v: File[]) => void,
-    setPlantillaMemoriaEu: (v: File[]) => void
+    setPlantillaMemoriaEu: (v: File[]) => void,
+    setIsPlanEsOriginal?: (v: boolean) => void,
+    setIsPlanEuOriginal?: (v: boolean) => void,
+    setIsMemoriaEsOriginal?: (v: boolean) => void,
+    setIsMemoriaEuOriginal?: (v: boolean) => void
 ) => {
     const slots = ['planES', 'planEU', 'memoriaEs', 'memoriaEu'] as const;
     const token = sessionStorage.getItem('access_token');
@@ -235,6 +350,11 @@ export const onSuccessFillFiles = async (
     setPlantillaPlanEu(downloads[1] ? [downloads[1] as File] : []);
     setPlantillaMemoriaEs(downloads[2] ? [downloads[2] as File] : []);
     setPlantillaMemoriaEu(downloads[3] ? [downloads[3] as File] : []);
+
+    if (setIsPlanEsOriginal) setIsPlanEsOriginal(downloads[0] ? false : true);
+    if (setIsPlanEuOriginal) setIsPlanEuOriginal(downloads[1] ? false : true);
+    if (setIsMemoriaEsOriginal) setIsMemoriaEsOriginal(downloads[2] ? false : true);
+    if (setIsMemoriaEuOriginal) setIsMemoriaEuOriginal(downloads[3] ? false : true);
 };
 
 export async function convertirPlantillaAFileValidado(urlPath: string, filename?: string): Promise<File> {

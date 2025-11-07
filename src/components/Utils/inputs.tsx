@@ -369,13 +369,15 @@ interface AttachProps {
     title?: string;
     borrar?: boolean;
     btnPlantillas?: boolean;
+    onRestaurar?: () => void;
+    hideRestaurar?: boolean;
 }
 
 export function isImage(file: File) {
     return /^image\//.test(file.type);
 }
 
-export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAceptables, multiple, title, borrar = true, btnPlantillas }: AttachProps) => {
+export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAceptables, multiple, title, borrar = true, btnPlantillas, onRestaurar, hideRestaurar }: AttachProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
     const [isDragging, setIsDragging] = useState(false);
@@ -519,16 +521,20 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                         }}
                         className="w-1/2 h-full"
                     />
-                    <Boton
-                        tipo="restaurar"
-                        textoBoton={t('RestaurarPlantilla')}
-                        onClick={() => {
-                            if (btnPlantillas) {
-                                setFiles([]);
-                            }
-                        }}
-                        className="w-1/2 h-full text-right"
-                    />
+                    {!hideRestaurar && (
+                        <Boton
+                            tipo="restaurar"
+                            textoBoton={t('RestaurarPlantilla')}
+                            onClick={() => {
+                                if (onRestaurar) {
+                                    onRestaurar();
+                                } else {
+                                    setFiles([]);
+                                }
+                            }}
+                            className="w-1/2 h-full text-right"
+                        />
+                    )}
                 </div>
             )}
         </div>
