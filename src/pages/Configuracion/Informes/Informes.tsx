@@ -188,7 +188,9 @@ const Index = () => {
                     }
                     console.log('✨ Finalizó procesamiento de todos los años');
                 } else {
-                    for (const y of anios.map(String)) {
+                    const aniosProcesar = years.filter((y) => y !== 'TODOS');
+
+                    for (const y of aniosProcesar) {
                         const data = await callForYear(y);
                         if (!data) continue;
                         sessionStorage.setItem('lastInformeData', JSON.stringify(data));

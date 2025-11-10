@@ -63,7 +63,6 @@ export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado, 
             continue;
         }
 
-        // reparto igual entre las fuentes listadas
         const reparto = valor / partes.length;
         for (const p of partes) {
             const clave = normalizeFuente(p);
@@ -74,37 +73,34 @@ export const GenerarInformePrestamo = async ({ resultados, t, anioSeleccionado, 
     const workbookInterno = workbook || new ExcelJS.Workbook();
     const sheet = worksheet || workbookInterno.addWorksheet('Informe Presupuestos');
 
+    sheet.getColumn(1).width = 35;
+    sheet.getColumn(2).width = 20;
+    sheet.getColumn(3).width = 15;
+
     if (metadatos) {
-        const filaInforme = sheet.addRow([metadatos.nombreInforme]);
+        const filaInforme = sheet.addRow([metadatos.nombreInforme, '', '']);
         filaInforme.getCell(1).font = { bold: true, size: 16 };
         filaInforme.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
         sheet.mergeCells(`A${filaInforme.number}:C${filaInforme.number}`);
 
-        const filaAnio = sheet.addRow([`${t('Ano')}: ${metadatos.anio}`]);
+        const filaAnio = sheet.addRow([`${t('Ano')}: ${metadatos.anio}`, '', '']);
         filaAnio.getCell(1).font = { bold: true };
         sheet.mergeCells(`A${filaAnio.number}:C${filaAnio.number}`);
 
-        const filaRegiones = sheet.addRow([`${t('comarcas')}: ${metadatos.regiones}`]);
+        const filaRegiones = sheet.addRow([`${t('comarcas')}: ${metadatos.regiones}`, '', '']);
         filaRegiones.getCell(1).font = { bold: true };
         sheet.mergeCells(`A${filaRegiones.number}:C${filaRegiones.number}`);
 
-        const filaFecha = sheet.addRow([`${t('fecha')}: ${metadatos.fechaHora}`]);
+        const filaFecha = sheet.addRow([`${t('fecha')}: ${metadatos.fechaHora}`, '', '']);
         filaFecha.getCell(1).font = { bold: true };
         sheet.mergeCells(`A${filaFecha.number}:C${filaFecha.number}`);
 
         sheet.addRow([]);
     }
 
-    sheet.columns = [
-        { header: t('object:infFuentes'), key: 'fuente', width: 35 },
-        { header: t('object:infCantidadAportada'), key: 'cantidad', width: 20 },
-        { header: t('porcentaje'), key: 'porcentaje', width: 15 },
-    ];
-
-    // título y total
-    const title = sheet.addRow([t('object:infFuentes')]);
+    const title = sheet.addRow([t('object:infFuentes'), '', '']);
     title.font = { size: 14, bold: true };
-    sheet.mergeCells('A1:C1');
+    sheet.mergeCells(`A${title.number}:C${title.number}`);
 
     sheet.addRow([]);
     const filaTotal = sheet.addRow([t('object:infTotalAportado'), total, total > 0 ? '100%' : '0%']);
