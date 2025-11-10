@@ -11,15 +11,15 @@ import { GenerarInformePrestamo } from './informePresupuesto';
 import { GenerarInformeObjetivos, crearGeneradorNombresUnicos } from './informeObjetivo';
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 import { generarInformeAcciones } from './informeAcciones';
-import { generarInformeTratamientoComarcal } from './InformesTratamientoComarcal';
+import { generarInformeTratamientoComarcal, generarInformeTratamientoComarcalSeparado } from './InformesTratamientoComarcal';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useUser } from '../../../contexts/UserContext';
 import ExcelJS from 'exceljs';
 import saveAs from 'file-saver';
 
-export type Informes = 'InfObjetivos' | 'InfObjetivosSeparados' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfPresupuestos';
+export type Informes = 'InfObjetivos' | 'InfObjetivosSeparados' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfTratamientoComarcalSeparado' | 'InfPresupuestos';
 
-export const tiposInformes: Informes[] = ['InfObjetivos', 'InfObjetivosSeparados', 'InfAcciones', 'InfTratamientoComarcal', 'InfPresupuestos'];
+export const tiposInformes: Informes[] = ['InfObjetivos', 'InfObjetivosSeparados', 'InfAcciones', 'InfTratamientoComarcal', 'InfTratamientoComarcalSeparado', 'InfPresupuestos'];
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -174,6 +174,19 @@ const Index = () => {
                             metadatos: metadatosRegionAnio,
                         });
                     }
+                } else if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
+                    const aniosProcesar = years.filter((y) => y !== 'TODOS');
+
+                    for (const y of aniosProcesar) {
+                        const data = await callForYear(y);
+
+                        if (!data || !data.data) {
+                            continue;
+                        }
+
+                        await generarInformeTratamientoComarcalSeparado(data.data, t, y, regionesEnDropdow, i18n, undefined, workbook, { ...metadatos, anio: y });
+                    }
+                    console.log('✨ Finalizó procesamiento de todos los años');
                 } else {
                     for (const y of anios.map(String)) {
                         const data = await callForYear(y);
@@ -211,7 +224,7 @@ const Index = () => {
 
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                saveAs(blob, `Informe_${informeSeleccionado}_Todos_los_años.xlsx`);
+                saveAs(blob, `${t(informeSeleccionado)}_Todos_los_años.xlsx`);
             } finally {
                 setLoading(false);
             }
@@ -288,6 +301,9 @@ const Index = () => {
                 }
                 if (informeSeleccionado === 'InfTratamientoComarcal') {
                     generarInformeTratamientoComarcal(data.data, t, anioSeleccionado);
+                }
+                if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
+                    generarInformeTratamientoComarcalSeparado(data.data, t, anioSeleccionado, regionesEnDropdow, i18n);
                 }
                 if (informeSeleccionado === 'InfPresupuestos') {
                     GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado });
