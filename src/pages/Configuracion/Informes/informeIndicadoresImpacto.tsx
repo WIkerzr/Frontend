@@ -99,8 +99,8 @@ export const generarInformeIndicadoresImpacto = async ({
         const baseCol = 8 + i * 4;
         sheet.getColumn(baseCol).width = 10; // Año
         sheet.getColumn(baseCol + 1).width = 15; // Valor
-        sheet.getColumn(baseCol + 2).width = 18; // Objetivo
-        sheet.getColumn(baseCol + 3).width = 18; // % Cumplimiento
+        sheet.getColumn(baseCol + 2).width = 18; // Cumplimiento
+        sheet.getColumn(baseCol + 3).width = 20; // Siguiente objetivo
     }
 
     const totalColumnas = 7 + maxAnios * 4;
@@ -140,7 +140,7 @@ export const generarInformeIndicadoresImpacto = async ({
 
     // Agregar encabezados para cada año
     for (let i = 0; i < maxAnios; i++) {
-        encabezadoArray.push('Año', 'Valor', 'Objetivo', '% Cumplimiento');
+        encabezadoArray.push('Año', 'Valor', 'Cumplimiento', 'Siguiente objetivo');
     }
 
     const encabezado = sheet.addRow(encabezadoArray);
@@ -180,25 +180,46 @@ export const generarInformeIndicadoresImpacto = async ({
         return datosConValores.some((d) => (d.IdIndicator === indicador.IdIndicador || d.IdIndicador === indicador.IdIndicador) && d.IdCategoria === indicador.IdCategoria);
     });
 
+    // Calcular la primera fila de datos (para usarla en las fórmulas)
+    const primeraFilaDatos = encabezado.number + 1;
+
     indicadoresFiltrados.forEach((indicador) => {
         const nombreIndicador = indicador.IndiadorNameEs || '';
         const categoria = indicador.CategoriaNameEs || '';
         const unidad = indicador.UnitEs || '';
 
-        // Valores iniciales desde ListadoCompleto
-        const anioInicial = typeof indicador.Year === 'string' ? parseInt(indicador.Year) : indicador.Year || 0;
-        const valorInicial = typeof indicador.LineBase === 'string' ? parseFloat(indicador.LineBase) : indicador.LineBase || 0;
-        const objetivoInicial = transformarObjetivo(indicador.ImpactType);
+        // Valores iniciales desde ListadoCompleto (por defecto)
+        let anioInicial = typeof indicador.Year === 'string' ? parseInt(indicador.Year) : indicador.Year || 0;
+        let valorInicial = typeof indicador.LineBase === 'string' ? parseFloat(indicador.LineBase) : indicador.LineBase || 0;
+        let objetivoInicial = transformarObjetivo(indicador.ImpactType);
 
         let valoresDisponibles: Valor[] = [];
         let alcanceTerritorialReal = '';
+        let rango = 0; // Rango de tolerancia
 
         if (datosConValores) {
             // Buscar por IdIndicator (Datos) o IdIndicador (ListadoCompleto)
             const indicadorConValores = datosConValores.find((d) => (d.IdIndicator === indicador.IdIndicador || d.IdIndicador === indicador.IdIndicador) && d.IdCategoria === indicador.IdCategoria);
 
             if (indicadorConValores) {
+                // Si hay Relaciones, usar esos datos para los valores iniciales
+                if (indicadorConValores.Relaciones) {
+                    const rel = indicadorConValores.Relaciones;
+                    // Verificar que coincidan IdIndicator e IdCategoria
+                    if ((rel.IdIndicator === indicador.IdIndicador || rel.IdIndicator === indicador.IdIndicator) && rel.IdCategoria === indicador.IdCategoria) {
+                        anioInicial = rel.Year;
+                        valorInicial = rel.Valor;
+                        objetivoInicial = rel.Objetivo || objetivoInicial;
+                    }
+                }
+
                 const datosArray = indicadorConValores.Datos?.[0] || indicadorConValores.datos?.[0];
+
+                // Obtener el Rango del indicador
+                const rangoStr = indicadorConValores.Rango;
+                if (rangoStr) {
+                    rango = typeof rangoStr === 'string' ? parseFloat(rangoStr) : rangoStr;
+                }
 
                 if (datosArray) {
                     alcanceTerritorialReal = datosArray.AlcanceTerritorial || '';
@@ -218,8 +239,8 @@ export const generarInformeIndicadoresImpacto = async ({
             const objetivoAnio = valor.Objetivo || '';
             const anioActual = valor.Year;
 
-            // No calcular el porcentaje aquí, se calculará con fórmula de Excel
-            filaArray.push(anioActual, valorAnio, objetivoAnio || objetivoInicial, '');
+            // Orden: Año, Valor, Cumplimiento (vacío, se calculará con fórmula), Siguiente objetivo
+            filaArray.push(anioActual, valorAnio, '', objetivoAnio || objetivoInicial);
         });
 
         // Si hay menos años que maxAnios, rellenar con vacíos
@@ -229,39 +250,97 @@ export const generarInformeIndicadoresImpacto = async ({
         }
 
         const fila = sheet.addRow(filaArray);
-        const filaNum = fila.number;
 
         // Aplicar formato de números
         fila.getCell(5).numFmt = '0'; // Año inicial
         fila.getCell(6).numFmt = '#,##0.00'; // Valor inicial
 
-        // Formatear las columnas de años y agregar fórmulas
+        // Formatear las columnas de años y calcular cumplimiento
         for (let i = 0; i < valoresDisponibles.length; i++) {
             const baseCol = 8 + i * 4;
             const colValor = baseCol + 1; // Columna del valor actual
-            const colPorcentaje = baseCol + 3; // Columna del % cumplimiento
+            const colPorcentaje = baseCol + 2; // Columna del Cumplimiento (ahora en posición 2)
 
             fila.getCell(baseCol).numFmt = '0'; // Año
             fila.getCell(colValor).numFmt = '#,##0.00'; // Valor
-            fila.getCell(colPorcentaje).numFmt = '0.00%'; // % Cumplimiento
 
-            // Determinar la columna del valor anterior
-            let colValorAnterior: string;
-            if (i === 0) {
-                // Primer año: comparar con Valor Inicial (columna F = 6)
-                colValorAnterior = 'F';
+            // Calcular valores desde TypeScript para simplificar
+            const valorAct = valoresDisponibles[i]?.Valor ?? 0;
+            const valorAnt = i === 0 ? valorInicial : valoresDisponibles[i - 1]?.Valor ?? 0;
+            const diferencia = valorAct - valorAnt;
+            const tipoObjetivo = objetivoInicial; // Aumentar, Disminuir, Mantener
+
+            let textoResultado = '';
+
+            // Solo calcular si hay un valor anterior válido
+            if (valorAnt !== 0) {
+                // Determinar si cumple basado en el Rango
+                let cumple = false;
+                if (rango > 0) {
+                    // Rango define el margen de tolerancia respecto al valor anterior
+                    if (tipoObjetivo === 'Aumentar') {
+                        // Aumentar: Cumple si valorActual >= valorAnterior + Rango
+                        cumple = valorAct >= valorAnt + rango;
+                    } else if (tipoObjetivo === 'Disminuir') {
+                        // Disminuir: Cumple si valorActual <= valorAnterior - Rango
+                        cumple = valorAct <= valorAnt - rango;
+                    } else if (tipoObjetivo === 'Mantener') {
+                        // Mantener: Cumple si está dentro de [valorAnterior - Rango, valorAnterior + Rango]
+                        cumple = valorAct >= valorAnt - rango && valorAct <= valorAnt + rango;
+                    }
+                } else {
+                    // Si no hay rango, usar la lógica anterior basada en porcentajes
+                    const ratio = valorAct / valorAnt;
+                    if (tipoObjetivo === 'Aumentar') {
+                        cumple = ratio >= 1;
+                    } else if (tipoObjetivo === 'Disminuir') {
+                        cumple = ratio <= 1;
+                    } else if (tipoObjetivo === 'Mantener') {
+                        cumple = ratio >= 0.95 && ratio <= 1.05;
+                    }
+                }
+
+                textoResultado = `${cumple ? 'SI' : 'NO'} (${diferencia.toFixed(2)})`;
+
+                // Aplicar color según el resultado
+                const cell = fila.getCell(colPorcentaje);
+                cell.value = textoResultado;
+                cell.numFmt = '@';
+
+                if (cumple) {
+                    // SI - determinar si es verde (diferencia >= 85) o amarillo (diferencia < 85)
+                    if (Math.abs(diferencia) >= 85) {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFC6EFCE' }, // Verde
+                        };
+                    } else {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFFFEB9C' }, // Amarillo
+                        };
+                    }
+                } else {
+                    // NO - rojo
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFFFC7CE' }, // Rojo
+                    };
+                }
             } else {
-                // Años siguientes: comparar con el valor del año anterior
-                const colAnterior = baseCol + 1 - 4; // 4 columnas atrás
-                colValorAnterior = String.fromCharCode(64 + colAnterior);
+                // Si no hay valor anterior, marcar como "SIN DATOS" - rojo
+                const cell = fila.getCell(colPorcentaje);
+                cell.value = 'SIN DATOS';
+                cell.numFmt = '@';
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFFFC7CE' }, // Rojo
+                };
             }
-
-            const colValorActual = String.fromCharCode(64 + colValor);
-
-            // Fórmula: valorActual / valorAnterior
-            // Usar IF para evitar división por cero o valores vacíos
-            const formula = `IF(AND(ISNUMBER(${colValorActual}${filaNum}),ISNUMBER(${colValorAnterior}${filaNum}),${colValorAnterior}${filaNum}<>0),${colValorActual}${filaNum}/${colValorAnterior}${filaNum},"")`;
-            fila.getCell(colPorcentaje).value = { formula };
         }
 
         // Rellenar columnas vacías para años sin datos
@@ -269,7 +348,7 @@ export const generarInformeIndicadoresImpacto = async ({
             const baseCol = 8 + i * 4;
             fila.getCell(baseCol).numFmt = '0'; // Año
             fila.getCell(baseCol + 1).numFmt = '#,##0.00'; // Valor
-            fila.getCell(baseCol + 3).numFmt = '0.00%'; // %Cumplimiento
+            fila.getCell(baseCol + 2).numFmt = '@'; // Cumplimiento - formato texto
         }
 
         // Aplicar alineación y bordes
@@ -306,198 +385,117 @@ export const generarInformeIndicadoresImpacto = async ({
         }
     }
 
-    // Aplicar formato condicional a las columnas de % Cumplimiento
-    const primeraFilaDatos = encabezado.number + 1;
+    // Los colores ya se aplican directamente en las celdas durante la generación de datos
+
+    // Agregar resumen de cumplimiento debajo de la tabla
+    sheet.addRow([]); // Fila vacía
+    sheet.addRow([]); // Fila vacía
+
+    // Calcular estadísticas para todas las columnas de Cumplimiento
+    const estadisticasPorAnio: Array<{
+        colValor: number;
+        colPorcentaje: number;
+        porcentajeRojo: string;
+        porcentajeAmarillo: string;
+        porcentajeVerde: string;
+    }> = [];
+
     for (let i = 0; i < maxAnios; i++) {
-        const colObjetivo = 8 + i * 4 + 2; // Columna de Objetivo
-        const colPorcentaje = 8 + i * 4 + 3; // Columna de % Cumplimiento
-        const colObjetivoLetra = String.fromCharCode(64 + colObjetivo);
-        const colPorcentajeLetra = String.fromCharCode(64 + colPorcentaje);
+        const colPorcentaje = 8 + i * 4 + 2; // Columna de Cumplimiento
+        const colValor = 8 + i * 4 + 1; // Columna de Valor
 
-        // Formato condicional para "Aumentar" - Verde si >= 100%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [`AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Aumentar",${colObjetivoLetra}${primeraFilaDatos}="1"),${colPorcentajeLetra}${primeraFilaDatos}>=1)`],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFC6EFCE' },
-                        },
-                    },
-                    priority: 1,
-                },
-            ],
+        // Contar valores en la columna de cumplimiento
+        let totalFilas = 0;
+        let contadorRojos = 0;
+        let contadorAmarillos = 0;
+        let contadorVerdes = 0;
+
+        // Recorrer todas las filas de datos
+        for (let rowNum = primeraFilaDatos; rowNum <= ultimaFila; rowNum++) {
+            const cellValue = sheet.getRow(rowNum).getCell(colPorcentaje).value;
+            if (cellValue && cellValue !== '') {
+                const texto = String(cellValue);
+                totalFilas++;
+
+                if (texto === 'SIN DATOS' || texto.startsWith('NO')) {
+                    contadorRojos++;
+                } else if (texto.startsWith('SI')) {
+                    const match = texto.match(/SI \(([^)]+)\)/);
+                    if (match) {
+                        const diferencia = parseFloat(match[1]);
+                        if (Math.abs(diferencia) >= 85) {
+                            contadorVerdes++;
+                        } else {
+                            contadorAmarillos++;
+                        }
+                    } else {
+                        contadorAmarillos++;
+                    }
+                }
+            }
+        }
+        sheet.eachRow((row) => {
+            row.alignment = { vertical: 'middle', horizontal: 'center' };
         });
 
-        // Formato condicional para "Aumentar" - Amarillo si >= 90% y < 100%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [
-                        `AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Aumentar",${colObjetivoLetra}${primeraFilaDatos}="1"),${colPorcentajeLetra}${primeraFilaDatos}>=0.9,${colPorcentajeLetra}${primeraFilaDatos}<1)`,
-                    ],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFFFEB9C' },
-                        },
-                    },
-                    priority: 2,
-                },
-            ],
-        });
+        const porcentajeRojo = totalFilas > 0 ? ((contadorRojos / totalFilas) * 100).toFixed(1) : '0.0';
+        const porcentajeAmarillo = totalFilas > 0 ? ((contadorAmarillos / totalFilas) * 100).toFixed(1) : '0.0';
+        const porcentajeVerde = totalFilas > 0 ? ((contadorVerdes / totalFilas) * 100).toFixed(1) : '0.0';
 
-        // Formato condicional para "Aumentar" - Rojo si < 90%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [`AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Aumentar",${colObjetivoLetra}${primeraFilaDatos}="1"),${colPorcentajeLetra}${primeraFilaDatos}<0.9)`],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFFFC7CE' },
-                        },
-                    },
-                    priority: 3,
-                },
-            ],
-        });
-
-        // Formato condicional para "Disminuir" - Verde si <= 100%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [`AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Disminuir",${colObjetivoLetra}${primeraFilaDatos}="2"),${colPorcentajeLetra}${primeraFilaDatos}<=1)`],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFC6EFCE' },
-                        },
-                    },
-                    priority: 4,
-                },
-            ],
-        });
-
-        // Formato condicional para "Disminuir" - Amarillo si > 100% y <= 110%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [
-                        `AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Disminuir",${colObjetivoLetra}${primeraFilaDatos}="2"),${colPorcentajeLetra}${primeraFilaDatos}>1,${colPorcentajeLetra}${primeraFilaDatos}<=1.1)`,
-                    ],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFFFEB9C' },
-                        },
-                    },
-                    priority: 5,
-                },
-            ],
-        });
-
-        // Formato condicional para "Disminuir" - Rojo si > 110%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [`AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Disminuir",${colObjetivoLetra}${primeraFilaDatos}="2"),${colPorcentajeLetra}${primeraFilaDatos}>1.1)`],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFFFC7CE' },
-                        },
-                    },
-                    priority: 6,
-                },
-            ],
-        });
-
-        // Formato condicional para "Mantener" - Verde si entre 95% y 105%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [
-                        `AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Mantener",${colObjetivoLetra}${primeraFilaDatos}="3"),${colPorcentajeLetra}${primeraFilaDatos}>=0.95,${colPorcentajeLetra}${primeraFilaDatos}<=1.05)`,
-                    ],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFC6EFCE' },
-                        },
-                    },
-                    priority: 7,
-                },
-            ],
-        });
-
-        // Formato condicional para "Mantener" - Amarillo si entre 85%-95% o 105%-115%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [
-                        `AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Mantener",${colObjetivoLetra}${primeraFilaDatos}="3"),OR(AND(${colPorcentajeLetra}${primeraFilaDatos}>=0.85,${colPorcentajeLetra}${primeraFilaDatos}<0.95),AND(${colPorcentajeLetra}${primeraFilaDatos}>1.05,${colPorcentajeLetra}${primeraFilaDatos}<=1.15)))`,
-                    ],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFFFEB9C' },
-                        },
-                    },
-                    priority: 8,
-                },
-            ],
-        });
-
-        // Formato condicional para "Mantener" - Rojo si < 85% o > 115%
-        sheet.addConditionalFormatting({
-            ref: `${colPorcentajeLetra}${primeraFilaDatos}:${colPorcentajeLetra}${ultimaFila}`,
-            rules: [
-                {
-                    type: 'expression',
-                    formulae: [
-                        `AND(OR(${colObjetivoLetra}${primeraFilaDatos}="Mantener",${colObjetivoLetra}${primeraFilaDatos}="3"),OR(${colPorcentajeLetra}${primeraFilaDatos}<0.85,${colPorcentajeLetra}${primeraFilaDatos}>1.15))`,
-                    ],
-                    style: {
-                        fill: {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            bgColor: { argb: 'FFFFC7CE' },
-                        },
-                    },
-                    priority: 9,
-                },
-            ],
+        estadisticasPorAnio.push({
+            colValor,
+            colPorcentaje,
+            porcentajeRojo,
+            porcentajeAmarillo,
+            porcentajeVerde,
         });
     }
 
-    sheet.eachRow((row) => {
-        row.alignment = { vertical: 'middle', horizontal: 'center' };
+    // Crear las filas de resumen una sola vez para todos los años
+    const filaResumenTitulo = sheet.addRow([]);
+    const filaRoja = sheet.addRow([]);
+    const filaAmarilla = sheet.addRow([]);
+    const filaVerde = sheet.addRow([]);
+
+    // Aplicar los valores a cada columna
+    estadisticasPorAnio.forEach((stats) => {
+        // Título
+        filaResumenTitulo.getCell(stats.colValor).value = 'Resumen de Cumplimiento';
+        filaResumenTitulo.getCell(stats.colValor).font = { bold: true };
+        filaResumenTitulo.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
+
+        // Fila roja
+        filaRoja.getCell(stats.colValor).value = 'Ejecución reducida';
+        filaRoja.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
+        filaRoja.getCell(stats.colPorcentaje).value = `${stats.porcentajeRojo}%`;
+        filaRoja.getCell(stats.colPorcentaje).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFC7CE' },
+        };
+        filaRoja.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
+
+        // Fila amarilla
+        filaAmarilla.getCell(stats.colValor).value = 'Ejecución media';
+        filaAmarilla.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
+        filaAmarilla.getCell(stats.colPorcentaje).value = `${stats.porcentajeAmarillo}%`;
+        filaAmarilla.getCell(stats.colPorcentaje).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFEB9C' },
+        };
+        filaAmarilla.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
+
+        // Fila verde
+        filaVerde.getCell(stats.colValor).value = 'Ejecución alta';
+        filaVerde.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
+        filaVerde.getCell(stats.colPorcentaje).value = `${stats.porcentajeVerde}%`;
+        filaVerde.getCell(stats.colPorcentaje).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFC6EFCE' },
+        };
+        filaVerde.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
     });
 
     if (!workbook) {
