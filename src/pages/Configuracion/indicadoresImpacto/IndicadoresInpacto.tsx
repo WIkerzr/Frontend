@@ -63,6 +63,7 @@ export interface AllDataIndicator {
     CategoriaNameEs: string;
     CategoriaNameEu: string;
     Datos: Dato[];
+    Relaciones?: Relaciones;
 }
 
 export interface ListIndi {
@@ -257,6 +258,11 @@ const Index = () => {
                     const indexEncontrado = listadoCompleto.findIndex((item) => item.IdIndicador === dato.IdIndicator && item.IdCategoria === dato.IdCategoria);
                     if (indexEncontrado >= 0) {
                         const listIndex = listadoCompleto[indexEncontrado];
+
+                        if (dato.Relaciones) {
+                            listIndex.Relaciones = dato.Relaciones;
+                        }
+
                         if (dato.Datos.length > 0) {
                             listIndex.datos = dato.Datos;
                             if (
