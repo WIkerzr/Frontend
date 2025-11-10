@@ -12,14 +12,23 @@ import { GenerarInformeObjetivos, crearGeneradorNombresUnicos } from './informeO
 import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
 import { generarInformeAcciones } from './informeAcciones';
 import { generarInformeTratamientoComarcal, generarInformeTratamientoComarcalSeparado } from './InformesTratamientoComarcal';
+import { generarInformeIndicadoresImpacto } from './informeIndicadoresImpacto';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useUser } from '../../../contexts/UserContext';
 import ExcelJS from 'exceljs';
 import saveAs from 'file-saver';
 
-export type Informes = 'InfObjetivos' | 'InfObjetivosSeparados' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfTratamientoComarcalSeparado' | 'InfPresupuestos';
+export type Informes = 'InfObjetivos' | 'InfObjetivosSeparados' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfTratamientoComarcalSeparado' | 'InfPresupuestos' | 'InfIndicadoresImpacto';
 
-export const tiposInformes: Informes[] = ['InfObjetivos', 'InfObjetivosSeparados', 'InfAcciones', 'InfTratamientoComarcal', 'InfTratamientoComarcalSeparado', 'InfPresupuestos'];
+export const tiposInformes: Informes[] = [
+    'InfObjetivos',
+    'InfObjetivosSeparados',
+    'InfAcciones',
+    'InfTratamientoComarcal',
+    'InfTratamientoComarcalSeparado',
+    'InfPresupuestos',
+    'InfIndicadoresImpacto',
+];
 
 const Index = () => {
     const { t, i18n } = useTranslation();
@@ -70,13 +79,6 @@ const Index = () => {
         }
     }, [regionSeleccionada]);
 
-    // const handlePruebas = () => {
-    //     //TODO borrar
-    //     const sessionData = sessionStorage.getItem('lastInformeData');
-    //     const data = sessionData ? JSON.parse(sessionData) : null;
-    //     generarInformeTratamientoComarcal(data.data, t);
-    // };
-
     const handleObtenerInforme = async () => {
         /* eslint-disable @typescript-eslint/no-explicit-any */
         const idRegionesSeleccionadas: number[] = regionesEnDropdow.map((r) => Number(r.RegionId));
@@ -104,7 +106,7 @@ const Index = () => {
                 });
             });
 
-        if (anioSeleccionado === 'TODOS') {
+        if (anioSeleccionado === 'TODOS' && informeSeleccionado !== 'InfIndicadoresImpacto') {
             try {
                 setLoading(true);
 
@@ -186,7 +188,6 @@ const Index = () => {
 
                         await generarInformeTratamientoComarcalSeparado(data.data, t, y, regionesEnDropdow, i18n, undefined, workbook, { ...metadatos, anio: y });
                     }
-                    console.log('✨ Finalizó procesamiento de todos los años');
                 } else {
                     const aniosProcesar = years.filter((y) => y !== 'TODOS');
 
@@ -237,7 +238,7 @@ const Index = () => {
             method: 'POST',
             url: `informes`,
             body: {
-                AnioSeleccionado: [anioSeleccionado],
+                AnioSeleccionado: informeSeleccionado !== 'InfIndicadoresImpacto' ? [anioSeleccionado] : [2025],
                 InformeSeleccionado: informeSeleccionado,
                 RegionesId: idRegionesSeleccionadas,
             },
@@ -287,7 +288,6 @@ const Index = () => {
                     return;
                 }
 
-                // Lógica original para otros informes
                 if (informeSeleccionado === 'InfObjetivos') {
                     GenerarInformeObjetivos({
                         realizacion: data.response.indicadoresRealizacion,
@@ -309,6 +309,49 @@ const Index = () => {
                 }
                 if (informeSeleccionado === 'InfPresupuestos') {
                     GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado });
+                }
+                if (informeSeleccionado === 'InfIndicadoresImpacto') {
+                    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                        const workbook = new ExcelJS.Workbook();
+                        const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
+
+                        for (const regionData of data.data) {
+                            const regionId = regionData.RegionId;
+                            const listadoCompleto = regionData.ListadoCompleto || [];
+                            const datosConValores = regionData.Datos || [];
+
+                            if (listadoCompleto.length > 0) {
+                                const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionId);
+                                const regionName = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionId}`;
+
+                                const nombrePestana = obtenerNombreUnico(regionName);
+                                const worksheet = workbook.addWorksheet(nombrePestana);
+
+                                const metadatos = {
+                                    nombreInforme: t('InfIndicadoresImpacto'),
+                                    anio: anioSeleccionado,
+                                    regiones: regionName,
+                                    fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
+                                };
+
+                                await generarInformeIndicadoresImpacto({
+                                    datosOriginales: listadoCompleto,
+                                    datosConValores: datosConValores,
+                                    t,
+                                    anioSeleccionado,
+                                    worksheet,
+                                    workbook,
+                                    metadatos,
+                                });
+                            }
+                        }
+
+                        if (workbook.worksheets.length > 0) {
+                            const buffer = await workbook.xlsx.writeBuffer();
+                            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                            saveAs(blob, `${t('InfIndicadoresImpacto')}_${anioSeleccionado}.xlsx`);
+                        }
+                    }
                 }
             },
         });
