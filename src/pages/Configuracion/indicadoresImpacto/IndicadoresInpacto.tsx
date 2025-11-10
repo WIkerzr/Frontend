@@ -11,8 +11,8 @@ import { useUser } from '../../../contexts/UserContext';
 export interface Relaciones {
     IdIndicator: string;
     IdCategoria: string;
-    Year: number;
-    Valor: number;
+    Year?: number;
+    Valor?: number;
     Objetivo: string;
 }
 export interface ListIndicador {
@@ -260,7 +260,13 @@ const Index = () => {
                         const listIndex = listadoCompleto[indexEncontrado];
 
                         if (dato.Relaciones) {
-                            listIndex.Relaciones = dato.Relaciones;
+                            listIndex.Relaciones = {
+                                IdIndicator: dato.Relaciones.IdIndicator,
+                                IdCategoria: dato.Relaciones.IdCategoria,
+                                Objetivo: dato.Relaciones.Objetivo,
+                                Valor: Number(dato.Relaciones.Valor) != 0 ? dato.Relaciones.Valor : undefined,
+                                Year: Number(dato.Relaciones.Year) != 0 ? dato.Relaciones.Year : undefined,
+                            };
                         }
 
                         if (dato.Datos.length > 0) {
@@ -311,8 +317,8 @@ const Index = () => {
             return datosActuales.map((d) => {
                 const valorExistente = Array.isArray(d.Valores) ? d.Valores.find((v) => v.Year === year) : undefined;
                 const valoresActualizados = valorExistente
-                    ? d.Valores.map((v) => (v.Year === year ? (field === 'Valor' ? { ...v, Valor: Number(value) || 0 } : { ...v, Objetivo: value }) : v))
-                    : [...(d.Valores || []), { Id: 0, Year: year, Valor: field === 'Valor' ? Number(value) || 0 : 0, Objetivo: field === 'Objetivo' ? value : '' }];
+                    ? d.Valores.map((v) => (v.Year === year ? (field === 'Valor' ? { ...v, Valor: value === '' ? 0 : Number(value) } : { ...v, Objetivo: value }) : v))
+                    : [...(d.Valores || []), { Id: 0, Year: year, Valor: field === 'Valor' ? (value === '' ? 0 : Number(value)) : 0, Objetivo: field === 'Objetivo' ? value : '' }];
 
                 return { ...d, Valores: valoresActualizados };
             });
@@ -322,7 +328,7 @@ const Index = () => {
             {
                 Id: 0,
                 AlcanceTerritorial: item.alcance || '',
-                Valores: [{ Id: 0, Year: year, Valor: field === 'Valor' ? Number(value) || 0 : 0, Objetivo: field === 'Objetivo' ? value : '' }],
+                Valores: [{ Id: 0, Year: year, Valor: field === 'Valor' ? (value === '' ? 0 : Number(value)) : 0, Objetivo: field === 'Objetivo' ? value : '' }],
             },
         ];
     };
@@ -477,7 +483,7 @@ const Index = () => {
                             IdIndicator: String(item.IdIndicador),
                             IdCategoria: String(item.IdCategoria),
                             Year: item.Relaciones?.Year || item.Year || 0,
-                            Valor: Number(value) || 0,
+                            Valor: value === '' ? 0 : Number(value),
                             Objetivo: item.Relaciones?.Objetivo || transformarObjetivoIndicadores(item) || '',
                         },
                     };
@@ -783,15 +789,25 @@ const Index = () => {
                                           <button
                                               className="bg-success text-white px-2 py-1 rounded"
                                               onClick={() => {
-                                                  const relaciones: Relaciones = {
+                                                  const body = { ...record };
+
+                                                  // Obtener valores de Relaciones
+                                                  const valorRelacion = record.Relaciones?.Valor ?? record.LineBase;
+                                                  const yearRelacion = record.Relaciones?.Year ?? record.Year;
+                                                  const objetivoRelacion = record.Relaciones?.Objetivo ?? transformarObjetivoIndicadores(record);
+
+                                                  // Validar que valorRelacion sea un número válido
+                                                  const valorNumerico = typeof valorRelacion === 'number' ? valorRelacion : Number(valorRelacion);
+                                                  const esValorValido = !isNaN(valorNumerico);
+
+                                                  // Siempre enviar Relaciones, pero con 0 si el valor no es válido o es 0
+                                                  body.Relaciones = {
                                                       IdIndicator: String(record.IdIndicador),
                                                       IdCategoria: String(record.IdCategoria),
-                                                      Year: record.Relaciones?.Year || record.Year || 0,
-                                                      Valor: record.Relaciones?.Valor || record.LineBase || 0,
-                                                      Objetivo: record.Relaciones?.Objetivo || transformarObjetivoIndicadores(record) || '',
+                                                      Year: yearRelacion && !isNaN(Number(yearRelacion)) ? Number(yearRelacion) : 0,
+                                                      Valor: esValorValido ? valorNumerico : 0,
+                                                      Objetivo: objetivoRelacion ? String(objetivoRelacion) : '',
                                                   };
-                                                  const body = record;
-                                                  body.Relaciones = relaciones;
 
                                                   setEditableRowIndex(null);
                                                   LlamadasBBDD({
