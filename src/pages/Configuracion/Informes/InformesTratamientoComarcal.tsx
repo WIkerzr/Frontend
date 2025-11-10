@@ -134,8 +134,14 @@ export const generarInformeTratamientoComarcal = async (
     }
 };
 
+interface DatosRegionAcciones {
+    RegionId: number;
+    Anio: number;
+    Acciones: DatosAccionDTOLiderAccion[];
+}
+
 export const generarInformeTratamientoComarcalSeparado = async (
-    datos: DatosAccionDTOLiderAccion[],
+    datos: DatosAccionDTOLiderAccion[] | DatosRegionAcciones[], // Soporta ambas estructuras
     t: TFunction<'translation'>,
     anioSeleccionado: string,
     regiones: { RegionId: string | number; NameEs: string; NameEu: string }[],
@@ -175,18 +181,34 @@ export const generarInformeTratamientoComarcalSeparado = async (
 
     const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
 
-    const accionesPorRegion = datos.reduce((acc, accion) => {
-        if (accion.RegionLiderId === null || accion.RegionLiderId === undefined) {
-            return acc;
-        }
+    const esDatosRegionAcciones = (item: DatosAccionDTOLiderAccion | DatosRegionAcciones): item is DatosRegionAcciones => {
+        return 'RegionId' in item && 'Acciones' in item;
+    };
 
-        const regionId = accion.RegionLiderId.toString();
-        if (!acc[regionId]) {
-            acc[regionId] = [];
-        }
-        acc[regionId].push(accion);
-        return acc;
-    }, {} as Record<string, DatosAccionDTOLiderAccion[]>);
+    const esNuevaEstructura = datos.length > 0 && esDatosRegionAcciones(datos[0]);
+
+    let accionesPorRegion: Record<string, DatosAccionDTOLiderAccion[]>;
+
+    if (esNuevaEstructura) {
+        accionesPorRegion = (datos as DatosRegionAcciones[]).reduce((acc, item) => {
+            const regionId = item.RegionId.toString();
+            acc[regionId] = item.Acciones || [];
+            return acc;
+        }, {} as Record<string, DatosAccionDTOLiderAccion[]>);
+    } else {
+        accionesPorRegion = (datos as DatosAccionDTOLiderAccion[]).reduce((acc, accion) => {
+            if (accion.RegionLiderId === null || accion.RegionLiderId === undefined) {
+                return acc;
+            }
+
+            const regionId = accion.RegionLiderId.toString();
+            if (!acc[regionId]) {
+                acc[regionId] = [];
+            }
+            acc[regionId].push(accion);
+            return acc;
+        }, {} as Record<string, DatosAccionDTOLiderAccion[]>);
+    }
 
     for (const [regionId, accionesRegion] of Object.entries(accionesPorRegion)) {
         const region = regiones.find((r) => {
