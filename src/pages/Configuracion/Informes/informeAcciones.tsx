@@ -20,11 +20,6 @@ interface ResumenEje {
     NumeroAcciones: number;
 }
 
-interface ResumenObjetivo {
-    NombreObjetivo: string;
-    NumeroAcciones: number;
-}
-
 interface RegionAnio {
     RegionId: number;
     Anio: number;
@@ -60,22 +55,31 @@ const generarInformeResumenComarcaEje = (datos: DatoEje[], i18n: { language: str
     return Array.from(mapa.values());
 };
 
-const generarInformeResumenObjetivos = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1): ResumenObjetivo[] => {
-    const mapa = new Map<number, ResumenObjetivo>();
+interface ResumenObjetivoPorComarca {
+    RegionId: string;
+    NombreObjetivo: string;
+    NumeroAcciones: number;
+}
+
+const generarInformeResumenObjetivosPorComarca = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1, regiones: RegionInfo[]): ResumenObjetivoPorComarca[] => {
+    const mapa = new Map<string, ResumenObjetivoPorComarca>();
 
     const datosFiltrados = datos.filter((d) => d.AxisType === tipoEje);
 
     for (const item of datosFiltrados) {
-        let resumen = mapa.get(item.ObjetivoId);
+        const key = `${item.RegionId}-${item.ObjetivoId}`;
+        let resumen = mapa.get(key);
 
         if (!resumen) {
+            const region = regiones.find((r) => r.RegionId.toString() === item.RegionId.toString());
+            const nombreRegion = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : item.RegionId;
+
             resumen = {
+                RegionId: nombreRegion,
                 NombreObjetivo: i18n.language === 'es' ? item.NombreObjetivo : item.IzenaObjetivo,
                 NumeroAcciones: item.NumeroAcciones,
             };
-            mapa.set(item.ObjetivoId, resumen);
-        } else {
-            resumen.NumeroAcciones += item.NumeroAcciones;
+            mapa.set(key, resumen);
         }
     }
 
@@ -166,27 +170,29 @@ export const generarInformeAcciones = async (
     filaTitulo2.getCell(1).font = { bold: true, size: 14 };
     filaTitulo2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const filaEncabezado2 = sheet.addRow([i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones'), '']);
+    const filaEncabezado2 = sheet.addRow([t('comarca'), i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones')]);
     filaEncabezado2.getCell(1).font = { bold: true };
     filaEncabezado2.getCell(2).font = { bold: true };
+    filaEncabezado2.getCell(3).font = { bold: true };
     filaEncabezado2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
     filaEncabezado2.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaEncabezado2.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
 
     let totalAccionesGenerales = 0;
     for (let index = 0; index < anios.length; index++) {
         const datos = anios[index].Datos;
-        const resumenesGenerales = generarInformeResumenObjetivos(datos, i18n, 0);
+        const resumenesGenerales = generarInformeResumenObjetivosPorComarca(datos, i18n, 0, regiones || []);
         resumenesGenerales.forEach((r) => {
-            sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
+            sheet.addRow([r.RegionId, r.NombreObjetivo, r.NumeroAcciones]);
             totalAccionesGenerales += r.NumeroAcciones;
         });
     }
 
     // Fila de total con borde superior
-    const filaTotalGenerales = sheet.addRow(['', totalAccionesGenerales, '']);
-    filaTotalGenerales.getCell(2).font = { bold: true };
-    filaTotalGenerales.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
-    filaTotalGenerales.getCell(2).border = {
+    const filaTotalGenerales = sheet.addRow(['', '', totalAccionesGenerales]);
+    filaTotalGenerales.getCell(3).font = { bold: true };
+    filaTotalGenerales.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaTotalGenerales.getCell(3).border = {
         top: { style: 'thin', color: { argb: 'FF000000' } },
     };
 
@@ -199,27 +205,29 @@ export const generarInformeAcciones = async (
     filaTitulo3.getCell(1).font = { bold: true, size: 14 };
     filaTitulo3.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const filaEncabezado3 = sheet.addRow([i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones'), '']);
+    const filaEncabezado3 = sheet.addRow([t('comarca'), i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones')]);
     filaEncabezado3.getCell(1).font = { bold: true };
     filaEncabezado3.getCell(2).font = { bold: true };
+    filaEncabezado3.getCell(3).font = { bold: true };
     filaEncabezado3.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
     filaEncabezado3.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaEncabezado3.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
 
     let totalAccionesSectoriales = 0;
     for (let index = 0; index < anios.length; index++) {
         const datos = anios[index].Datos;
-        const resumenesSectoriales = generarInformeResumenObjetivos(datos, i18n, 1);
+        const resumenesSectoriales = generarInformeResumenObjetivosPorComarca(datos, i18n, 1, regiones || []);
         resumenesSectoriales.forEach((r) => {
-            sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
+            sheet.addRow([r.RegionId, r.NombreObjetivo, r.NumeroAcciones]);
             totalAccionesSectoriales += r.NumeroAcciones;
         });
     }
 
     // Fila de total con borde superior
-    const filaTotalSectoriales = sheet.addRow(['', totalAccionesSectoriales, '']);
-    filaTotalSectoriales.getCell(2).font = { bold: true };
-    filaTotalSectoriales.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
-    filaTotalSectoriales.getCell(2).border = {
+    const filaTotalSectoriales = sheet.addRow(['', '', totalAccionesSectoriales]);
+    filaTotalSectoriales.getCell(3).font = { bold: true };
+    filaTotalSectoriales.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaTotalSectoriales.getCell(3).border = {
         top: { style: 'thin', color: { argb: 'FF000000' } },
     };
 
