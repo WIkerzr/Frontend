@@ -308,6 +308,13 @@ export interface IndicadorRealizacionAccionDTO {
     MetaFinal_Mujer?: string;
     MetaFinal_Total?: string;
     IdsResultados?: string;
+    IndicadorRealizacion?: {
+        Description?: string;
+        Id?: number;
+        NameEs?: string;
+        NameEu?: string;
+        UnitMed?: string;
+    };
 }
 
 export interface IndicadorResultadoAccionDTO {
@@ -325,4 +332,11 @@ export interface IndicadorResultadoAccionDTO {
     MetaFinal_Hombre?: string;
     MetaFinal_Mujer?: string;
     MetaFinal_Total?: string;
+    IndicadorResultado?: {
+        Description?: string;
+        Id?: number;
+        NameEs?: string;
+        NameEu?: string;
+        UnitMed?: string;
+    };
 }

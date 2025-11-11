@@ -115,7 +115,7 @@ const Index = () => {
                 const regionesNombres = regionesEnDropdow.map((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs)).join(', ');
                 const metadatos = {
                     nombreInforme: t(informeSeleccionado),
-                    anio: 'TODOS',
+                    anio: t('TODOS'),
                     regiones: regionesNombres || t('todasLasComarcas'),
                     fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
                 };
@@ -227,7 +227,7 @@ const Index = () => {
 
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                saveAs(blob, `${t(informeSeleccionado)}_Todos_los_años.xlsx`);
+                saveAs(blob, `${t(informeSeleccionado)} ${t('todosLosAnios')}.xlsx`);
             } finally {
                 setLoading(false);
             }
@@ -338,7 +338,6 @@ const Index = () => {
                                     datosOriginales: listadoCompleto,
                                     datosConValores: datosConValores,
                                     t,
-                                    anioSeleccionado,
                                     worksheet,
                                     workbook,
                                     metadatos,

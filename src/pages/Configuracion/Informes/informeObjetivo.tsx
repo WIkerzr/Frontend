@@ -72,29 +72,31 @@ const CreacionDatosIndicador = (
         let nombre = '';
         if (tipo === 'realizacion') {
             const realizacion = r as IndicadorRealizacionConNombre;
-            const nombreEncontrado = listadoNombres.find((re) => re.id === realizacion.IndicadorRealizacionId)?.nombre;
-            if (nombreEncontrado) {
-                nombre = nombreEncontrado;
-            } else {
-                const indicador = realizacion.IndicadorRealizacion;
-                if (indicador) {
-                    nombre = idioma === 'eu' ? indicador.NameEu || indicador.NameEs || `id-${realizacion.IndicadorRealizacionId}` : indicador.NameEs || `id-${realizacion.IndicadorRealizacionId}`;
-                } else {
-                    nombre = `id-${realizacion.IndicadorRealizacionId}`;
-                }
+            const indicador = realizacion.IndicadorRealizacion;
+
+            if (indicador) {
+                // Primero intentar obtener el nombre del indicador según el idioma
+                nombre = idioma === 'eu' ? indicador.NameEu || indicador.NameEs || '' : indicador.NameEs || '';
+            }
+
+            // Si no se encontró nombre en el indicador, buscar en listadoNombres
+            if (!nombre) {
+                const nombreEncontrado = listadoNombres.find((re) => re.id === realizacion.IndicadorRealizacionId)?.nombre;
+                nombre = nombreEncontrado || `id-${realizacion.IndicadorRealizacionId}`;
             }
         } else if (tipo === 'resultado') {
             const resultado = r as IndicadorResultadoConNombre;
-            const nombreEncontrado = listadoNombres.find((re) => re.id === resultado.IndicadorResultadoId)?.nombre;
-            if (nombreEncontrado) {
-                nombre = nombreEncontrado;
-            } else {
-                const indicador = resultado.IndicadorResultado;
-                if (indicador) {
-                    nombre = idioma === 'eu' ? indicador.NameEu || indicador.NameEs || `id-${resultado.IndicadorResultadoId}` : indicador.NameEs || `id-${resultado.IndicadorResultadoId}`;
-                } else {
-                    nombre = `id-${resultado.IndicadorResultadoId}`;
-                }
+            const indicador = resultado.IndicadorResultado;
+
+            if (indicador) {
+                // Primero intentar obtener el nombre del indicador según el idioma
+                nombre = idioma === 'eu' ? indicador.NameEu || indicador.NameEs || '' : indicador.NameEs || '';
+            }
+
+            // Si no se encontró nombre en el indicador, buscar en listadoNombres
+            if (!nombre) {
+                const nombreEncontrado = listadoNombres.find((re) => re.id === resultado.IndicadorResultadoId)?.nombre;
+                nombre = nombreEncontrado || `id-${resultado.IndicadorResultadoId}`;
             }
         }
 
@@ -168,6 +170,8 @@ export const GenerarInformeObjetivos = async ({
     const ListadoCached = MemorizarResultadoFuncion(async (tipo: TiposDeIndicadores) => Promise.resolve(ListadoNombresIdicadoresSegunADR(tipo)));
     const nombresRealizacion: ListadoNombresIdicadoresItem[] = await ListadoCached('realizacion');
     const nombresResultado: ListadoNombresIdicadoresItem[] = await ListadoCached('resultado');
+    console.log(realizacion[0].IndicadorRealizacion?.NameEs);
+    console.log(resultado);
 
     const serviciosConvertidos = ConvertirIndicadoresServicioAAccionDTO(servicios, nombresRealizacion, nombresResultado);
     realizacion.push(...serviciosConvertidos.indicadoreRealizacion);
@@ -181,16 +185,16 @@ export const GenerarInformeObjetivos = async ({
     const sheet = worksheet || workbookInterno.addWorksheet('Informe Objetivos');
 
     const Columnas = [
-        { header: 'Nombre del indicador', key: 'Nombre_del_indicador', width: 40 },
-        { header: 'Ejecutado Hombre', key: 'Ejecutado_Hombre', width: 12 },
-        { header: 'Ejecutado Mujer', key: 'Ejecutado_Mujer', width: 12 },
-        { header: 'Ejecutado Total', key: 'Ejecutado_Total', width: 12 },
-        { header: 'MetaAnual Hombre', key: 'MetaAnual_Hombre', width: 12 },
-        { header: 'MetaAnual Mujer', key: 'MetaAnual_Mujer', width: 12 },
-        { header: 'MetaAnual Total', key: 'MetaAnual_Total', width: 12 },
-        { header: 'Grado de ejecución Hombre', key: 'Grado_de_ejecución_Hombre', width: 12 },
-        { header: 'Grado de ejecución Mujer', key: 'Grado_de_ejecución_Mujer', width: 12 },
-        { header: 'Grado de ejecución total', key: 'Grado_de_ejecución_Total', width: 12 },
+        { header: t('nombreIndicador'), key: 'Nombre_del_indicador', width: 40 },
+        { header: `${t('ejecutado')} ${t('Hombre')}`, key: 'Ejecutado_Hombre', width: 12 },
+        { header: `${t('ejecutado')} ${t('Mujer')}`, key: 'Ejecutado_Mujer', width: 12 },
+        { header: `${t('ejecutado')} ${t('Total')}`, key: 'Ejecutado_Total', width: 12 },
+        { header: `${t('metaAnual')} ${t('Hombre')}`, key: 'MetaAnual_Hombre', width: 12 },
+        { header: `${t('metaAnual')} ${t('Mujer')}`, key: 'MetaAnual_Mujer', width: 12 },
+        { header: `${t('metaAnual')} ${t('Total')}`, key: 'MetaAnual_Total', width: 12 },
+        { header: `${t('porcentEjecutado')} ${t('Hombre')}`, key: 'Grado_de_ejecución_Hombre', width: 12 },
+        { header: `${t('porcentEjecutado')} ${t('Mujer')}`, key: 'Grado_de_ejecución_Mujer', width: 12 },
+        { header: `${t('porcentEjecutado')} ${t('Total')}`, key: 'Grado_de_ejecución_Total', width: 12 },
     ];
 
     sheet.columns = Columnas.map((col) => ({
@@ -310,10 +314,10 @@ export const GenerarInformeObjetivos = async ({
             const porcentajeVerde = ((contadorVerdes / totalIndicadores) * 100).toFixed(1);
 
             // Fila Ejecución reducida
-            const filaRoja = sheet.addRow(['', '', '', '', '', '', '', '', 'Ejecución reducida', `${porcentajeRojo}%`]);
+            const filaRoja = sheet.addRow(['', '', '', '', '', '', '', '', t('ejecucionReducida'), `${porcentajeRojo}%`]);
             sheet.mergeCells(`A${filaRoja.number}:I${filaRoja.number}`);
             const celdaRoja = filaRoja.getCell(1);
-            celdaRoja.value = 'Ejecución reducida';
+            celdaRoja.value = t('ejecucionReducida');
             celdaRoja.alignment = { horizontal: 'right', vertical: 'middle' };
             filaRoja.getCell('Grado_de_ejecución_Total').fill = {
                 type: 'pattern',
@@ -323,10 +327,10 @@ export const GenerarInformeObjetivos = async ({
             filaRoja.getCell('Grado_de_ejecución_Total').alignment = { horizontal: 'center', vertical: 'middle' };
 
             // Fila Ejecución media
-            const filaAmarilla = sheet.addRow(['', '', '', '', '', '', '', '', 'Ejecución media', `${porcentajeAmarillo}%`]);
+            const filaAmarilla = sheet.addRow(['', '', '', '', '', '', '', '', t('ejecucionMedia'), `${porcentajeAmarillo}%`]);
             sheet.mergeCells(`A${filaAmarilla.number}:I${filaAmarilla.number}`);
             const celdaAmarilla = filaAmarilla.getCell(1);
-            celdaAmarilla.value = 'Ejecución media';
+            celdaAmarilla.value = t('ejecucionMedia');
             celdaAmarilla.alignment = { horizontal: 'right', vertical: 'middle' };
             filaAmarilla.getCell('Grado_de_ejecución_Total').fill = {
                 type: 'pattern',
@@ -336,10 +340,10 @@ export const GenerarInformeObjetivos = async ({
             filaAmarilla.getCell('Grado_de_ejecución_Total').alignment = { horizontal: 'center', vertical: 'middle' };
 
             // Fila Ejecución objetiva
-            const filaVerde = sheet.addRow(['', '', '', '', '', '', '', '', 'Ejecución alta', `${porcentajeVerde}%`]);
+            const filaVerde = sheet.addRow(['', '', '', '', '', '', '', '', t('ejecucionAlta'), `${porcentajeVerde}%`]);
             sheet.mergeCells(`A${filaVerde.number}:I${filaVerde.number}`);
             const celdaVerde = filaVerde.getCell(1);
-            celdaVerde.value = 'Ejecución objetiva';
+            celdaVerde.value = t('ejecucionObjetiva');
             celdaVerde.alignment = { horizontal: 'right', vertical: 'middle' };
             filaVerde.getCell('Grado_de_ejecución_Total').fill = {
                 type: 'pattern',

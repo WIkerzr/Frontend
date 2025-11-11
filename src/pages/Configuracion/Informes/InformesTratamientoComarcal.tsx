@@ -4,6 +4,9 @@ import { TFunction } from 'i18next';
 import { DatosPlanBack } from '../../../types/TipadoAccion';
 import { Comarcal } from '../../../types/GeneralTypes';
 import { crearGeneradorNombresUnicos } from './informeObjetivo';
+import i18n from '../../../i18n';
+import opcionesComarcalEs from '../../../../public/locales/objectEs.json';
+import opcionesComarcalEu from '../../../../public/locales/objectEu.json';
 
 interface DatosAccionDTOLiderAccion {
     Id: number;
@@ -23,10 +26,50 @@ interface ResumenAcciones {
     supracomarcales: ConteoPorTipo;
 }
 
+// Función para traducir opciones predefinidas del tratamiento territorial
+const traducirTratamientoTerritorial = (texto: string): string => {
+    if (!texto) return texto;
+
+    const idiomaActual = i18n.language;
+
+    // Mapas de traducción entre español y euskera
+    const opcionesEs = opcionesComarcalEs.opcionesComarcal;
+    const opcionesEu = opcionesComarcalEu.opcionesComarcal;
+    const opcionesSupraEs = opcionesComarcalEs.opcionesSupraComarcal;
+    const opcionesSupraEu = opcionesComarcalEu.opcionesSupraComarcal;
+
+    // Si el idioma es euskera, buscar en las opciones españolas y traducir
+    if (idiomaActual === 'eu') {
+        const indiceComarcal = opcionesEs.indexOf(texto);
+        if (indiceComarcal !== -1) {
+            return opcionesEu[indiceComarcal];
+        }
+
+        const indiceSupra = opcionesSupraEs.indexOf(texto);
+        if (indiceSupra !== -1) {
+            return opcionesSupraEu[indiceSupra];
+        }
+    } else {
+        // Si el idioma es español, buscar en las opciones euskera y traducir
+        const indiceComarcal = opcionesEu.indexOf(texto);
+        if (indiceComarcal !== -1) {
+            return opcionesEs[indiceComarcal];
+        }
+
+        const indiceSupra = opcionesSupraEu.indexOf(texto);
+        if (indiceSupra !== -1) {
+            return opcionesSupraEs[indiceSupra];
+        }
+    }
+
+    // Si no es una opción predefinida, devolver el texto tal cual (texto personalizado)
+    return texto;
+};
+
 const incrementar = (mapa: ConteoPorTipo, clave: Comarcal | string | null | undefined) => {
     if (!clave) return;
     const key = String(clave).trim();
-    if (!key || (key || '').toLowerCase().startsWith('sin tratamiento')) return;
+    if (!key || (key || '').toLowerCase().startsWith('sin tratamiento') || (key || '').toLowerCase().startsWith('eskualde tratamendurik')) return;
     mapa[key] = (mapa[key] ?? 0) + 1;
 };
 
@@ -96,13 +139,14 @@ export const generarInformeTratamientoComarcal = async (
     filaTituloComarcal.font = { bold: true };
     sheet.mergeCells(`A${filaTituloComarcal.number}:C${filaTituloComarcal.number}`);
 
-    const encabezadoComarcal = sheet.addRow(['Tratamiento', 'Cantidad', 'Porcentaje']);
+    const encabezadoComarcal = sheet.addRow([t('tratamiento'), t('cantidad'), t('porcentaje')]);
     encabezadoComarcal.font = { bold: true };
     encabezadoComarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
     Object.entries(acciones.comarcales).forEach(([comarcal, cantidad]) => {
         const porcentaje = totalComarcales > 0 ? Math.round((cantidad / totalComarcales) * 100) : 0;
-        sheet.addRow([comarcal, cantidad, `${porcentaje}%`]);
+        const comarcalTraducido = traducirTratamientoTerritorial(comarcal);
+        sheet.addRow([comarcalTraducido, cantidad, `${porcentaje}%`]);
     });
 
     sheet.addRow([]);
@@ -111,13 +155,14 @@ export const generarInformeTratamientoComarcal = async (
     filaTituloSupracomarcal.font = { bold: true };
     sheet.mergeCells(`A${filaTituloSupracomarcal.number}:C${filaTituloSupracomarcal.number}`);
 
-    const encabezadoSupracomarcal = sheet.addRow(['Tratamiento', 'Cantidad', 'Porcentaje']);
+    const encabezadoSupracomarcal = sheet.addRow([t('tratamiento'), t('cantidad'), t('porcentaje')]);
     encabezadoSupracomarcal.font = { bold: true };
     encabezadoSupracomarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
     Object.entries(acciones.supracomarcales).forEach(([supracomarcales, cantidad]) => {
         const porcentaje = totalSupracomarcales > 0 ? Math.round((cantidad / totalSupracomarcales) * 100) : 0;
-        sheet.addRow([supracomarcales, cantidad, `${porcentaje}%`]);
+        const supracomarcalesTraducido = traducirTratamientoTerritorial(supracomarcales);
+        sheet.addRow([supracomarcalesTraducido, cantidad, `${porcentaje}%`]);
     });
 
     sheet.eachRow((row) => (row.alignment = { vertical: 'middle', horizontal: 'center' }));
@@ -160,14 +205,14 @@ export const generarInformeTratamientoComarcalSeparado = async (
     if (!datos || !Array.isArray(datos) || datos.length === 0) {
         if (workbook) {
             const sheet = workbook.addWorksheet('Error');
-            const filaError = sheet.addRow(['No hay datos disponibles para generar el informe']);
+            const filaError = sheet.addRow([t('noDatosDisponiblesInforme')]);
             filaError.font = { bold: true, color: { argb: 'FFFF0000' } };
             sheet.mergeCells(`A${filaError.number}:C${filaError.number}`);
             return;
         }
 
         const sheet = workbookInterno.addWorksheet('Error');
-        const filaError = sheet.addRow(['No hay datos disponibles para generar el informe']);
+        const filaError = sheet.addRow([t('noDatosDisponiblesInforme')]);
         filaError.font = { bold: true, color: { argb: 'FFFF0000' } };
         sheet.mergeCells(`A${filaError.number}:C${filaError.number}`);
 
@@ -216,7 +261,7 @@ export const generarInformeTratamientoComarcalSeparado = async (
             const accionRegionIdNum = Number(regionId);
             return regionIdNum === accionRegionIdNum;
         });
-        const nombreRegion = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionId}`;
+        const nombreRegion = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `${t('region')} ${regionId}`;
 
         const nombrePestana = obtenerNombreUnico(`${anioSeleccionado} - ${nombreRegion}`);
         const sheet = workbookInterno.addWorksheet(nombrePestana);
@@ -265,13 +310,14 @@ export const generarInformeTratamientoComarcalSeparado = async (
         filaTituloComarcal.font = { bold: true };
         sheet.mergeCells(`A${filaTituloComarcal.number}:C${filaTituloComarcal.number}`);
 
-        const encabezadoComarcal = sheet.addRow([t('Tratamiento'), t('Cantidad'), t('Porcentaje')]);
+        const encabezadoComarcal = sheet.addRow([t('tratamiento'), t('cantidad'), t('porcentaje')]);
         encabezadoComarcal.font = { bold: true };
         encabezadoComarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
         Object.entries(resumenRegion.comarcales).forEach(([comarcal, cantidad]) => {
             const porcentaje = totalComarcales > 0 ? Math.round((cantidad / totalComarcales) * 100) : 0;
-            sheet.addRow([comarcal, cantidad, `${porcentaje}%`]);
+            const comarcalTraducido = traducirTratamientoTerritorial(comarcal);
+            sheet.addRow([comarcalTraducido, cantidad, `${porcentaje}%`]);
         });
 
         sheet.addRow([]);
@@ -281,13 +327,14 @@ export const generarInformeTratamientoComarcalSeparado = async (
         filaTituloSupracomarcal.font = { bold: true };
         sheet.mergeCells(`A${filaTituloSupracomarcal.number}:C${filaTituloSupracomarcal.number}`);
 
-        const encabezadoSupracomarcal = sheet.addRow([t('Tratamiento'), t('Cantidad'), t('Porcentaje')]);
+        const encabezadoSupracomarcal = sheet.addRow([t('tratamiento'), t('cantidad'), t('porcentaje')]);
         encabezadoSupracomarcal.font = { bold: true };
         encabezadoSupracomarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
         Object.entries(resumenRegion.supracomarcales).forEach(([supracomarcales, cantidad]) => {
             const porcentaje = totalSupracomarcales > 0 ? Math.round((cantidad / totalSupracomarcales) * 100) : 0;
-            sheet.addRow([supracomarcales, cantidad, `${porcentaje}%`]);
+            const supracomarcalesTraducido = traducirTratamientoTerritorial(supracomarcales);
+            sheet.addRow([supracomarcalesTraducido, cantidad, `${porcentaje}%`]);
         });
 
         sheet.eachRow((row) => (row.alignment = { vertical: 'middle', horizontal: 'center' }));

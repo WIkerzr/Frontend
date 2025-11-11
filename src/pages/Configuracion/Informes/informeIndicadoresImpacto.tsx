@@ -1,6 +1,7 @@
 import saveAs from 'file-saver';
 import { TFunction } from 'i18next';
 import ExcelJS from 'exceljs';
+import i18n from '../../../i18n';
 
 export interface Valor {
     Id: number;
@@ -51,7 +52,6 @@ interface GenerarInformeIndicadoresImpactoProps {
     datosOriginales: IndicadorImpacto[];
     datosConValores?: IndicadorImpacto[]; // Array "Datos" de la región
     t: TFunction<'translation'>;
-    anioSeleccionado: string;
     worksheet?: ExcelJS.Worksheet;
     workbook?: ExcelJS.Workbook;
     metadatos?: {
@@ -62,15 +62,7 @@ interface GenerarInformeIndicadoresImpactoProps {
     };
 }
 
-export const generarInformeIndicadoresImpacto = async ({
-    datosOriginales,
-    datosConValores,
-    t,
-    anioSeleccionado,
-    worksheet,
-    workbook,
-    metadatos,
-}: GenerarInformeIndicadoresImpactoProps): Promise<void> => {
+export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosConValores, t, worksheet, workbook, metadatos }: GenerarInformeIndicadoresImpactoProps): Promise<void> => {
     const workbookInterno = workbook || new ExcelJS.Workbook();
     const sheet = worksheet || workbookInterno.addWorksheet('Indicadores de Impacto');
 
@@ -136,11 +128,11 @@ export const generarInformeIndicadoresImpacto = async ({
     sheet.addRow([]);
 
     // Crear encabezado dinámico
-    const encabezadoArray = ['Indicador', 'Categoría', 'Unidad de Medida', 'Alcance Territorial', 'Año Inicial', 'Valor Inicial', 'Objetivo Inicial'];
+    const encabezadoArray = [t('indicador'), t('categoria'), t('unidadMedida'), t('alcanceTerritorial'), t('anioInicial'), t('valorInicial'), t('objetivoInicial')];
 
     // Agregar encabezados para cada año
     for (let i = 0; i < maxAnios; i++) {
-        encabezadoArray.push('Año', 'Valor', 'Cumplimiento', 'Siguiente objetivo');
+        encabezadoArray.push(t('anio'), t('valor'), t('cumplimiento'), t('siguienteObjetivo'));
     }
 
     const encabezado = sheet.addRow(encabezadoArray);
@@ -153,7 +145,7 @@ export const generarInformeIndicadoresImpacto = async ({
     };
 
     if (!datosOriginales || !Array.isArray(datosOriginales) || datosOriginales.length === 0) {
-        const filaError = sheet.addRow(['No hay datos disponibles para generar el informe', '', '', '', '', '', '', '', '', '', '']);
+        const filaError = sheet.addRow([t('noDatosDisponiblesInforme'), '', '', '', '', '', '', '', '', '', '']);
         filaError.font = { bold: true, color: { argb: 'FFFF0000' } };
         sheet.mergeCells(`A${filaError.number}:K${filaError.number}`);
 
@@ -162,15 +154,60 @@ export const generarInformeIndicadoresImpacto = async ({
             const blob = new Blob([buffer], {
                 type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             });
-            saveAs(blob, `${t('InfIndicadoresImpacto')}_${anioSeleccionado}.xlsx`);
+            saveAs(blob, `${t('InfIndicadoresImpacto')}.xlsx`);
         }
         return;
     }
 
     const transformarObjetivo = (impactType?: number): string => {
-        if (impactType === 1) return 'Aumentar';
-        if (impactType === 2) return 'Disminuir';
-        return 'Mantener';
+        if (impactType === 1) return t('aumentar');
+        if (impactType === 2) return t('disminuir');
+        return t('mantener');
+    };
+
+    // Función para traducir objetivos guardados en base de datos
+    const traducirObjetivo = (objetivo?: string | null): string => {
+        if (!objetivo) return '';
+        const objetivoLower = objetivo.toLowerCase();
+        if (objetivoLower.includes('aumentar') || objetivoLower.includes('handitu')) return t('aumentar');
+        if (objetivoLower.includes('disminuir') || objetivoLower.includes('txikitu')) return t('disminuir');
+        if (objetivoLower.includes('mantener') || objetivoLower.includes('mantendu')) return t('mantener');
+        return objetivo; // Si no coincide, devolver tal cual
+    };
+
+    // Función para traducir alcance territorial guardado en base de datos
+    const traducirAlcanceTerritorial = (alcance?: string): string => {
+        if (!alcance) return '';
+
+        // Mapear valores exactos que vienen del select
+        const mapaAlcances: { [key: string]: string } = {
+            Comarcal: t('comarcal'),
+            ZEA: t('ZEA'),
+            'Zona rural (ZEA + TER+ zona rural de HRD)': t('Zrural'),
+            'Municipios rurales (ZEA + TER)': t('ZEATER'),
+        };
+
+        // Buscar coincidencia exacta
+        if (mapaAlcances[alcance]) {
+            return mapaAlcances[alcance];
+        }
+
+        // Si no hay coincidencia exacta, buscar en las traducciones inversas (por si viene ya traducido)
+        const alcanceLower = alcance.toLowerCase();
+        if (alcanceLower.includes('comarcal') || alcanceLower.includes('barrutiko')) {
+            return t('comarcal');
+        }
+        if (alcanceLower === 'zea') {
+            return t('ZEA');
+        }
+        if (alcanceLower.includes('landa-eremua') || alcanceLower.includes('zona rural')) {
+            return t('Zrural');
+        }
+        if (alcanceLower.includes('landa-udalerriak') || alcanceLower.includes('municipios rurales')) {
+            return t('ZEATER');
+        }
+
+        return alcance; // Si no coincide, devolver tal cual
     };
 
     // Filtrar solo los indicadores que existen en datosConValores
@@ -183,10 +220,17 @@ export const generarInformeIndicadoresImpacto = async ({
     // Calcular la primera fila de datos (para usarla en las fórmulas)
     const primeraFilaDatos = encabezado.number + 1;
 
+    // Detectar idioma actual
+    const idiomaActual = i18n.language;
+    const esEuskera = idiomaActual === 'eu';
+
     indicadoresFiltrados.forEach((indicador) => {
-        const nombreIndicador = indicador.IndiadorNameEs || '';
-        const categoria = indicador.CategoriaNameEs || '';
-        const unidad = indicador.UnitEs || '';
+        // Usar campos según idioma, con fallback al otro idioma si está vacío
+        const nombreIndicador = esEuskera ? indicador.IndiadorNameEu || indicador.IndiadorNameEs || '' : indicador.IndiadorNameEs || indicador.IndiadorNameEu || '';
+
+        const categoria = esEuskera ? indicador.CategoriaNameEu || indicador.CategoriaNameEs || '' : indicador.CategoriaNameEs || indicador.CategoriaNameEu || '';
+
+        const unidad = esEuskera ? indicador.UnitEu || indicador.UnitEs || '' : indicador.UnitEs || indicador.UnitEu || '';
 
         // Valores iniciales desde ListadoCompleto (por defecto)
         let anioInicial = typeof indicador.Year === 'string' ? parseInt(indicador.Year) : indicador.Year || 0;
@@ -209,7 +253,7 @@ export const generarInformeIndicadoresImpacto = async ({
                     if ((rel.IdIndicator === indicador.IdIndicador || rel.IdIndicator === indicador.IdIndicator) && rel.IdCategoria === indicador.IdCategoria) {
                         anioInicial = rel.Year;
                         valorInicial = rel.Valor;
-                        objetivoInicial = rel.Objetivo || objetivoInicial;
+                        objetivoInicial = traducirObjetivo(rel.Objetivo) || objetivoInicial;
                     }
                 }
 
@@ -222,7 +266,7 @@ export const generarInformeIndicadoresImpacto = async ({
                 }
 
                 if (datosArray) {
-                    alcanceTerritorialReal = datosArray.AlcanceTerritorial || '';
+                    alcanceTerritorialReal = traducirAlcanceTerritorial(datosArray.AlcanceTerritorial);
                     if (datosArray.Valores) {
                         valoresDisponibles = datosArray.Valores;
                     }
@@ -236,7 +280,7 @@ export const generarInformeIndicadoresImpacto = async ({
         // Agregar datos para cada año disponible
         valoresDisponibles.forEach((valor) => {
             const valorAnio = valor.Valor || 0;
-            const objetivoAnio = valor.Objetivo || '';
+            const objetivoAnio = traducirObjetivo(valor.Objetivo);
             const anioActual = valor.Year;
 
             // Orden: Año, Valor, Cumplimiento (vacío, se calculará con fórmula), Siguiente objetivo
@@ -300,7 +344,7 @@ export const generarInformeIndicadoresImpacto = async ({
                     }
                 }
 
-                textoResultado = `${cumple ? 'SI' : 'NO'} (${diferencia.toFixed(2)})`;
+                textoResultado = `${cumple ? t('si') : t('no')} (${diferencia.toFixed(2)})`;
 
                 // Aplicar color según el resultado
                 const cell = fila.getCell(colPorcentaje);
@@ -333,7 +377,7 @@ export const generarInformeIndicadoresImpacto = async ({
             } else {
                 // Si no hay valor anterior, marcar como "SIN DATOS" - rojo
                 const cell = fila.getCell(colPorcentaje);
-                cell.value = 'SIN DATOS';
+                cell.value = t('sinDatosInforme');
                 cell.numFmt = '@';
                 cell.fill = {
                     type: 'pattern',
@@ -417,10 +461,11 @@ export const generarInformeIndicadoresImpacto = async ({
                 const texto = String(cellValue);
                 totalFilas++;
 
-                if (texto === 'SIN DATOS' || texto.startsWith('NO')) {
+                if (texto === t('sinDatosInforme') || texto.startsWith(t('no'))) {
                     contadorRojos++;
-                } else if (texto.startsWith('SI')) {
-                    const match = texto.match(/SI \(([^)]+)\)/);
+                } else if (texto.startsWith(t('si'))) {
+                    // Extraer el número entre paréntesis usando una regex más flexible
+                    const match = texto.match(/\(([^)]+)\)/);
                     if (match) {
                         const diferencia = parseFloat(match[1]);
                         if (Math.abs(diferencia) >= 85) {
@@ -460,12 +505,12 @@ export const generarInformeIndicadoresImpacto = async ({
     // Aplicar los valores a cada columna
     estadisticasPorAnio.forEach((stats) => {
         // Título
-        filaResumenTitulo.getCell(stats.colValor).value = 'Resumen de Cumplimiento';
+        filaResumenTitulo.getCell(stats.colValor).value = t('resumenCumplimiento');
         filaResumenTitulo.getCell(stats.colValor).font = { bold: true };
         filaResumenTitulo.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
 
         // Fila roja
-        filaRoja.getCell(stats.colValor).value = 'Ejecución reducida';
+        filaRoja.getCell(stats.colValor).value = t('ejecucionReducida');
         filaRoja.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
         filaRoja.getCell(stats.colPorcentaje).value = `${stats.porcentajeRojo}%`;
         filaRoja.getCell(stats.colPorcentaje).fill = {
@@ -476,7 +521,7 @@ export const generarInformeIndicadoresImpacto = async ({
         filaRoja.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
 
         // Fila amarilla
-        filaAmarilla.getCell(stats.colValor).value = 'Ejecución media';
+        filaAmarilla.getCell(stats.colValor).value = t('ejecucionMedia');
         filaAmarilla.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
         filaAmarilla.getCell(stats.colPorcentaje).value = `${stats.porcentajeAmarillo}%`;
         filaAmarilla.getCell(stats.colPorcentaje).fill = {
@@ -487,7 +532,7 @@ export const generarInformeIndicadoresImpacto = async ({
         filaAmarilla.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
 
         // Fila verde
-        filaVerde.getCell(stats.colValor).value = 'Ejecución objetiva';
+        filaVerde.getCell(stats.colValor).value = t('ejecucionObjetiva');
         filaVerde.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
         filaVerde.getCell(stats.colPorcentaje).value = `${stats.porcentajeVerde}%`;
         filaVerde.getCell(stats.colPorcentaje).fill = {
@@ -503,6 +548,6 @@ export const generarInformeIndicadoresImpacto = async ({
         const blob = new Blob([buffer], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
-        saveAs(blob, `${t('InfIndicadoresImpacto')}_${anioSeleccionado}.xlsx`);
+        saveAs(blob, `${t('InfIndicadoresImpacto')}.xlsx`);
     }
 };
