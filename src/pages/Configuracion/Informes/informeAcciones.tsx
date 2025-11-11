@@ -139,24 +139,23 @@ export const generarInformeAcciones = async (
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
     });
 
-    const datosPorAnio = anios.reduce((acc, item) => {
-        if (!acc[item.Anio]) acc[item.Anio] = [];
-        acc[item.Anio].push(item);
-        return acc;
-    }, {} as Record<number, RegionAnio[]>);
-
-    for (const anioStr in datosPorAnio) {
-        const fila = sheet.addRow([anioStr]);
-        sheet.mergeCells(`A${fila.number}:C${fila.number}`);
-        fila.font = { bold: true, size: 12 };
-        fila.alignment = { horizontal: 'center', vertical: 'middle' };
-
-        for (let index = 0; index < anios.length; index++) {
-            const datos = anios[index].Datos;
-            const resumenes = generarInformeResumenComarcaEje(datos, i18n, regiones || []);
-            resumenes.forEach((r) => sheet.addRow(r));
-        }
+    let totalAcciones = 0;
+    for (let index = 0; index < anios.length; index++) {
+        const datos = anios[index].Datos;
+        const resumenes = generarInformeResumenComarcaEje(datos, i18n, regiones || []);
+        resumenes.forEach((r) => {
+            sheet.addRow(r);
+            totalAcciones += r.NumeroAcciones;
+        });
     }
+
+    // Fila de total con borde superior
+    const filaTotal = sheet.addRow(['', '', totalAcciones]);
+    filaTotal.getCell(3).font = { bold: true };
+    filaTotal.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaTotal.getCell(3).border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+    };
 
     sheet.addRow([]);
     sheet.addRow([]);
@@ -173,20 +172,23 @@ export const generarInformeAcciones = async (
     filaEncabezado2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
     filaEncabezado2.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    for (const anioStr in datosPorAnio) {
-        const fila = sheet.addRow([anioStr]);
-        sheet.mergeCells(`A${fila.number}:C${fila.number}`);
-        fila.font = { bold: true, size: 12 };
-        fila.alignment = { horizontal: 'center', vertical: 'middle' };
-
-        for (let index = 0; index < anios.length; index++) {
-            const datos = anios[index].Datos;
-            const resumenesGenerales = generarInformeResumenObjetivos(datos, i18n, 0);
-            resumenesGenerales.forEach((r) => {
-                sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
-            });
-        }
+    let totalAccionesGenerales = 0;
+    for (let index = 0; index < anios.length; index++) {
+        const datos = anios[index].Datos;
+        const resumenesGenerales = generarInformeResumenObjetivos(datos, i18n, 0);
+        resumenesGenerales.forEach((r) => {
+            sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
+            totalAccionesGenerales += r.NumeroAcciones;
+        });
     }
+
+    // Fila de total con borde superior
+    const filaTotalGenerales = sheet.addRow(['', totalAccionesGenerales, '']);
+    filaTotalGenerales.getCell(2).font = { bold: true };
+    filaTotalGenerales.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaTotalGenerales.getCell(2).border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+    };
 
     sheet.addRow([]);
     sheet.addRow([]);
@@ -203,20 +205,23 @@ export const generarInformeAcciones = async (
     filaEncabezado3.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
     filaEncabezado3.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    for (const anioStr in datosPorAnio) {
-        const fila = sheet.addRow([anioStr]);
-        sheet.mergeCells(`A${fila.number}:C${fila.number}`);
-        fila.font = { bold: true, size: 12 };
-        fila.alignment = { horizontal: 'center', vertical: 'middle' };
-
-        for (let index = 0; index < anios.length; index++) {
-            const datos = anios[index].Datos;
-            const resumenesSectoriales = generarInformeResumenObjetivos(datos, i18n, 1);
-            resumenesSectoriales.forEach((r) => {
-                sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
-            });
-        }
+    let totalAccionesSectoriales = 0;
+    for (let index = 0; index < anios.length; index++) {
+        const datos = anios[index].Datos;
+        const resumenesSectoriales = generarInformeResumenObjetivos(datos, i18n, 1);
+        resumenesSectoriales.forEach((r) => {
+            sheet.addRow([r.NombreObjetivo, r.NumeroAcciones, '']);
+            totalAccionesSectoriales += r.NumeroAcciones;
+        });
     }
+
+    // Fila de total con borde superior
+    const filaTotalSectoriales = sheet.addRow(['', totalAccionesSectoriales, '']);
+    filaTotalSectoriales.getCell(2).font = { bold: true };
+    filaTotalSectoriales.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaTotalSectoriales.getCell(2).border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+    };
 
     sheet.eachRow((row) => {
         row.alignment = { vertical: 'middle', horizontal: 'left' };
