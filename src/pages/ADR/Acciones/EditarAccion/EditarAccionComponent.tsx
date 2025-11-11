@@ -354,13 +354,8 @@ export const TablasIndicadoresComponent = forwardRef<HTMLDivElement, TablasIndic
         ref
     ) => {
         const records = tipoIndicador === 'realizacion' ? dataRealizacion : (dataResultado as any);
+
         if (!records || records.length === 0) return null;
-        for (let i = records.length - 1; i >= 0; i--) {
-            const desc = records[i]?.descripcion;
-            if (typeof desc !== 'string' || desc.trim() === '') {
-                records.splice(i, 1);
-            }
-        }
         const setIndicador = tipoIndicador === 'realizacion' ? setIndicadoresRealizacion : setIndicadoresResultado;
         const editableRowIndex = tipoIndicador === 'realizacion' ? editableRowIndexRealizacion : editableRowIndexResultado;
         const setEditableRowIndex = tipoIndicador === 'realizacion' ? setEditableRowIndexRealizacion : setEditableRowIndexResultado;

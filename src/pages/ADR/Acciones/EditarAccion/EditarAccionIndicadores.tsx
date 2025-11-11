@@ -19,7 +19,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
     const { ListadoNombresIdicadoresSegunADR, indicadoresRealizacion, indicadoresResultado, PrimeraLlamada } = useIndicadoresContext();
-    const [carga, setCarga] = useState<boolean>(false);
+    const [carga, setCarga] = useState<boolean>(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ? true : false);
 
     const [indicadoresRealizacionTabla, setIndicadoresRealizacionTabla] = useState<IndicadorRealizacionAccion[]>(sortBy(datosEditandoAccion.indicadorAccion?.indicadoreRealizacion, 'id') ?? []);
     const [indicadoresResultadoTabla, setIndicadoresResultadoTabla] = useState<IndicadorResultadoAccion[]>(sortBy(datosEditandoAccion.indicadorAccion?.indicadoreResultado, 'id') ?? []);
@@ -51,25 +51,21 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
         if (datosEditandoAccion.indicadorAccion?.indicadoreRealizacion) {
             setCarga(true);
         }
-        const sinEspacios = datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion.find((e) => e.descripcion != '');
-        if (!sinEspacios) return;
 
         const rescargarIndicadorRealizacion = datosEditandoAccion?.indicadorAccion?.indicadoreRealizacion;
-        if (!rescargarIndicadorRealizacion) {
-            return;
-        }
-        // Solo actualizamos si realmente hay cambios
-        if (JSON.stringify(sortBy(rescargarIndicadorRealizacion, 'id')) !== JSON.stringify(indicadoresRealizacionTabla)) {
-            setIndicadoresRealizacionTabla(sortBy(rescargarIndicadorRealizacion, 'id'));
+        if (rescargarIndicadorRealizacion && rescargarIndicadorRealizacion.length > 0) {
+            // Solo actualizamos si realmente hay cambios
+            if (JSON.stringify(sortBy(rescargarIndicadorRealizacion, 'id')) !== JSON.stringify(indicadoresRealizacionTabla)) {
+                setIndicadoresRealizacionTabla(sortBy(rescargarIndicadorRealizacion, 'id'));
+            }
         }
 
         const rescargarIndicadorResultado = datosEditandoAccion?.indicadorAccion?.indicadoreResultado;
-        if (!rescargarIndicadorResultado) {
-            return;
-        }
-        // Solo actualizamos si realmente hay cambios
-        if (JSON.stringify(sortBy(rescargarIndicadorResultado, 'id')) !== JSON.stringify(indicadoresResultadoTabla)) {
-            setIndicadoresResultadoTabla(sortBy(rescargarIndicadorResultado, 'id'));
+        if (rescargarIndicadorResultado && rescargarIndicadorResultado.length > 0) {
+            // Solo actualizamos si realmente hay cambios
+            if (JSON.stringify(sortBy(rescargarIndicadorResultado, 'id')) !== JSON.stringify(indicadoresResultadoTabla)) {
+                setIndicadoresResultadoTabla(sortBy(rescargarIndicadorResultado, 'id'));
+            }
         }
     }, [datosEditandoAccion]);
 
