@@ -153,7 +153,9 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
         return null;
     }
 
-    if (datosEditandoAccion.datosPlan !== undefined || !carga) {
+    const esRutaAcciones = window.location.pathname.includes('acciones');
+
+    if (!esRutaAcciones && datosEditandoAccion.datosPlan !== undefined && !carga) {
         return null;
     }
 
