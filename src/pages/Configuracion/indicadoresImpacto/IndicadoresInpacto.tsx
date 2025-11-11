@@ -175,19 +175,27 @@ const Index = () => {
 
     const [aniosHabilitados, setAniosHabilitados] = useState<number[]>([]);
 
-    let aniosIndicadores = getMinMaxYearsIndicadores(indicadores) || { minYear: 2025, maxYear: 2025 };
+    // Obtener rango de años desde los indicadores si existen
+    let aniosIndicadores = getMinMaxYearsIndicadores(indicadores);
     const aniosRegion = sessionStorage.getItem('aniosRegion');
-    if (aniosRegion && !aniosIndicadores) {
-        const aniosParsed = JSON.parse(aniosRegion) as { RegionId: number; Years: number[] }[];
-        aniosIndicadores = getMinMaxYears(aniosParsed) || aniosIndicadores;
+    // Si no hay años detectados en los indicadores, intentar obtenerlos desde sessionStorage (aniosRegion)
+    if (!aniosIndicadores && aniosRegion) {
+        try {
+            const aniosParsed = JSON.parse(aniosRegion) as { RegionId: number; Years: number[] }[];
+            const fallback = getMinMaxYears(aniosParsed);
+            if (fallback) aniosIndicadores = fallback;
+        } catch {
+            // ignore parse errors and keep aniosIndicadores as undefined
+        }
     }
 
     const yearsArray: number[] =
-        aniosHabilitados.length > 0
-            ? aniosHabilitados.sort((a, b) => a - b)
-            : aniosIndicadores
-            ? Array.from({ length: aniosIndicadores.maxYear - aniosIndicadores.minYear + 1 }, (_, i) => aniosIndicadores.minYear + i)
-            : [];
+        aniosHabilitados && aniosHabilitados.length > 0
+            ? [...aniosHabilitados].sort((a, b) => a - b)
+            : // aniosIndicadores
+              // ? Array.from({ length: aniosIndicadores.maxYear - aniosIndicadores.minYear + 1 }, (_, i) => aniosIndicadores.minYear + i)
+              // :
+              [];
 
     const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');

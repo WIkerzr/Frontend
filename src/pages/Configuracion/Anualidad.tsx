@@ -106,29 +106,33 @@ const Index = () => {
             .map(Number)
             .sort((a, b) => b - a);
 
-        const promesas = years.map(async (year) => {
-            const isSelected = selectedYears[year];
+        const callApi = (params: { method: 'GET' | 'POST' | 'PUT' | 'DELETE'; url: string; body?: unknown }) =>
+            new Promise<unknown>((resolve, reject) => {
+                LlamadasBBDD({
+                    method: params.method,
+                    url: params.url,
+                    body: params.body,
+                    setLoading: () => {},
+                    setSuccessMessage: () => {},
+                    setErrorMessage: () => {},
+                    onSuccess: (res) => resolve(res),
+                    onError: (err) => reject(err),
+                });
+            });
+
+        const promesas = years.map((year) => {
+            const isSelected = !!selectedYears[year];
             const existingYear = impactYearsFromDB.find((y) => y.Year === year);
 
             if (existingYear) {
-                return LlamadasBBDD({
-                    method: 'PUT',
-                    url: `impactIndicatorYears/${year}`,
-                    body: { Year: year, Status: isSelected },
-                    setLoading: () => {},
-                    setSuccessMessage: () => {},
-                    setErrorMessage: () => {},
-                });
-            } else if (isSelected) {
-                return LlamadasBBDD({
-                    method: 'POST',
-                    url: 'impactIndicatorYears',
-                    body: { Year: year, Status: true },
-                    setLoading: () => {},
-                    setSuccessMessage: () => {},
-                    setErrorMessage: () => {},
-                });
+                return callApi({ method: 'PUT', url: `impactIndicatorYears/${year}`, body: { Year: year, Status: isSelected } });
             }
+
+            if (isSelected) {
+                return callApi({ method: 'POST', url: 'impactIndicatorYears', body: { Year: year, Status: true } });
+            }
+
+            return Promise.resolve(null);
         });
 
         try {
