@@ -235,7 +235,6 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                             <input
                                 type="text"
                                 className="form-input"
-                                placeholder="2024-2028"
                                 disabled={bloqueo}
                                 maxLength={9}
                                 value={datosEditandoAccion.datosPlan.rangoAnios || ''}

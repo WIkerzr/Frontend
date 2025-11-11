@@ -560,7 +560,10 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             },
             onSuccess: (response) => {
                 if (tipo === 'AccionesAccesorias') {
-                    const eje = yearData.plan.ejesRestantes!.find((eje) => eje.Id === datosEditandoAccion.ejeId);
+                    let eje = yearData.plan.ejesRestantes!.find((eje) => eje.Id === datosEditandoAccion.ejeId);
+                    if (!eje) {
+                        eje = yearData.plan.ejes.find((eje) => eje.Id === datosEditandoAccion.ejeId);
+                    }
                     if (eje) {
                         const accionTranformada = accionTransformadaBackAFront(response.data, eje.NameEs, eje.NameEu, eje.Id);
                         setYearData({

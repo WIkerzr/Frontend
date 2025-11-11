@@ -253,7 +253,7 @@ export function VerificarAccionFinal(datosEditandoAccion: DatosAccion, editarPla
         //Memoria
         checkData(memoria.presupuestoEjecutado.fuenteDeFinanciacion, 'fuenteDeFinanciacion');
         checkData(memoria.presupuestoEjecutado.cuantia, 'cuantia');
-        checkData(memoria.presupuestoEjecutado.observaciones, 'observaciones');
+        // checkData(memoria.presupuestoEjecutado.observaciones, 'observaciones');
         checkData(memoria.ejecucionPresupuestaria.previsto, 'previsto');
         checkData(memoria.ejecucionPresupuestaria.ejecutado, 'ejecutado');
         checkData(memoria.ejecucionPresupuestaria.porcentaje, 'porcentaje');
