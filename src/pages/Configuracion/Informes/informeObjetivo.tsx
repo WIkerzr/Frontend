@@ -273,7 +273,7 @@ export const GenerarInformeObjetivos = async ({
 
                 cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
-                if (valor > 0 && valor < 50) {
+                if (valor >= 0 && valor < 50) {
                     cell.fill = {
                         type: 'pattern',
                         pattern: 'solid',

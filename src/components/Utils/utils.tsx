@@ -729,35 +729,79 @@ export function ConvertirIndicadoresServicioAAccionDTO(
     const indicadoreRealizacion: IndicadorRealizacionAccionDTO[] = [];
     const indicadoreResultado: IndicadorResultadoAccionDTO[] = [];
 
+    // Obtener los indicadores desde localStorage para buscar por NameEs/NameEu
+    const indicadoresRealizacionStorage = localStorage.getItem('indicadoresRealizacion');
+    const indicadoresResultadoStorage = localStorage.getItem('indicadoresResultado');
+    const indicadoresRealizacionADRStorage = sessionStorage.getItem('indicadoresRealizacionFiltrado');
+    const indicadoresResultadoADRStorage = sessionStorage.getItem('indicadoresResultadoFiltrado');
+
+    const todosIndicadoresRealizacion = [
+        ...(indicadoresRealizacionStorage ? JSON.parse(indicadoresRealizacionStorage) : []),
+        ...(indicadoresRealizacionADRStorage ? JSON.parse(indicadoresRealizacionADRStorage) : []),
+    ];
+
+    const todosIndicadoresResultado = [
+        ...(indicadoresResultadoStorage ? JSON.parse(indicadoresResultadoStorage) : []),
+        ...(indicadoresResultadoADRStorage ? JSON.parse(indicadoresResultadoADRStorage) : []),
+    ];
+
     indicadores.forEach((ind) => {
         const base = {
             id: ind.Id ?? 0,
             descripcion: ind.Indicador,
-            Ejecutado_Hombre: ind.PrevistoHombres,
-            Ejecutado_Mujer: ind.PrevistoMujeres,
-            Ejecutado_Total: ind.PrevistoValor,
-            MetaAnual_Hombre: ind.AlcanzadoHombres,
-            MetaAnual_Mujer: ind.AlcanzadoMujeres,
-            MetaAnual_Total: ind.AlcanzadoValor,
+            Ejecutado_Hombre: ind.AlcanzadoHombres,
+            Ejecutado_Mujer: ind.AlcanzadoMujeres,
+            Ejecutado_Total: ind.AlcanzadoValor,
+            MetaAnual_Hombre: ind.PrevistoHombres,
+            MetaAnual_Mujer: ind.PrevistoMujeres,
+            MetaAnual_Total: ind.PrevistoValor,
             hipotesis: '',
         };
 
         if (ind.Tipo === 'realizacion') {
-            const idIndicadorOriginal = listadoNombresRealizacion.find((re) => re.nombre === ind.Indicador)?.id;
+            // Buscar primero en listadoNombres
+            let idIndicadorOriginal = listadoNombresRealizacion.find((re) => re.nombre === ind.Indicador)?.id;
+            let nameEs = ind.Indicador;
+            let nameEu = ind.Indicador;
+
+            // Si no se encuentra, buscar en los indicadores almacenados por NameEs/NameEu
+            if (!idIndicadorOriginal) {
+                const indicadorEncontrado = todosIndicadoresRealizacion.find((indReal: any) => indReal.NameEs === ind.Indicador || indReal.NameEu === ind.Indicador);
+                if (indicadorEncontrado) {
+                    idIndicadorOriginal = indicadorEncontrado.Id;
+                    nameEs = indicadorEncontrado.NameEs;
+                    nameEu = indicadorEncontrado.NameEu;
+                }
+            }
+
             indicadoreRealizacion.push({
                 ...base,
-                IndicadorRealizacionId: idIndicadorOriginal ?? 0,
-                NameEs: ind.Indicador,
-                NameEu: ind.Indicador,
+                IndicadorRealizacionId: idIndicadorOriginal ?? ind.Id ?? 0,
+                NameEs: nameEs,
+                NameEu: nameEu,
                 DatosAccionId: ind.Id ?? 0,
             });
         } else {
-            const idIndicadorOriginal = listadoNombresResultado.find((re) => re.nombre === ind.Indicador)?.id;
+            // Buscar primero en listadoNombres
+            let idIndicadorOriginal = listadoNombresResultado.find((re) => re.nombre === ind.Indicador)?.id;
+            let nameEs = ind.Indicador;
+            let nameEu = ind.Indicador;
+
+            // Si no se encuentra, buscar en los indicadores almacenados por NameEs/NameEu
+            if (!idIndicadorOriginal) {
+                const indicadorEncontrado = todosIndicadoresResultado.find((indRes: any) => indRes.NameEs === ind.Indicador || indRes.NameEu === ind.Indicador);
+                if (indicadorEncontrado) {
+                    idIndicadorOriginal = indicadorEncontrado.Id;
+                    nameEs = indicadorEncontrado.NameEs;
+                    nameEu = indicadorEncontrado.NameEu;
+                }
+            }
+
             indicadoreResultado.push({
                 ...base,
-                IndicadorResultadoId: idIndicadorOriginal ?? 0,
-                NameEs: ind.Indicador,
-                NameEu: ind.Indicador,
+                IndicadorResultadoId: idIndicadorOriginal ?? ind.Id ?? 0,
+                NameEs: nameEs,
+                NameEu: nameEu,
                 DatosAccionId: ind.Id ?? 0,
             });
         }
