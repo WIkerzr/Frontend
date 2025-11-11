@@ -143,7 +143,7 @@ const Index = () => {
                                                 ValidacionAnualPlanMemoria({
                                                     yearData: yearDate,
                                                     editarPlan,
-                                                    editarMemoria: false,
+                                                    editarMemoria,
                                                     tipoPM: 'Memoria',
                                                     t,
                                                     setMensajeError,
