@@ -234,7 +234,9 @@ export const GenerarInformeObjetivos = async ({
             cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
         });
 
-        let cumplidos = 0;
+        let contadorRojos = 0; // 0-50%
+        let contadorAmarillos = 0; // 50-80%
+        let contadorVerdes = 0; // 80-100%
         const totalIndicadores = indicadores.length;
 
         indicadores.forEach((re) => {
@@ -273,12 +275,18 @@ export const GenerarInformeObjetivos = async ({
                         pattern: 'solid',
                         fgColor: { argb: 'FFFFC7CE' },
                     };
-                } else if (valor > 0 && valor < 80) {
+                    if (colKey === 'Grado_de_ejecución_Total') {
+                        contadorRojos++;
+                    }
+                } else if (valor >= 50 && valor < 80) {
                     cell.fill = {
                         type: 'pattern',
                         pattern: 'solid',
                         fgColor: { argb: 'FFFFEB9C' },
                     };
+                    if (colKey === 'Grado_de_ejecución_Total') {
+                        contadorAmarillos++;
+                    }
                 } else if (valor >= 80) {
                     cell.fill = {
                         type: 'pattern',
@@ -287,25 +295,58 @@ export const GenerarInformeObjetivos = async ({
                     };
 
                     if (colKey === 'Grado_de_ejecución_Total') {
-                        cumplidos++;
+                        contadorVerdes++;
                     }
                 }
             });
         });
 
         if (totalIndicadores > 0) {
-            const porcentajeCumplimiento = Math.round((cumplidos / totalIndicadores) * 100);
-            const filaPorcentaje = sheet.addRow(['', '', '', '', '', '', '', '', '', `${cumplidos}/${totalIndicadores} (${porcentajeCumplimiento}%)`]);
+            // Agregar resumen detallado
+            sheet.addRow([]);
 
-            const celdaPorcentaje = filaPorcentaje.getCell('Grado_de_ejecución_Total');
-            celdaPorcentaje.font = { bold: true };
-            celdaPorcentaje.alignment = { horizontal: 'center', vertical: 'middle' };
+            const porcentajeRojo = ((contadorRojos / totalIndicadores) * 100).toFixed(1);
+            const porcentajeAmarillo = ((contadorAmarillos / totalIndicadores) * 100).toFixed(1);
+            const porcentajeVerde = ((contadorVerdes / totalIndicadores) * 100).toFixed(1);
 
-            sheet.mergeCells(`A${filaPorcentaje.number}:I${filaPorcentaje.number}`);
-            const celdaTexto = filaPorcentaje.getCell(1);
-            celdaTexto.value = 'Porcentaje de cumplimiento';
-            celdaTexto.font = { bold: true };
-            celdaTexto.alignment = { horizontal: 'right', vertical: 'middle' };
+            // Fila Ejecución reducida
+            const filaRoja = sheet.addRow(['', '', '', '', '', '', '', '', 'Ejecución reducida', `${porcentajeRojo}%`]);
+            sheet.mergeCells(`A${filaRoja.number}:I${filaRoja.number}`);
+            const celdaRoja = filaRoja.getCell(1);
+            celdaRoja.value = 'Ejecución reducida';
+            celdaRoja.alignment = { horizontal: 'right', vertical: 'middle' };
+            filaRoja.getCell('Grado_de_ejecución_Total').fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFC7CE' },
+            };
+            filaRoja.getCell('Grado_de_ejecución_Total').alignment = { horizontal: 'center', vertical: 'middle' };
+
+            // Fila Ejecución media
+            const filaAmarilla = sheet.addRow(['', '', '', '', '', '', '', '', 'Ejecución media', `${porcentajeAmarillo}%`]);
+            sheet.mergeCells(`A${filaAmarilla.number}:I${filaAmarilla.number}`);
+            const celdaAmarilla = filaAmarilla.getCell(1);
+            celdaAmarilla.value = 'Ejecución media';
+            celdaAmarilla.alignment = { horizontal: 'right', vertical: 'middle' };
+            filaAmarilla.getCell('Grado_de_ejecución_Total').fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFEB9C' },
+            };
+            filaAmarilla.getCell('Grado_de_ejecución_Total').alignment = { horizontal: 'center', vertical: 'middle' };
+
+            // Fila Ejecución objetiva
+            const filaVerde = sheet.addRow(['', '', '', '', '', '', '', '', 'Ejecución alta', `${porcentajeVerde}%`]);
+            sheet.mergeCells(`A${filaVerde.number}:I${filaVerde.number}`);
+            const celdaVerde = filaVerde.getCell(1);
+            celdaVerde.value = 'Ejecución objetiva';
+            celdaVerde.alignment = { horizontal: 'right', vertical: 'middle' };
+            filaVerde.getCell('Grado_de_ejecución_Total').fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFC6EFCE' },
+            };
+            filaVerde.getCell('Grado_de_ejecución_Total').alignment = { horizontal: 'center', vertical: 'middle' };
         }
     }
 

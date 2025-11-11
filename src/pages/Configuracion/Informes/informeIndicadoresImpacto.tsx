@@ -487,7 +487,7 @@ export const generarInformeIndicadoresImpacto = async ({
         filaAmarilla.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
 
         // Fila verde
-        filaVerde.getCell(stats.colValor).value = 'Ejecución alta';
+        filaVerde.getCell(stats.colValor).value = 'Ejecución objetiva';
         filaVerde.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
         filaVerde.getCell(stats.colPorcentaje).value = `${stats.porcentajeVerde}%`;
         filaVerde.getCell(stats.colPorcentaje).fill = {
