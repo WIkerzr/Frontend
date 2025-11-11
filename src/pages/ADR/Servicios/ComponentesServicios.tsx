@@ -11,6 +11,7 @@ interface ResultadoValidacionServicios {
     faltanIndicadoresMemoria: boolean;
     faltanCamposPlan: boolean;
     faltanCamposMemoria: boolean;
+    faltaNombre: boolean;
 }
 
 export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoValidacionServicios {
@@ -26,12 +27,12 @@ export function validarCamposObligatoriosServicio(datos: Servicios): ResultadoVa
     if (!faltanIndicadoresPlan) {
         faltanIndicadoresMemoria = datos.indicadores[0].alcanzado ? !datos.indicadores[0].alcanzado.valor : false;
     }
-
-    const faltanCamposPlan = !checkDataString(datos.nombre) || !checkDataString(datos.descripcion);
+    const faltaNombre = !checkDataString(datos.nombre);
+    const faltanCamposPlan = !checkDataString(datos.descripcion);
 
     const faltanCamposMemoria = !checkDataString(datos.dSeguimiento) || !checkDataString(datos.valFinal);
 
-    return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria };
+    return { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria, faltaNombre };
 }
 
 interface MostrarAvisoCamposServiciosProps {
@@ -43,14 +44,14 @@ export const MostrarAvisoCamposServicios: React.FC<MostrarAvisoCamposServiciosPr
     const { t } = useTranslation();
     const { editarPlan } = useEstadosPorAnio();
 
-    const { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria } = validarCamposObligatoriosServicio(datos);
+    const { faltanIndicadoresPlan, faltanIndicadoresMemoria, faltanCamposPlan, faltanCamposMemoria, faltaNombre } = validarCamposObligatoriosServicio(datos);
 
     if (!texto) {
         return null;
     }
 
     if (editarPlan) {
-        if (!faltanCamposPlan && !faltanIndicadoresPlan) {
+        if (!faltanCamposPlan && !faltanIndicadoresPlan && !faltaNombre) {
             return null;
         }
     } else {
@@ -62,7 +63,14 @@ export const MostrarAvisoCamposServicios: React.FC<MostrarAvisoCamposServiciosPr
     return (
         <NavLink to="/adr/servicios/editando" className="group">
             <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
-                {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
+                {faltaNombre ? (
+                    <>
+                        <IconInfoCircle />
+                        <span>
+                            <strong>{t('aviso')}:</strong> {t('inroduceNombreServicio')}.
+                        </span>
+                    </>
+                ) : faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
                     <>
                         <IconInfoCircle />
                         <span>

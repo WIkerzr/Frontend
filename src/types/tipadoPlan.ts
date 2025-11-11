@@ -175,19 +175,7 @@ export const servicioIniciadoVacio: Servicios = {
     descripcion: ``,
     idEje: 1,
     lineaActuaccion: '',
-    indicadores: [
-        {
-            id: 0,
-            indicador: '',
-            previsto: {
-                valor: '',
-            },
-            tipo: 'realizacion',
-            alcanzado: {
-                valor: '',
-            },
-        },
-    ],
+    indicadores: [],
     supraComarcal: '',
 };
 

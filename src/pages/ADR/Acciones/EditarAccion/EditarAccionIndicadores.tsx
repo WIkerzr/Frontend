@@ -47,7 +47,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
     }, [indicadoresRealizacion]);
 
     useEffect(() => {
-        if (!datosEditandoAccion || datosEditandoAccion.id === '0') return;
+        if (!datosEditandoAccion) return;
         if (datosEditandoAccion.indicadorAccion?.indicadoreRealizacion) {
             setCarga(true);
         }
@@ -149,11 +149,12 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
         }
     }, [indicadoresRealizacionTabla, indicadoresResultadoTabla]);
 
-    if (!datosEditandoAccion || datosEditandoAccion.id === '0') {
+    if (!datosEditandoAccion) {
         return null;
     }
-    if (!carga) {
-        return;
+
+    if (datosEditandoAccion.datosPlan !== undefined || !carga) {
+        return null;
     }
 
     const handleSave = (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => {
