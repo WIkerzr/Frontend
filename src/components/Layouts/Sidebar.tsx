@@ -57,7 +57,7 @@ const Sidebar = () => {
     useEffect(() => {
         const path = location.pathname || '';
 
-        if (path.includes('/configuracion/indicadores') || path.includes('/configuracion/indicadoresADR') || path.includes('/configuracion/indicadoresImpacto')) {
+        if (path.includes('/indicadores/indicadores') || path.includes('/indicadores/indicadoresADR') || path.includes('/indicadores/indicadoresImpacto')) {
             setIndicadoresOpen(true);
             setCurrentMenu('');
             return;
@@ -137,14 +137,14 @@ const Sidebar = () => {
                     <ul className="sub-menu text-gray-500 text">
                         {role === 'HAZI' && (
                             <li>
-                                <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                                <NavLink to="/indicadores/indicadores">{t('indicadores')}</NavLink>
                             </li>
                         )}
                         <li>
-                            <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ' + t('adr')}</NavLink>
+                            <NavLink to="/indicadores/indicadoresADR">{t('indicadores') + ' ' + t('adr')}</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
+                            <NavLink to="/indicadores/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
                         </li>
                     </ul>
                 </AnimateHeight>
@@ -252,9 +252,9 @@ const Sidebar = () => {
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
                             <SideBarList texto={t('CuadroMando')} link="/cuadroMando" src={IconCuadroMando2} role={role} />
                             <DespegableIndicadores />
-                            <SideBarList texto={t('PCDR')} link="/configuracion/PCDR" src={IconPCDR} role={role} />
-                            <SideBarList texto={t('informes')} link="/configuracion/informes" src={IconInformes} role={role} />
-                            {role === 'HAZI' && <SideBarList texto={t('usuarios')} link="/configuracion/usuarios" src={IconUsuarios} role={role} />}
+                            <SideBarList texto={t('PCDR')} link="/PCDR" src={IconPCDR} role={role} />
+                            <SideBarList texto={t('informes')} link="/informes" src={IconInformes} role={role} />
+                            {role === 'HAZI' && <SideBarList texto={t('usuarios')} link="/usuarios" src={IconUsuarios} role={role} />}
                             {role === 'HAZI' && <DespegableConfiguracion />}
                             <SelectorAnio />
                             <MenuADRLateral />

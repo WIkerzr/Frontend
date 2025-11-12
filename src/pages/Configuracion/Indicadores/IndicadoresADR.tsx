@@ -32,7 +32,7 @@ const Index = () => {
     const role: UserRole = user!.role as UserRole;
 
     useEffect(() => {
-        if (location.pathname === '/configuracion/indicadoresADR') {
+        if (location.pathname === '/indicadores/indicadoresADR') {
             PrimeraLlamada(regionSeleccionada);
         }
         if (!regionSeleccionada) {

@@ -29,7 +29,7 @@ const Index = () => {
     const [modalNuevo, setModalNuevo] = useState(false);
 
     useEffect(() => {
-        if (location.pathname === '/configuracion/indicadores') {
+        if (location.pathname === '/indicadores/indicadores') {
             PrimeraLlamada(null);
         }
     }, [location.pathname]);

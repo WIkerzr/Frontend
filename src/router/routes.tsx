@@ -37,17 +37,17 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/usuarios',
+        path: '/usuarios',
         element: (
             <OnlyIfLoggedIn>
                 <Usuarios />
             </OnlyIfLoggedIn>
         ),
-        layout: 'Usuarios',
+        layout: 'usuarios',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/indicadores',
+        path: '/indicadores/indicadores',
         element: (
             <OnlyIfLoggedIn>
                 <Indicadores />
@@ -67,7 +67,7 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/indicadoresADR',
+        path: '/indicadores/indicadoresADR',
         element: (
             <OnlyIfLoggedIn>
                 <IndicadoresADR />
@@ -188,7 +188,7 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/indicadoresImpacto',
+        path: '/indicadores/indicadoresImpacto',
         element: (
             <OnlyIfLoggedIn>
                 <IndicadoresInpacto />
@@ -219,7 +219,7 @@ const routes = [
     },
 
     {
-        path: '/configuracion/PCDR',
+        path: '/PCDR',
         element: (
             <OnlyIfLoggedIn>
                 <PCDR />
@@ -229,7 +229,7 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/informes',
+        path: '/informes',
         element: (
             <OnlyIfLoggedIn>
                 <Informes />
