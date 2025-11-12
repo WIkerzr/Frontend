@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Sidebar component
 import AnimateHeight from 'react-animate-height';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useTranslation } from 'react-i18next';
@@ -9,12 +9,17 @@ import { IRootState } from '../../store';
 import { useState, useEffect } from 'react';
 import IconCaretsDown from '../Icon/IconCaretsDown';
 import IconMenuConfiguracion from '../Icon/Menu/IconMenuConfiguracion.svg';
+import IconIndicadores from '../Icon/Menu/IconIndicadores.svg';
 import IconCaretDown from '../Icon/IconCaretDown';
 import IconServiciosPrestados from '../Icon/Menu/IconServiciosPrestados.svg';
 import IconAcciones from '../Icon/Menu/IconAcciones.svg';
 import IconAccionesAccesorias from '../Icon/Menu/IconAccionesAccesorias.svg';
 import IconEjes from '../Icon/Menu/IconEjes.svg';
 import IconPlan from '../Icon/Menu/IconPlan.svg';
+import IconCuadroMando2 from '../Icon/Menu/IconCuadroMando2.svg';
+import IconPCDR from '../Icon/Menu/IconPCDR.svg';
+import IconInformes from '../Icon/Menu/IconInformes.svg';
+import IconUsuarios from '../Icon/Menu/IconUsuarios.svg';
 import IconMemoria from '../Icon/Menu/IconMemoria.svg';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
@@ -32,6 +37,7 @@ const Sidebar = () => {
     const { user } = useUser();
     const [role, setRole] = useState<UserRole>();
     const [currentMenu, setCurrentMenu] = useState<string>('');
+    const [indicadoresOpen, setIndicadoresOpen] = useState<boolean>(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
@@ -49,29 +55,23 @@ const Sidebar = () => {
     }, []);
 
     useEffect(() => {
-        if (location.pathname.includes('configuracion')) {
-            setCurrentMenu('configuracion');
-        } else {
-            setCurrentMenu('');
-        }
-    }, [location.pathname]);
+        const path = location.pathname || '';
 
-    useEffect(() => {
-        const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
-        if (selector) {
-            selector.classList.add('active');
-            const ul: any = selector.closest('ul.sub-menu');
-            if (ul) {
-                let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link') || [];
-                if (ele.length) {
-                    ele = ele[0];
-                    setTimeout(() => {
-                        ele.click();
-                    });
-                }
-            }
+        if (path.includes('/configuracion/indicadores') || path.includes('/configuracion/indicadoresADR') || path.includes('/configuracion/indicadoresImpacto')) {
+            setIndicadoresOpen(true);
+            setCurrentMenu('');
+            return;
         }
-    }, []);
+
+        if (path.includes('/configuracion')) {
+            setCurrentMenu('configuracion');
+            setIndicadoresOpen(false);
+            return;
+        }
+
+        setCurrentMenu('');
+        setIndicadoresOpen(false);
+    }, [location.pathname]);
 
     useEffect(() => {
         if (window.innerWidth < 1024 && themeConfig.sidebar) {
@@ -81,13 +81,11 @@ const Sidebar = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedYear = Number(e.target.value);
-        
+
         if (selectedYear && selectedYear !== anioSeleccionada) {
-            // Limpiamos el sessionStorage antes de cambiar
             sessionStorage.removeItem('DataYear');
             sessionStorage.removeItem('datosAccionModificado');
-            
-            // Actualizamos el año - el useEffect en EstadosPorAnioContext se encargará de cargar los datos
+
             setAnio(selectedYear);
         }
     };
@@ -95,13 +93,13 @@ const Sidebar = () => {
     const DespegableConfiguracion = () => {
         return (
             <li className="menu nav-item">
-                <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
+                <button type="button" className={`${currentMenu === 'configuracion' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('configuracion')}>
                     <div className="flex items-center">
                         <img src={IconMenuConfiguracion} alt={t('CuadroMando')} className="w-6 h-6" />
                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('configuracion')}</span>
                     </div>
 
-                    <div className={`m-auto transition-transform duration-300 ${currentMenu ? 'rotate-0' : '-rotate-90'}`}>
+                    <div className={`m-auto transition-transform duration-300 ${currentMenu === 'configuracion' ? 'rotate-0' : '-rotate-90'}`}>
                         <IconCaretDown />
                     </div>
                 </button>
@@ -110,42 +108,44 @@ const Sidebar = () => {
                         {role === 'HAZI' && (
                             <>
                                 <li>
-                                    <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
+                                    <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
                                 </li>
                                 <li>
-                                    <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                                    <NavLink to="/configuracion/anualidad">{t('Anualidad')}</NavLink>
                                 </li>
                             </>
+                        )}
+                    </ul>
+                </AnimateHeight>
+            </li>
+        );
+    };
+    const DespegableIndicadores = () => {
+        return (
+            <li className="menu nav-item">
+                <button type="button" className={`${indicadoresOpen ? 'active' : ''} nav-link group w-full`} onClick={() => setIndicadoresOpen((v) => !v)}>
+                    <div className="flex items-center">
+                        <img src={IconIndicadores} alt={t('indicadores')} className="w-6 h-6" />
+                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('indicadores')}</span>
+                    </div>
+
+                    <div className={`m-auto transition-transform duration-300 ${indicadoresOpen ? 'rotate-0' : '-rotate-90'}`}>
+                        <IconCaretDown />
+                    </div>
+                </button>
+                <AnimateHeight duration={300} height={indicadoresOpen ? 'auto' : 0}>
+                    <ul className="sub-menu text-gray-500 text">
+                        {role === 'HAZI' && (
+                            <li>
+                                <NavLink to="/configuracion/indicadores">{t('indicadores')}</NavLink>
+                            </li>
                         )}
                         <li>
                             <NavLink to="/configuracion/indicadoresADR">{t('indicadores') + ' ' + t('adr')}</NavLink>
                         </li>
-                        <>
-                            <li>
-                                <NavLink to={'/configuracion/cuadroMando'}>
-                                    <span>{t('CuadroMando')}</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/configuracion/PCDR">{t('PCDR')}</NavLink>
-                            </li>
-                            <li>
-                                <NavLink to="/configuracion/informes">{t('informes')}</NavLink>
-                            </li>
-                            {role === 'HAZI' && (
-                                <>
-                                    <li>
-                                        <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
-                                    </li>
-                                    <li>
-                                        <NavLink to="/configuracion/anualidad">{t('Anualidad')}</NavLink>
-                                    </li>
-                                </>
-                            )}
-                        </>
+                        <li>
+                            <NavLink to="/configuracion/indicadoresImpacto">{t('indicadoresImpacto')}</NavLink>
+                        </li>
                     </ul>
                 </AnimateHeight>
             </li>
@@ -250,7 +250,12 @@ const Sidebar = () => {
 
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            {role != 'GOBIERNOVASCO' && <DespegableConfiguracion />}
+                            <SideBarList texto={t('CuadroMando')} link="/cuadroMando" src={IconCuadroMando2} role={role} />
+                            <DespegableIndicadores />
+                            <SideBarList texto={t('PCDR')} link="/configuracion/PCDR" src={IconPCDR} role={role} />
+                            <SideBarList texto={t('informes')} link="/configuracion/informes" src={IconInformes} role={role} />
+                            {role === 'HAZI' && <SideBarList texto={t('usuarios')} link="/configuracion/usuarios" src={IconUsuarios} role={role} />}
+                            {role === 'HAZI' && <DespegableConfiguracion />}
                             <SelectorAnio />
                             <MenuADRLateral />
                         </ul>

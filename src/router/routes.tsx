@@ -178,13 +178,13 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/configuracion/CuadroMando',
+        path: '/cuadroMando',
         element: (
             <OnlyIfLoggedIn>
                 <CuadroMando />
             </OnlyIfLoggedIn>
         ),
-        layout: 'CuadroMando',
+        layout: 'cuadroMando',
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
