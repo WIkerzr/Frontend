@@ -7,6 +7,7 @@ import { DropdownTraducido, InputField, SelectorEje, TextArea } from '../../../c
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
+import { YearData } from '../../../types/tipadoPlan';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { ComprobacionYAvisosDeCambios, Loading } from '../../../components/Utils/animations';
@@ -201,10 +202,10 @@ const Index: React.FC = () => {
             });
 
             if (nuevoServicio) {
-                setYearData({
-                    ...yearData,
-                    servicios: [...(yearData.servicios || []), nuevoServicio],
-                });
+                (setYearData as unknown as React.Dispatch<React.SetStateAction<YearData>>)((prev: YearData) => ({
+                    ...prev,
+                    servicios: [...(prev.servicios || []), nuevoServicio],
+                }));
                 try {
                     if (restablecer) restablecer(nuevoServicio);
                 } catch {
@@ -223,10 +224,10 @@ const Index: React.FC = () => {
                 method: 'PUT',
             });
             if (editadoServicio) {
-                setYearData({
-                    ...yearData,
-                    servicios: [...(yearData.servicios?.filter((s) => s.id !== editadoServicio.id) || []), editadoServicio],
-                });
+                (setYearData as unknown as React.Dispatch<React.SetStateAction<YearData>>)((prev: YearData) => ({
+                    ...prev,
+                    servicios: [...(prev.servicios?.filter((s: Servicios) => s.id !== editadoServicio.id) || []), editadoServicio],
+                }));
                 try {
                     if (restablecer) restablecer(editadoServicio);
                 } catch {
