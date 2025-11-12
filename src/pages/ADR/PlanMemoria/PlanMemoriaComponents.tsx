@@ -171,7 +171,7 @@ export const CamposPlanMemoria = forwardRef<HTMLDivElement, CamposPlanMemoriaPro
                 const dataMemoriaConGOADR: MemoriaLlamadaGestion = {
                     id: dataMemoria.id,
                     dSeguimiento: dataMemoria.dSeguimiento,
-                    valFinal: dataMemoria.dSeguimiento,
+                    valFinal: dataMemoria.valFinal,
                     generalOperationADR: dataPlan.generalOperationADR,
                     valGeneral: dataMemoria.valGeneral,
                 };

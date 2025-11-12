@@ -42,19 +42,26 @@ const addContentTypeOverride = (zip: PizZip, imagePartName: string, mimeType: st
 };
 
 const formatHMT = (dato: HMT | undefined) => {
-    if (dato === undefined) {
-        return '';
-    }
-    let texto = '';
-    if (dato.hombres != '0' && dato.hombres !== '') {
-        texto += `H: ${dato.hombres}`;
-    }
-    if (dato.mujeres != '0' && dato.mujeres !== '') {
-        texto += `M: ${dato.mujeres}`;
-    }
-    dato.total = dato.total === '' ? '' : Number(dato.total).toLocaleString();
-    texto += ` T: ${dato.total}`;
-    return texto;
+    if (!dato) return '';
+
+    const fmt = (v: string | number | undefined) => {
+        if (v === undefined || v === null) return '';
+        const s = String(v).trim();
+        if (s === '' || s === '0') return '';
+        const n = Number(s.replace(/,/g, ''));
+        return Number.isNaN(n) ? s : n.toLocaleString();
+    };
+
+    const parts: string[] = [];
+    const hombres = fmt(dato.hombres);
+    const mujeres = fmt(dato.mujeres);
+    const total = fmt(dato.total);
+
+    if (hombres) parts.push(`H: ${hombres}`);
+    if (mujeres) parts.push(`M: ${mujeres}`);
+    if (total) parts.push(`T: ${total}`);
+
+    return parts.join(', ');
 };
 
 const Ejecutoras = (ejecutora: string | undefined) => {
@@ -113,14 +120,14 @@ export const GeneracionDelDocumentoWordPlan = async (
                         unitMed: indicadoresRealizacion.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed ?? '',
                         metaAnual: formatHMT(iR.metaAnual) ?? '',
                         metaFinal: formatHMT(iR.metaFinal) ?? '',
-                        anualidadMetaFinal: ' ',
+                        anualidadMetaFinal: iR.anualidadMetaFinal ?? '',
                     })),
                     indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
                         nombre: iR.descripcion ?? '',
                         unitMed: indicadoresResultado.find((e) => `${e.Id}` === `${iR.id}`)?.UnitMed ?? '',
                         metaAnual: formatHMT(iR.metaAnual) ?? '',
                         metaFinal: formatHMT(iR.metaFinal) ?? '',
-                        anualidadMetaFinal: ' ',
+                        anualidadMetaFinal: iR.anualidadMetaFinal ?? '',
                     })),
                     observaciones: accion.datosPlan?.observaciones ?? '',
                 }))
@@ -427,7 +434,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
                         metaAnual: formatHMT(iR.metaAnual) ?? '',
                         valorAlcanzado: formatHMT(iR.ejecutado) ?? '',
                         metaFinal: formatHMT(iR.metaFinal) ?? '',
-                        anualidadMetaFinal: ' ',
+                        anualidadMetaFinal: safePorcentaje(iR.metaFinal?.total, iR.ejecutado?.total),
                     })),
                     indicadoresResultado: accion.indicadorAccion?.indicadoreResultado.map((iR: IndicadorResultadoAccion) => ({
                         nombre: iR.descripcion ?? '',
@@ -435,7 +442,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
                         metaAnual: formatHMT(iR.metaAnual) ?? '',
                         valorAlcanzado: formatHMT(iR.ejecutado) ?? '',
                         metaFinal: formatHMT(iR.metaFinal) ?? '',
-                        anualidadMetaFinal: ' ',
+                        anualidadMetaFinal: safePorcentaje(iR.metaFinal?.total, iR.ejecutado?.total),
                     })),
                     observaciones: accion.datosPlan?.observaciones ?? '',
                     dSeguimiento: accion.datosMemoria?.dSeguimiento ?? '',
@@ -479,6 +486,15 @@ export const GeneracionDelDocumentoWordMemoria = async (
         const cuadroMandoRealizacion = [...(cuadroAcciones[0] || []), ...(cuadroAccionesAccesorias[0] || []), ...(cuadroServicios[0] || [])];
         const cuadroMandoResultado = [...(cuadroAcciones[1] || []), ...(cuadroAccionesAccesorias[1] || []), ...(cuadroServicios[1] || [])];
 
+        const safePorcentaje = (metaFinalTotal: unknown, metaAnualTotal: unknown) => {
+            const a = Number(metaAnualTotal as any);
+            const f = Number(metaFinalTotal as any);
+            if (!isFinite(a) || a === 0) return '';
+            const p = (f / a) * 100;
+            if (!isFinite(p)) return '';
+            return p.toFixed(2);
+        };
+
         // 4. Datos a sustituir
         const data = {
             nADR: match ? match[1].match(/^\S+/)?.[0] ?? '' : '',
@@ -493,8 +509,8 @@ export const GeneracionDelDocumentoWordMemoria = async (
                 value: item.value ?? '',
                 valueAlcanzado: item.valueAchieved ?? '',
             })),
-            dSeguimiento: datos.plan.generalOperationADR.dSeguimiento ?? '',
-            valFinal: datos.plan.generalOperationADR.valFinal ?? '',
+            dSeguimiento: datos.memoria.dSeguimiento ?? '',
+            valFinal: datos.memoria.valFinal ?? '',
             //4.
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
                 nombre: `S. ${index + 1}.- ${item.nombre ?? ''}`,
@@ -540,18 +556,18 @@ export const GeneracionDelDocumentoWordMemoria = async (
             cuadroMandoRealizacion: cuadroMandoRealizacion.map((item) => ({
                 accion: item.nombreAccion || '',
                 indicadoresRealizacion: item.descripcion || '',
-                valorInicial: item.ejecutado?.total || '',
-                metaA: item.metaAnual?.total || '',
-                valorAlcanzado: item.metaFinal?.total || '',
-                porcentaje: ((Number(item.metaFinal?.total) / Number(item.metaAnual?.total)) * 100).toFixed(2),
+                valorInicial: item.metaAnual?.total || '',
+                metaA: item.metaFinal?.total || '',
+                valorAlcanzado: item.ejecutado?.total || '',
+                porcentaje: safePorcentaje(item.metaFinal?.total, item.ejecutado?.total),
             })),
             cuadroMandoResultado: cuadroMandoResultado.map((item) => ({
                 accion: item.nombreAccion || '',
                 indicadoresResultado: item.descripcion || '',
-                valorInicial: item.ejecutado?.total || '',
-                metaA: item.metaAnual?.total || '',
-                valorAlcanzado: item.metaFinal?.total || '',
-                porcentaje: ((Number(item.metaFinal?.total) / Number(item.metaAnual?.total)) * 100).toFixed(2),
+                valorInicial: item.metaAnual?.total || '',
+                metaA: item.metaFinal?.total || '',
+                valorAlcanzado: item.ejecutado?.total || '',
+                porcentaje: safePorcentaje(item.metaFinal?.total, item.ejecutado?.total),
             })),
 
             //8
