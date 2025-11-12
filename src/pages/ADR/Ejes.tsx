@@ -64,6 +64,19 @@ const Index = () => {
         message: t('object:cambioPagina'),
     });
 
+    const [savedReset, setSavedReset] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (savedReset && ejesEstrategicos) {
+            try {
+                restablecerEjes(ejesEstrategicos || []);
+            } catch {
+                // ignorar
+            }
+            setSavedReset(false);
+        }
+    }, [savedReset, ejesEstrategicos]);
+
     const llamadaEjes = () => {
         LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage }, setLoading, setEjesEstrategicos, setFechaUltimoActualizadoBBDD);
     };
@@ -102,11 +115,8 @@ const Index = () => {
             body: body,
             async onSuccess() {
                 await llamadaBBDDYearData(anioSeleccionada, true);
-                try {
-                    if (restablecerEjes) restablecerEjes(ejesEstrategicos || []);
-                } catch {
-                    // ignore
-                }
+                // marcar para restablecer una vez que ejesEstrategicos se haya refrescado
+                setSavedReset(true);
             },
         });
     };
