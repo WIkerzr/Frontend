@@ -155,15 +155,15 @@ const Index = () => {
             <LoadingOverlayPersonalizada isLoading={loading} message={{ successMessage, setSuccessMessage, errorMessage, setErrorMessage }} />
             <div className="flex flex-col gap-4 w-full max-w-md">
                 <div>
-                    <h3 className="text-lg font-semibold mb-1">{t('genAnio')}</h3>
+                    <h3 className="text-lg font-semibold mb-1">{t('Anualidades')}</h3>
                 </div>
                 <BotonNuevoAnio btnAnioNew={btnAnioNew} setLoading={setLoading} setErrorMessage={setErrorMessage} setSuccessMessage={setSuccessMessage} />
             </div>
 
             <div className="flex flex-col gap-4 w-full max-w-md">
                 <div>
-                    <h3 className="text-lg font-semibold mb-1">{t('yearsIndicadoresImpacto')}</h3>
-                    <p className="text-sm text-gray-500 mb-3">{t('yearsIndicadoresImpactoDescription')}</p>
+                    <h3 className="text-lg font-semibold mb-1">{t('puntoControlIndicadores')}</h3>
+                    <p className="text-sm text-gray-500 mb-3">{t('puntoControlIndicadoresDescription')}</p>
                 </div>
 
                 <div className="flex flex-col gap-2">
