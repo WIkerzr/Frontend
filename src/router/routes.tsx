@@ -37,7 +37,7 @@ const routes = [
         errorElement: !ModoDev ? <ErrorPage /> : undefined,
     },
     {
-        path: '/usuarios',
+        path: '/configuracion/usuarios',
         element: (
             <OnlyIfLoggedIn>
                 <Usuarios />

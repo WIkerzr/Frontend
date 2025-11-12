@@ -19,7 +19,6 @@ import IconPlan from '../Icon/Menu/IconPlan.svg';
 import IconCuadroMando2 from '../Icon/Menu/IconCuadroMando2.svg';
 import IconPCDR from '../Icon/Menu/IconPCDR.svg';
 import IconInformes from '../Icon/Menu/IconInformes.svg';
-import IconUsuarios from '../Icon/Menu/IconUsuarios.svg';
 import IconMemoria from '../Icon/Menu/IconMemoria.svg';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
@@ -107,6 +106,9 @@ const Sidebar = () => {
                     <ul className="sub-menu text-gray-500 text">
                         {role === 'HAZI' && (
                             <>
+                                <li>
+                                    <NavLink to="/configuracion/usuarios">{t('usuarios')}</NavLink>
+                                </li>
                                 <li>
                                     <NavLink to="/configuracion/plantillas">{t('Plantillas')}</NavLink>
                                 </li>
@@ -250,12 +252,11 @@ const Sidebar = () => {
 
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
+                            {role === 'HAZI' && <DespegableConfiguracion />}
                             <SideBarList texto={t('CuadroMando')} link="/cuadroMando" src={IconCuadroMando2} role={role} />
                             {(role === 'HAZI' || role === 'ADR') && <DespegableIndicadores />}
                             <SideBarList texto={t('PCDR')} link="/PCDR" src={IconPCDR} role={role} />
                             <SideBarList texto={t('informes')} link="/informes" src={IconInformes} role={role} />
-                            {role === 'HAZI' && <SideBarList texto={t('usuarios')} link="/usuarios" src={IconUsuarios} role={role} />}
-                            {role === 'HAZI' && <DespegableConfiguracion />}
                             <SelectorAnio />
                             <MenuADRLateral />
                         </ul>

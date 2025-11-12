@@ -14,7 +14,7 @@ const DefaultLayout = React.lazy(() => import('../components/Layouts/DefaultLayo
 const protectedPaths = [
     '/',
     '/indicadores/indicadores',
-    '/usuarios',
+    '/configuracion/usuarios',
     '/cuadroMando',
     '/indicadores/indicadoresImpacto',
     '/indicadores/indicadoresADR',
