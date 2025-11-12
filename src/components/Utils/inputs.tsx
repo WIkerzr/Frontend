@@ -700,12 +700,21 @@ interface SelectorAnioCuadroMandoProps {
 
 export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ informeSeleccionado, setInformeSeleccionado }) => {
     const { t } = useTranslation();
+    const { user } = useUser();
+    const role = user?.role;
+
+    const tiposVisibles = tiposInformes.filter((informe) => {
+        if (informe === 'InfObjetivosSeparados' || informe === 'InfTratamientoComarcalSeparado') {
+            return role === 'HAZI';
+        }
+        return true;
+    });
 
     return (
         <div className="w-[850px]">
             <label className="block mb-1">{t('SeleccionTipoInforme')}</label>
             <select className="w-full border rounded p-2 resize-y" value={informeSeleccionado} onChange={(e) => setInformeSeleccionado(e.target.value as Informes)}>
-                {tiposInformes.map((informe) => (
+                {tiposVisibles.map((informe) => (
                     <option key={informe} value={informe}>
                         {t(informe)}
                     </option>
