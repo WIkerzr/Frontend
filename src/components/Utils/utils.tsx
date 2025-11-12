@@ -99,7 +99,7 @@ interface SideBarListProps {
 }
 
 export function SideBarList({ link, src, texto, role, disabled }: SideBarListProps) {
-    if (role === 'GOBIERNOVASCO') {
+    if (role === 'GOBIERNOVASCO' || role === 'DF') {
         return null;
     }
 

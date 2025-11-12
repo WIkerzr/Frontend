@@ -251,7 +251,7 @@ const Sidebar = () => {
                     <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
                             <SideBarList texto={t('CuadroMando')} link="/cuadroMando" src={IconCuadroMando2} role={role} />
-                            <DespegableIndicadores />
+                            {(role === 'HAZI' || role === 'ADR') && <DespegableIndicadores />}
                             <SideBarList texto={t('PCDR')} link="/PCDR" src={IconPCDR} role={role} />
                             <SideBarList texto={t('informes')} link="/informes" src={IconInformes} role={role} />
                             {role === 'HAZI' && <SideBarList texto={t('usuarios')} link="/usuarios" src={IconUsuarios} role={role} />}

@@ -80,7 +80,7 @@ const useLogin = () => {
             }
             if (!isBackendError(result)) {
                 const isUserRole = (value: string): value is UserRole => {
-                    const allowedRoles: string[] = ['HAZI', 'GOBIERNOVASCO', 'ADR'];
+                    const allowedRoles: string[] = ['HAZI', 'GOBIERNOVASCO', 'ADR', 'DF'];
                     return typeof value === 'string' && allowedRoles.includes(value.toUpperCase());
                 };
                 const user: UserID = {
@@ -116,10 +116,10 @@ const useLogin = () => {
                 }
 
                 setTimeout(() => {
-                    if (user.role === 'GOBIERNOVASCO') {
+                    if (user.role === 'GOBIERNOVASCO' || user.role === 'DF') {
                         navigate('/adr/planesGestion');
                     } else {
-                        navigate('/configuracion/indicadoresADR');
+                        navigate('/cuadroMando');
                     }
                 }, 200);
             }

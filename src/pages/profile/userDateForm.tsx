@@ -146,9 +146,10 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             <option value="ADR">{t('adr')}</option>
                             <option value="HAZI">{t('hazi')}</option>
                             <option value="GV">{t('gobiernoVasco')}</option>
+                            <option value="DF">{t('df')}</option>
                         </select>
                     </div>
-                    {userData.role === 'ADR' || userData.role === 'adr' ? (
+                    {userData.role === 'ADR' || userData.role === 'adr' || userData.role === 'DF' || userData.role === 'df' ? (
                         <div>
                             <label className="block text-sm font-medium mb-1">{t('comarca')}</label>
                             <select
@@ -179,9 +180,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 ))}
                             </select>
                         </div>
-                    ) : (
-                        <></>
-                    )}
+                    ) : null}
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (

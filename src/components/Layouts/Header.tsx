@@ -24,7 +24,7 @@ const Header = () => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        if (role.toUpperCase() === 'ADR') {
+        if (role.toUpperCase() === 'ADR' || role.toUpperCase() === 'DF') {
             setRegionSeleccionada(user!.ambit ? Number(user!.ambit) : null);
         }
     }, []);

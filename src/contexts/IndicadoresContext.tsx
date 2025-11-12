@@ -223,7 +223,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const token = sessionStorage.getItem('access_token');
         setMensajeError('');
         if (!token) return;
-        if (user && (user.role as string) != 'GOBIERNOVASCO') {
+        if (user && (user.role as string) != 'GOBIERNOVASCO' && (user.role as string) != 'DF') {
             setLoading(true);
             const storedRealizacion = localStorage.getItem('indicadoresRealizacion');
             const storedResultado = localStorage.getItem('indicadoresResultado');
@@ -368,7 +368,7 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => {
         const token = sessionStorage.getItem('access_token');
         if (!token) return;
-        if (user && (user.role as string) != 'GOBIERNOVASCO') {
+        if (user && (user.role as string) != 'GOBIERNOVASCO' && (user.role as string) != 'DF') {
             actualizarIndicadoresADR();
         }
     }, [regionSeleccionada]);
