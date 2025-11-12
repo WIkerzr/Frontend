@@ -158,7 +158,12 @@ const Index = () => {
                 <div className="panel w-2/4">
                     <section className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{pantalla === 'plan' ? t('archivosPdf') : t('archivoPdf')}</h3>
-                        <AdjuntarArchivos files={planFiles} setFiles={setPlanFiles} title={t('archivoCorrespondiente', { zona: pantalla === 'Plan' ? 'al plan' : 'a la memoria' })} />
+                        <AdjuntarArchivos
+                            files={planFiles}
+                            setFiles={setPlanFiles}
+                            tipoArchivosAceptables="PDF"
+                            title={t('archivoCorrespondiente', { zona: pantalla === 'Plan' ? 'al plan' : 'a la memoria' })}
+                        />
                     </section>
 
                     <section className="panel p-4 shadow-sm">
