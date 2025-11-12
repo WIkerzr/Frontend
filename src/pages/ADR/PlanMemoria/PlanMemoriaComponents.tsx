@@ -567,6 +567,7 @@ export function validarCamposMemoriaSeguimientoAnual(yearData: YearData): boolea
     const memoria = yearData.memoria;
     const plan = yearData.plan;
 
+    if (!memoria.valGeneral || memoria.valGeneral === '') return false;
     if (!memoria.valFinal || memoria.valFinal === '') return false;
     if (!memoria.dSeguimiento || memoria.dSeguimiento === '') return false;
 
