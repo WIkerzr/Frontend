@@ -476,13 +476,13 @@ const Index = () => {
             <div className="panel ">
                 <div className="flex flex-row gap-x-4">
                     {informeSeleccionado != 'InfIndicadoresImpacto' && (
-                        <div className="flex flex-col items-center  panel">
-                            <label className="text-center">{t('seleccionaAnio')}</label>
+                        <div className="flex flex-col items-center panel w-[320px] ">
+                            <label className="text-center w-[150px]">{t('seleccionaAnio')}</label>
                             <div className="flex flex-row gap-x-4 w-full">
                                 {selectedYearsMulti.length === yearOptions.length ? (
                                     <Boton
                                         tipo="cerrar"
-                                        textoBoton={t('borrar')}
+                                        textoBoton={t('borrarSeleccion')}
                                         onClick={() => {
                                             setSelectedYearsMulti([]);
                                             setMultiselectKey((prev) => prev + 1);
@@ -491,14 +491,14 @@ const Index = () => {
                                 ) : (
                                     <Boton
                                         tipo="guardar"
-                                        textoBoton={t('TODOS')}
+                                        textoBoton={t('todosLosAnios')}
                                         onClick={() => {
                                             setSelectedYearsMulti(yearOptions.map((o) => o.value));
                                             setMultiselectKey((prev) => prev + 1);
                                         }}
                                     />
                                 )}
-                                <div style={{ width: '100%' }}>
+                                <div style={{ width: '100%' }} className="min-w-0">
                                     <Multiselect
                                         key={multiselectKey}
                                         placeholder={''}
@@ -511,12 +511,17 @@ const Index = () => {
                                         style={{
                                             multiselectContainer: {
                                                 width: '100%',
+                                                boxSizing: 'border-box',
+                                                maxWidth: '80%',
                                             },
                                             searchBox: {
                                                 width: '100%',
+                                                boxSizing: 'border-box',
                                             },
                                             optionContainer: {
                                                 width: '100%',
+                                                boxSizing: 'border-box',
+                                                maxWidth: '80%',
                                             },
                                         }}
                                     />
@@ -524,35 +529,35 @@ const Index = () => {
                             </div>
                         </div>
                     )}
-                    <div className="panel min-w-[300px]">
+                    <div className="panel w-[300px] ">
                         <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
                     </div>
-                    <div className="panel">
+                    <div className="panel w-[120px] ">
                         {user && user.role === 'HAZI' && informeSeleccionado != 'InfIndicadoresImpacto' && (
                             <div className="flex flex-col items-center h-10 ">
-                                <label className="w-[200px] text-center">{t('informesSeparados')}</label>
+                                <label className="w-[110px] text-center">{t('informesSeparados')}</label>
                                 <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
                             </div>
                         )}
                     </div>
-                    <div className="panel">
+                    <div className="panel flex-1">
                         {user && user.role === 'HAZI' && (
                             <div className="w-full resize-y ">
-                                <label className="block mb-1">{t('seleccionaComarca')}</label>
+                                <label className="block mb-1 w-full">{t('seleccionaComarca')}</label>
                                 <div className="flex flex-row gap-x-4 w-full">
                                     {regionesEnDropdow.length === regiones.length ? (
                                         <Boton
                                             tipo="cerrar"
-                                            textoBoton={t('borrar')}
+                                            textoBoton={t('borrarSeleccion')}
                                             onClick={() => {
                                                 setRegionesEnDropdow([]);
                                                 setMultiselectKey((prev) => prev + 1);
                                             }}
                                         />
                                     ) : (
-                                        <Boton tipo="guardar" textoBoton={t('TODOS')} onClick={() => setRegionesEnDropdow(regiones)} />
+                                        <Boton tipo="guardar" textoBoton={t('todasLasComarcas')} onClick={() => setRegionesEnDropdow(regiones)} />
                                     )}
-                                    <div style={{ width: '100%' }}>
+                                    <div style={{ width: '100%' }} className="min-w-0">
                                         <Multiselect
                                             key={multiselectKey}
                                             placeholder={t('seleccionaMultiOpcion')}
@@ -565,12 +570,17 @@ const Index = () => {
                                             style={{
                                                 multiselectContainer: {
                                                     width: '100%',
+                                                    boxSizing: 'border-box',
+                                                    maxWidth: '100%',
                                                 },
                                                 searchBox: {
                                                     width: '100%',
+                                                    boxSizing: 'border-box',
                                                 },
                                                 optionContainer: {
                                                     width: '100%',
+                                                    boxSizing: 'border-box',
+                                                    maxWidth: '100%',
                                                 },
                                             }}
                                         />

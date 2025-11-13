@@ -112,10 +112,10 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
     // Configurar anchos de columnas dinámicas para cada año
     for (let i = 0; i < maxAnios; i++) {
         const baseCol = 8 + i * 4;
-        sheet.getColumn(baseCol).width = 10; // Año
-        sheet.getColumn(baseCol + 1).width = 15; // Valor
+        sheet.getColumn(baseCol).width = 12; // Año control
+        sheet.getColumn(baseCol + 1).width = 15; // Valor control
         sheet.getColumn(baseCol + 2).width = 18; // Cumplimiento
-        sheet.getColumn(baseCol + 3).width = 20; // Siguiente objetivo
+        sheet.getColumn(baseCol + 3).width = 20; // Ajuste objetivo
     }
 
     const totalColumnas = 7 + maxAnios * 4;
@@ -151,7 +151,7 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
 
     // Agregar encabezados para cada año
     for (let i = 0; i < maxAnios; i++) {
-        encabezadoArray.push(t('anio'), t('valor'), t('cumplimiento'), t('siguienteObjetivo'));
+        encabezadoArray.push(t('anioControl'), t('valorControl'), t('cumplimiento'), t('ajusteObjetivo'));
     }
 
     const encabezado = sheet.addRow(encabezadoArray);
