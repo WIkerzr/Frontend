@@ -696,19 +696,17 @@ export const SelectorAnio: React.FC<SelectorAnioProps> = ({ years, yearFilter, s
 interface SelectorAnioCuadroMandoProps {
     informeSeleccionado: string;
     setInformeSeleccionado: React.Dispatch<React.SetStateAction<Informes>>;
+    SeparadosComarcas: boolean;
 }
 
-export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ informeSeleccionado, setInformeSeleccionado }) => {
+export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ informeSeleccionado, setInformeSeleccionado, SeparadosComarcas }) => {
     const { t } = useTranslation();
-    const { user } = useUser();
-    const role = user?.role;
 
     const tiposVisibles = tiposInformes.filter((informe) => {
-        if (informe === 'InfObjetivosSeparados' || informe === 'InfTratamientoComarcalSeparado') {
-            return role === 'HAZI';
-        }
-        return true;
-    });
+        const name = String(informe || '');
+        const isSeparado = name.includes('Separad');
+            return SeparadosComarcas ? isSeparado : !isSeparado;
+        });
 
     return (
         <div className="w-[850px]">

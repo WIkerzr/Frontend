@@ -170,8 +170,6 @@ export const GenerarInformeObjetivos = async ({
     const ListadoCached = MemorizarResultadoFuncion(async (tipo: TiposDeIndicadores) => Promise.resolve(ListadoNombresIdicadoresSegunADR(tipo)));
     const nombresRealizacion: ListadoNombresIdicadoresItem[] = await ListadoCached('realizacion');
     const nombresResultado: ListadoNombresIdicadoresItem[] = await ListadoCached('resultado');
-    console.log(realizacion[0].IndicadorRealizacion?.NameEs);
-    console.log(resultado);
 
     const serviciosConvertidos = ConvertirIndicadoresServicioAAccionDTO(servicios, nombresRealizacion, nombresResultado);
     realizacion.push(...serviciosConvertidos.indicadoreRealizacion);

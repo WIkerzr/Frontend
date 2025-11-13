@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
-import { SelectorAnio, SelectorInformes } from '../../../components/Utils/inputs';
+import { SelectorInformes } from '../../../components/Utils/inputs';
 import { useEffect, useState } from 'react';
 import Multiselect from 'multiselect-react-dropdown';
 import { useRegionContext } from '../../../contexts/RegionContext';
@@ -17,17 +17,31 @@ import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useUser } from '../../../contexts/UserContext';
 import ExcelJS from 'exceljs';
 import saveAs from 'file-saver';
+import { Checkbox } from '@mantine/core';
 
-export type Informes = 'InfObjetivos' | 'InfObjetivosSeparados' | 'InfAcciones' | 'InfTratamientoComarcal' | 'InfTratamientoComarcalSeparado' | 'InfPresupuestos' | 'InfIndicadoresImpacto';
+export type Informes =
+    | 'InfObjetivos'
+    | 'InfObjetivosSeparado'
+    | 'InfAcciones'
+    | 'InfAccionesSeparado'
+    | 'InfTratamientoComarcal'
+    | 'InfTratamientoComarcalSeparado'
+    | 'InfPresupuestos'
+    | 'InfPresupuestosSeparado'
+    | 'InfIndicadoresImpacto'
+    | 'InfIndicadoresImpactoSeparado';
 
 export const tiposInformes: Informes[] = [
     'InfObjetivos',
-    'InfObjetivosSeparados',
+    'InfObjetivosSeparado',
     'InfAcciones',
+    'InfAccionesSeparado',
     'InfTratamientoComarcal',
     'InfTratamientoComarcalSeparado',
     'InfPresupuestos',
+    'InfPresupuestosSeparado',
     'InfIndicadoresImpacto',
+    'InfIndicadoresImpactoSeparado',
 ];
 
 const Index = () => {
@@ -42,10 +56,36 @@ const Index = () => {
     const [successMessage, setSuccessMessage] = useState<string>('');
 
     const [years, setYears] = useState<string[]>(['TODOS', ...anios.map(String)]);
-    const [anioSeleccionado, setAnioSeleccionado] = useState<string>('TODOS');
     const [informeSeleccionado, setInformeSeleccionado] = useState<Informes>('InfObjetivos');
     const [regionesEnDropdow, setRegionesEnDropdow] = useState<RegionInterface[]>([]);
     const [multiselectKey, setMultiselectKey] = useState<number>(0);
+    const yearOptions = years.filter((y) => y !== 'TODOS').map((y) => ({ value: y, label: y }));
+    const [selectedYearsMulti, setSelectedYearsMulti] = useState<string[]>(yearOptions.map((o) => o.value));
+
+    useEffect(() => {
+        setSelectedYearsMulti(yearOptions.map((o) => o.value));
+    }, [years]);
+
+    const [SeparadosComarcas, setSeparadosComarcas] = useState<boolean>(false);
+
+    const getCorrespondingInforme = (informe: Informes, separados: boolean): Informes => {
+        const infStr = informe as string;
+        if (separados) {
+            return (infStr.endsWith('Separado') ? infStr : `${infStr}Separado`) as Informes;
+        }
+        return (infStr.endsWith('Separado') ? infStr.replace(/Separado$/, '') : infStr) as Informes;
+    };
+
+    useEffect(() => {
+        setInformeSeleccionado((prev) => getCorrespondingInforme(prev, SeparadosComarcas));
+    }, [SeparadosComarcas]);
+
+    useEffect(() => {
+        const baseInforme = (informeSeleccionado as string).replace(/Separado$/, '');
+        if (baseInforme === 'InfIndicadoresImpacto') {
+            setSeparadosComarcas(selectedYearsMulti.length > 1);
+        }
+    }, [selectedYearsMulti, informeSeleccionado]);
 
     const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
         setRegionesEnDropdow(selected);
@@ -106,7 +146,7 @@ const Index = () => {
                 });
             });
 
-        if (anioSeleccionado === 'TODOS' && informeSeleccionado !== 'InfIndicadoresImpacto') {
+        if (selectedYearsMulti.length > 1 && informeSeleccionado !== 'InfIndicadoresImpacto') {
             try {
                 setLoading(true);
 
@@ -120,14 +160,41 @@ const Index = () => {
                     fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
                 };
 
-                if (informeSeleccionado === 'InfObjetivosSeparados') {
+                if (informeSeleccionado === 'InfObjetivosSeparado') {
                     const data = await new Promise<any>((resolve) => {
                         let resultData: any = null;
                         LlamadasBBDD({
                             method: 'POST',
                             url: `informes`,
                             body: {
-                                AnioSeleccionado: anios.map(Number),
+                                AnioSeleccionado: selectedYearsMulti,
+                                InformeSeleccionado: informeSeleccionado,
+                                RegionesId: idRegionesSeleccionadas,
+                            },
+                            setLoading: () => {},
+                            setErrorMessage,
+                            setSuccessMessage,
+                            onSuccess: (data) => {
+                                resultData = data;
+                            },
+                            onFinally: () => {
+                                resolve(resultData);
+                            },
+                        });
+                    });
+
+                    if (!data || !data.data) {
+                        setLoading(false);
+                        return;
+                    }
+                } else if (informeSeleccionado === 'InfAccionesSeparado') {
+                    const data = await new Promise<any>((resolve) => {
+                        let resultData: any = null;
+                        LlamadasBBDD({
+                            method: 'POST',
+                            url: `informes`,
+                            body: {
+                                AnioSeleccionado: selectedYearsMulti,
                                 InformeSeleccionado: informeSeleccionado,
                                 RegionesId: idRegionesSeleccionadas,
                             },
@@ -148,14 +215,14 @@ const Index = () => {
                         return;
                     }
 
-                    const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
+                    const { obtenerNombreUnico: obtenerNombreUnicoAcc } = crearGeneradorNombresUnicos();
 
                     for (const regionAnioData of data.data) {
                         const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
                         if (!region) continue;
 
                         const regionName = i18n.language === 'eu' ? region.NameEu : region.NameEs;
-                        const nombrePestana = obtenerNombreUnico(`${regionAnioData.Anio} - ${regionName}`);
+                        const nombrePestana = obtenerNombreUnicoAcc(`${regionAnioData.Anio} - ${regionName}`);
                         const worksheet = workbook.addWorksheet(nombrePestana);
 
                         const metadatosRegionAnio = {
@@ -164,17 +231,111 @@ const Index = () => {
                             regiones: regionName,
                         };
 
-                        await GenerarInformeObjetivos({
-                            realizacion: regionAnioData.IndicadoresRealizacion || [],
-                            resultado: regionAnioData.IndicadoresResultado || [],
-                            servicios: regionAnioData.IndicadoresServicios || [],
-                            ListadoNombresIdicadoresSegunADR,
-                            t,
-                            anioSeleccionado: String(regionAnioData.Anio),
-                            worksheet,
-                            workbook,
-                            metadatos: metadatosRegionAnio,
+                        const payloadForAcciones = Array.isArray(regionAnioData.Datos) ? [regionAnioData] : Array.isArray(regionAnioData.data) ? regionAnioData.data : [regionAnioData];
+                        await generarInformeAcciones(payloadForAcciones, t, i18n, String(regionAnioData.Anio), worksheet, workbook, metadatosRegionAnio, regionesEnDropdow);
+                    }
+                } else if (informeSeleccionado === 'InfPresupuestosSeparado') {
+                    const data = await new Promise<any>((resolve) => {
+                        let resultData: any = null;
+                        LlamadasBBDD({
+                            method: 'POST',
+                            url: `informes`,
+                            body: {
+                                AnioSeleccionado: selectedYearsMulti,
+                                InformeSeleccionado: informeSeleccionado,
+                                RegionesId: idRegionesSeleccionadas,
+                            },
+                            setLoading: () => {},
+                            setErrorMessage,
+                            setSuccessMessage,
+                            onSuccess: (data) => {
+                                resultData = data;
+                            },
+                            onFinally: () => {
+                                resolve(resultData);
+                            },
                         });
+                    });
+
+                    if (!data || !data.data) {
+                        setLoading(false);
+                        return;
+                    }
+
+                    const { obtenerNombreUnico: obtenerNombreUnicoPres } = crearGeneradorNombresUnicos();
+
+                    for (const regionAnioData of data.data) {
+                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
+                        if (!region) continue;
+
+                        const regionName = i18n.language === 'eu' ? region.NameEu : region.NameEs;
+                        const nombrePestana = obtenerNombreUnicoPres(`${regionAnioData.Anio} - ${regionName}`);
+                        const worksheet = workbook.addWorksheet(nombrePestana);
+
+                        const metadatosRegionAnio = {
+                            ...metadatos,
+                            anio: String(regionAnioData.Anio),
+                            regiones: regionName,
+                        };
+
+                        const payloadForPresupuestos = Array.isArray(regionAnioData.Datos)
+                            ? regionAnioData.Datos
+                            : Array.isArray(regionAnioData.data)
+                            ? regionAnioData.data
+                            : regionAnioData.resultados
+                            ? regionAnioData.resultados
+                            : [regionAnioData];
+
+                        await GenerarInformePrestamo({ resultados: payloadForPresupuestos, t, anioSeleccionado: String(regionAnioData.Anio), worksheet, workbook, metadatos: metadatosRegionAnio });
+                    }
+                } else if (informeSeleccionado === 'InfIndicadoresImpactoSeparado') {
+                    const data = await new Promise<any>((resolve) => {
+                        let resultData: any = null;
+                        LlamadasBBDD({
+                            method: 'POST',
+                            url: `informes`,
+                            body: {
+                                AnioSeleccionado: selectedYearsMulti,
+                                InformeSeleccionado: informeSeleccionado,
+                                RegionesId: idRegionesSeleccionadas,
+                            },
+                            setLoading: () => {},
+                            setErrorMessage,
+                            setSuccessMessage,
+                            onSuccess: (data) => {
+                                resultData = data;
+                            },
+                            onFinally: () => {
+                                resolve(resultData);
+                            },
+                        });
+                    });
+
+                    if (!data || !data.data) {
+                        setLoading(false);
+                        return;
+                    }
+
+                    const { obtenerNombreUnico: obtenerNombreUnicoInd } = crearGeneradorNombresUnicos();
+
+                    for (const regionAnioData of data.data) {
+                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
+                        const regionName = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionAnioData.RegionId}`;
+                        const nombrePestana = obtenerNombreUnicoInd(`${regionAnioData.Anio} - ${regionName}`);
+                        const worksheet = workbook.addWorksheet(nombrePestana);
+
+                        const metadatosRegionAnio = {
+                            ...metadatos,
+                            anio: String(regionAnioData.Anio),
+                            regiones: regionName,
+                        };
+
+                        const listadoCompleto = regionAnioData.ListadoCompleto || [];
+                        const datosConValores = regionAnioData.Datos || [];
+
+                        if (listadoCompleto.length > 0) {
+                            await generarInformeIndicadoresImpacto({ datosOriginales: listadoCompleto, datosConValores: datosConValores, t, worksheet, workbook, metadatos: metadatosRegionAnio });
+                        }
                     }
                 } else if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
                     const aniosProcesar = years.filter((y) => y !== 'TODOS');
@@ -238,7 +399,7 @@ const Index = () => {
             method: 'POST',
             url: `informes`,
             body: {
-                AnioSeleccionado: informeSeleccionado !== 'InfIndicadoresImpacto' ? [anioSeleccionado] : [2025],
+                AnioSeleccionado: informeSeleccionado !== 'InfObjetivosSeparado' ? selectedYearsMulti : [2025],
                 InformeSeleccionado: informeSeleccionado,
                 RegionesId: idRegionesSeleccionadas,
             },
@@ -248,10 +409,9 @@ const Index = () => {
             onSuccess: async (data: any) => {
                 sessionStorage.setItem('lastInformeData', JSON.stringify(data));
 
-                if (informeSeleccionado === 'InfObjetivosSeparados' && data.data) {
+                if (informeSeleccionado === 'InfObjetivosSeparado' && data.data) {
                     const workbook = new ExcelJS.Workbook();
 
-                    // Crear generador de nombres únicos para pestañas
                     const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
 
                     for (const regionAnioData of data.data) {
@@ -284,33 +444,106 @@ const Index = () => {
 
                     const buffer = await workbook.xlsx.writeBuffer();
                     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    saveAs(blob, `${t(informeSeleccionado)}_${anioSeleccionado}.xlsx`);
+                    saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
                     return;
                 }
 
-                if (informeSeleccionado === 'InfObjetivos') {
+                if (informeSeleccionado === 'InfPresupuestosSeparado' && data.data) {
+                    const workbook = new ExcelJS.Workbook();
+
+                    const { obtenerNombreUnico: obtenerNombreUnicoPres } = crearGeneradorNombresUnicos();
+
+                    for (const regionAnioData of data.data) {
+                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
+                        if (!region) continue;
+
+                        const regionName = i18n.language === 'eu' ? region.NameEu : region.NameEs;
+                        const nombrePestana = obtenerNombreUnicoPres(`${regionAnioData.Anio} - ${regionName}`);
+                        const worksheet = workbook.addWorksheet(nombrePestana);
+
+                        const metadatos = {
+                            nombreInforme: t(informeSeleccionado),
+                            anio: String(regionAnioData.Anio),
+                            regiones: regionName,
+                            fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
+                        };
+
+                        const resultados = Array.isArray(regionAnioData.Datos)
+                            ? regionAnioData.Datos
+                            : Array.isArray(regionAnioData.data)
+                            ? regionAnioData.data
+                            : regionAnioData.resultados
+                            ? regionAnioData.resultados
+                            : [];
+
+                        await GenerarInformePrestamo({ resultados: resultados, t, anioSeleccionado: String(regionAnioData.Anio), worksheet, workbook, metadatos });
+                    }
+
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
+                    return;
+                }
+
+                if (informeSeleccionado === 'InfIndicadoresImpactoSeparado' && data.data) {
+                    const workbook = new ExcelJS.Workbook();
+                    const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
+
+                    for (const regionAnioData of data.data) {
+                        const regionId = regionAnioData.RegionId;
+                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionId);
+                        const regionName = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionId}`;
+
+                        const nombrePestana = obtenerNombreUnico(`${regionAnioData.Anio} - ${regionName}`);
+                        const worksheet = workbook.addWorksheet(nombrePestana);
+
+                        const metadatos = {
+                            nombreInforme: t(informeSeleccionado),
+                            anio: String(regionAnioData.Anio),
+                            regiones: regionName,
+                            fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
+                        };
+
+                        const listadoCompleto = regionAnioData.ListadoCompleto || [];
+                        const datosConValores = regionAnioData.Datos || [];
+
+                        if (listadoCompleto.length > 0) {
+                            await generarInformeIndicadoresImpacto({ datosOriginales: listadoCompleto, datosConValores: datosConValores, t, worksheet, workbook, metadatos });
+                        }
+                    }
+
+                    if (workbook.worksheets.length > 0) {
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
+                    }
+
+                    return;
+                }
+
+                if (informeSeleccionado === 'InfObjetivos' && selectedYearsMulti.length === 1) {
                     GenerarInformeObjetivos({
                         realizacion: data.response.indicadoresRealizacion,
                         resultado: data.response.indicadoresResultado,
                         servicios: data.response.indicadoresServicios,
                         ListadoNombresIdicadoresSegunADR,
                         t,
-                        anioSeleccionado,
+                        anioSeleccionado: selectedYearsMulti[0],
                     });
                 }
-                if (informeSeleccionado === 'InfAcciones') {
-                    generarInformeAcciones(data.data, t, i18n, anioSeleccionado, undefined, undefined, undefined, regionesEnDropdow);
+                if (informeSeleccionado === 'InfAcciones' && selectedYearsMulti.length === 1) {
+                    generarInformeAcciones(data.data, t, i18n, selectedYearsMulti[0], undefined, undefined, undefined, regionesEnDropdow);
                 }
-                if (informeSeleccionado === 'InfTratamientoComarcal') {
-                    generarInformeTratamientoComarcal(data.data, t, anioSeleccionado);
+                if (informeSeleccionado === 'InfTratamientoComarcal' && selectedYearsMulti.length === 1) {
+                    generarInformeTratamientoComarcal(data.data, t, selectedYearsMulti[0]);
                 }
-                if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
-                    generarInformeTratamientoComarcalSeparado(data.data, t, anioSeleccionado, regionesEnDropdow, i18n);
+                if (informeSeleccionado === 'InfTratamientoComarcalSeparado' && selectedYearsMulti.length === 1) {
+                    generarInformeTratamientoComarcalSeparado(data.data, t, selectedYearsMulti[0], regionesEnDropdow, i18n);
                 }
-                if (informeSeleccionado === 'InfPresupuestos') {
-                    GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado });
+                if (informeSeleccionado === 'InfPresupuestos' && selectedYearsMulti.length === 1) {
+                    GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: selectedYearsMulti[0] });
                 }
-                if (informeSeleccionado === 'InfIndicadoresImpacto') {
+                if (informeSeleccionado === 'InfIndicadoresImpacto' && selectedYearsMulti.length === 1) {
                     if (data.data && Array.isArray(data.data) && data.data.length > 0) {
                         const workbook = new ExcelJS.Workbook();
                         const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
@@ -329,7 +562,7 @@ const Index = () => {
 
                                 const metadatos = {
                                     nombreInforme: t('InfIndicadoresImpacto'),
-                                    anio: anioSeleccionado,
+                                    anio: selectedYearsMulti[0],
                                     regiones: regionName,
                                     fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
                                 };
@@ -348,7 +581,7 @@ const Index = () => {
                         if (workbook.worksheets.length > 0) {
                             const buffer = await workbook.xlsx.writeBuffer();
                             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                            saveAs(blob, `${t('InfIndicadoresImpacto')}_${anioSeleccionado}.xlsx`);
+                            saveAs(blob, `${t('InfIndicadoresImpacto')}_${selectedYearsMulti[0]}.xlsx`);
                         }
                     }
                 }
@@ -376,8 +609,34 @@ const Index = () => {
             />
 
             <div className="panel flex flex-row gap-x-4">
-                <SelectorAnio years={years} yearFilter={t(`${anioSeleccionado}`)} setYearFilter={setAnioSeleccionado} />
-                <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} />
+                <div className="flex flex-col items-center h-10 ">
+                    <label className="w-[200px] text-center">{t('seleccionaAnio')}</label>
+                    <Multiselect
+                        placeholder={''}
+                        options={yearOptions}
+                        selectedValues={yearOptions.filter((o) => selectedYearsMulti.includes(o.value))}
+                        displayValue="label"
+                        onSelect={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
+                        onRemove={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
+                        emptyRecordMsg={t('error:errorNoOpciones')}
+                        style={{
+                            multiselectContainer: {
+                                width: '100%',
+                            },
+                            searchBox: {
+                                width: '100%',
+                            },
+                            optionContainer: {
+                                width: '100%',
+                            },
+                        }}
+                    />
+                </div>
+                <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
+                <div className="flex flex-col items-center h-10 ">
+                    <label className="w-[200px] text-center">{t('informesSeparados')}</label>
+                    <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
+                </div>
                 {user && user.role === 'HAZI' && (
                     <div className="w-full resize-y ">
                         <label className="block mb-1">{t('seleccionaComarca')}</label>
