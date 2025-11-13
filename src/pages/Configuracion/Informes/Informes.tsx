@@ -143,12 +143,7 @@ const Index = () => {
                 });
             });
 
-        if (
-            selectedYearsMulti.length > 1 &&
-            informeSeleccionado !== 'InfIndicadoresImpacto' &&
-            informeSeleccionado !== 'InfTratamientoComarcal' &&
-            informeSeleccionado !== 'InfTratamientoComarcalSeparado'
-        ) {
+        if (informeSeleccionado === 'InfPresupuestosSeparado') {
             try {
                 setLoading(true);
 
@@ -162,81 +157,7 @@ const Index = () => {
                     fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
                 };
 
-                if (informeSeleccionado === 'InfObjetivosSeparado') {
-                    const data = await new Promise<any>((resolve) => {
-                        let resultData: any = null;
-                        LlamadasBBDD({
-                            method: 'POST',
-                            url: `informes`,
-                            body: {
-                                AnioSeleccionado: selectedYearsMulti,
-                                InformeSeleccionado: informeSeleccionado,
-                                RegionesId: idRegionesSeleccionadas,
-                            },
-                            setLoading: () => {},
-                            setErrorMessage,
-                            setSuccessMessage,
-                            onSuccess: (data) => {
-                                resultData = data;
-                            },
-                            onFinally: () => {
-                                resolve(resultData);
-                            },
-                        });
-                    });
-
-                    if (!data || !data.data) {
-                        setLoading(false);
-                        return;
-                    }
-                } else if (informeSeleccionado === 'InfAccionesSeparado') {
-                    const data = await new Promise<any>((resolve) => {
-                        let resultData: any = null;
-                        LlamadasBBDD({
-                            method: 'POST',
-                            url: `informes`,
-                            body: {
-                                AnioSeleccionado: selectedYearsMulti,
-                                InformeSeleccionado: informeSeleccionado,
-                                RegionesId: idRegionesSeleccionadas,
-                            },
-                            setLoading: () => {},
-                            setErrorMessage,
-                            setSuccessMessage,
-                            onSuccess: (data) => {
-                                resultData = data;
-                            },
-                            onFinally: () => {
-                                resolve(resultData);
-                            },
-                        });
-                    });
-
-                    if (!data || !data.data) {
-                        setLoading(false);
-                        return;
-                    }
-
-                    const { obtenerNombreUnico: obtenerNombreUnicoAcc } = crearGeneradorNombresUnicos();
-
-                    for (const regionAnioData of data.data) {
-                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
-                        if (!region) continue;
-
-                        const regionName = i18n.language === 'eu' ? region.NameEu : region.NameEs;
-                        const nombrePestana = obtenerNombreUnicoAcc(`${regionAnioData.Anio} - ${regionName}`);
-                        const worksheet = workbook.addWorksheet(nombrePestana);
-
-                        const metadatosRegionAnio = {
-                            ...metadatos,
-                            anio: String(regionAnioData.Anio),
-                            regiones: regionName,
-                        };
-
-                        const payloadForAcciones = Array.isArray(regionAnioData.Datos) ? [regionAnioData] : Array.isArray(regionAnioData.data) ? regionAnioData.data : [regionAnioData];
-                        await generarInformeAcciones(payloadForAcciones, t, i18n, String(regionAnioData.Anio), worksheet, workbook, metadatosRegionAnio, regionesEnDropdow);
-                    }
-                } else if (informeSeleccionado === 'InfPresupuestosSeparado') {
+                if (informeSeleccionado === 'InfPresupuestosSeparado') {
                     const data = await new Promise<any>((resolve) => {
                         let resultData: any = null;
                         LlamadasBBDD({
@@ -290,41 +211,6 @@ const Index = () => {
 
                         await GenerarInformePrestamo({ resultados: payloadForPresupuestos, t, anioSeleccionado: String(regionAnioData.Anio), worksheet, workbook, metadatos: metadatosRegionAnio });
                     }
-                } else {
-                    const aniosProcesar = years.filter((y) => y !== 'TODOS');
-
-                    for (const y of aniosProcesar) {
-                        const data = await callForYear(y);
-                        if (!data) continue;
-                        sessionStorage.setItem('lastInformeData', JSON.stringify(data));
-
-                        const worksheet = workbook.addWorksheet(`Año ${y}`);
-
-                        const metadatosAnio = { ...metadatos, anio: y };
-
-                        if (informeSeleccionado === 'InfObjetivos') {
-                            await GenerarInformeObjetivos({
-                                realizacion: data.response.indicadoresRealizacion,
-                                resultado: data.response.indicadoresResultado,
-                                servicios: data.response.indicadoresServicios,
-                                ListadoNombresIdicadoresSegunADR,
-                                t,
-                                anioSeleccionado: y,
-                                worksheet,
-                                workbook,
-                                metadatos: metadatosAnio,
-                            });
-                        }
-                        if (informeSeleccionado === 'InfAcciones') {
-                            await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio, regionesEnDropdow);
-                        }
-                        // if (informeSeleccionado === 'InfTratamientoComarcal') {
-                        //     await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
-                        // }
-                        if (informeSeleccionado === 'InfPresupuestos') {
-                            await GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y, worksheet, workbook, metadatos: metadatosAnio });
-                        }
-                    }
                 }
 
                 const buffer = await workbook.xlsx.writeBuffer();
@@ -334,9 +220,7 @@ const Index = () => {
                 setLoading(false);
             }
             return;
-        }
-
-        if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
+        } else if (informeSeleccionado != 'InfObjetivosSeparado' && informeSeleccionado != 'InfIndicadoresImpacto') {
             try {
                 setLoading(true);
 
@@ -350,14 +234,88 @@ const Index = () => {
                     fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
                 };
 
-                for (const y of selectedYearsMulti) {
-                    const data = await callForYear(y);
+                if (informeSeleccionado === 'InfAccionesSeparado') {
+                    const data = await new Promise<any>((resolve) => {
+                        let resultData: any = null;
+                        LlamadasBBDD({
+                            method: 'POST',
+                            url: `informes`,
+                            body: {
+                                AnioSeleccionado: selectedYearsMulti,
+                                InformeSeleccionado: informeSeleccionado,
+                                RegionesId: idRegionesSeleccionadas,
+                            },
+                            setLoading: () => {},
+                            setErrorMessage,
+                            setSuccessMessage,
+                            onSuccess: (data) => {
+                                resultData = data;
+                            },
+                            onFinally: () => {
+                                resolve(resultData);
+                            },
+                        });
+                    });
 
                     if (!data || !data.data) {
-                        continue;
+                        setLoading(false);
+                        return;
                     }
 
-                    await generarInformeTratamientoComarcalSeparado(data.data, t, y, regionesEnDropdow, i18n, undefined, workbook, { ...metadatos, anio: y });
+                    const { obtenerNombreUnico: obtenerNombreUnicoAcc } = crearGeneradorNombresUnicos();
+
+                    for (const regionAnioData of data.data) {
+                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
+                        if (!region) continue;
+
+                        const regionName = i18n.language === 'eu' ? region.NameEu : region.NameEs;
+                        const nombrePestana = obtenerNombreUnicoAcc(`${regionAnioData.Anio} - ${regionName}`);
+                        const worksheet = workbook.addWorksheet(nombrePestana);
+
+                        const metadatosRegionAnio = {
+                            ...metadatos,
+                            anio: String(regionAnioData.Anio),
+                            regiones: regionName,
+                        };
+
+                        const payloadForAcciones = Array.isArray(regionAnioData.Datos) ? [regionAnioData] : Array.isArray(regionAnioData.data) ? regionAnioData.data : [regionAnioData];
+                        await generarInformeAcciones(payloadForAcciones, t, i18n, String(regionAnioData.Anio), worksheet, workbook, metadatosRegionAnio, regionesEnDropdow);
+                    }
+                } else {
+                    for (const y of selectedYearsMulti) {
+                        const data = await callForYear(y);
+
+                        if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
+                            if (!data || !data.data) {
+                                continue;
+                            }
+
+                            await generarInformeTratamientoComarcalSeparado(data.data, t, y, regionesEnDropdow, i18n, undefined, workbook, { ...metadatos, anio: y });
+                            continue;
+                        }
+                        const worksheet = workbook.addWorksheet(`Año ${y}`);
+                        const metadatosAnio = { ...metadatos, anio: y };
+
+                        if (informeSeleccionado === 'InfTratamientoComarcal') {
+                            await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
+                        } else if (informeSeleccionado === 'InfAcciones') {
+                            await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio, regionesEnDropdow);
+                        } else if (informeSeleccionado === 'InfPresupuestos') {
+                            await GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y, worksheet, workbook, metadatos: metadatosAnio });
+                        } else if (informeSeleccionado === 'InfObjetivos') {
+                            await GenerarInformeObjetivos({
+                                realizacion: data.response.indicadoresRealizacion,
+                                resultado: data.response.indicadoresResultado,
+                                servicios: data.response.indicadoresServicios,
+                                ListadoNombresIdicadoresSegunADR,
+                                t,
+                                anioSeleccionado: y,
+                                worksheet,
+                                workbook,
+                                metadatos: metadatosAnio,
+                            });
+                        }
+                    }
                 }
 
                 const buffer = await workbook.xlsx.writeBuffer();
@@ -382,7 +340,6 @@ const Index = () => {
             setSuccessMessage: setSuccessMessage,
             onSuccess: async (data: any) => {
                 sessionStorage.setItem('lastInformeData', JSON.stringify(data));
-
                 if (informeSeleccionado === 'InfObjetivosSeparado' && data.data) {
                     const workbook = new ExcelJS.Workbook();
 
@@ -420,66 +377,6 @@ const Index = () => {
                     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
                     return;
-                }
-
-                if (informeSeleccionado === 'InfPresupuestosSeparado' && data.data) {
-                    const workbook = new ExcelJS.Workbook();
-
-                    const { obtenerNombreUnico: obtenerNombreUnicoPres } = crearGeneradorNombresUnicos();
-
-                    for (const regionAnioData of data.data) {
-                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
-                        if (!region) continue;
-
-                        const regionName = i18n.language === 'eu' ? region.NameEu : region.NameEs;
-                        const nombrePestana = obtenerNombreUnicoPres(`${regionAnioData.Anio} - ${regionName}`);
-                        const worksheet = workbook.addWorksheet(nombrePestana);
-
-                        const metadatos = {
-                            nombreInforme: t(informeSeleccionado),
-                            anio: String(regionAnioData.Anio),
-                            regiones: regionName,
-                            fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
-                        };
-
-                        const resultados = Array.isArray(regionAnioData.Datos)
-                            ? regionAnioData.Datos
-                            : Array.isArray(regionAnioData.data)
-                            ? regionAnioData.data
-                            : regionAnioData.resultados
-                            ? regionAnioData.resultados
-                            : [];
-
-                        await GenerarInformePrestamo({ resultados: resultados, t, anioSeleccionado: String(regionAnioData.Anio), worksheet, workbook, metadatos });
-                    }
-
-                    const buffer = await workbook.xlsx.writeBuffer();
-                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
-                    return;
-                }
-
-                if (informeSeleccionado === 'InfObjetivos' && selectedYearsMulti.length === 1) {
-                    GenerarInformeObjetivos({
-                        realizacion: data.response.indicadoresRealizacion,
-                        resultado: data.response.indicadoresResultado,
-                        servicios: data.response.indicadoresServicios,
-                        ListadoNombresIdicadoresSegunADR,
-                        t,
-                        anioSeleccionado: selectedYearsMulti[0],
-                    });
-                }
-                if (informeSeleccionado === 'InfAcciones' && selectedYearsMulti.length === 1) {
-                    generarInformeAcciones(data.data, t, i18n, selectedYearsMulti[0], undefined, undefined, undefined, regionesEnDropdow);
-                }
-                if (informeSeleccionado === 'InfTratamientoComarcal' && selectedYearsMulti.length === 1) {
-                    generarInformeTratamientoComarcal(data.data, t, selectedYearsMulti[0]);
-                }
-                // if (informeSeleccionado === 'InfTratamientoComarcalSeparado' && selectedYearsMulti.length === 1) {
-                //     generarInformeTratamientoComarcalSeparado(data.data, t, selectedYearsMulti[0], regionesEnDropdow, i18n);
-                // }
-                if (informeSeleccionado === 'InfPresupuestos' && selectedYearsMulti.length === 1) {
-                    GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: selectedYearsMulti[0] });
                 }
                 if (informeSeleccionado === 'InfIndicadoresImpacto' && selectedYearsMulti.length === 1) {
                     if (data.data && Array.isArray(data.data) && data.data.length > 0) {
