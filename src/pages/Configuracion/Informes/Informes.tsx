@@ -331,7 +331,7 @@ const Index = () => {
             method: 'POST',
             url: `informes`,
             body: {
-                AnioSeleccionado: selectedYearsMulti,
+                AnioSeleccionado: informeSeleccionado === 'InfIndicadoresImpacto' ? [2025] : selectedYearsMulti,
                 InformeSeleccionado: informeSeleccionado,
                 RegionesId: idRegionesSeleccionadas,
             },
@@ -378,7 +378,7 @@ const Index = () => {
                     saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
                     return;
                 }
-                if (informeSeleccionado === 'InfIndicadoresImpacto' && selectedYearsMulti.length === 1) {
+                if (informeSeleccionado === 'InfIndicadoresImpacto') {
                     if (data.data && Array.isArray(data.data) && data.data.length > 0) {
                         const workbook = new ExcelJS.Workbook();
                         const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
@@ -425,7 +425,7 @@ const Index = () => {
     };
 
     return (
-        <div className="panel">
+        <div>
             <ZonaTitulo
                 titulo={
                     <h2 className="text-xl font-bold flex items-center space-x-2">
@@ -443,87 +443,123 @@ const Index = () => {
                 }}
             />
 
-            <div className="panel flex flex-row gap-x-4">
-                {informeSeleccionado != 'InfIndicadoresImpacto' && (
-                    <div className="flex flex-col items-center h-10 ">
-                        <label className="w-[200px] text-center">{t('seleccionaAnio')}</label>
-                        <Multiselect
-                            placeholder={''}
-                            options={yearOptions}
-                            selectedValues={yearOptions.filter((o) => selectedYearsMulti.includes(o.value))}
-                            displayValue="label"
-                            onSelect={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
-                            onRemove={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
-                            emptyRecordMsg={t('error:errorNoOpciones')}
-                            style={{
-                                multiselectContainer: {
-                                    width: '100%',
-                                },
-                                searchBox: {
-                                    width: '100%',
-                                },
-                                optionContainer: {
-                                    width: '100%',
-                                },
-                            }}
-                        />
-                    </div>
-                )}
-                <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
-                {user && user.role === 'HAZI' && informeSeleccionado != 'InfIndicadoresImpacto' && (
-                    <div className="flex flex-col items-center h-10 ">
-                        <label className="w-[200px] text-center">{t('informesSeparados')}</label>
-                        <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
-                    </div>
-                )}
-                {user && user.role === 'HAZI' && (
-                    <div className="w-full resize-y ">
-                        <label className="block mb-1">{t('seleccionaComarca')}</label>
-                        <div className="flex flex-row gap-x-4 w-full">
-                            {regionesEnDropdow.length === regiones.length ? (
-                                <Boton
-                                    tipo="cerrar"
-                                    textoBoton={t('borrar')}
-                                    onClick={() => {
-                                        setRegionesEnDropdow([]);
-                                        setMultiselectKey((prev) => prev + 1);
-                                    }}
-                                />
-                            ) : (
-                                <Boton tipo="guardar" textoBoton={t('TODOS')} onClick={() => setRegionesEnDropdow(regiones)} />
-                            )}
-                            <div style={{ width: '100%' }}>
-                                <Multiselect
-                                    key={multiselectKey}
-                                    placeholder={t('seleccionaMultiOpcion')}
-                                    options={regiones}
-                                    selectedValues={regionesEnDropdow}
-                                    displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
-                                    onSelect={handleChangeRegionsSupracomarcal}
-                                    onRemove={handleChangeRegionsSupracomarcal}
-                                    emptyRecordMsg={t('error:errorNoOpciones')}
-                                    style={{
-                                        multiselectContainer: {
-                                            width: '100%',
-                                        },
-                                        searchBox: {
-                                            width: '100%',
-                                        },
-                                        optionContainer: {
-                                            width: '100%',
-                                        },
-                                    }}
-                                />
+            <div className="panel ">
+                <div className="flex flex-row gap-x-4">
+                    {informeSeleccionado != 'InfIndicadoresImpacto' && (
+                        <div className="flex flex-col items-center  panel">
+                            <label className="text-center">{t('seleccionaAnio')}</label>
+                            <div className="flex flex-row gap-x-4 w-full">
+                                {selectedYearsMulti.length === yearOptions.length ? (
+                                    <Boton
+                                        tipo="cerrar"
+                                        textoBoton={t('borrar')}
+                                        onClick={() => {
+                                            setSelectedYearsMulti([]);
+                                            setMultiselectKey((prev) => prev + 1);
+                                        }}
+                                    />
+                                ) : (
+                                    <Boton
+                                        tipo="guardar"
+                                        textoBoton={t('TODOS')}
+                                        onClick={() => {
+                                            setSelectedYearsMulti(yearOptions.map((o) => o.value));
+                                            setMultiselectKey((prev) => prev + 1);
+                                        }}
+                                    />
+                                )}
+                                <div style={{ width: '100%' }}>
+                                    <Multiselect
+                                        key={multiselectKey}
+                                        placeholder={''}
+                                        options={yearOptions}
+                                        selectedValues={yearOptions.filter((o) => selectedYearsMulti.includes(o.value))}
+                                        displayValue="label"
+                                        onSelect={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
+                                        onRemove={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
+                                        emptyRecordMsg={t('error:errorNoOpciones')}
+                                        style={{
+                                            multiselectContainer: {
+                                                width: '100%',
+                                            },
+                                            searchBox: {
+                                                width: '100%',
+                                            },
+                                            optionContainer: {
+                                                width: '100%',
+                                            },
+                                        }}
+                                    />
+                                </div>
                             </div>
-                            {/* <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} /> */}
                         </div>
+                    )}
+                    <div className="panel">
+                        <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
                     </div>
-                )}
-                <div className="w-full resize-y ">
-                    <label className="block mb-1">{t('descargarInforme')}</label>
-                    <div className="flex flex-row gap-x-4 w-full">
-                        <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handleObtenerInforme} />
+                    <div className="panel">
+                        {user && user.role === 'HAZI' && informeSeleccionado != 'InfIndicadoresImpacto' && (
+                            <div className="flex flex-col items-center h-10 ">
+                                <label className="w-[200px] text-center">{t('informesSeparados')}</label>
+                                <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
+                            </div>
+                        )}
                     </div>
+                    <div className="panel">
+                        {user && user.role === 'HAZI' && (
+                            <div className="w-full resize-y ">
+                                <label className="block mb-1">{t('seleccionaComarca')}</label>
+                                <div className="flex flex-row gap-x-4 w-full">
+                                    {regionesEnDropdow.length === regiones.length ? (
+                                        <Boton
+                                            tipo="cerrar"
+                                            textoBoton={t('borrar')}
+                                            onClick={() => {
+                                                setRegionesEnDropdow([]);
+                                                setMultiselectKey((prev) => prev + 1);
+                                            }}
+                                        />
+                                    ) : (
+                                        <Boton tipo="guardar" textoBoton={t('TODOS')} onClick={() => setRegionesEnDropdow(regiones)} />
+                                    )}
+                                    <div style={{ width: '100%' }}>
+                                        <Multiselect
+                                            key={multiselectKey}
+                                            placeholder={t('seleccionaMultiOpcion')}
+                                            options={regiones}
+                                            selectedValues={regionesEnDropdow}
+                                            displayValue={i18n.language === 'eu' ? 'NameEu' : 'NameEs'}
+                                            onSelect={handleChangeRegionsSupracomarcal}
+                                            onRemove={handleChangeRegionsSupracomarcal}
+                                            emptyRecordMsg={t('error:errorNoOpciones')}
+                                            style={{
+                                                multiselectContainer: {
+                                                    width: '100%',
+                                                },
+                                                searchBox: {
+                                                    width: '100%',
+                                                },
+                                                optionContainer: {
+                                                    width: '100%',
+                                                },
+                                            }}
+                                        />
+                                    </div>
+                                    {/* <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} /> */}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-center w-full mt-4">
+                    <label className="block mb-2">{t('descargarInforme')}</label>
+                    <Boton
+                        tipo="guardar"
+                        disabled={(informeSeleccionado != 'InfIndicadoresImpacto' ? selectedYearsMulti.length === 0 : false) || regionesEnDropdow.length === 0}
+                        textoBoton={t('descargar')}
+                        onClick={handleObtenerInforme}
+                    />
                 </div>
             </div>
         </div>
