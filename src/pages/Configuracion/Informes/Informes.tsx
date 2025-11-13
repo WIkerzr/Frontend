@@ -28,8 +28,7 @@ export type Informes =
     | 'InfTratamientoComarcalSeparado'
     | 'InfPresupuestos'
     | 'InfPresupuestosSeparado'
-    | 'InfIndicadoresImpacto'
-    | 'InfIndicadoresImpactoSeparado';
+    | 'InfIndicadoresImpacto';
 
 export const tiposInformes: Informes[] = [
     'InfObjetivos',
@@ -41,7 +40,6 @@ export const tiposInformes: Informes[] = [
     'InfPresupuestos',
     'InfPresupuestosSeparado',
     'InfIndicadoresImpacto',
-    'InfIndicadoresImpactoSeparado',
 ];
 
 const Index = () => {
@@ -81,11 +79,10 @@ const Index = () => {
     }, [SeparadosComarcas]);
 
     useEffect(() => {
-        const baseInforme = (informeSeleccionado as string).replace(/Separado$/, '');
-        if (baseInforme === 'InfIndicadoresImpacto') {
-            setSeparadosComarcas(selectedYearsMulti.length > 1);
+        if (informeSeleccionado === 'InfIndicadoresImpacto') {
+            setSeparadosComarcas(false);
         }
-    }, [selectedYearsMulti, informeSeleccionado]);
+    }, [informeSeleccionado]);
 
     const handleChangeRegionsSupracomarcal = (selected: RegionInterface[]) => {
         setRegionesEnDropdow(selected);
@@ -146,7 +143,12 @@ const Index = () => {
                 });
             });
 
-        if (selectedYearsMulti.length > 1 && informeSeleccionado !== 'InfIndicadoresImpacto' && informeSeleccionado !== 'InfIndicadoresImpactoSeparado') {
+        if (
+            selectedYearsMulti.length > 1 &&
+            informeSeleccionado !== 'InfIndicadoresImpacto' &&
+            informeSeleccionado !== 'InfTratamientoComarcal' &&
+            informeSeleccionado !== 'InfTratamientoComarcalSeparado'
+        ) {
             try {
                 setLoading(true);
 
@@ -288,18 +290,6 @@ const Index = () => {
 
                         await GenerarInformePrestamo({ resultados: payloadForPresupuestos, t, anioSeleccionado: String(regionAnioData.Anio), worksheet, workbook, metadatos: metadatosRegionAnio });
                     }
-                } else if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
-                    const aniosProcesar = years.filter((y) => y !== 'TODOS');
-
-                    for (const y of aniosProcesar) {
-                        const data = await callForYear(y);
-
-                        if (!data || !data.data) {
-                            continue;
-                        }
-
-                        await generarInformeTratamientoComarcalSeparado(data.data, t, y, regionesEnDropdow, i18n, undefined, workbook, { ...metadatos, anio: y });
-                    }
                 } else {
                     const aniosProcesar = years.filter((y) => y !== 'TODOS');
 
@@ -328,9 +318,9 @@ const Index = () => {
                         if (informeSeleccionado === 'InfAcciones') {
                             await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio, regionesEnDropdow);
                         }
-                        if (informeSeleccionado === 'InfTratamientoComarcal') {
-                            await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
-                        }
+                        // if (informeSeleccionado === 'InfTratamientoComarcal') {
+                        //     await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
+                        // }
                         if (informeSeleccionado === 'InfPresupuestos') {
                             await GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y, worksheet, workbook, metadatos: metadatosAnio });
                         }
@@ -346,11 +336,44 @@ const Index = () => {
             return;
         }
 
+        if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
+            try {
+                setLoading(true);
+
+                const workbook = new ExcelJS.Workbook();
+
+                const regionesNombres = regionesEnDropdow.map((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs)).join(', ');
+                const metadatos = {
+                    nombreInforme: t(informeSeleccionado),
+                    anio: t('TODOS'),
+                    regiones: regionesNombres || t('todasLasComarcas'),
+                    fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
+                };
+
+                for (const y of selectedYearsMulti) {
+                    const data = await callForYear(y);
+
+                    if (!data || !data.data) {
+                        continue;
+                    }
+
+                    await generarInformeTratamientoComarcalSeparado(data.data, t, y, regionesEnDropdow, i18n, undefined, workbook, { ...metadatos, anio: y });
+                }
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                saveAs(blob, `${t(informeSeleccionado)} ${t('todosLosAnios')}.xlsx`);
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
         LlamadasBBDD({
             method: 'POST',
             url: `informes`,
             body: {
-                AnioSeleccionado: informeSeleccionado !== 'InfObjetivosSeparado' ? selectedYearsMulti : [2025],
+                AnioSeleccionado: selectedYearsMulti,
                 InformeSeleccionado: informeSeleccionado,
                 RegionesId: idRegionesSeleccionadas,
             },
@@ -436,48 +459,6 @@ const Index = () => {
                     return;
                 }
 
-                if (informeSeleccionado === 'InfIndicadoresImpactoSeparado' && data.data) {
-                    const workbook = new ExcelJS.Workbook();
-                    const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
-
-                    const grupos = new Map<number, any[]>();
-                    for (const item of data.data) {
-                        const rid = Number(item.RegionId);
-                        if (!grupos.has(rid)) grupos.set(rid, []);
-                        grupos.get(rid)!.push(item);
-                    }
-
-                    for (const [regionId, items] of grupos.entries()) {
-                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionId);
-                        const regionName = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionId}`;
-
-                        const nombrePestana = obtenerNombreUnico(`${regionName}`);
-                        const worksheet = workbook.addWorksheet(nombrePestana);
-
-                        const metadatosRegion = {
-                            nombreInforme: t(informeSeleccionado),
-                            regiones: regionName,
-                            fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
-                        };
-
-                        const listadoCompleto = items[0].ListadoCompleto || [];
-
-                        const datosConValores = items.flatMap((it) => (Array.isArray(it.Datos) ? it.Datos : Array.isArray(it.data) ? it.data : []));
-
-                        if (listadoCompleto.length > 0) {
-                            await generarInformeIndicadoresImpacto({ datosOriginales: listadoCompleto, datosConValores: datosConValores, t, worksheet, workbook, metadatos: metadatosRegion });
-                        }
-                    }
-
-                    if (workbook.worksheets.length > 0) {
-                        const buffer = await workbook.xlsx.writeBuffer();
-                        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                        saveAs(blob, `${t(informeSeleccionado)}_${selectedYearsMulti}.xlsx`);
-                    }
-
-                    return;
-                }
-
                 if (informeSeleccionado === 'InfObjetivos' && selectedYearsMulti.length === 1) {
                     GenerarInformeObjetivos({
                         realizacion: data.response.indicadoresRealizacion,
@@ -494,9 +475,9 @@ const Index = () => {
                 if (informeSeleccionado === 'InfTratamientoComarcal' && selectedYearsMulti.length === 1) {
                     generarInformeTratamientoComarcal(data.data, t, selectedYearsMulti[0]);
                 }
-                if (informeSeleccionado === 'InfTratamientoComarcalSeparado' && selectedYearsMulti.length === 1) {
-                    generarInformeTratamientoComarcalSeparado(data.data, t, selectedYearsMulti[0], regionesEnDropdow, i18n);
-                }
+                // if (informeSeleccionado === 'InfTratamientoComarcalSeparado' && selectedYearsMulti.length === 1) {
+                //     generarInformeTratamientoComarcalSeparado(data.data, t, selectedYearsMulti[0], regionesEnDropdow, i18n);
+                // }
                 if (informeSeleccionado === 'InfPresupuestos' && selectedYearsMulti.length === 1) {
                     GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: selectedYearsMulti[0] });
                 }
@@ -566,31 +547,33 @@ const Index = () => {
             />
 
             <div className="panel flex flex-row gap-x-4">
-                <div className="flex flex-col items-center h-10 ">
-                    <label className="w-[200px] text-center">{t('seleccionaAnio')}</label>
-                    <Multiselect
-                        placeholder={''}
-                        options={yearOptions}
-                        selectedValues={yearOptions.filter((o) => selectedYearsMulti.includes(o.value))}
-                        displayValue="label"
-                        onSelect={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
-                        onRemove={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
-                        emptyRecordMsg={t('error:errorNoOpciones')}
-                        style={{
-                            multiselectContainer: {
-                                width: '100%',
-                            },
-                            searchBox: {
-                                width: '100%',
-                            },
-                            optionContainer: {
-                                width: '100%',
-                            },
-                        }}
-                    />
-                </div>
+                {informeSeleccionado != 'InfIndicadoresImpacto' && (
+                    <div className="flex flex-col items-center h-10 ">
+                        <label className="w-[200px] text-center">{t('seleccionaAnio')}</label>
+                        <Multiselect
+                            placeholder={''}
+                            options={yearOptions}
+                            selectedValues={yearOptions.filter((o) => selectedYearsMulti.includes(o.value))}
+                            displayValue="label"
+                            onSelect={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
+                            onRemove={(selectedList) => setSelectedYearsMulti((selectedList as any[]).map((o) => o.value))}
+                            emptyRecordMsg={t('error:errorNoOpciones')}
+                            style={{
+                                multiselectContainer: {
+                                    width: '100%',
+                                },
+                                searchBox: {
+                                    width: '100%',
+                                },
+                                optionContainer: {
+                                    width: '100%',
+                                },
+                            }}
+                        />
+                    </div>
+                )}
                 <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
-                {user && user.role === 'HAZI' && (
+                {user && user.role === 'HAZI' && informeSeleccionado != 'InfIndicadoresImpacto' && (
                     <div className="flex flex-col items-center h-10 ">
                         <label className="w-[200px] text-center">{t('informesSeparados')}</label>
                         <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />

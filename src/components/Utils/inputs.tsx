@@ -703,6 +703,7 @@ export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ infor
     const { t } = useTranslation();
 
     const tiposVisibles = tiposInformes.filter((informe) => {
+        if (informe === 'InfIndicadoresImpacto') return true;
         const name = String(informe || '');
         const isSeparado = name.includes('Separad');
         return SeparadosComarcas ? isSeparado : !isSeparado;
