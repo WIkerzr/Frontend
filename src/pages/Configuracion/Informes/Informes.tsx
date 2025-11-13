@@ -215,7 +215,7 @@ const Index = () => {
 
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                saveAs(blob, `${t(informeSeleccionado)} ${t('todosLosAnios')}.xlsx`);
+                saveAs(blob, `${t(informeSeleccionado)}.xlsx`);
             } finally {
                 setLoading(false);
             }
@@ -282,6 +282,10 @@ const Index = () => {
                         await generarInformeAcciones(payloadForAcciones, t, i18n, String(regionAnioData.Anio), worksheet, workbook, metadatosRegionAnio, regionesEnDropdow);
                     }
                 } else {
+                    const acumuladoPresupuestos: any[] = [];
+                    const acumuladoTratamiento: any[] = [];
+                    const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
+
                     for (const y of selectedYearsMulti) {
                         const data = await callForYear(y);
 
@@ -298,10 +302,16 @@ const Index = () => {
 
                         if (informeSeleccionado === 'InfTratamientoComarcal') {
                             await generarInformeTratamientoComarcal(data.data, t, y, worksheet, workbook, metadatosAnio);
+                            if (data && data.data && Array.isArray(data.data)) {
+                                acumuladoTratamiento.push(...data.data);
+                            }
                         } else if (informeSeleccionado === 'InfAcciones') {
                             await generarInformeAcciones(data.data, t, i18n, y, worksheet, workbook, metadatosAnio, regionesEnDropdow);
                         } else if (informeSeleccionado === 'InfPresupuestos') {
                             await GenerarInformePrestamo({ resultados: data.data, t, anioSeleccionado: y, worksheet, workbook, metadatos: metadatosAnio });
+                            if (data && data.data && Array.isArray(data.data)) {
+                                acumuladoPresupuestos.push(...data.data);
+                            }
                         } else if (informeSeleccionado === 'InfObjetivos') {
                             await GenerarInformeObjetivos({
                                 realizacion: data.response.indicadoresRealizacion,
@@ -316,11 +326,31 @@ const Index = () => {
                             });
                         }
                     }
+
+                    if (informeSeleccionado === 'InfPresupuestos' && acumuladoPresupuestos.length > 0) {
+                        const nombreResumen = obtenerNombreUnico(t('Resumen') || 'Resumen');
+                        const worksheetResumen = workbook.addWorksheet(nombreResumen);
+                        const metadatosResumen = { ...metadatos, anio: t('Resumen') || 'Resumen' };
+                        await GenerarInformePrestamo({
+                            resultados: acumuladoPresupuestos,
+                            t,
+                            anioSeleccionado: t('Resumen') || 'Resumen',
+                            worksheet: worksheetResumen,
+                            workbook,
+                            metadatos: metadatosResumen,
+                        });
+                    }
+                    if (informeSeleccionado === 'InfTratamientoComarcal' && acumuladoTratamiento.length > 0) {
+                        const nombreResumenTC = obtenerNombreUnico(t('Resumen') || 'Resumen');
+                        const worksheetResumenTC = workbook.addWorksheet(nombreResumenTC);
+                        const metadatosResumenTC = { ...metadatos, anio: t('Resumen') || 'Resumen' };
+                        await generarInformeTratamientoComarcal(acumuladoTratamiento, t, t('Resumen') || 'Resumen', worksheetResumenTC, workbook, metadatosResumenTC);
+                    }
                 }
 
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                saveAs(blob, `${t(informeSeleccionado)} ${t('todosLosAnios')}.xlsx`);
+                saveAs(blob, `${t(informeSeleccionado)}.xlsx`);
             } finally {
                 setLoading(false);
             }
@@ -494,7 +524,7 @@ const Index = () => {
                             </div>
                         </div>
                     )}
-                    <div className="panel">
+                    <div className="panel min-w-[300px]">
                         <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
                     </div>
                     <div className="panel">

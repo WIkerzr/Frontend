@@ -26,60 +26,58 @@ interface RegionAnio {
     Datos: DatoEje[];
 }
 
-interface RegionInfo {
-    RegionId: string | number;
-    NameEs: string;
-    NameEu: string;
-}
+// La información de regiones ya no se usa en este informe (agrupamos por ejes)
 
-const generarInformeResumenComarcaEje = (datos: DatoEje[], i18n: { language: string }, regiones: RegionInfo[]): ResumenEje[] => {
-    const mapa = new Map<string, ResumenEje>();
+// Genera resumen agrupado por EJE (ignorando comarcas)
+const generarResumenPorEje = (datos: DatoEje[], i18n: { language: string }): ResumenEje[] => {
+    const mapa = new Map<number, ResumenEje>();
 
     for (const item of datos) {
-        const key = `${item.RegionId}-${item.EjeId}`;
+        const key = item.EjeId;
         let resumen = mapa.get(key);
 
         if (!resumen) {
-            const region = regiones.find((r) => r.RegionId.toString() === item.RegionId.toString());
-            const nombreRegion = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : item.RegionId;
-
             resumen = {
-                RegionId: nombreRegion,
+                RegionId: '', // no usado ahora, mantenemos la interfaz
                 NombreEje: i18n.language === 'es' ? item.NombreEje : item.IzenaEje,
                 NumeroAcciones: item.NumeroAcciones,
             };
             mapa.set(key, resumen);
+        } else {
+            resumen.NumeroAcciones += item.NumeroAcciones;
         }
     }
 
     return Array.from(mapa.values());
 };
 
-interface ResumenObjetivoPorComarca {
-    RegionId: string;
+// (se eliminó el resumen por comarca: ahora agrupamos por eje)
+
+// Genera resumen de objetivos agrupado por EJE y Objetivo (sin columna comarca)
+interface ResumenObjetivoPorEje {
+    NombreEje: string;
     NombreObjetivo: string;
     NumeroAcciones: number;
 }
 
-const generarInformeResumenObjetivosPorComarca = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1, regiones: RegionInfo[]): ResumenObjetivoPorComarca[] => {
-    const mapa = new Map<string, ResumenObjetivoPorComarca>();
+const generarResumenObjetivosPorEje = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1): ResumenObjetivoPorEje[] => {
+    const mapa = new Map<string, ResumenObjetivoPorEje>();
 
     const datosFiltrados = datos.filter((d) => d.AxisType === tipoEje);
 
     for (const item of datosFiltrados) {
-        const key = `${item.RegionId}-${item.ObjetivoId}`;
+        const key = `${item.EjeId}-${item.ObjetivoId}`;
         let resumen = mapa.get(key);
 
         if (!resumen) {
-            const region = regiones.find((r) => r.RegionId.toString() === item.RegionId.toString());
-            const nombreRegion = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : item.RegionId;
-
             resumen = {
-                RegionId: nombreRegion,
+                NombreEje: i18n.language === 'es' ? item.NombreEje : item.IzenaEje,
                 NombreObjetivo: i18n.language === 'es' ? item.NombreObjetivo : item.IzenaObjetivo,
                 NumeroAcciones: item.NumeroAcciones,
             };
             mapa.set(key, resumen);
+        } else {
+            resumen.NumeroAcciones += item.NumeroAcciones;
         }
     }
 
@@ -99,8 +97,10 @@ export const generarInformeAcciones = async (
         regiones: string;
         fechaHora: string;
     },
-    regiones?: RegionInfo[]
+    _regiones?: unknown[]
 ) => {
+    // evitar warning de parámetro no usado
+    void _regiones;
     const workbookInterno = workbook || new ExcelJS.Workbook();
     const sheet = worksheet || workbookInterno.addWorksheet('Informe de Acciones');
 
@@ -125,39 +125,37 @@ export const generarInformeAcciones = async (
         sheet.addRow([]);
     }
 
-    // Tabla 1: COMARCA | EJE | ACCIONES
-    const filaTitulo1 = sheet.addRow([i18n.language === 'es' ? 'RESUMEN POR COMARCA Y EJE' : 'LABURPENA ESKUALDEKA ETA ARDATZEKA']);
-    sheet.mergeCells(`A${filaTitulo1.number}:C${filaTitulo1.number}`);
+    // Tabla 1: EJE | ACCIONES (resumen agrupado por eje)
+    const filaTitulo1 = sheet.addRow([i18n.language === 'es' ? 'RESUMEN POR EJE' : 'ARDATZAREN ARABERA LABURPENA']);
+    sheet.mergeCells(`A${filaTitulo1.number}:B${filaTitulo1.number}`);
     filaTitulo1.getCell(1).font = { bold: true, size: 14 };
     filaTitulo1.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
     sheet.columns = [
-        { header: t('comarca'), key: 'RegionId', width: 30 },
-        { header: t('Eje'), key: 'NombreEje', width: 40 },
-        { header: t('Acciones'), key: 'NumeroAcciones', width: 15 },
+        { key: 'NombreEje', width: 60 },
+        { key: 'NumeroAcciones', width: 15 },
     ];
 
-    const filaEncabezado1 = sheet.addRow([t('comarca'), t('Eje'), t('Acciones')]);
+    const filaEncabezado1 = sheet.addRow([t('Eje'), t('Acciones')]);
     filaEncabezado1.eachCell((cell) => {
         cell.font = { bold: true };
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
     });
 
+    // Acumular datos de todos los años y generar resumen único por Eje
+    const todosLosDatos = anios.flatMap((a) => a.Datos || []);
+    const resumenesUnicos = generarResumenPorEje(todosLosDatos, i18n);
     let totalAcciones = 0;
-    for (let index = 0; index < anios.length; index++) {
-        const datos = anios[index].Datos;
-        const resumenes = generarInformeResumenComarcaEje(datos, i18n, regiones || []);
-        resumenes.forEach((r) => {
-            sheet.addRow(r);
-            totalAcciones += r.NumeroAcciones;
-        });
-    }
+    resumenesUnicos.forEach((r: ResumenEje) => {
+        sheet.addRow([r.NombreEje, r.NumeroAcciones]);
+        totalAcciones += r.NumeroAcciones;
+    });
 
     // Fila de total con borde superior
-    const filaTotal = sheet.addRow(['', '', totalAcciones]);
-    filaTotal.getCell(3).font = { bold: true };
-    filaTotal.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
-    filaTotal.getCell(3).border = {
+    const filaTotal = sheet.addRow(['', totalAcciones]);
+    filaTotal.getCell(2).font = { bold: true };
+    filaTotal.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    filaTotal.getCell(2).border = {
         top: { style: 'thin', color: { argb: 'FF000000' } },
     };
 
@@ -170,7 +168,14 @@ export const generarInformeAcciones = async (
     filaTitulo2.getCell(1).font = { bold: true, size: 14 };
     filaTitulo2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const filaEncabezado2 = sheet.addRow([t('comarca'), i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones')]);
+    // Ajustar columnas para la tabla de objetivos (sin 'header' para no sobrescribir filas existentes)
+    sheet.columns = [
+        { key: 'NombreEje', width: 40 },
+        { key: 'NombreObjetivo', width: 80 },
+        { key: 'NumeroAcciones', width: 15 },
+    ];
+
+    const filaEncabezado2 = sheet.addRow([t('Eje'), i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones')]);
     filaEncabezado2.getCell(1).font = { bold: true };
     filaEncabezado2.getCell(2).font = { bold: true };
     filaEncabezado2.getCell(3).font = { bold: true };
@@ -178,15 +183,13 @@ export const generarInformeAcciones = async (
     filaEncabezado2.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
     filaEncabezado2.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
 
+    // Acumular datos de todos los años y generar resumen único por Eje+Objetivo (generales)
+    const resumenesGeneralesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 0);
     let totalAccionesGenerales = 0;
-    for (let index = 0; index < anios.length; index++) {
-        const datos = anios[index].Datos;
-        const resumenesGenerales = generarInformeResumenObjetivosPorComarca(datos, i18n, 0, regiones || []);
-        resumenesGenerales.forEach((r) => {
-            sheet.addRow([r.RegionId, r.NombreObjetivo, r.NumeroAcciones]);
-            totalAccionesGenerales += r.NumeroAcciones;
-        });
-    }
+    resumenesGeneralesUnicos.forEach((r: ResumenObjetivoPorEje) => {
+        sheet.addRow([r.NombreEje, r.NombreObjetivo, r.NumeroAcciones]);
+        totalAccionesGenerales += r.NumeroAcciones;
+    });
 
     // Fila de total con borde superior
     const filaTotalGenerales = sheet.addRow(['', '', totalAccionesGenerales]);
@@ -205,7 +208,14 @@ export const generarInformeAcciones = async (
     filaTitulo3.getCell(1).font = { bold: true, size: 14 };
     filaTitulo3.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const filaEncabezado3 = sheet.addRow([t('comarca'), i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones')]);
+    // Ajustar columnas para la tabla sectorial (sin 'header')
+    sheet.columns = [
+        { key: 'NombreEje', width: 40 },
+        { key: 'NombreObjetivo', width: 80 },
+        { key: 'NumeroAcciones', width: 15 },
+    ];
+
+    const filaEncabezado3 = sheet.addRow([t('Eje'), i18n.language === 'es' ? 'Objetivo' : 'Helburua', t('Acciones')]);
     filaEncabezado3.getCell(1).font = { bold: true };
     filaEncabezado3.getCell(2).font = { bold: true };
     filaEncabezado3.getCell(3).font = { bold: true };
@@ -213,15 +223,13 @@ export const generarInformeAcciones = async (
     filaEncabezado3.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
     filaEncabezado3.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
 
+    // Acumular datos de todos los años y generar resumen único por Eje+Objetivo (sectoriales)
+    const resumenesSectorialesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 1);
     let totalAccionesSectoriales = 0;
-    for (let index = 0; index < anios.length; index++) {
-        const datos = anios[index].Datos;
-        const resumenesSectoriales = generarInformeResumenObjetivosPorComarca(datos, i18n, 1, regiones || []);
-        resumenesSectoriales.forEach((r) => {
-            sheet.addRow([r.RegionId, r.NombreObjetivo, r.NumeroAcciones]);
-            totalAccionesSectoriales += r.NumeroAcciones;
-        });
-    }
+    resumenesSectorialesUnicos.forEach((r: ResumenObjetivoPorEje) => {
+        sheet.addRow([r.NombreEje, r.NombreObjetivo, r.NumeroAcciones]);
+        totalAccionesSectoriales += r.NumeroAcciones;
+    });
 
     // Fila de total con borde superior
     const filaTotalSectoriales = sheet.addRow(['', '', totalAccionesSectoriales]);

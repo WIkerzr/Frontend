@@ -143,11 +143,18 @@ export const generarInformeTratamientoComarcal = async (
     encabezadoComarcal.font = { bold: true };
     encabezadoComarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
+    let sumaPorcentajeComarcales = 0;
     Object.entries(acciones.comarcales).forEach(([comarcal, cantidad]) => {
         const porcentaje = totalComarcales > 0 ? Math.round((cantidad / totalComarcales) * 100) : 0;
+        sumaPorcentajeComarcales += porcentaje;
         const comarcalTraducido = traducirTratamientoTerritorial(comarcal);
         sheet.addRow([comarcalTraducido, cantidad, `${porcentaje}%`]);
     });
+
+    const filaTotalComarcales = sheet.addRow([t('total'), totalComarcales, `${sumaPorcentajeComarcales}%`]);
+    filaTotalComarcales.font = { bold: true };
+    filaTotalComarcales.getCell(2).border = { top: { style: 'thin' } };
+    filaTotalComarcales.getCell(3).border = { top: { style: 'thin' } };
 
     sheet.addRow([]);
 
@@ -159,11 +166,18 @@ export const generarInformeTratamientoComarcal = async (
     encabezadoSupracomarcal.font = { bold: true };
     encabezadoSupracomarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
+    let sumaPorcentajeSupracomarcales = 0;
     Object.entries(acciones.supracomarcales).forEach(([supracomarcales, cantidad]) => {
         const porcentaje = totalSupracomarcales > 0 ? Math.round((cantidad / totalSupracomarcales) * 100) : 0;
+        sumaPorcentajeSupracomarcales += porcentaje;
         const supracomarcalesTraducido = traducirTratamientoTerritorial(supracomarcales);
         sheet.addRow([supracomarcalesTraducido, cantidad, `${porcentaje}%`]);
     });
+
+    const filaTotalSupracomarcales = sheet.addRow([t('total'), totalSupracomarcales, `${sumaPorcentajeSupracomarcales}%`]);
+    filaTotalSupracomarcales.font = { bold: true };
+    filaTotalSupracomarcales.getCell(2).border = { top: { style: 'thin' } };
+    filaTotalSupracomarcales.getCell(3).border = { top: { style: 'thin' } };
 
     sheet.eachRow((row) => (row.alignment = { vertical: 'middle', horizontal: 'center' }));
     sheet.columns.forEach((col) => (col.alignment = { horizontal: 'center' }));
@@ -314,11 +328,18 @@ export const generarInformeTratamientoComarcalSeparado = async (
         encabezadoComarcal.font = { bold: true };
         encabezadoComarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
+        let sumaPorcentajeComarcales = 0;
         Object.entries(resumenRegion.comarcales).forEach(([comarcal, cantidad]) => {
             const porcentaje = totalComarcales > 0 ? Math.round((cantidad / totalComarcales) * 100) : 0;
+            sumaPorcentajeComarcales += porcentaje;
             const comarcalTraducido = traducirTratamientoTerritorial(comarcal);
             sheet.addRow([comarcalTraducido, cantidad, `${porcentaje}%`]);
         });
+
+        const filaTotalComarcales = sheet.addRow([t('total'), totalComarcales, `${sumaPorcentajeComarcales}%`]);
+        filaTotalComarcales.font = { bold: true };
+        filaTotalComarcales.getCell(2).border = { top: { style: 'thin' } };
+        filaTotalComarcales.getCell(3).border = { top: { style: 'thin' } };
 
         sheet.addRow([]);
 
@@ -331,11 +352,18 @@ export const generarInformeTratamientoComarcalSeparado = async (
         encabezadoSupracomarcal.font = { bold: true };
         encabezadoSupracomarcal.alignment = { horizontal: 'center', vertical: 'middle' };
 
+        let sumaPorcentajeSupracomarcales = 0;
         Object.entries(resumenRegion.supracomarcales).forEach(([supracomarcales, cantidad]) => {
             const porcentaje = totalSupracomarcales > 0 ? Math.round((cantidad / totalSupracomarcales) * 100) : 0;
+            sumaPorcentajeSupracomarcales += porcentaje;
             const supracomarcalesTraducido = traducirTratamientoTerritorial(supracomarcales);
             sheet.addRow([supracomarcalesTraducido, cantidad, `${porcentaje}%`]);
         });
+
+        const filaTotalSupracomarcales = sheet.addRow([t('total'), totalSupracomarcales, `${sumaPorcentajeSupracomarcales}%`]);
+        filaTotalSupracomarcales.font = { bold: true };
+        filaTotalSupracomarcales.getCell(2).border = { top: { style: 'thin' } };
+        filaTotalSupracomarcales.getCell(3).border = { top: { style: 'thin' } };
 
         sheet.eachRow((row) => (row.alignment = { vertical: 'middle', horizontal: 'center' }));
         sheet.columns.forEach((col) => (col.alignment = { horizontal: 'center' }));

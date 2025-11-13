@@ -337,11 +337,11 @@ export const GenerarInformeObjetivos = async ({
             };
             filaAmarilla.getCell('Grado_de_ejecución_Total').alignment = { horizontal: 'center', vertical: 'middle' };
 
-            // Fila Ejecución objetiva
+            // Fila Ejecución optima
             const filaVerde = sheet.addRow(['', '', '', '', '', '', '', '', t('ejecucionAlta'), `${porcentajeVerde}%`]);
             sheet.mergeCells(`A${filaVerde.number}:I${filaVerde.number}`);
             const celdaVerde = filaVerde.getCell(1);
-            celdaVerde.value = t('ejecucionObjetiva');
+            celdaVerde.value = t('ejecucionOptima');
             celdaVerde.alignment = { horizontal: 'right', vertical: 'middle' };
             filaVerde.getCell('Grado_de_ejecución_Total').fill = {
                 type: 'pattern',
