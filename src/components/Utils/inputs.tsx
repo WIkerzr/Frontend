@@ -705,19 +705,52 @@ export const SelectorInformes: React.FC<SelectorAnioCuadroMandoProps> = ({ infor
     const tiposVisibles = tiposInformes.filter((informe) => {
         const name = String(informe || '');
         const isSeparado = name.includes('Separad');
-            return SeparadosComarcas ? isSeparado : !isSeparado;
-        });
+        return SeparadosComarcas ? isSeparado : !isSeparado;
+    });
+
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickFuera = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickFuera);
+        return () => document.removeEventListener('mousedown', handleClickFuera);
+    }, []);
+
+    useEffect(() => {
+        setOpen(false);
+    }, [informeSeleccionado]);
 
     return (
-        <div className="w-[850px]">
+        <div ref={dropdownRef} className="relative w-full max-w-md">
             <label className="block mb-1">{t('SeleccionTipoInforme')}</label>
-            <select className="w-full border rounded p-2 resize-y" value={informeSeleccionado} onChange={(e) => setInformeSeleccionado(e.target.value as Informes)}>
-                {tiposVisibles.map((informe) => (
-                    <option key={informe} value={informe}>
-                        {t(informe)}
-                    </option>
-                ))}
-            </select>
+
+            <button type="button" aria-haspopup="listbox" aria-expanded={open} className="w-full border rounded p-2 text-left bg-white" onClick={() => setOpen((prev) => !prev)}>
+                {informeSeleccionado ? t(informeSeleccionado) : t('seleccionaInforme')}
+            </button>
+
+            {open && (
+                <ul role="listbox" className="absolute z-10 w-full mt-1 border rounded bg-white shadow max-h-60 overflow-y-auto">
+                    {tiposVisibles.map((informe) => (
+                        <li
+                            key={informe}
+                            role="option"
+                            aria-selected={informe === informeSeleccionado}
+                            className={`p-2 cursor-pointer whitespace-normal break-words hover:bg-gray-100 ${informe === informeSeleccionado ? 'bg-gray-50 font-medium' : ''}`}
+                            onClick={() => {
+                                setInformeSeleccionado(informe as Informes);
+                                setOpen(false);
+                            }}
+                        >
+                            {t(informe)}
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };

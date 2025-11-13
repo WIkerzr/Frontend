@@ -146,7 +146,7 @@ const Index = () => {
                 });
             });
 
-        if (selectedYearsMulti.length > 1 && informeSeleccionado !== 'InfIndicadoresImpacto') {
+        if (selectedYearsMulti.length > 1 && informeSeleccionado !== 'InfIndicadoresImpacto' && informeSeleccionado !== 'InfIndicadoresImpactoSeparado') {
             try {
                 setLoading(true);
 
@@ -287,55 +287,6 @@ const Index = () => {
                             : [regionAnioData];
 
                         await GenerarInformePrestamo({ resultados: payloadForPresupuestos, t, anioSeleccionado: String(regionAnioData.Anio), worksheet, workbook, metadatos: metadatosRegionAnio });
-                    }
-                } else if (informeSeleccionado === 'InfIndicadoresImpactoSeparado') {
-                    const data = await new Promise<any>((resolve) => {
-                        let resultData: any = null;
-                        LlamadasBBDD({
-                            method: 'POST',
-                            url: `informes`,
-                            body: {
-                                AnioSeleccionado: selectedYearsMulti,
-                                InformeSeleccionado: informeSeleccionado,
-                                RegionesId: idRegionesSeleccionadas,
-                            },
-                            setLoading: () => {},
-                            setErrorMessage,
-                            setSuccessMessage,
-                            onSuccess: (data) => {
-                                resultData = data;
-                            },
-                            onFinally: () => {
-                                resolve(resultData);
-                            },
-                        });
-                    });
-
-                    if (!data || !data.data) {
-                        setLoading(false);
-                        return;
-                    }
-
-                    const { obtenerNombreUnico: obtenerNombreUnicoInd } = crearGeneradorNombresUnicos();
-
-                    for (const regionAnioData of data.data) {
-                        const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionAnioData.RegionId);
-                        const regionName = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionAnioData.RegionId}`;
-                        const nombrePestana = obtenerNombreUnicoInd(`${regionAnioData.Anio} - ${regionName}`);
-                        const worksheet = workbook.addWorksheet(nombrePestana);
-
-                        const metadatosRegionAnio = {
-                            ...metadatos,
-                            anio: String(regionAnioData.Anio),
-                            regiones: regionName,
-                        };
-
-                        const listadoCompleto = regionAnioData.ListadoCompleto || [];
-                        const datosConValores = regionAnioData.Datos || [];
-
-                        if (listadoCompleto.length > 0) {
-                            await generarInformeIndicadoresImpacto({ datosOriginales: listadoCompleto, datosConValores: datosConValores, t, worksheet, workbook, metadatos: metadatosRegionAnio });
-                        }
                     }
                 } else if (informeSeleccionado === 'InfTratamientoComarcalSeparado') {
                     const aniosProcesar = years.filter((y) => y !== 'TODOS');
@@ -489,26 +440,32 @@ const Index = () => {
                     const workbook = new ExcelJS.Workbook();
                     const { obtenerNombreUnico } = crearGeneradorNombresUnicos();
 
-                    for (const regionAnioData of data.data) {
-                        const regionId = regionAnioData.RegionId;
+                    const grupos = new Map<number, any[]>();
+                    for (const item of data.data) {
+                        const rid = Number(item.RegionId);
+                        if (!grupos.has(rid)) grupos.set(rid, []);
+                        grupos.get(rid)!.push(item);
+                    }
+
+                    for (const [regionId, items] of grupos.entries()) {
                         const region = regionesEnDropdow.find((r) => Number(r.RegionId) === regionId);
                         const regionName = region ? (i18n.language === 'eu' ? region.NameEu : region.NameEs) : `Región ${regionId}`;
 
-                        const nombrePestana = obtenerNombreUnico(`${regionAnioData.Anio} - ${regionName}`);
+                        const nombrePestana = obtenerNombreUnico(`${regionName}`);
                         const worksheet = workbook.addWorksheet(nombrePestana);
 
-                        const metadatos = {
+                        const metadatosRegion = {
                             nombreInforme: t(informeSeleccionado),
-                            anio: String(regionAnioData.Anio),
                             regiones: regionName,
                             fechaHora: new Date().toLocaleString(i18n.language === 'eu' ? 'eu-ES' : 'es-ES'),
                         };
 
-                        const listadoCompleto = regionAnioData.ListadoCompleto || [];
-                        const datosConValores = regionAnioData.Datos || [];
+                        const listadoCompleto = items[0].ListadoCompleto || [];
+
+                        const datosConValores = items.flatMap((it) => (Array.isArray(it.Datos) ? it.Datos : Array.isArray(it.data) ? it.data : []));
 
                         if (listadoCompleto.length > 0) {
-                            await generarInformeIndicadoresImpacto({ datosOriginales: listadoCompleto, datosConValores: datosConValores, t, worksheet, workbook, metadatos });
+                            await generarInformeIndicadoresImpacto({ datosOriginales: listadoCompleto, datosConValores: datosConValores, t, worksheet, workbook, metadatos: metadatosRegion });
                         }
                     }
 
@@ -633,10 +590,12 @@ const Index = () => {
                     />
                 </div>
                 <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
-                <div className="flex flex-col items-center h-10 ">
-                    <label className="w-[200px] text-center">{t('informesSeparados')}</label>
-                    <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
-                </div>
+                {user && user.role === 'HAZI' && (
+                    <div className="flex flex-col items-center h-10 ">
+                        <label className="w-[200px] text-center">{t('informesSeparados')}</label>
+                        <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
+                    </div>
+                )}
                 {user && user.role === 'HAZI' && (
                     <div className="w-full resize-y ">
                         <label className="block mb-1">{t('seleccionaComarca')}</label>

@@ -268,12 +268,14 @@ const Index = () => {
                         const listIndex = listadoCompleto[indexEncontrado];
 
                         if (dato.Relaciones) {
+                            const relValor = parseNumberOrNull(dato.Relaciones.Valor);
+                            const relYear = parseIntSafe(dato.Relaciones.Year);
                             listIndex.Relaciones = {
                                 IdIndicator: dato.Relaciones.IdIndicator,
                                 IdCategoria: dato.Relaciones.IdCategoria,
                                 Objetivo: dato.Relaciones.Objetivo,
-                                Valor: Number(dato.Relaciones.Valor) != 0 ? dato.Relaciones.Valor : undefined,
-                                Year: Number(dato.Relaciones.Year) != 0 ? dato.Relaciones.Year : undefined,
+                                Valor: relValor !== null && relValor !== 0 ? relValor : undefined,
+                                Year: relYear !== 0 ? relYear : undefined,
                             };
                         }
 
@@ -302,6 +304,35 @@ const Index = () => {
 
     const [editableRowIndex, setEditableRowIndex] = useState<number | null>(null);
 
+    const parseNumber = (v: unknown): number => {
+        if (v === null || v === undefined) return 0;
+        if (typeof v === 'number') return v;
+        const s = String(v).trim();
+        if (s === '') return 0;
+        let t = s;
+        if (t.indexOf('.') !== -1) t = t.replace(/\./g, '');
+        if (t.indexOf(',') !== -1) t = t.replace(/,/g, '.');
+        const n = parseFloat(t);
+        return isNaN(n) ? 0 : n;
+    };
+
+    const parseIntSafe = (v: unknown): number => {
+        const n = parseNumber(v);
+        return Math.trunc(n);
+    };
+
+    const parseNumberOrNull = (v: unknown): number | null => {
+        if (v === null || v === undefined) return null;
+        const s = String(v).trim();
+        if (s === '') return null;
+        let t = s;
+        if (t.indexOf('.') !== -1) t = t.replace(/\./g, '');
+        if (t.indexOf(',') !== -1) t = t.replace(/,/g, '.');
+        if (!/[0-9]/.test(t)) return null;
+        const n = parseFloat(t);
+        return isNaN(n) ? null : n;
+    };
+
     if (!regionSeleccionada) return <SeleccioneRegion />;
 
     const handleNuevo = () => {
@@ -325,8 +356,8 @@ const Index = () => {
             return datosActuales.map((d) => {
                 const valorExistente = Array.isArray(d.Valores) ? d.Valores.find((v) => v.Year === year) : undefined;
                 const valoresActualizados = valorExistente
-                    ? d.Valores.map((v) => (v.Year === year ? (field === 'Valor' ? { ...v, Valor: value === '' ? 0 : Number(value) } : { ...v, Objetivo: value }) : v))
-                    : [...(d.Valores || []), { Id: 0, Year: year, Valor: field === 'Valor' ? (value === '' ? 0 : Number(value)) : 0, Objetivo: field === 'Objetivo' ? value : '' }];
+                    ? d.Valores.map((v) => (v.Year === year ? (field === 'Valor' ? { ...v, Valor: value === '' ? 0 : parseNumber(value) } : { ...v, Objetivo: value }) : v))
+                    : [...(d.Valores || []), { Id: 0, Year: year, Valor: field === 'Valor' ? (value === '' ? 0 : parseNumber(value)) : 0, Objetivo: field === 'Objetivo' ? value : '' }];
 
                 return { ...d, Valores: valoresActualizados };
             });
@@ -336,7 +367,7 @@ const Index = () => {
             {
                 Id: 0,
                 AlcanceTerritorial: item.alcance || '',
-                Valores: [{ Id: 0, Year: year, Valor: field === 'Valor' ? (value === '' ? 0 : Number(value)) : 0, Objetivo: field === 'Objetivo' ? value : '' }],
+                Valores: [{ Id: 0, Year: year, Valor: field === 'Valor' ? (value === '' ? 0 : parseNumber(value)) : 0, Objetivo: field === 'Objetivo' ? value : '' }],
             },
         ];
     };
@@ -467,7 +498,7 @@ const Index = () => {
                             ...item.Relaciones,
                             IdIndicator: String(item.IdIndicador),
                             IdCategoria: String(item.IdCategoria),
-                            Year: Number(value) || 0,
+                            Year: parseIntSafe(value) || 0,
                             Valor: item.Relaciones?.Valor || item.LineBase || 0,
                             Objetivo: item.Relaciones?.Objetivo || transformarObjetivoIndicadores(item) || '',
                         },
@@ -491,7 +522,7 @@ const Index = () => {
                             IdIndicator: String(item.IdIndicador),
                             IdCategoria: String(item.IdCategoria),
                             Year: item.Relaciones?.Year || item.Year || 0,
-                            Valor: value === '' ? 0 : Number(value),
+                            Valor: value === '' ? 0 : parseNumber(value),
                             Objetivo: item.Relaciones?.Objetivo || transformarObjetivoIndicadores(item) || '',
                         },
                     };
@@ -715,8 +746,15 @@ const Index = () => {
                 const isEditing = editableRowIndex === rowIndex;
                 const valorOriginal = record.Relaciones?.Valor ?? record.LineBase ?? '';
 
-                // Convertir valor a numérico si es posible
-                const valorNumerico = typeof valorOriginal === 'number' ? valorOriginal : !isNaN(Number(valorOriginal)) && valorOriginal !== '' ? Number(valorOriginal) : null;
+                // Convertir valor a numérico si es posible (eliminar puntos y tratar comas como decimales)
+                let valorNumerico: number | null = null;
+                if (valorOriginal === '') {
+                    valorNumerico = null;
+                } else if (typeof valorOriginal === 'number') {
+                    valorNumerico = valorOriginal;
+                } else {
+                    valorNumerico = parseNumberOrNull(valorOriginal);
+                }
 
                 // Si no hay permisos y el valor no es numérico, mostrar vacío
                 const valorMostrar = !permisosEditar && valorNumerico === null ? '' : valorNumerico ?? valorOriginal;
@@ -804,16 +842,22 @@ const Index = () => {
                                                   const yearRelacion = record.Relaciones?.Year ?? record.Year;
                                                   const objetivoRelacion = record.Relaciones?.Objetivo ?? transformarObjetivoIndicadores(record);
 
-                                                  // Validar que valorRelacion sea un número válido
-                                                  const valorNumerico = typeof valorRelacion === 'number' ? valorRelacion : Number(valorRelacion);
-                                                  const esValorValido = !isNaN(valorNumerico);
+                                                  // Validar que valorRelacion sea un número válido usando el parser local
+                                                  let valorNumericoTmp: number | null = null;
+                                                  if (typeof valorRelacion === 'number') valorNumericoTmp = valorRelacion;
+                                                  else valorNumericoTmp = parseNumberOrNull(valorRelacion);
+
+                                                  const esValorValido = valorNumericoTmp !== null;
+
+                                                  // Validar año
+                                                  const yearToSend = parseIntSafe(yearRelacion) || 0;
 
                                                   // Siempre enviar Relaciones, pero con 0 si el valor no es válido o es 0
                                                   body.Relaciones = {
                                                       IdIndicator: String(record.IdIndicador),
                                                       IdCategoria: String(record.IdCategoria),
-                                                      Year: yearRelacion && !isNaN(Number(yearRelacion)) ? Number(yearRelacion) : 0,
-                                                      Valor: esValorValido ? valorNumerico : 0,
+                                                      Year: yearToSend,
+                                                      Valor: esValorValido ? (valorNumericoTmp as number) : 0,
                                                       Objetivo: objetivoRelacion ? String(objetivoRelacion) : '',
                                                   };
 

@@ -48,6 +48,30 @@ export interface IndicadorImpacto {
     };
 }
 
+// Helper para parsear números: si vienen con puntos (.) se eliminan
+const parseNumber = (v: unknown): number => {
+    if (v === null || v === undefined) return 0;
+    if (typeof v === 'number') return v;
+    let s = String(v).trim();
+    if (s === '') return 0;
+
+    if (s.indexOf('.') !== -1) {
+        s = s.replace(/\./g, '');
+    }
+
+    if (s.indexOf(',') !== -1) {
+        s = s.replace(/,/g, '.');
+    }
+
+    const n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+};
+
+const parseIntSafe = (v: unknown): number => {
+    const n = parseNumber(v);
+    return isNaN(n) ? 0 : Math.trunc(n);
+};
+
 interface GenerarInformeIndicadoresImpactoProps {
     datosOriginales: IndicadorImpacto[];
     datosConValores?: IndicadorImpacto[]; // Array "Datos" de la región
@@ -56,7 +80,6 @@ interface GenerarInformeIndicadoresImpactoProps {
     workbook?: ExcelJS.Workbook;
     metadatos?: {
         nombreInforme: string;
-        anio: string;
         regiones: string;
         fechaHora: string;
     };
@@ -104,10 +127,6 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
         filaInforme.getCell(1).font = { bold: true, size: 16 };
         filaInforme.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
         sheet.mergeCells(`A${filaInforme.number}:${ultimaColumnaLetra}${filaInforme.number}`);
-
-        const filaAnio = sheet.addRow([`${t('Ano')}: ${metadatos.anio}`, ...fillerArray]);
-        filaAnio.getCell(1).font = { bold: true };
-        sheet.mergeCells(`A${filaAnio.number}:${ultimaColumnaLetra}${filaAnio.number}`);
 
         const filaRegiones = sheet.addRow([`${t('comarcas')}: ${metadatos.regiones}`, ...fillerArray]);
         filaRegiones.getCell(1).font = { bold: true };
@@ -159,10 +178,28 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
         return;
     }
 
+    // Devuelve la cadena traducida para mostrar en el informe
     const transformarObjetivo = (impactType?: number): string => {
         if (impactType === 1) return t('aumentar');
         if (impactType === 2) return t('disminuir');
         return t('mantener');
+    };
+
+    type ObjetivoKey = 'AUMENTAR' | 'DISMINUIR' | 'MANTENER';
+
+    const objetivoKeyFromImpactType = (impactType?: number): ObjetivoKey => {
+        if (impactType === 1) return 'AUMENTAR';
+        if (impactType === 2) return 'DISMINUIR';
+        return 'MANTENER';
+    };
+
+    const objetivoKeyFromString = (objetivo?: string | null): ObjetivoKey | null => {
+        if (!objetivo) return null;
+        const lower = objetivo.toLowerCase();
+        if (lower.includes('aument') || lower.includes('handit')) return 'AUMENTAR';
+        if (lower.includes('dismin') || lower.includes('txikit')) return 'DISMINUIR';
+        if (lower.includes('manten') || lower.includes('mantend')) return 'MANTENER';
+        return null;
     };
 
     // Función para traducir objetivos guardados en base de datos
@@ -233,9 +270,10 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
         const unidad = esEuskera ? indicador.UnitEu || indicador.UnitEs || '' : indicador.UnitEs || indicador.UnitEu || '';
 
         // Valores iniciales desde ListadoCompleto (por defecto)
-        let anioInicial = typeof indicador.Year === 'string' ? parseInt(indicador.Year) : indicador.Year || 0;
-        let valorInicial = typeof indicador.LineBase === 'string' ? parseFloat(indicador.LineBase) : indicador.LineBase || 0;
-        let objetivoInicial = transformarObjetivo(indicador.ImpactType);
+        let anioInicial = parseIntSafe(indicador.Year);
+        let valorInicial = parseNumber(indicador.LineBase);
+        let objetivoInicialDisplay = transformarObjetivo(indicador.ImpactType);
+        let objetivoInicialKey: ObjetivoKey = objetivoKeyFromImpactType(indicador.ImpactType);
 
         let valoresDisponibles: Valor[] = [];
         let alcanceTerritorialReal = '';
@@ -253,7 +291,10 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
                     if ((rel.IdIndicator === indicador.IdIndicador || rel.IdIndicator === indicador.IdIndicator) && rel.IdCategoria === indicador.IdCategoria) {
                         anioInicial = rel.Year;
                         valorInicial = rel.Valor;
-                        objetivoInicial = traducirObjetivo(rel.Objetivo) || objetivoInicial;
+                        const display = traducirObjetivo(rel.Objetivo) || objetivoInicialDisplay;
+                        objetivoInicialDisplay = display;
+                        const key = objetivoKeyFromString(rel.Objetivo);
+                        if (key) objetivoInicialKey = key;
                     }
                 }
 
@@ -261,30 +302,30 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
 
                 // Obtener el Rango del indicador
                 const rangoStr = indicadorConValores.Rango;
-                if (rangoStr) {
-                    rango = typeof rangoStr === 'string' ? parseFloat(rangoStr) : rangoStr;
+                if (rangoStr !== undefined && rangoStr !== null && String(rangoStr).trim() !== '') {
+                    rango = parseNumber(rangoStr);
                 }
 
                 if (datosArray) {
                     alcanceTerritorialReal = traducirAlcanceTerritorial(datosArray.AlcanceTerritorial);
                     if (datosArray.Valores) {
-                        valoresDisponibles = datosArray.Valores;
+                        valoresDisponibles = datosArray.Valores.map((v) => ({ ...v, Valor: parseNumber(v.Valor), Year: parseIntSafe(v.Year) }));
                     }
                 }
             }
         }
 
         // Crear una sola fila con todos los años en columnas
-        const filaArray = [nombreIndicador, categoria, unidad, alcanceTerritorialReal, anioInicial, valorInicial, objetivoInicial];
+        const filaArray = [nombreIndicador, categoria, unidad, alcanceTerritorialReal, anioInicial, valorInicial, objetivoInicialDisplay];
 
         // Agregar datos para cada año disponible
         valoresDisponibles.forEach((valor) => {
-            const valorAnio = valor.Valor || 0;
-            const objetivoAnio = traducirObjetivo(valor.Objetivo);
-            const anioActual = valor.Year;
+            const valorAnio = parseNumber(valor.Valor);
+            const anioActual = parseIntSafe(valor.Year);
+            const objetivoAnioDisplay = traducirObjetivo(valor.Objetivo) || objetivoInicialDisplay;
 
             // Orden: Año, Valor, Cumplimiento (vacío, se calculará con fórmula), Siguiente objetivo
-            filaArray.push(anioActual, valorAnio, '', objetivoAnio || objetivoInicial);
+            filaArray.push(anioActual, valorAnio, '', objetivoAnioDisplay);
         });
 
         // Si hay menos años que maxAnios, rellenar con vacíos
@@ -309,10 +350,12 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
             fila.getCell(colValor).numFmt = '#,##0.00'; // Valor
 
             // Calcular valores desde TypeScript para simplificar
-            const valorAct = valoresDisponibles[i]?.Valor ?? 0;
-            const valorAnt = i === 0 ? valorInicial : valoresDisponibles[i - 1]?.Valor ?? 0;
+            const valorAct = parseNumber(valoresDisponibles[i]?.Valor);
+            const valorAnt = i === 0 ? valorInicial : parseNumber(valoresDisponibles[i - 1]?.Valor);
             const diferencia = valorAct - valorAnt;
-            const tipoObjetivo = objetivoInicial; // Aumentar, Disminuir, Mantener
+            const objetivoStr = valoresDisponibles[i]?.Objetivo;
+            const keyFromVal = objetivoKeyFromString(objetivoStr);
+            const tipoObjetivo: ObjetivoKey = keyFromVal || objetivoInicialKey;
 
             let textoResultado = '';
 
@@ -321,26 +364,39 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
                 // Determinar si cumple basado en el Rango
                 let cumple = false;
                 if (rango > 0) {
-                    // Rango define el margen de tolerancia respecto al valor anterior
-                    if (tipoObjetivo === 'Aumentar') {
-                        // Aumentar: Cumple si valorActual >= valorAnterior + Rango
-                        cumple = valorAct >= valorAnt + rango;
-                    } else if (tipoObjetivo === 'Disminuir') {
-                        // Disminuir: Cumple si valorActual <= valorAnterior - Rango
-                        cumple = valorAct <= valorAnt - rango;
-                    } else if (tipoObjetivo === 'Mantener') {
-                        // Mantener: Cumple si está dentro de [valorAnterior - Rango, valorAnterior + Rango]
-                        cumple = valorAct >= valorAnt - rango && valorAct <= valorAnt + rango;
+                    // Si rango está en (0..100) lo interpretamos como porcentaje (%) de tolerancia
+                    if (rango > 0 && rango <= 100) {
+                        const tolPercent = rango; // p.ej. 1 => 1%
+                        if (tipoObjetivo === 'AUMENTAR') {
+                            const umbral = valorAnt * (1 + tolPercent / 100);
+                            cumple = valorAct > umbral;
+                        } else if (tipoObjetivo === 'DISMINUIR') {
+                            const umbral = valorAnt * (1 - tolPercent / 100);
+                            cumple = valorAct < umbral;
+                        } else if (tipoObjetivo === 'MANTENER') {
+                            const min = valorAnt * (1 - tolPercent / 100);
+                            const max = valorAnt * (1 + tolPercent / 100);
+                            cumple = valorAct >= min && valorAct <= max;
+                        }
+                    } else {
+                        // Si rango es mayor a 100 lo tratamos como margen absoluto
+                        if (tipoObjetivo === 'AUMENTAR') {
+                            cumple = valorAct >= valorAnt + rango;
+                        } else if (tipoObjetivo === 'DISMINUIR') {
+                            cumple = valorAct <= valorAnt - rango;
+                        } else if (tipoObjetivo === 'MANTENER') {
+                            cumple = valorAct >= valorAnt - rango && valorAct <= valorAnt + rango;
+                        }
                     }
                 } else {
-                    // Si no hay rango, usar la lógica anterior basada en porcentajes
-                    const ratio = valorAct / valorAnt;
-                    if (tipoObjetivo === 'Aumentar') {
-                        cumple = ratio >= 1;
-                    } else if (tipoObjetivo === 'Disminuir') {
-                        cumple = ratio <= 1;
-                    } else if (tipoObjetivo === 'Mantener') {
-                        cumple = ratio >= 0.95 && ratio <= 1.05;
+                    // Sin rango: usar una tolerancia por defecto en porcentaje (99%-101% para mantener)
+                    const ratioPercent = (valorAct / valorAnt) * 100;
+                    if (tipoObjetivo === 'AUMENTAR') {
+                        cumple = ratioPercent > 100;
+                    } else if (tipoObjetivo === 'DISMINUIR') {
+                        cumple = ratioPercent < 100;
+                    } else if (tipoObjetivo === 'MANTENER') {
+                        cumple = ratioPercent >= 99 && ratioPercent <= 101;
                     }
                 }
 
@@ -352,20 +408,12 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
                 cell.numFmt = '@';
 
                 if (cumple) {
-                    // SI - determinar si es verde (diferencia >= 85) o amarillo (diferencia < 85)
-                    if (Math.abs(diferencia) >= 85) {
-                        cell.fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFC6EFCE' }, // Verde
-                        };
-                    } else {
-                        cell.fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFFFEB9C' }, // Amarillo
-                        };
-                    }
+                    // SI - marcado siempre como verde
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFC6EFCE' }, // Verde
+                    };
                 } else {
                     // NO - rojo
                     cell.fill = {
@@ -435,13 +483,12 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
     sheet.addRow([]); // Fila vacía
     sheet.addRow([]); // Fila vacía
 
-    // Calcular estadísticas para todas las columnas de Cumplimiento
+    // Calcular estadísticas para todas las columnas de Cumplimiento (solo Válida / No válida)
     const estadisticasPorAnio: Array<{
         colValor: number;
         colPorcentaje: number;
-        porcentajeRojo: string;
-        porcentajeAmarillo: string;
-        porcentajeVerde: string;
+        porcentajeNoValida: string;
+        porcentajeValida: string;
     }> = [];
 
     for (let i = 0; i < maxAnios; i++) {
@@ -450,9 +497,8 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
 
         // Contar valores en la columna de cumplimiento
         let totalFilas = 0;
-        let contadorRojos = 0;
-        let contadorAmarillos = 0;
-        let contadorVerdes = 0;
+        let contadorNoValida = 0;
+        let contadorValida = 0;
 
         // Recorrer todas las filas de datos
         for (let rowNum = primeraFilaDatos; rowNum <= ultimaFila; rowNum++) {
@@ -461,21 +507,12 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
                 const texto = String(cellValue);
                 totalFilas++;
 
-                if (texto === t('sinDatosInforme') || texto.startsWith(t('no'))) {
-                    contadorRojos++;
-                } else if (texto.startsWith(t('si'))) {
-                    // Extraer el número entre paréntesis usando una regex más flexible
-                    const match = texto.match(/\(([^)]+)\)/);
-                    if (match) {
-                        const diferencia = parseFloat(match[1]);
-                        if (Math.abs(diferencia) >= 85) {
-                            contadorVerdes++;
-                        } else {
-                            contadorAmarillos++;
-                        }
-                    } else {
-                        contadorAmarillos++;
-                    }
+                // Considerar válida cualquier texto que empiece por 'si' (cumple)
+                if (texto.startsWith(t('si'))) {
+                    contadorValida++;
+                } else {
+                    // Todo lo demás se considera no válida (incluye 'sinDatosInforme' y 'no')
+                    contadorNoValida++;
                 }
             }
         }
@@ -483,23 +520,20 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
             row.alignment = { vertical: 'middle', horizontal: 'center' };
         });
 
-        const porcentajeRojo = totalFilas > 0 ? ((contadorRojos / totalFilas) * 100).toFixed(1) : '0.0';
-        const porcentajeAmarillo = totalFilas > 0 ? ((contadorAmarillos / totalFilas) * 100).toFixed(1) : '0.0';
-        const porcentajeVerde = totalFilas > 0 ? ((contadorVerdes / totalFilas) * 100).toFixed(1) : '0.0';
+        const porcentajeNoValida = totalFilas > 0 ? ((contadorNoValida / totalFilas) * 100).toFixed(1) : '0.0';
+        const porcentajeValida = totalFilas > 0 ? ((contadorValida / totalFilas) * 100).toFixed(1) : '0.0';
 
         estadisticasPorAnio.push({
             colValor,
             colPorcentaje,
-            porcentajeRojo,
-            porcentajeAmarillo,
-            porcentajeVerde,
+            porcentajeNoValida,
+            porcentajeValida,
         });
     }
 
-    // Crear las filas de resumen una sola vez para todos los años
+    // Crear las filas de resumen una sola vez para todos los años (No válida / Válida)
     const filaResumenTitulo = sheet.addRow([]);
     const filaRoja = sheet.addRow([]);
-    const filaAmarilla = sheet.addRow([]);
     const filaVerde = sheet.addRow([]);
 
     // Aplicar los valores a cada columna
@@ -509,10 +543,10 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
         filaResumenTitulo.getCell(stats.colValor).font = { bold: true };
         filaResumenTitulo.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
 
-        // Fila roja
-        filaRoja.getCell(stats.colValor).value = t('ejecucionReducida');
+        // Fila roja (No válida)
+        filaRoja.getCell(stats.colValor).value = t('noValida');
         filaRoja.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
-        filaRoja.getCell(stats.colPorcentaje).value = `${stats.porcentajeRojo}%`;
+        filaRoja.getCell(stats.colPorcentaje).value = `${stats.porcentajeNoValida}%`;
         filaRoja.getCell(stats.colPorcentaje).fill = {
             type: 'pattern',
             pattern: 'solid',
@@ -520,21 +554,10 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
         };
         filaRoja.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
 
-        // Fila amarilla
-        filaAmarilla.getCell(stats.colValor).value = t('ejecucionMedia');
-        filaAmarilla.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
-        filaAmarilla.getCell(stats.colPorcentaje).value = `${stats.porcentajeAmarillo}%`;
-        filaAmarilla.getCell(stats.colPorcentaje).fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFFEB9C' },
-        };
-        filaAmarilla.getCell(stats.colPorcentaje).alignment = { horizontal: 'center', vertical: 'middle' };
-
-        // Fila verde
-        filaVerde.getCell(stats.colValor).value = t('ejecucionObjetiva');
+        // Fila verde (Válida)
+        filaVerde.getCell(stats.colValor).value = t('valida') || 'Válida';
         filaVerde.getCell(stats.colValor).alignment = { horizontal: 'right', vertical: 'middle' };
-        filaVerde.getCell(stats.colPorcentaje).value = `${stats.porcentajeVerde}%`;
+        filaVerde.getCell(stats.colPorcentaje).value = `${stats.porcentajeValida}%`;
         filaVerde.getCell(stats.colPorcentaje).fill = {
             type: 'pattern',
             pattern: 'solid',
