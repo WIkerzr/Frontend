@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { useYear } from '../../../contexts/DatosAnualContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import IconEye from '../../../components/Icon/IconEye';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { DatosAccion } from '../../../types/TipadoAccion';
-import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 import { LlamadaBBDDEjesRegion } from '../../../components/Utils/data/dataEjes';
-import { useRegionContext } from '../../../contexts/RegionContext';
-import { Ejes } from '../../../types/tipadoPlan';
 import { formateaConCeroDelante, TextoSegunIdioma } from '../../../components/Utils/utils';
-
+import { useYear } from '../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { DatosAccion } from '../../../types/TipadoAccion';
+import { Ejes } from '../../../types/tipadoPlan';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 const Index: React.FC = () => {
     const navigate = useNavigate();
     const { regionSeleccionada } = useRegionContext();
@@ -150,6 +149,7 @@ const Index: React.FC = () => {
                         {fila.map((accion: DatosAccion) => {
                             let editable = editarPlan || editarMemoria;
                             let colorAccion = 'bg-white';
+                            let esAccionParticipante = false;
 
                             if (accion.accionCompartida?.regionLider) {
                                 const regionLider = formateaConCeroDelante(
@@ -158,11 +158,13 @@ const Index: React.FC = () => {
                                 if (regionLider === regionSeleccionada) {
                                     colorAccion = 'bg-teal-100';
                                     editable = editable ? true : false;
+                                    esAccionParticipante = false;
                                 }
 
                                 if (regionLider != regionSeleccionada) {
                                     colorAccion = 'bg-gray-300';
                                     editable = false;
+                                    esAccionParticipante = true;
                                 }
                             }
                             return (
@@ -183,6 +185,8 @@ const Index: React.FC = () => {
                                         </span>
                                     )}
                                     <div className="flex gap-2 justify-end mt-2">
+                                        {esAccionParticipante && editarPlan && <ModalAccion acciones={'AccionesAccesorias'} file={accion} />}
+
                                         <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => handleEdit(accion)}>
                                             {editable ? <IconPencil /> : <IconEye />}
                                         </button>

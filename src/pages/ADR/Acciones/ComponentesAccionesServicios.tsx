@@ -1,25 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { useEffect, useRef, useState } from 'react';
-import IconPencil from '../../../components/Icon/IconPencil';
-import IconTrash from '../../../components/Icon/IconTrash';
+import Tippy from '@tippyjs/react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { DatosAccion } from '../../../types/TipadoAccion';
-import { TiposAccion, useYear } from '../../../contexts/DatosAnualContext';
 import IconEye from '../../../components/Icon/IconEye';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
+import IconPencil from '../../../components/Icon/IconPencil';
+import IconPlus from '../../../components/Icon/IconPlus';
+import IconRefresh from '../../../components/Icon/IconRefresh';
+import IconTrash from '../../../components/Icon/IconTrash';
+import { Loading } from '../../../components/Utils/animations';
+import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../components/Utils/data/dataEjes';
+import MyEditableDropdown, { SelectorEje } from '../../../components/Utils/inputs';
 import { NewModal, PrintFechaTexto, TextoSegunIdioma, formateaConCeroDelante, obtenerFechaLlamada } from '../../../components/Utils/utils';
+import { TiposAccion, useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import MyEditableDropdown, { SelectorEje } from '../../../components/Utils/inputs';
-import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../components/Utils/data/dataEjes';
-import { Loading } from '../../../components/Utils/animations';
+import { DatosAccion } from '../../../types/TipadoAccion';
 import { Ejes, EjesBBDD } from '../../../types/tipadoPlan';
-import React from 'react';
-import Tippy from '@tippyjs/react';
-import IconRefresh from '../../../components/Icon/IconRefresh';
 import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../EjesHelpers';
 import { VerificadorIndicadores, VerificarAccionFinal } from './EditarAccion/EditarAccionComponent';
@@ -27,13 +27,14 @@ import { VerificadorIndicadores, VerificarAccionFinal } from './EditarAccion/Edi
 interface ModalAccionProps {
     acciones: TiposAccion;
     numAcciones?: number[];
+    file?: DatosAccion;
 }
 
-export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones }) => {
+export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones, file }) => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
-
+    const accionCompartida = file ? true : false;
     const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
 
     const { regionSeleccionada } = useRegionContext();
@@ -170,13 +171,32 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
         }
     }, [yearData]);
 
+    useEffect(() => {
+        if (showModal && file && file.ejeId) {
+            let idEje = '0';
+            if (file.ejeEs) {
+                idEje = yearData.plan.ejes.find((eje) => eje.NameEs === file.ejeEs)?.Id || '0';
+            }
+            if (file.ejeEu) {
+                if ((yearData.plan.ejes.find((eje) => eje.NameEu === file.ejeEu)?.Id || '0') !== idEje) {
+                    idEje = file.ejeId;
+                }
+            }
+
+            setIdEjeSeleccionado(idEje);
+            setNuevaAccion(file.accion);
+            setNuevaLineaActuaccion(file.lineaActuaccion);
+            setNuevaPlurianual(file.plurianual);
+        }
+    }, [showModal]);
+
     const handleNuevaAccion = () => {
         if (acciones == 'Acciones' ? !nuevaAccion.trim() || !nuevaLineaActuaccion.trim() : !nuevaAccion.trim()) {
             setInputError(true);
             return;
         }
 
-        AgregarAccion(acciones, `${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual);
+        AgregarAccion(acciones, `${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual, file ? true : undefined);
 
         setIdEjeSeleccionado('');
         setNuevaAccion('');
@@ -202,13 +222,18 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
                 }}
             />
 
-            {showBTNModal && (
-                <div className="flex justify-center">
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
-                        {t('anadirAccion')}
+            {showBTNModal &&
+                (!accionCompartida ? (
+                    <div className="flex justify-center">
+                        <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition" onClick={() => setShowModal(true)}>
+                            {t('anadirAccion')}
+                        </button>
+                    </div>
+                ) : (
+                    <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setShowModal(true)}>
+                        <IconPlus />
                     </button>
-                </div>
-            )}
+                ))}
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('newAccion')}>
                 <div className="space-y-5">
                     <SelectorEje
@@ -237,6 +262,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones 
                         <div style={{ position: 'relative', minHeight: 40 }}>
                             <DropdownLineaActuaccion
                                 setNuevaLineaActuaccion={setNuevaLineaActuaccion}
+                                lineaActuaccion={accionCompartida ? nuevaLineaActuaccion : undefined}
                                 idEjeSeleccionado={`${idEjeSeleccionado}`}
                                 ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                 tipoAccion={acciones}
@@ -382,6 +408,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                 {accionesMostradas.map((accion) => {
                     let editable = editarPlan || editarMemoria;
                     let colorAccion = 'bg-white';
+                    let esAccionParticipante = false;
 
                     if (accion.accionCompartida?.regionLider) {
                         const regionLider = formateaConCeroDelante(
@@ -390,11 +417,13 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                         if (regionLider === regionSeleccionada) {
                             colorAccion = 'bg-teal-100';
                             editable = editable ? true : false;
+                            esAccionParticipante = false;
                         }
 
                         if (regionLider != regionSeleccionada) {
                             colorAccion = 'bg-gray-300';
                             editable = false;
+                            esAccionParticipante = true;
                         }
                     }
                     if (accion.id === accionNueva) {
@@ -415,6 +444,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                         handleEdit(accion);
                                     }}
                                 >
+                                    {esAccionParticipante && <IconPlus />}
                                     {editable ? <IconPencil /> : <IconEye />}
                                 </button>
                                 <div>

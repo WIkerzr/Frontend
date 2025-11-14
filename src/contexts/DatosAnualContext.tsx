@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { createContext, useContext, useState, useEffect, ReactNode, JSX } from 'react';
-import { EjeBBDD, EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
+import { isEqual } from 'lodash';
+import { createContext, JSX, ReactNode, useContext, useEffect, useState } from 'react';
+import { MessageSetters } from '../components/Utils/data/dataEjes';
+import { RegionInterface } from '../components/Utils/data/getRegiones';
+import { LlamadasBBDD } from '../components/Utils/data/utilsData';
+import { accionesTransformadasBackAFront, accionTransformadaBackAFront, checkData, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
+import { convertirArrayACadena, ConvertirIndicadoresServicioAAccion, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
+import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
+import { LoadingOverlayPersonalizada } from '../pages/Configuracion/Users/componentes';
+import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
 import {
     DatosAccion,
     DatosAccionDTO,
@@ -15,17 +24,8 @@ import {
     IndicadorRealizacionAccionDTO,
     IndicadorResultadoAccionDTO,
 } from '../types/TipadoAccion';
-import { Estado, isEstado, Servicios } from '../types/GeneralTypes';
-import { isEqual } from 'lodash';
-import { convertirArrayACadena, ConvertirIndicadoresServicioAAccion, formateaConCeroDelante, obtenerFechaLlamada } from '../components/Utils/utils';
-import { LlamadasBBDD } from '../components/Utils/data/utilsData';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../types/Indicadores';
+import { EjeBBDD, EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, servicioIniciadoVacio, YearData, yearIniciadoVacio } from '../types/tipadoPlan';
 import { useRegionContext } from './RegionContext';
-import { MessageSetters } from '../components/Utils/data/dataEjes';
-import { accionesTransformadasBackAFront, accionTransformadaBackAFront, checkData, construirYearData, convertirGeneralOperationADR } from '../components/Utils/data/YearData/yearDataTransformData';
-import { ObtenerAccionDeEje } from '../components/Utils/yeardataUtils';
-import { LoadingOverlayPersonalizada } from '../pages/Configuracion/Users/componentes';
-import { RegionInterface } from '../components/Utils/data/getRegiones';
 
 export type TiposAccion = 'Acciones' | 'AccionesAccesorias';
 interface YearContextType {
@@ -47,7 +47,7 @@ interface YearContextType {
     ProcesarYearData: (data: any, todasLasAcciones: boolean, retornarDatos: boolean, datosModificadorCompartidos: EjeBBDD2[], hacerSet?: boolean) => void;
     loadingYearData: boolean;
     GuardarEdicionServicio: () => void;
-    AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => void;
+    AgregarAccion: (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean, accionDuplicada?: boolean, idAccionOriginal?: string) => void;
     GuardarLaEdicionAccion: (tipo: TiposAccion, setLoading: React.Dispatch<React.SetStateAction<boolean>>, message: MessageSetters) => void;
     EliminarAccion: (tipo: TiposAccion, idEje: string, idAccion: string) => void;
     AgregarServicio: () => void;
@@ -425,7 +425,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         setDatosEditandoServicio(null);
     };
 
-    const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean) => {
+    const AgregarAccion = (tipo: TiposAccion, idEje: string, nuevaAccion: string, nuevaLineaActuaccion: string, plurianual: boolean, accionDuplicada?: boolean, idAccionOriginal?: string) => {
         let ejeSeleccionado: Ejes | undefined = undefined;
         let accionPrioritaria = false;
         if (tipo === 'AccionesAccesorias') {
@@ -439,9 +439,15 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         if (ejeSeleccionado === undefined) return;
 
         setSelectedId(idEje);
+
+        const endpoint =
+            accionDuplicada && idAccionOriginal
+                ? `yearData/${yearData.plan.id}/${idEje}/duplicateAction/${idAccionOriginal}/${tipo === 'AccionesAccesorias' ? 'proyectos' : 'accion'}`
+                : `yearData/${yearData.plan.id}/${idEje}/newAction/${tipo === 'AccionesAccesorias' ? 'proyectos' : 'accion'}`;
+
         LlamadasBBDD({
             method: 'POST',
-            url: `yearData/${yearData.plan.id}/${idEje}/newAction/${tipo === 'AccionesAccesorias' ? 'proyectos' : 'accion'}`,
+            url: endpoint,
             setLoading: setLoadingYearData,
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
             setErrorMessage: setErrorMessageYearData,
@@ -459,67 +465,67 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     ejeEs: ejeSeleccionado!.NameEs,
                     ejeEu: ejeSeleccionado!.NameEu,
                     lineaActuaccion: nuevaLineaActuaccion,
+                    accionDuplicadaDeId: accionDuplicada ? idAccionOriginal : undefined,
                     plurianual,
+                    ...((response as any).AccionDuplicadaDeId && { accionDuplicadaDeId: (response as any).AccionDuplicadaDeId }),
                 };
-                if (tipo === 'Acciones') {
-                    const actualizarEjes = (ejes: Ejes[]) =>
-                        ejes.map((eje) =>
-                            eje.Id === ejeSeleccionado!.Id
-                                ? {
-                                      ...eje,
-                                      acciones: [...(eje.acciones || []), nuevaAccionObj],
-                                  }
-                                : eje
-                        );
-                    setYearData({
-                        ...yearData,
-                        plan: {
-                            ...yearData.plan,
-                            ejesPrioritarios: actualizarEjes(yearData.plan.ejesPrioritarios),
-                            ejesRestantes: yearData.plan.ejesRestantes ? actualizarEjes(yearData.plan.ejesRestantes) : [],
-                            //ejes: tipo === 'AccionesAccesorias' ? actualizarEjes(yearData.plan.ejes) : yearData.plan.ejes,
-                        },
-                    });
-                } else {
-                    const actualizarEjesAccesoria = (ejes: Ejes[]) =>
-                        ejes.map((eje) =>
-                            eje.Id === `${response.IdEje}`
-                                ? {
-                                      ...eje,
-                                      IsAccessory: true,
-                                      acciones: [...(eje.acciones || []), nuevaAccionObj],
-                                  }
-                                : eje
-                        );
-                    let nuevosEjesRestantes: Ejes[];
-                    if (yearData.plan.ejesRestantes!.find((e) => `${e.NameEs}` === ejeSeleccionado!.NameEs)) {
-                        setYearData({
-                            ...yearData,
-                            plan: {
-                                ...yearData.plan,
-                                ejesRestantes: yearData.plan.ejesRestantes ? actualizarEjesAccesoria(yearData.plan.ejesRestantes) : [],
-                            },
-                        });
-                    } else {
-                        const nuevoEje: Ejes = {
-                            ...ejeSeleccionado!,
-                            Id: `${response.IdEje}`,
-                            IsAccessory: true,
-                            acciones: [nuevaAccionObj],
-                            LineasActuaccion: ejeSeleccionado!.LineasActuaccion ?? [],
+                // Actualización funcional para evitar usar estado obsoleto y sincronizar todas las colecciones
+                setYearData((prev) => {
+                    const planPrev = prev.plan;
+                    if (tipo === 'Acciones') {
+                        const ejesPrioritarios = planPrev.ejesPrioritarios.map((eje) => (eje.Id === ejeSeleccionado!.Id ? { ...eje, acciones: [...(eje.acciones || []), nuevaAccionObj] } : eje));
+                        // Mantener ejesRestantes igual; podrían contener el mismo Id si se comparte, añadimos también si corresponde
+                        const ejesRestantes = planPrev.ejesRestantes
+                            ? planPrev.ejesRestantes.map((eje) => (eje.Id === ejeSeleccionado!.Id ? { ...eje, acciones: [...(eje.acciones || []), nuevaAccionObj] } : eje))
+                            : [];
+                        const ejesGlobales = planPrev.ejes ? planPrev.ejes.map((eje) => (eje.Id === ejeSeleccionado!.Id ? { ...eje, acciones: [...(eje.acciones || []), nuevaAccionObj] } : eje)) : [];
+                        const nuevoPlan = {
+                            ...planPrev,
+                            ejesPrioritarios,
+                            ejesRestantes,
+                            ejes: ejesGlobales,
                         };
-
-                        nuevosEjesRestantes = [...(yearData.plan.ejesRestantes || []), nuevoEje];
-
-                        setYearData({
-                            ...yearData,
-                            plan: {
-                                ...yearData.plan,
-                                ejesRestantes: nuevosEjesRestantes,
-                            },
-                        });
+                        const nuevoYearData = { ...prev, plan: nuevoPlan };
+                        sessionStorage.setItem('DataYear', JSON.stringify(nuevoYearData));
+                        return nuevoYearData;
+                    } else {
+                        // Acciones accesorias
+                        const idRespuestaEje = `${response.IdEje}`;
+                        const existeEnRestantes = planPrev.ejesRestantes?.some((e) => `${e.Id}` === idRespuestaEje);
+                        let ejesRestantes: Ejes[] = planPrev.ejesRestantes ? [...planPrev.ejesRestantes] : [];
+                        if (existeEnRestantes) {
+                            ejesRestantes = ejesRestantes.map((eje) => (`${eje.Id}` === idRespuestaEje ? { ...eje, IsAccessory: true, acciones: [...(eje.acciones || []), nuevaAccionObj] } : eje));
+                        } else {
+                            const nuevoEje: Ejes = {
+                                ...ejeSeleccionado!,
+                                Id: idRespuestaEje,
+                                IsAccessory: true,
+                                IsPrioritarios: false,
+                                acciones: [nuevaAccionObj],
+                                LineasActuaccion: ejeSeleccionado!.LineasActuaccion ?? [],
+                            };
+                            ejesRestantes = [...ejesRestantes, nuevoEje];
+                        }
+                        // También actualizar colección general ejes si existe ese Id
+                        const ejesGlobales = planPrev.ejes
+                            ? (() => {
+                                  const existeGlobal = planPrev.ejes.some((e) => `${e.Id}` === idRespuestaEje);
+                                  if (existeGlobal) {
+                                      return planPrev.ejes.map((eje) => (`${eje.Id}` === idRespuestaEje ? { ...eje, acciones: [...(eje.acciones || []), nuevaAccionObj] } : eje));
+                                  }
+                                  return [...planPrev.ejes, ejesRestantes[ejesRestantes.length - 1]];
+                              })()
+                            : ejesRestantes;
+                        const nuevoPlan = {
+                            ...planPrev,
+                            ejesRestantes,
+                            ejes: ejesGlobales,
+                        };
+                        const nuevoYearData = { ...prev, plan: nuevoPlan };
+                        sessionStorage.setItem('DataYear', JSON.stringify(nuevoYearData));
+                        return nuevoYearData;
                     }
-                }
+                });
             },
         });
     };
