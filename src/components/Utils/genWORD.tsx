@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { LoadingOverlayPersonalizada } from '../../pages/Configuracion/Users/componentes';
 import { convertirPlantillaAFileValidado, onSuccessFillFiles, plantillasOriginales } from '../../pages/Configuracion/Plantillas';
 import { SaberLogoEnGenWORD } from '../Layouts/LayoutsComponents';
-
+import { TraductorAutomaticoNAMES } from './utils';
 // Helpers para insertar/reemplazar imágenes en el paquete .docx (ZIP)
 const getNextRId = (relsXml: string) => {
     const regex = /rId(\d+)/g;
@@ -100,12 +100,12 @@ export const GeneracionDelDocumentoWordPlan = async (
             return ejes?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
                     accion: `${nivel}.${contAccion++}: ${accion.accion ?? ''}`,
-                    eje: item.NameEs ?? '',
+                    eje: TraductorAutomaticoNAMES(item) ?? item.NameEs ?? '',
                     lineaActuaccion: accion.lineaActuaccion ?? '',
                     ejecutora: Ejecutoras(accion.datosPlan?.ejecutora) ?? '',
                     implicadas: accion.datosPlan?.implicadas ?? '',
                     comarcal: accion.datosPlan?.comarcal ?? '',
-                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : ` `,
+                    supracomarcal: accion.datosPlan?.supracomarcal ?? '',
                     plurianual: accion.plurianual ? t('Si') : t('No'),
                     oAccion: accion.datosPlan?.oAccion ?? '',
                     dAccion: accion.datosPlan?.dAccion ?? '',
@@ -197,13 +197,15 @@ export const GeneracionDelDocumentoWordPlan = async (
             //2.
             tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks ?? '',
             indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
-                nombre: item.nameEs ?? '',
+                nombre: TraductorAutomaticoNAMES(item) ?? item.nameEs ?? '',
                 value: item.value ?? '',
             })),
             //3.
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
                 nombre: `S. ${index + 1}.- ${item.nombre ?? ''}`,
                 descripcion: item.descripcion ?? '',
+                ejes: TraductorAutomaticoNAMES(datos.plan.ejes.find((eje) => eje.Id === `${item.idEje}`)) ?? '',
+                supracomarcal: item.supraComarcal ?? '',
                 indicadoresRealizacion: item.indicadores
                     .filter((iR: IndicadoresServicios) => iR.tipo === 'realizacion')
                     .map((iR) => ({
@@ -220,13 +222,13 @@ export const GeneracionDelDocumentoWordPlan = async (
             //4.1
             proceso: datos.plan.proceso ?? '',
             //4.2
-            eje1: accionesPrioritarias[0]?.NameEs ?? '',
-            eje2: accionesPrioritarias[1] ? accionesPrioritarias[1].NameEs ?? '' : '',
-            eje3: accionesPrioritarias[2] ? accionesPrioritarias[2].NameEs ?? '' : '',
+            eje1: accionesPrioritarias[0] ? TraductorAutomaticoNAMES(accionesPrioritarias[0]) ?? '' : '',
+            eje2: accionesPrioritarias[1] ? TraductorAutomaticoNAMES(accionesPrioritarias[1]) ?? '' : '',
+            eje3: accionesPrioritarias[2] ? TraductorAutomaticoNAMES(accionesPrioritarias[2]) ?? '' : '',
             //4.3
             acciones: accionesPrioritarias?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
-                    nombreEje: item.NameEs ?? '',
+                    nombreEje: TraductorAutomaticoNAMES(item) ?? '',
                     lineaActuaccion: accion.lineaActuaccion ?? '',
                     accion: accion.accion ?? '',
                 }))
@@ -407,12 +409,12 @@ export const GeneracionDelDocumentoWordMemoria = async (
             return ejes?.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
                     accion: `${nivel}.${contAccion++}: ${accion.accion ?? ''}`,
-                    eje: item.NameEs ?? '',
+                    eje: TraductorAutomaticoNAMES(item) ?? '',
                     lineaActuaccion: accion.lineaActuaccion ?? '',
                     ejecutora: Ejecutoras(accion.datosPlan?.ejecutora) ?? '',
                     implicadas: accion.datosPlan?.implicadas ?? '',
                     comarcal: accion.datosPlan?.comarcal ?? '',
-                    supracomarcal: accion.datosPlan?.supracomarcal ? accion.datosPlan?.supracomarcal : ` `,
+                    supracomarcal: accion.datosPlan?.supracomarcal ?? '',
                     plurianual: accion.plurianual ? t('Si') : t('No'),
                     situacion: accion.datosMemoria?.sActual ?? '',
                     oAccion: accion.datosPlan?.oAccion ?? '',
@@ -505,7 +507,7 @@ export const GeneracionDelDocumentoWordMemoria = async (
             //3.
             tareasInternasGestion: datos.plan.generalOperationADR.adrInternalTasks ?? '',
             indicadoresOperativos: datos.plan.generalOperationADR.operationalIndicators.map((item: OperationalIndicators) => ({
-                nombre: item.nameEs ?? '',
+                nombre: TraductorAutomaticoNAMES(item) ?? '',
                 value: item.value ?? '',
                 valueAlcanzado: item.valueAchieved ?? '',
             })),
@@ -515,6 +517,8 @@ export const GeneracionDelDocumentoWordMemoria = async (
             fichasServicio: datos.servicios?.map((item: Servicios, index) => ({
                 nombre: `S. ${index + 1}.- ${item.nombre ?? ''}`,
                 descripcion: item.descripcion ?? '',
+                ejes: TraductorAutomaticoNAMES(datos.plan.ejes.find((eje) => eje.Id === `${item.idEje}`)) ?? '',
+                supracomarcal: item.supraComarcal ?? '',
                 indicadoresRealizacion: item.indicadores
                     .filter((iR: IndicadoresServicios) => iR.tipo === 'realizacion')
                     .map((iR) => ({
@@ -535,13 +539,13 @@ export const GeneracionDelDocumentoWordMemoria = async (
             //5.1
             proceso: datos.plan.proceso ?? '',
             //5.2
-            eje1: accionesPrioritarias[0]?.NameEs ?? '',
-            eje2: accionesPrioritarias[1] ? accionesPrioritarias[1].NameEs ?? '' : '',
-            eje3: accionesPrioritarias[2] ? accionesPrioritarias[2].NameEs ?? '' : '',
+            eje1: accionesPrioritarias[0] ? TraductorAutomaticoNAMES(accionesPrioritarias[0]) ?? '' : '',
+            eje2: accionesPrioritarias[1] ? TraductorAutomaticoNAMES(accionesPrioritarias[1]) ?? '' : '',
+            eje3: accionesPrioritarias[2] ? TraductorAutomaticoNAMES(accionesPrioritarias[2]) ?? '' : '',
             //5.3
             acciones: accionesPrioritarias.flatMap((item: Ejes) =>
                 item.acciones.map((accion: DatosAccion) => ({
-                    nombreEje: item.NameEs ?? '',
+                    nombreEje: TraductorAutomaticoNAMES(item) ?? '',
                     lineaActuaccion: accion.lineaActuaccion ?? '',
                     accion: accion.accion ?? '',
                     situacion: accion.datosMemoria?.sActual ?? '',

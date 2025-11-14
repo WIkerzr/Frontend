@@ -838,3 +838,15 @@ export function downloadFile(file: File) {
         a.remove();
     }, 500);
 }
+
+export function TraductorAutomaticoNAMES<T extends { NameEs?: string; NameEu?: string; nameEs?: string; nameEu?: string }>(objeto?: T | null, language?: string): string {
+    const lang = language ?? i18n.language;
+    if (!objeto) return '';
+
+    const pick = (preferred: 'Es' | 'Eu') => {
+        if (preferred === 'Es') return (objeto as any).NameEs ?? (objeto as any).nameEs ?? (objeto as any).NameEu ?? (objeto as any).nameEu ?? '';
+        return (objeto as any).NameEu ?? (objeto as any).nameEu ?? (objeto as any).NameEs ?? (objeto as any).nameEs ?? '';
+    };
+
+    return lang === 'eu' ? pick('Eu') : pick('Es');
+}
