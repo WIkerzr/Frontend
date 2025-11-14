@@ -25,7 +25,7 @@ interface UserDataFormProps {
 
 const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChange, errorMessage, setErrorMessage, successMessage, fadeOut, roleDisabled = true, isNewUser, title = true }) => {
     const { t, i18n } = useTranslation();
-    const { regiones } = useRegionContext();
+    const { regiones, provincias } = useRegionContext();
     const [regionSeleccionada, setRegionSeleccionada] = useState(regiones.find((r) => `${r.RegionId}` === formateaConCeroDelante(`${userData.ambit}`)) || null);
     const [conditional, setConditional] = useState<boolean>(false);
     const [datosUsuario, setDatosUsuario] = useState(userData);
@@ -33,11 +33,13 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
     const [email, setEmail] = useState<string[]>([]);
     const { users } = useUsers();
 
+    const [provinciaSeleccionada, setProvinciaSeleccionada] = useState(provincias.find((p) => `${p.ProvinceId}` === formateaConCeroDelante(`${userData.ambit}`)) || null);
+
     useEffect(() => {
         if ((user!.role as string) === 'HAZI') {
             setEmail(users.map((usuario) => usuario.email));
         }
-    }, []);
+    }, [datosUsuario]);
 
     useEffect(() => {
         setDatosUsuario(userData);
@@ -90,8 +92,20 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (e.target.value !== 'HAZI') {
-            userData.RegionName = '';
-            userData.ambit = '';
+            const eventoRegionName = {
+                target: {
+                    name: 'RegionName',
+                    value: '',
+                },
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+            const eventoAmbit = {
+                target: {
+                    name: 'ambit',
+                    value: '',
+                },
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+            onChange(eventoRegionName);
+            onChange(eventoAmbit);
             setRegionSeleccionada(null);
         }
         onChange(e);
@@ -149,7 +163,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             <option value="DF">{t('df')}</option>
                         </select>
                     </div>
-                    {userData.role === 'ADR' || userData.role === 'adr' || userData.role === 'DF' || userData.role === 'df' ? (
+                    {userData.role === 'ADR' || userData.role === 'adr' ? (
                         <div>
                             <label className="block text-sm font-medium mb-1">{t('comarca')}</label>
                             <select
@@ -181,6 +195,38 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                             </select>
                         </div>
                     ) : null}
+                    {(userData.role === 'DF' || userData.role === 'df') && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('Provincias')}</label>
+                            <select
+                                className="form-select min-w-max w-full"
+                                style={{ minWidth: 'calc(100% + 10px)' }}
+                                value={i18n.language === 'eu' ? provinciaSeleccionada?.NameEu : provinciaSeleccionada?.NameEs}
+                                name="RegionName"
+                                onChange={(e) => {
+                                    const provinciaIdSeleccionada = e.target.value;
+                                    const provincia = provincias.find((p) => (i18n.language === 'eu' ? p.NameEu : p.NameEs) === provinciaIdSeleccionada);
+                                    setProvinciaSeleccionada(provincia!);
+
+                                    const evento = {
+                                        target: {
+                                            name: 'ambit',
+                                            value: provincia?.ProvinceId,
+                                        },
+                                    };
+
+                                    onChange(evento as unknown as React.ChangeEvent<HTMLInputElement>);
+                                }}
+                            >
+                                <option value="notSelect">{t('sinSeleccionar')}</option>
+                                {provincias.map((provincia) => (
+                                    <option key={provincia.ProvinceId} value={i18n.language === 'eu' ? provincia.NameEu : provincia.NameEs}>
+                                        {i18n.language === 'eu' ? provincia.NameEu : provincia.NameEs}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                 </div>
                 {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
                 {successMessage && (

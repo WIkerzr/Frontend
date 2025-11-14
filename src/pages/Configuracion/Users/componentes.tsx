@@ -142,7 +142,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                 [name]: value,
             };
 
-            if (name === 'role' && value !== 'adr') {
+            if (name === 'role' && String(value).toUpperCase() !== 'ADR') {
+                // Si el rol cambia a otro que no sea ADR, limpiamos ambit
                 updatedData.ambit = '';
             }
 
@@ -186,8 +187,10 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                             secondSurname: UserData.secondSurname === '' ? '-' : UserData.secondSurname,
                             role: UserData.role,
                             email: UserData.email,
-                            ambit: UserData.role === 'ADR' ? UserData.ambit : '-',
-                            RegionId: UserData.role === 'ADR' ? formateaConCeroDelante(`${UserData.ambit}`) : null,
+                            // Enviar ambit tal cual (puede ser RegionId para ADR o ProvinceId para DF)
+                            ambit: UserData.ambit || '-',
+                            // Enviar RegionId siempre (se normaliza si existe), backend decide cómo interpretarlo
+                            RegionId: UserData.ambit ? formateaConCeroDelante(`${UserData.ambit}`) : null,
                             id: UserData.id,
                             status: true,
                         },
@@ -214,8 +217,8 @@ export const UsersDateModalLogic: React.FC<UserDataProps> = ({ userData, accion,
                         secondSurname: UserData.secondSurname === '' ? '-' : UserData.secondSurname,
                         role: UserData.role,
                         email: UserData.email,
-                        ambit: UserData.role === 'ADR' ? UserData.ambit : '-',
-                        RegionId: UserData.role === 'ADR' ? formateaConCeroDelante(`${UserData.ambit}`) : null,
+                        ambit: UserData.ambit || '-',
+                        RegionId: UserData.ambit ? formateaConCeroDelante(`${UserData.ambit}`) : null,
                         id: UserData.id,
                         status: true,
                     },

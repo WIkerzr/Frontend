@@ -200,9 +200,20 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
     const { i18n, t } = useTranslation();
     const { user } = useUser();
     const role: UserRole = user!.role as UserRole;
-    const { regiones, regionSeleccionada, setRegionSeleccionada } = useRegionContext();
+    const { regiones, regionSeleccionada, setRegionSeleccionada, provincias } = useRegionContext();
 
     const getRegionName = (region: { NameEs: string; NameEu: string }) => (i18n.language === 'eu' ? region.NameEu : region.NameEs);
+
+    const regionesFiltradas = useMemo(() => {
+        if (role.toUpperCase() === 'DF' && user?.ambit) {
+            const provinciaUsuario = provincias.find((p) => `${p.ProvinceId}` === `${formateaConCeroDelante(user.ambit as string | number)}`);
+            if (provinciaUsuario && provinciaUsuario.RegionIds) {
+                const regionIdsSet = new Set(provinciaUsuario.RegionIds.map((id) => String(id)));
+                return regiones.filter((r) => regionIdsSet.has(String(r.RegionId)));
+            }
+        }
+        return regiones;
+    }, [role, user?.ambit, provincias, regiones]);
 
     useEffect(() => {
         const savedRegion = sessionStorage.getItem('regionSeleccionada');
@@ -234,7 +245,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({ disabled, header = f
                     onChange={handleChange}
                 >
                     <option value="notSelect">{t('sinSeleccionar')}</option>
-                    {regiones.map((region) => (
+                    {regionesFiltradas.map((region) => (
                         <option key={region.RegionId} value={region.RegionId}>
                             {getRegionName(region)}
                         </option>
@@ -546,7 +557,7 @@ import { SingleValue } from 'react-select';
 import { EjesBBDD } from '../../types/tipadoPlan';
 import { TiposAccion } from '../../contexts/DatosAnualContext';
 import { Informes, tiposInformes } from '../../pages/Configuracion/Informes/Informes';
-import { Boton, downloadFile } from './utils';
+import { Boton, downloadFile, formateaConCeroDelante } from './utils';
 interface OptionType {
     value: string;
     label: string;

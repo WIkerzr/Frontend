@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { GetRegionesResponse, RegionInterface } from '../components/Utils/data/getRegiones';
+import { GetRegionesResponse, RegionInterface, GetProvinceResponse, ProvinceInterface } from '../components/Utils/data/getRegiones';
 import { useUser } from './UserContext';
 import { InitialDataResponse, yearIniciadoVacio } from '../types/tipadoPlan';
 import { formateaConCeroDelante } from '../components/Utils/utils';
@@ -14,6 +14,7 @@ interface CodRegiones {
 
 type RegionContextType = {
     regiones: RegionInterface[];
+    provincias: ProvinceInterface[];
     regionActual?: RegionInterface;
     regionData: InitialDataResponse | undefined;
     codRegiones: CodRegiones;
@@ -26,6 +27,7 @@ type RegionContextType = {
 
 const RegionContext = createContext<RegionContextType>({
     regiones: [],
+    provincias: [],
     regionActual: { RegionId: '', NameEs: '', NameEu: '' },
     regionData: undefined,
     codRegiones: {},
@@ -50,6 +52,14 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
         const saved = sessionStorage.getItem('regiones');
         try {
             return saved ? (JSON.parse(saved) as RegionInterface[]) : [];
+        } catch {
+            return [];
+        }
+    });
+    const [provincias, setProvincias] = useState<ProvinceInterface[]>(() => {
+        const saved = sessionStorage.getItem('provincias');
+        try {
+            return saved ? (JSON.parse(saved) as ProvinceInterface[]) : [];
         } catch {
             return [];
         }
@@ -107,6 +117,21 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!token) return;
         if (user) {
+            if (user.role === 'HAZI' || user.role === 'DF') {
+                const provinciasStr = sessionStorage.getItem('provincias');
+                if (!provinciasStr) {
+                    LlamadasBBDD({
+                        method: 'GET',
+                        url: `/provinces`,
+                        setLoading: setLoading,
+                        onSuccess: (data: GetProvinceResponse) => {
+                            setProvincias(data.data);
+                            sessionStorage.setItem('provincias', JSON.stringify(data.data));
+                        },
+                    });
+                }
+            }
+
             const regionesStr = sessionStorage.getItem('regiones');
             if (!regionesStr) {
                 LlamadasBBDD({
@@ -145,6 +170,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
         <RegionContext.Provider
             value={{
                 regiones,
+                provincias,
                 regionActual,
                 regionData,
                 codRegiones,

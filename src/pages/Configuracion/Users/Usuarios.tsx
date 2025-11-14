@@ -5,6 +5,8 @@ import { useUsers } from '../../../contexts/UsersContext';
 import Tippy from '@tippyjs/react';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { useTranslation } from 'react-i18next';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { formateaConCeroDelante } from '../../../components/Utils/utils';
 import { useSelector } from 'react-redux';
 import IconRefresh from '../../../components/Icon/IconRefresh';
 import { IRootState } from '../../../store';
@@ -13,7 +15,8 @@ import { PrintFecha } from '../../../components/Utils/utils';
 
 const Index = () => {
     const { users, setUsers, loading, llamadaBBDDUsers, fechaUltimoActualizadoBBDD, errorMessage, setErrorMessage } = useUsers();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const { provincias } = useRegionContext();
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
     const [refres, setRefres] = useState(false);
 
@@ -165,7 +168,22 @@ const Index = () => {
                                                     return ROLE_MAP[roleKey] || roleKey;
                                                 },
                                             },
-                                            { accessor: 'RegionName', title: t('ambit'), sortable: true },
+                                            {
+                                                accessor: 'RegionName',
+                                                title: t('ambit'),
+                                                sortable: true,
+                                                render: (row) => {
+                                                    const roleKey = String(row.role || '').toUpperCase();
+                                                    if (roleKey === 'DF') {
+                                                        const ambitRaw = String(row.RegionId ?? '');
+                                                        const padded = ambitRaw.length < 10 ? formateaConCeroDelante(ambitRaw) : ambitRaw;
+                                                        const provincia = provincias.find((p) => p.ProvinceId === ambitRaw || p.ProvinceId === padded);
+                                                        if (provincia) return i18n.language === 'eu' ? provincia.NameEu : provincia.NameEs;
+                                                        return row.RegionName || '';
+                                                    }
+                                                    return row.RegionName || '';
+                                                },
+                                            },
                                             {
                                                 accessor: 'acciones',
                                                 title: t('Acciones'),

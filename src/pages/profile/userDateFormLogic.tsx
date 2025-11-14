@@ -20,7 +20,7 @@ const UserDateFormLogic: React.FC = () => {
                     email: parsed.email || '',
                     ambit: parsed.ambit || '-',
                     status: true,
-                    id: parsed.id || 9999,
+                    id: parsed.id || '9999',
                 };
             } catch (e) {
                 console.error('Error parsing sessionStorage user:', e);
@@ -77,7 +77,7 @@ const UserDateFormLogic: React.FC = () => {
                     name: UserData.name,
                     lastName: UserData.lastName,
                     secondSurname: UserData.secondSurname,
-                    role: initialData.role,
+                    role: UserData.role,
                     email: UserData.email,
                     RegionId: formateaConCeroDelante(`${UserData.ambit}`),
                     id: UserData.id,
@@ -97,10 +97,11 @@ const UserDateFormLogic: React.FC = () => {
                     name: UserData.name,
                     lastName: UserData.lastName,
                     secondSurname: UserData.secondSurname,
-                    role: initialData.role,
+                    role: UserData.role,
                     email: UserData.email,
                     ambit: UserData.ambit,
                     status: UserData.status,
+                    id: UserData.id,
                 })
             );
 
