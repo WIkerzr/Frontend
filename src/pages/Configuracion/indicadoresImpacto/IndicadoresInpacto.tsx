@@ -562,7 +562,7 @@ const Index = () => {
         //año
         {
             accessor: `year_label_${y}`,
-            title: 'Año',
+            title: t('anio'),
             width: 100,
             cellsClassName: index % 2 === 0 ? 'bg-blue-50' : 'bg-green-50',
             render: (record: ListIndicador, rowIndex: number) => {
@@ -583,7 +583,7 @@ const Index = () => {
         //valor
         {
             accessor: `year_valor_${y}`,
-            title: `Valor`,
+            title: t('valor'),
             width: 100,
             cellsClassName: index % 2 === 0 ? 'bg-blue-50' : 'bg-green-50',
             render: (record: ListIndicador, rowIndex: number) => {
@@ -610,7 +610,7 @@ const Index = () => {
         //objetivo
         {
             accessor: `year_objetivo_${y}`,
-            title: `Objetivo`,
+            title: t('objetivo'),
             width: 120,
             cellsClassName: index % 2 === 0 ? 'bg-blue-50' : 'bg-green-50',
             render: (record: ListIndicador, rowIndex: number) => {
@@ -669,7 +669,7 @@ const Index = () => {
         //categoria
         {
             accessor: 'categoria',
-            title: 'Categoria',
+            title: t('categoria'),
             width: 150,
             render: (record: ListIndicador) => {
                 const categoria = record.CategoriaNameEs;
@@ -688,10 +688,10 @@ const Index = () => {
             },
         },
         //unidad de medida
-        { accessor: 'UnitEs', title: 'Unidad de medida', width: 150 },
+        { accessor: 'UnitEs', title: t('unidadMedida'), width: 150 },
         {
             accessor: 'alcance',
-            title: 'Alcance Territorial',
+            title: t('alcanceTerritorial'),
             width: 200,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;
@@ -740,7 +740,7 @@ const Index = () => {
         //Valor Inicial
         {
             accessor: 'valorInicial',
-            title: 'Valor Inicial',
+            title: t('valorInicial'),
             width: 100,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;
@@ -775,7 +775,7 @@ const Index = () => {
         //Objetivo Inicial
         {
             accessor: 'objetivoInicial',
-            title: 'Objetivo Inicial',
+            title: t('objetivoInicial'),
             width: 120,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;
@@ -801,7 +801,7 @@ const Index = () => {
         ...yearColumns,
         {
             accessor: 'valorFinal',
-            title: 'Valor Final',
+            title: t('valorFinal'),
             width: 100,
             render: (record: ListIndicador, rowIndex: number) => {
                 const isEditing = editableRowIndex === rowIndex;

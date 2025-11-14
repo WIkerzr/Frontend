@@ -58,8 +58,7 @@ export function transformarIndicadorStringAArray(indicador: IndicadorRealizacion
 
     return indicadorFinal;
 }
-const transformarBORRARIndicadorArrayAString = (indicador: IndicadorRealizacion | IndicadorResultado): any => {
-    //TODO borrar cuando se implemente el backend
+const transformarIndicadorArrayAString = (indicador: IndicadorRealizacion | IndicadorResultado): any => {
     const idsString = indicador.RelatedAxes ? indicador.RelatedAxes.map((eje) => `'${eje.EjeId}'`).join(',') : '';
 
     const resultadosTransformados =
@@ -69,10 +68,19 @@ const transformarBORRARIndicadorArrayAString = (indicador: IndicadorRealizacion 
                   RelatedAxes: resultado.RelatedAxes ? resultado.RelatedAxes.map((eje) => `'${eje.EjeId}'`).join(',') : '',
               }))
             : undefined;
+    const unitMedRaw = indicador.UnitMed ?? '';
+    const unitMedTrimmed = String(unitMedRaw).trim();
+    const unitMed = unitMedTrimmed === '' ? 'NUMERO' : unitMedTrimmed;
+
+    const DisaggregationVariablesRaw = indicador.DisaggregationVariables ?? '';
+    const disaggregationVariablesTrimmed = String(DisaggregationVariablesRaw).trim();
+    const disaggregationVariables = disaggregationVariablesTrimmed === '' ? 'NoAplica' : disaggregationVariablesTrimmed;
 
     return {
         ...indicador,
         RelatedAxes: idsString,
+        DisaggregationVariables: disaggregationVariables,
+        UnitMed: unitMed,
         ...(resultadosTransformados ? { Resultados: resultadosTransformados } : {}),
     };
 };
@@ -88,7 +96,7 @@ export async function editIndicadorRealizacionBack({
     ejesIndicador: EjeIndicadorBBDD[];
     onSucces: (indicador: IndicadorRealizacion) => void;
 }) {
-    const borrar = transformarBORRARIndicadorArrayAString(indicadorModificado);
+    const borrar = transformarIndicadorArrayAString(indicadorModificado);
     LlamadasBBDD({
         method: 'PUT',
         url: `editarIndicadorRealizacion`,
@@ -120,13 +128,13 @@ export async function editIndicadorResultadoBack({
     ejesIndicador: EjeIndicadorBBDD[];
     onSucces: (indicador: IndicadorResultado) => void;
 }) {
-    const borrar = transformarBORRARIndicadorArrayAString(indicadorModificado);
+    const body = transformarIndicadorArrayAString(indicadorModificado);
 
     LlamadasBBDD({
         method: 'PUT',
         url: `editarIndicadorResultado`,
         setLoading: setLoading ?? (() => {}),
-        body: borrar,
+        body: body,
         //setErrorMessage,
         //setSuccessMessage,
         async onSuccess(response) {
@@ -184,7 +192,7 @@ export async function guardarNuevoRealizacionBack({
     const indicadorIntermedio = esADR ? datosBorrar : datosBorrarIndicador;
     if (indicadorIntermedio.Resultados) {
         indicadorIntermedio.Resultados.forEach((resultado, i, arr) => {
-            arr[i] = transformarBORRARIndicadorArrayAString(resultado);
+            arr[i] = transformarIndicadorArrayAString(resultado);
         });
     }
     LlamadasBBDD({
