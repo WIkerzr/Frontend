@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { AdjuntarArchivos } from '../../components/Utils/inputs';
 import { useTranslation } from 'react-i18next';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from './Users/componentes';
-import { Boton, SeleccioneRegion } from '../../components/Utils/utils';
-import { LlamadaBBDDSubirPCDR, LlamadaBBDDVerPCDR } from '../../components/Utils/data/configuracionData/DataPCDR';
-import { useRegionContext } from '../../contexts/RegionContext';
 import IconDownloand from '../../components/Icon/IconDownloand.svg';
+import { LlamadaBBDDSubirPCDR, LlamadaBBDDVerPCDR } from '../../components/Utils/data/configuracionData/DataPCDR';
 import { ArchivoBodyParams, LlamadaBBDDBorrarArchivo, LlamarDescargarArchivo } from '../../components/Utils/data/utilsData';
+import { AdjuntarArchivos } from '../../components/Utils/inputs';
+import { Boton, SeleccioneRegion } from '../../components/Utils/utils';
+import { useRegionContext } from '../../contexts/RegionContext';
 import { useUser } from '../../contexts/UserContext';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from './Users/componentes';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -153,7 +153,7 @@ const Index = () => {
                     {rol === 'ADR' && (
                         <>
                             <section className="panel p-4 shadow-sm">
-                                <AdjuntarArchivos files={archivosPCDR} setFiles={setArchivosPCDR} multiple={true} />
+                                <AdjuntarArchivos files={archivosPCDR} setFiles={setArchivosPCDR} multiple={true} tipoArchivosAceptables="PDF" />
                             </section>
                             <Boton tipo="guardar" textoBoton={t('enviar')} onClick={handleGuardarFicheros} />
                         </>

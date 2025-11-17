@@ -248,6 +248,8 @@ export interface DatosAccionDTO {
     DatosMemoria?: DatosMemoriaDTO;
     AccionCompartidaId?: number;
     AccionCompartida?: AccionCompartidaDTO;
+    AccionDuplicadaDeId?: number;
+    RegionesAccionDuplicada?: RegionInterface[];
     IndicadorRealizacionAcciones?: IndicadorRealizacionAccionDTO[];
     IndicadorResultadoAcciones?: IndicadorResultadoAccionDTO[];
     IndicadoresRealizacionAccion?: IndicadorRealizacionAccionDTO[];

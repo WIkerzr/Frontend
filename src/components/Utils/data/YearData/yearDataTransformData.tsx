@@ -281,7 +281,7 @@ export const accionesTransformadasBackAFront = (eje: EjeBBDD2): DatosAccion[] =>
             indicadorResultadoAccion = transformIndicadoresResultado(accion.IndicadoresResultadoAccion);
         }
 
-        return {
+        const accionTranformado = {
             id: checkData(accion?.Id, 'Id', '0'),
             accion: checkData(accion?.Nombre, 'Nombre'),
             lineaActuaccion: checkData(accion?.LineaActuaccion, 'LineaAcctuacion'),
@@ -297,7 +297,11 @@ export const accionesTransformadasBackAFront = (eje: EjeBBDD2): DatosAccion[] =>
             datosPlan: dataPlan,
             datosMemoria: dataMemoria,
             ejeId: `${eje.EjeGlobal.Id}`,
+            accionDuplicadaDeId: accion.AccionDuplicadaDeId ? accion.AccionDuplicadaDeId : undefined,
+            regionesAccionDuplicada: accion.RegionesAccionDuplicada,
         };
+
+        return accionTranformado;
     });
 
 export const accionTransformadaBackAFront = (accion: DatosAccionDTO, ejeEs: string, ejeEu: string, ejeId: string): DatosAccion => {

@@ -726,6 +726,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     camposFaltantes: accion.CamposFaltantes,
                     accionPrioritaria: accion.AccionPrioritaria,
                     accionDuplicadaDeId: accion.AccionDuplicadaDeId ? accion.AccionDuplicadaDeId : undefined,
+                    regionesAccionDuplicada: accion.RegionesAccionDuplicada,
                     accionCompartida: {
                         regionLider: accion.RegionLiderId,
                         regiones: [],

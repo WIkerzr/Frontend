@@ -392,6 +392,7 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
     const [isDragging, setIsDragging] = useState(false);
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = e.target.files ? Array.from(e.target.files) : [];
@@ -412,6 +413,11 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                 alert(t('ArchivoExtensionErronea') + ': ' + archivosInvalidos.map((f) => f.name).join(', ') + '\n' + t('ExtensionesPerm') + ': ' + tipoArchivosAceptables);
                 return;
             }
+        }
+        const archivosDemasiadoGrandes = newFiles.filter((file) => file.size > MAX_FILE_SIZE);
+        if (archivosDemasiadoGrandes.length > 0) {
+            alert('Peso máximo permitido por archivo: 5 MB.\n' + archivosDemasiadoGrandes.map((f) => f.name).join(', '));
+            return;
         }
         if (multiple) {
             setFiles((prevFiles) => {
@@ -435,6 +441,32 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
         e.stopPropagation();
         setIsDragging(false);
         const newFiles = Array.from(e.dataTransfer.files);
+
+        if (tipoArchivosAceptables) {
+            const extensionesPermitidas = tipoArchivosAceptables.split(',').map((ext) =>
+                ext
+                    .trim()
+                    .toLowerCase()
+                    .replace(/^\*?\.?/, '')
+            );
+
+            const archivosInvalidos = newFiles.filter((file) => {
+                const extension = file.name.split('.').pop()?.toLowerCase() || '';
+                return !extensionesPermitidas.some((ext) => ext === extension || ext === '*' || ext.includes('/'));
+            });
+
+            if (archivosInvalidos.length > 0) {
+                alert(t('ArchivoExtensionErronea') + ': ' + archivosInvalidos.map((f) => f.name).join(', ') + '\n' + t('ExtensionesPerm') + ': ' + tipoArchivosAceptables);
+                return;
+            }
+        }
+
+        const archivosDemasiadoGrandes = newFiles.filter((file) => file.size > MAX_FILE_SIZE);
+        if (archivosDemasiadoGrandes.length > 0) {
+            alert('Peso máximo permitido por archivo: 5 MB.\n' + archivosDemasiadoGrandes.map((f) => f.name).join(', '));
+            return;
+        }
+
         setFiles(newFiles);
     };
 
@@ -497,6 +529,7 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                     </button>
                 </div>
             )}
+            {!disabled && <div className="text-xs text-gray-500 mt-1">Peso máximo permitido por archivo: 5 MB.</div>}
             <div className="mt-4 space-y-2">
                 {files.map((file, idx) => (
                     <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
