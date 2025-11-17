@@ -1,14 +1,14 @@
-import { forwardRef, useEffect, useState } from 'react';
-import { useYear } from '../../../../contexts/DatosAnualContext';
-import { DatosPlan } from '../../../../types/TipadoAccion';
-import { DivInputFieldMulti, DropdownTraducido, InputField, TextArea } from '../../../../components/Utils/inputs';
-import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../../types/GeneralTypes';
-import Multiselect from 'multiselect-react-dropdown';
-import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@mantine/core';
+import Multiselect from 'multiselect-react-dropdown';
+import { forwardRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
+import { DivInputFieldMulti, DropdownTraducido, InputField, TextArea } from '../../../../components/Utils/inputs';
+import { useYear } from '../../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../../contexts/RegionContext';
+import { opcionesComarcal, opcionesODS, opcionesSupraComarcal } from '../../../../types/GeneralTypes';
+import { DatosPlan } from '../../../../types/TipadoAccion';
 
 export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     const { t, i18n } = useTranslation();
@@ -37,9 +37,9 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
         }
         const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoAccion.accionCompartida?.regiones ?? [];
         const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
-            const regionIdNormalizado = r.RegionId.padStart(2, '0');
+            const regionIdNormalizado = String(r.RegionId).padStart(2, '0');
 
-            const regionCompleta = regiones.find((reg) => reg.RegionId.padStart(2, '0') === regionIdNormalizado);
+            const regionCompleta = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === regionIdNormalizado);
 
             return {
                 RegionId: regionIdNormalizado,
@@ -62,6 +62,26 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
             },
         });
     }, [entidades]);
+
+    useEffect(() => {
+        if (datosEditandoAccion.accionDuplicadaDeId) {
+            setRegionesSupracomarcal(true);
+            const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoAccion.regionesAccionDuplicada ?? [];
+            const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
+                const regionIdNormalizado = String(r.RegionId).padStart(2, '0');
+
+                const regionCompleta = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === regionIdNormalizado);
+
+                return {
+                    RegionId: regionIdNormalizado,
+                    NameEs: regionCompleta?.NameEs || '',
+                    NameEu: regionCompleta?.NameEu || '',
+                };
+            });
+
+            setDataMultiselect(regionesCompletadas);
+        }
+    }, [datosEditandoAccion]);
 
     if (!datosEditandoAccion || !datosEditandoAccion.datosPlan) {
         return;
@@ -259,7 +279,11 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
 
                     <div className="flex flex-col items-center">
                         <label>{t('esSupracomarcal')}</label>
-                        <Checkbox checked={regionesSupracomarcal} disabled={bloqueo} onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)} />
+                        <Checkbox
+                            checked={datosEditandoAccion.accionDuplicadaDeId ? true : regionesSupracomarcal}
+                            disabled={datosEditandoAccion.accionDuplicadaDeId ? true : bloqueo}
+                            onChange={(e) => handleChangeCheckboxSupracomarcal(e.target.checked)}
+                        />
                     </div>
                 </div>
                 {regionesSupracomarcal && (
@@ -267,7 +291,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                         <div className="flex gap-4">
                             <DropdownTraducido
                                 title={'supracomarcal'}
-                                disabled={bloqueo}
+                                disabled={datosEditandoAccion.accionDuplicadaDeId ? true : bloqueo}
                                 value={
                                     regionesSupracomarcal
                                         ? opcionesSupraComarcalSinOtros.includes(datosEditandoAccion.datosPlan?.supracomarcal)
@@ -283,7 +307,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                                 <InputField
                                     nombreInput="supracomarcal"
                                     required
-                                    disabled={bloqueo}
+                                    disabled={datosEditandoAccion.accionDuplicadaDeId ? true : bloqueo}
                                     value={datosEditandoAccion.datosPlan.supracomarcal != 'Otros' ? datosEditandoAccion.datosPlan.supracomarcal : ''}
                                     onChange={(e) => handleChangeCampos('supracomarcal', e)}
                                 />
@@ -298,7 +322,7 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
                             onSelect={handleChangeRegionsSupracomarcal}
                             onRemove={handleChangeRegionsSupracomarcal}
                             emptyRecordMsg={t('error:errorNoOpciones')}
-                            disable={bloqueo}
+                            disable={datosEditandoAccion.accionDuplicadaDeId ? true : bloqueo}
                         />
                     </div>
                 )}

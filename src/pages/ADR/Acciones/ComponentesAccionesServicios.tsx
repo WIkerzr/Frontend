@@ -196,7 +196,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones,
             return;
         }
 
-        AgregarAccion(acciones, `${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual, file ? true : undefined);
+        AgregarAccion(acciones, `${idEjeSeleccionado}`, nuevaAccion, nuevaLineaActuaccion, plurianual, file ? true : undefined, file ? file.id : undefined);
 
         setIdEjeSeleccionado('');
         setNuevaAccion('');

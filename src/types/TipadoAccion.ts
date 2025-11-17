@@ -83,6 +83,7 @@ export interface DatosAccion {
     camposFaltantes?: string;
     accionPrioritaria?: boolean;
     accionDuplicadaDeId?: number;
+    regionesAccionDuplicada?: RegionInterface[];
 }
 
 export const datosInicializadosAccion: DatosAccion = {

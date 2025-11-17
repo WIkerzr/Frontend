@@ -1,30 +1,28 @@
 /* eslint-disable no-unused-vars */
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { Checkbox } from '@mantine/core';
+import Multiselect from 'multiselect-react-dropdown';
+import React, { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { DropdownTraducido, InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useYear } from '../../../contexts/DatosAnualContext';
-import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
-import { YearData } from '../../../types/tipadoPlan';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { useRegionContext } from '../../../contexts/RegionContext';
-import { ComprobacionYAvisosDeCambios, Loading } from '../../../components/Utils/animations';
-import { gestionarServicio } from '../../../components/Utils/data/dataServices';
-import React from 'react';
-import { Tab, TabList, TabGroup, TabPanel, TabPanels } from '@headlessui/react';
-import { TabCard } from '../Acciones/EditarAccion/EditarAccionComponent';
+import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
 import IconMemoria from '../../../components/Icon/Menu/IconMemoria.svg';
 import IconPlan from '../../../components/Icon/Menu/IconPlan.svg';
-import IconCuadroMando from '../../../components/Icon/Menu/IconCuadroMando.svg';
-import { EjesBBDD } from '../../../types/tipadoPlan';
-import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
-import { EjesBBDDToEjes } from '../EjesHelpers';
-import { PestanaIndicadores } from '../Acciones/EditarAccion/EditarAccionIndicadores';
-import { Boton, ConvertirIndicadoresAccionAServicio } from '../../../components/Utils/utils';
-import Multiselect from 'multiselect-react-dropdown';
+import { ComprobacionYAvisosDeCambios, Loading } from '../../../components/Utils/animations';
+import { gestionarServicio } from '../../../components/Utils/data/dataServices';
 import { RegionInterface } from '../../../components/Utils/data/getRegiones';
+import { DropdownTraducido, InputField, SelectorEje, TextArea } from '../../../components/Utils/inputs';
+import { Boton, ConvertirIndicadoresAccionAServicio } from '../../../components/Utils/utils';
+import { useYear } from '../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
+import { EjesBBDD, YearData } from '../../../types/tipadoPlan';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
+import { TabCard } from '../Acciones/EditarAccion/EditarAccionComponent';
+import { PestanaIndicadores } from '../Acciones/EditarAccion/EditarAccionIndicadores';
+import { EjesBBDDToEjes } from '../EjesHelpers';
 export const ejeGeneralServicios: EjesBBDD = {
     EjeId: 'general',
     NameEs: 'General',
@@ -493,9 +491,9 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
         }
         const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoServicio.serviciosCompartidas?.regiones ?? [];
         const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
-            const regionIdNormalizado = r.RegionId.padStart(2, '0');
+            const regionIdNormalizado = String(r.RegionId).padStart(2, '0');
 
-            const regionCompleta = regiones.find((reg) => reg.RegionId.padStart(2, '0') === regionIdNormalizado);
+            const regionCompleta = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === regionIdNormalizado);
 
             return {
                 RegionId: regionIdNormalizado,

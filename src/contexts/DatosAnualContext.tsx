@@ -271,6 +271,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                             ejeId: idEje,
                             ejeEs: eje?.NameEs,
                             ejeEu: eje?.NameEu,
+                            accionDuplicadaDeId: response.data.AccionDuplicadaDeId ? response.data.AccionDuplicadaDeId : undefined,
+                            regionesAccionDuplicada: response.data.RegionesAccionDuplicada ? response.data.RegionesAccionDuplicada : undefined,
                         };
 
                         setIdEjeEditado(idEje);
@@ -535,6 +537,29 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         if (!datos) return;
         const { indicadoreRealizacionEdit, indicadoreResultadoEdit, DatosPlan, DatosMemoria } = datos;
 
+        const accionCompartida = datosEditandoAccion.accionCompartida
+            ? {
+                  Id: datosEditandoAccion.accionCompartida.idCompartida,
+                  RegionLiderId: Number(datosEditandoAccion.accionCompartida.regionLider.RegionId),
+                  AccionCompartidaRegiones: datosEditandoAccion.accionCompartida.regiones.map((e) => ({
+                      RegionId: Number(e.RegionId),
+                  })),
+              }
+            : undefined;
+        const body = {
+            Id: Number(datosEditandoAccion.id),
+            Nombre: datosEditandoAccion.accion,
+            LineaAcctuacion: datosEditandoAccion.lineaActuaccion,
+            Plurianual: datosEditandoAccion.plurianual,
+            DatosPlanId: DatosPlan.Id ? Number(DatosPlan.Id) : undefined,
+            DatosPlan: DatosPlan,
+            DatosMemoriaId: DatosMemoria.Id ? Number(DatosMemoria.Id) : undefined,
+            DatosMemoria: DatosMemoria,
+            AccionCompartidaId: !datosEditandoAccion.accionDuplicadaDeId ? datosEditandoAccion.accionCompartidaid : undefined,
+            AccionCompartida: !datosEditandoAccion.accionDuplicadaDeId ? accionCompartida : undefined,
+            IndicadorRealizacionAcciones: indicadoreRealizacionEdit,
+            IndicadorResultadoAcciones: indicadoreResultadoEdit,
+        };
         LlamadasBBDD<any, DatosAccionDTO>({
             method: 'POST',
             url: `actionData/editAction/${datosEditandoAccion.id}`,
@@ -542,28 +567,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             setFechaUltimoActualizadoBBDD: setFechaUltimoActualizadoBBDDYearData,
             setErrorMessage: message.setErrorMessage,
             setSuccessMessage: message.setSuccessMessage,
-            body: {
-                Id: Number(datosEditandoAccion.id),
-                Nombre: datosEditandoAccion.accion,
-                LineaAcctuacion: datosEditandoAccion.lineaActuaccion,
-                Plurianual: datosEditandoAccion.plurianual,
-                DatosPlanId: DatosPlan.Id ? Number(DatosPlan.Id) : undefined,
-                DatosPlan: DatosPlan,
-                DatosMemoriaId: DatosMemoria.Id ? Number(DatosMemoria.Id) : undefined,
-                DatosMemoria: DatosMemoria,
-                AccionCompartidaId: datosEditandoAccion.accionCompartidaid,
-                AccionCompartida: datosEditandoAccion.accionCompartida
-                    ? {
-                          Id: datosEditandoAccion.accionCompartida.idCompartida,
-                          RegionLiderId: Number(datosEditandoAccion.accionCompartida.regionLider.RegionId),
-                          AccionCompartidaRegiones: datosEditandoAccion.accionCompartida.regiones.map((e) => ({
-                              RegionId: Number(e.RegionId),
-                          })),
-                      }
-                    : undefined,
-                IndicadorRealizacionAcciones: indicadoreRealizacionEdit,
-                IndicadorResultadoAcciones: indicadoreResultadoEdit,
-            },
+            body: body,
             onSuccess: (response) => {
                 if (tipo === 'AccionesAccesorias') {
                     let eje = yearData.plan.ejesRestantes!.find((eje) => eje.Id === datosEditandoAccion.ejeId);
