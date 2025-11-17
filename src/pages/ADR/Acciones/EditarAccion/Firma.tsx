@@ -1,14 +1,14 @@
 import { forwardRef, useEffect, useState } from 'react';
-import { Boton } from '../../../../components/Utils/utils';
 import { useTranslation } from 'react-i18next';
-import { LlamadaBBDDFirma, LlamadaArbolArchivos } from '../../../../components/Utils/data/YearData/dataGestionPlanMemoria';
-import { Nodo, BuscarNodo, TransformarArchivosAFile } from '../../../../components/Utils/data/YearData/yearDataTransformData';
-import { AdjuntarArchivos } from '../../../../components/Utils/inputs';
-import { useRegionContext } from '../../../../contexts/RegionContext';
-import { useYear } from '../../../../contexts/DatosAnualContext';
-import { LoadingOverlayPersonalizada } from '../../../Configuracion/Users/componentes';
-import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { ArchivoBodyParams, LlamarDescargarArchivo, RutasArchivos } from '../../../../components/Utils/data/utilsData';
+import { LlamadaArbolArchivos, LlamadaBBDDFirma } from '../../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { BuscarNodo, Nodo, TransformarArchivosAFile } from '../../../../components/Utils/data/YearData/yearDataTransformData';
+import { AdjuntarArchivos } from '../../../../components/Utils/inputs';
+import { Boton } from '../../../../components/Utils/utils';
+import { useYear } from '../../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../../contexts/RegionContext';
+import { LoadingOverlayPersonalizada } from '../../../Configuracion/Users/componentes';
 
 export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
@@ -124,7 +124,6 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
                     <div className="flex justify-center">
                         <Boton
                             tipo="guardar"
-                            disabled={firma.length === 0}
                             textoBoton={`${t('descargarFirmaVacia')}`}
                             onClick={() => {
                                 const link = document.createElement('a');
@@ -153,7 +152,7 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
 
                 {editarPlan && (
                     <div className="flex justify-center">
-                        <Boton tipo="guardar" disabled={firma.length === 0} textoBoton={`${t('enviar')} ${t('firma')}`} onClick={handleGuardarFirma} />
+                        <Boton tipo="guardar" disabled={firma.length === 0} textoBoton={`${t('enviar')} ${t('MuestrasInteres')}`} onClick={handleGuardarFirma} />
                     </div>
                 )}
             </section>

@@ -87,6 +87,7 @@ export const gestionarServicio = async ({
                     idEje: data.EjeGlobalIdInt,
                     lineaActuaccion: data.LineaActuaccion,
                     serviciosCompartidaId: data.ServiciosCompartidaId,
+                    ServicioDuplicadaDeId: duplicacionServicio ? data.ServicioDuplicadaDeId : undefined,
                     serviciosCompartidas: data.ServiciosCompartida
                         ? {
                               idCompartida: data.ServiciosCompartida.Id,
@@ -117,6 +118,12 @@ export const gestionarServicio = async ({
                         },
                         tipo: i.Tipo ?? '',
                     })),
+                    regionesServicioDuplicada:
+                        data.ServiciosCompartidaRegionesDuplicada?.map((r) => ({
+                            RegionId: String(r.RegionId),
+                            NameEs: '',
+                            NameEu: '',
+                        })) ?? [],
                 };
                 resolve(resultado);
             },

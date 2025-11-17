@@ -349,6 +349,7 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                 lineaActuaccion: `${datosEditandoServicio.lineaActuaccion}`,
                 plurianual: false,
                 indicadorAccion: indicadorAccion,
+                accionDuplicadaDeId: datosEditandoServicio.ServicioDuplicadaDeId,
             };
             setDatosEditandoAccion(datosAccionTransformados);
         }

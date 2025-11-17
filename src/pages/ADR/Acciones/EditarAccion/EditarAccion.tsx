@@ -1,25 +1,25 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
-import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { TabCard } from './EditarAccionComponent';
-import { PestanaPlan } from './EditarAccionPlan';
-import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
-import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
-import { PestanaMemoria } from './EditarAccionMemoria';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PestanaIndicadores } from './EditarAccionIndicadores';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../../Configuracion/Users/componentes';
-import { useYear } from '../../../../contexts/DatosAnualContext';
-import { Boton } from '../../../../components/Utils/utils';
-import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
-import { DropdownLineaActuaccion } from '../ComponentesAccionesServicios';
-import { DatosAccion } from '../../../../types/TipadoAccion';
+import IconCuadroMando from '../../../../components/Icon/Menu/IconCuadroMando.svg';
+import IconMemoria from '../../../../components/Icon/Menu/IconMemoria.svg';
+import IconPlan from '../../../../components/Icon/Menu/IconPlan.svg';
+import { ComprobacionYAvisosDeCambios, Loading } from '../../../../components/Utils/animations';
 import { LlamadaBBDDEjesRegion, ValidarEjesRegion } from '../../../../components/Utils/data/dataEjes';
-import { Ejes, EjesBBDD } from '../../../../types/tipadoPlan';
+import { Boton } from '../../../../components/Utils/utils';
+import { useYear } from '../../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio } from '../../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../../contexts/RegionContext';
+import { DatosAccion } from '../../../../types/TipadoAccion';
+import { Ejes, EjesBBDD } from '../../../../types/tipadoPlan';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../../Configuracion/Users/componentes';
 import { EjesBBDDToEjes, EjesToEjesBBDD } from '../../EjesHelpers';
-import { Loading, ComprobacionYAvisosDeCambios } from '../../../../components/Utils/animations';
+import { DropdownLineaActuaccion } from '../ComponentesAccionesServicios';
+import { TabCard } from './EditarAccionComponent';
+import { PestanaIndicadores } from './EditarAccionIndicadores';
+import { PestanaMemoria } from './EditarAccionMemoria';
+import { PestanaPlan } from './EditarAccionPlan';
 import { PestanaFirma } from './Firma';
 
 const Index: React.FC = () => {
@@ -379,9 +379,9 @@ const Index: React.FC = () => {
                                 >
                                     <div className={`flex items-center`}>
                                         <div className="relative">
-                                            <img src={IconPlan} alt={t(`${'firma'}`)} className="w-6 h-6" />
+                                            <img src={IconPlan} alt={t(`${'MuestrasInteres'}`)} className="w-6 h-6" />
                                         </div>
-                                        <span className={`font-semibold`}>{t(`${'firma'}`)}</span>
+                                        <span className={`font-semibold`}>{t(`${'MuestrasInteres'}`)}</span>
                                     </div>
                                 </button>
                             )}

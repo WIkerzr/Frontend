@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { forwardRef, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../../types/TipadoAccion';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { isEqual, sortBy } from 'lodash';
-import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
+import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditableColumnByPath } from '../../../../components/Utils/utilsTabla/Columnas';
 import { TiposAccion } from '../../../../contexts/DatosAnualContext';
-import { Estado } from '../../../../types/GeneralTypes';
 import { StatusColorsFonds } from '../../../../contexts/EstadosPorAnioContext';
-import React from 'react';
+import { Estado } from '../../../../types/GeneralTypes';
+import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
+import { DatosAccion, DatosMemoria, EstadoLabel } from '../../../../types/TipadoAccion';
 import { PlanOMemoria } from '../../PlanMemoria/PlanMemoriaComponents';
 interface TabCardProps {
     icon: string;
@@ -299,6 +298,7 @@ interface TablaIndicadorAccionProps {
     servicios?: boolean;
     editarPlan: boolean;
     editarMemoria: boolean;
+    disableEliminar?: boolean;
 }
 
 interface TablasIndicadoresComponentProps {
@@ -324,6 +324,7 @@ interface TablasIndicadoresComponentProps {
     setSortStatusResultado: React.Dispatch<React.SetStateAction<DataTableSortStatus<IndicadorResultadoAccion>>>;
     serviciosFlag?: boolean;
     t: (key: string, options?: any) => string;
+    disableEliminar?: boolean;
 }
 
 export const TablasIndicadoresComponent = forwardRef<HTMLDivElement, TablasIndicadoresComponentProps>(
@@ -350,6 +351,7 @@ export const TablasIndicadoresComponent = forwardRef<HTMLDivElement, TablasIndic
             setSortStatusRealizacion,
             setSortStatusResultado,
             t,
+            disableEliminar,
         },
         ref
     ) => {
@@ -494,9 +496,11 @@ export const TablasIndicadoresComponent = forwardRef<HTMLDivElement, TablasIndic
                                       <button className="bg-primary text-white px-2 py-1 rounded" onMouseDown={() => setEditableRowIndex(index)}>
                                           {t('editar')}
                                       </button>
-                                      <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarIndicador(tipoIndicador, index)}>
-                                          {t('Eliminar')}
-                                      </button>
+                                      {disableEliminar ? null : (
+                                          <button className="bg-danger text-white px-2 py-1 rounded" onClick={() => handleEliminarIndicador(tipoIndicador, index)}>
+                                              {t('Eliminar')}
+                                          </button>
+                                      )}
                                   </div>
                               );
                           },
@@ -551,6 +555,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
             handleEliminarIndicador,
             editarPlan,
             editarMemoria,
+            disableEliminar,
         },
         ref
     ) => {
@@ -655,6 +660,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                         sortStatusResultado={sortStatusResultado}
                         setSortStatusRealizacion={setSortStatusRealizacion}
                         setSortStatusResultado={setSortStatusResultado}
+                        disableEliminar={disableEliminar}
                         t={t}
                     />
                 </div>
@@ -689,6 +695,7 @@ export const TablaIndicadorAccion = forwardRef<HTMLDivElement, TablaIndicadorAcc
                         sortStatusResultado={sortStatusResultado}
                         setSortStatusRealizacion={setSortStatusRealizacion}
                         setSortStatusResultado={setSortStatusResultado}
+                        disableEliminar={disableEliminar}
                         t={t}
                     />
                 </div>

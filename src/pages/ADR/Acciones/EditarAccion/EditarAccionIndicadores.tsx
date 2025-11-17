@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { forwardRef, useEffect, useState } from 'react';
+import { sortBy } from 'lodash';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NewModal } from '../../../../components/Utils/utils';
-import { TablaIndicadorAccion } from './EditarAccionComponent';
-import React from 'react';
 import { useYear } from '../../../../contexts/DatosAnualContext';
 import { useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion, TiposDeIndicadores } from '../../../../types/Indicadores';
-import { sortBy } from 'lodash';
+import { TablaIndicadorAccion } from './EditarAccionComponent';
 
 interface PestanaIndicadoresProps {
     bloqueo: { plan: boolean; memoria: boolean; bloqueoTotal: boolean };
@@ -268,17 +267,20 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
             reglasEspeciales={reglasEspeciales}
             editarPlan={!bloqueo.plan}
             editarMemoria={!bloqueo.memoria}
+            disableEliminar={datosEditandoAccion.accionDuplicadaDeId !== undefined}
             botonNuevoIndicadorAccion={
-                <BtnNuevoIndicadorAccion
-                    indicadoresRealizacionTabla={indicadoresRealizacionTabla}
-                    indicadoresResultadoTabla={indicadoresResultadoTabla}
-                    block={block}
-                    editarPlan={!bloqueo.plan}
-                    open={open}
-                    setOpen={setOpen}
-                    handleOpenModal={handleOpenModal}
-                    handleSave={handleSave}
-                />
+                datosEditandoAccion.accionDuplicadaDeId === undefined && (
+                    <BtnNuevoIndicadorAccion
+                        indicadoresRealizacionTabla={indicadoresRealizacionTabla}
+                        indicadoresResultadoTabla={indicadoresResultadoTabla}
+                        block={block}
+                        editarPlan={!bloqueo.plan}
+                        open={open}
+                        setOpen={setOpen}
+                        handleOpenModal={handleOpenModal}
+                        handleSave={handleSave}
+                    />
+                )
             }
         />
     );
