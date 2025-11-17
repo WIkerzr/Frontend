@@ -25,20 +25,21 @@ const Index: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
-
     const [navigated, setNavigated] = useState<boolean>(false);
 
+    const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
     useEffect(() => {
-        const ejesRestantes = yearData?.plan?.ejesRestantes ?? [];
-        const todasAcciones = ejesRestantes.flatMap((eje) => eje.acciones ?? []);
-        const ids = todasAcciones
-            .map((a) => a.accionDuplicadaDeId)
-            .map((id) => (id == null ? '' : String(id)))
-            .filter((id) => id !== '' && id !== '0');
+        if (yearData.plan.ejesRestantes) {
+            const ejesRestantes = yearData?.plan?.ejesRestantes ?? [];
+            const todasAcciones = ejesRestantes.flatMap((eje) => eje.acciones ?? []);
+            const ids = todasAcciones
+                .map((a) => a.accionDuplicadaDeId)
+                .map((id) => (id == null ? '' : String(id)))
+                .filter((id) => id !== '' && id !== '0');
 
-        const idsUnicos = Array.from(new Set(ids));
-        setRegionesDuplicadas(idsUnicos);
+            const idsUnicos = Array.from(new Set(ids));
+            setRegionesDuplicadas(idsUnicos);
+        }
     }, [yearData]);
 
     function grup5<T>(array: T[], size: number): T[][] {
@@ -94,9 +95,10 @@ const Index: React.FC = () => {
                 ejeId: eje.Id,
             }))
         );
+
         const dataFiltrado = data.filter((accion) => !regionesDuplicadas.includes(String(accion.id)));
         setAccionesGrup(grup5(dataFiltrado, 4));
-    }, [yearData, anioSeleccionada]);
+    }, [yearData, anioSeleccionada, regionesDuplicadas]);
 
     const handleDelete = (id: string, idEje: string | undefined) => {
         const data = yearData.plan.ejesRestantes!.flatMap((eje) => eje.acciones);

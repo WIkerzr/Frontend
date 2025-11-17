@@ -31,11 +31,24 @@ const Index: React.FC = () => {
         SeleccionVaciarEditarAccion();
     }, []);
 
+    const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
+    useEffect(() => {
+        const todosServicios = yearData?.servicios ?? [];
+        const ids = todosServicios
+            .map((a) => a.ServicioDuplicadaDeId)
+            .map((id) => (id == null ? '' : String(id)))
+            .filter((id) => id !== '' && id !== '0');
+
+        setRegionesDuplicadas(ids.map((id) => formateaConCeroDelante(String(id))));
+    }, [yearData]);
+
     useEffect(() => {
         if (!yearData.servicios) return;
+
         const serviciosOrdenados = [...yearData.servicios].sort((a, b) => a.id - b.id);
-        setServiciosGrup(grup5(serviciosOrdenados, 4));
-    }, [yearData]);
+        const serviciosFiltrados = serviciosOrdenados.filter((servicio) => !regionesDuplicadas.includes(formateaConCeroDelante(String(servicio.id))));
+        setServiciosGrup(grup5(serviciosFiltrados, 4));
+    }, [yearData, regionesDuplicadas]);
 
     const handleDelete = async (id: number) => {
         const servicio = yearData.servicios?.filter((item) => item.id === id);
