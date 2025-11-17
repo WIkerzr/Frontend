@@ -1,17 +1,17 @@
 import { Estado, IndicadoresServicios, IndicadoresServiciosDTO, Servicios, ServiciosDTO, ServiciosDTOConvertIndicadores } from '../../../../types/GeneralTypes';
 import { IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../../../types/Indicadores';
 import {
-    DatosPlanDTO,
-    DatosPlan,
-    DatosMemoriaDTO,
-    DatosMemoriaBackF,
-    FuenteFinanciacion,
     DatosAccion,
     DatosAccionDTO,
+    DatosMemoriaBack,
+    DatosMemoriaBackF,
+    DatosMemoriaDTO,
+    DatosPlan,
+    DatosPlanDTO,
+    EstadoLabel,
+    FuenteFinanciacion,
     IndicadorRealizacionAccionDTO,
     IndicadorResultadoAccionDTO,
-    DatosMemoriaBack,
-    EstadoLabel,
 } from '../../../../types/TipadoAccion';
 import { EjeBBDD2, Ejes, GeneralOperationADR, GeneralOperationADRDTOCompleto, OperationalIndicators, OperationalIndicatorsDTO, YearData, YearDataDTO } from '../../../../types/tipadoPlan';
 import { RegionInterface } from '../getRegiones';
@@ -415,6 +415,19 @@ export const convertirServicios = (serviciosDTO: ServiciosDTOConvertIndicadores[
             supraComarcal: dto.Supracomarcal,
             valFinal: dto.ValFinal,
             serviciosCompartidaId: dto.ServiciosCompartidaId,
+            ServicioDuplicadaDeId: dto.ServicioDuplicadaDeId,
+            regionesServicioDuplicada: dto.ServiciosCompartidaRegionesDuplicada
+                ? dto.ServiciosCompartidaRegionesDuplicada.map((reg) => {
+                      const region = regionesDisponibles.find((r) => r.RegionId === reg.RegionId.toString());
+                      return (
+                          region || {
+                              RegionId: reg.RegionId.toString(),
+                              NameEs: '',
+                              NameEu: '',
+                          }
+                      );
+                  })
+                : [],
             serviciosCompartidas: dto.ServiciosCompartida
                 ? {
                       idCompartida: dto.ServiciosCompartida.Id,
@@ -461,6 +474,7 @@ export const normalizarServicios = (servicios: ServiciosDTO[] | ServiciosDTOConv
             LineaActuaccion: s.LineaActuaccion,
             ServiciosCompartidaId: s.ServiciosCompartidaId !== undefined ? s.ServiciosCompartidaId : 0,
             ServiciosCompartida: s.ServiciosCompartida,
+            ServiciosCompartidaRegionesDuplicada: s.ServiciosCompartidaRegionesDuplicada,
             Supracomarcal: s.SupraComarcal,
         };
     });

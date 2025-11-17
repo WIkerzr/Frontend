@@ -410,7 +410,7 @@ const Index: React.FC = () => {
                                         />
                                         {erroresGenerales.descripcion && <p className="text-red-500 text-xs">{t('campoObligatorio')}</p>}
                                     </div>
-                                    <Supracomarcal bloqueo={bloqueo.plan} />
+                                    <Supracomarcal bloqueo={datosEditandoServicio.ServicioDuplicadaDeId ? true : bloqueo.plan} />
                                 </div>
                             </div>
                         </TabPanel>
@@ -486,22 +486,40 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
 
     useEffect(() => {
         if (!datosEditandoServicio) return;
-        if (datosEditandoServicio.serviciosCompartidas && datosEditandoServicio.serviciosCompartidas.regionLider && Number(datosEditandoServicio.serviciosCompartidas.regionLider.RegionId) > 0) {
+        if (datosEditandoServicio.ServicioDuplicadaDeId) {
             setRegionesSupracomarcal(true);
+
+            const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoServicio.regionesServicioDuplicada ?? [];
+            const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
+                const regionIdNormalizado = String(r.RegionId).padStart(2, '0');
+
+                const regionCompleta = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === regionIdNormalizado);
+
+                return {
+                    RegionId: regionIdNormalizado,
+                    NameEs: regionCompleta?.NameEs || '',
+                    NameEu: regionCompleta?.NameEu || '',
+                };
+            });
+            setDataMultiselect(regionesCompletadas);
+        } else {
+            if (datosEditandoServicio.serviciosCompartidas && datosEditandoServicio.serviciosCompartidas.regionLider && Number(datosEditandoServicio.serviciosCompartidas.regionLider.RegionId) > 0) {
+                setRegionesSupracomarcal(true);
+            }
+            const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoServicio.serviciosCompartidas?.regiones ?? [];
+            const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
+                const regionIdNormalizado = String(r.RegionId).padStart(2, '0');
+
+                const regionCompleta = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === regionIdNormalizado);
+
+                return {
+                    RegionId: regionIdNormalizado,
+                    NameEs: regionCompleta?.NameEs || '',
+                    NameEu: regionCompleta?.NameEu || '',
+                };
+            });
+            setDataMultiselect(regionesCompletadas);
         }
-        const regionesPreselecionadasEnDropdow: RegionInterface[] = datosEditandoServicio.serviciosCompartidas?.regiones ?? [];
-        const regionesCompletadas = regionesPreselecionadasEnDropdow.map((r) => {
-            const regionIdNormalizado = String(r.RegionId).padStart(2, '0');
-
-            const regionCompleta = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === regionIdNormalizado);
-
-            return {
-                RegionId: regionIdNormalizado,
-                NameEs: regionCompleta?.NameEs || '',
-                NameEu: regionCompleta?.NameEu || '',
-            };
-        });
-        setDataMultiselect(regionesCompletadas);
     }, []);
 
     if (!datosEditandoServicio) return;

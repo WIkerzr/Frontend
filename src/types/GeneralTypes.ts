@@ -59,6 +59,8 @@ export interface Servicios {
     valFinal?: string;
     serviciosCompartidas?: ServiciosCompartida;
     serviciosCompartidaId?: number;
+    ServicioDuplicadaDeId?: number;
+    regionesServicioDuplicada?: RegionInterface[];
 }
 export interface HMTServicios {
     hombres?: string;
@@ -109,6 +111,8 @@ export interface ServiciosDTO {
     ServiciosCompartidaId?: number;
     ServiciosCompartida?: ServiciosCompartidaDTO;
     SupraComarcal: SupraComarcal | string;
+    ServicioDuplicadaDeId?: number;
+    ServiciosCompartidaRegionesDuplicada?: ServiciosCompartidaRegionDTO[];
 }
 export interface ServiciosDTOConvertIndicadores {
     Id?: number;
@@ -125,4 +129,6 @@ export interface ServiciosDTOConvertIndicadores {
     Supracomarcal: SupraComarcal | string;
     ServiciosCompartidaId: number;
     ServiciosCompartida?: ServiciosCompartidaDTO;
+    ServicioDuplicadaDeId?: number;
+    ServiciosCompartidaRegionesDuplicada?: ServiciosCompartidaRegionDTO[];
 }

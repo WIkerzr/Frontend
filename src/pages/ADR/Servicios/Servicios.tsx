@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 
-import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { NavLink } from 'react-router-dom';
 import IconEye from '../../../components/Icon/IconEye';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
+import { ErrorMessage } from '../../../components/Utils/animations';
+import { eliminarServicio } from '../../../components/Utils/data/dataServices';
 import { Boton, formateaConCeroDelante } from '../../../components/Utils/utils';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
 import { Servicios } from '../../../types/GeneralTypes';
 import { servicioIniciadoVacio } from '../../../types/tipadoPlan';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { eliminarServicio } from '../../../components/Utils/data/dataServices';
-import { ErrorMessage } from '../../../components/Utils/animations';
-import { MostrarAvisoCamposServicios } from './ComponentesServicios';
+import { ModalServicio, MostrarAvisoCamposServicios } from './ComponentesServicios';
 import { ejeGeneralServicios } from './EditarServicios';
-import { useRegionContext } from '../../../contexts/RegionContext';
 
 const Index: React.FC = () => {
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -98,6 +98,8 @@ const Index: React.FC = () => {
                         {fila.map((servicio: Servicios) => {
                             let editable = editarPlan || editarMemoria;
                             let nombreEje = '';
+                            let esServicioParticipante = false;
+
                             if (servicio.idEje === 'general') {
                                 nombreEje = i18n.language === 'eu' ? ejeGeneralServicios.NameEu : ejeGeneralServicios.NameEs;
                             } else {
@@ -111,11 +113,13 @@ const Index: React.FC = () => {
                                 if (regionLider) {
                                     colorAccion = 'bg-teal-100';
                                     editable = editable ? true : false;
+                                    esServicioParticipante = false;
                                 }
                                 const regionCooperando = servicio.serviciosCompartidas.regiones?.some((region) => formateaConCeroDelante(`${region.RegionId}`) === regionSeleccionada);
                                 if (regionCooperando) {
                                     colorAccion = 'bg-gray-300';
                                     editable = false;
+                                    esServicioParticipante = true;
                                 }
                             }
                             return (
@@ -138,6 +142,8 @@ const Index: React.FC = () => {
                                         </span>
                                     )}
                                     <div className="flex gap-2 justify-end mt-2">
+                                        {esServicioParticipante && editarPlan && <ModalServicio file={servicio} />}
+
                                         <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
                                             <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio({ ...servicio })}>
                                                 {editable ? <IconPencil /> : <IconEye />}
