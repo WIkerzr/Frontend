@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Dispatch, SetStateAction } from 'react';
-import { Servicios, IndicadoresServiciosDTO, ServiciosDTO } from '../../../types/GeneralTypes';
+import { IndicadoresServiciosDTO, Servicios, ServiciosDTO } from '../../../types/GeneralTypes';
 import { LlamadasBBDD } from './utilsData';
 
 interface GestionServicioProps {
@@ -12,6 +12,7 @@ interface GestionServicioProps {
     setLoading: (a: boolean) => void;
     setSuccessMessage?: Dispatch<SetStateAction<string>>;
     setErrorMessage?: Dispatch<SetStateAction<string>>;
+    duplicacionServicio?: boolean;
 }
 
 export const gestionarServicio = async ({
@@ -23,6 +24,7 @@ export const gestionarServicio = async ({
     setLoading,
     setSuccessMessage,
     setErrorMessage,
+    duplicacionServicio,
 }: GestionServicioProps): Promise<Servicios | undefined> => {
     const indicadoresServiciosDto: IndicadoresServiciosDTO[] = datosEditandoServicio.indicadores.map((i) => ({
         Indicador: i.indicador,
@@ -59,8 +61,11 @@ export const gestionarServicio = async ({
         SupraComarcal: datosEditandoServicio.supraComarcal,
     };
 
-    const url = method === 'POST' ? `services/newService` : `services/${idServicio}/updateService`;
+    let url = method === 'POST' ? `services/newService` : `services/${idServicio}/updateService`;
 
+    if (duplicacionServicio) {
+        url = `services/${idServicio}/duplicateService/`;
+    }
     let resultado: Servicios | undefined = undefined;
 
     return new Promise<Servicios | undefined>((resolve) => {
@@ -120,8 +125,6 @@ export const gestionarServicio = async ({
             },
         });
     });
-
-    return resultado;
 };
 
 interface EliminarServicioProps {

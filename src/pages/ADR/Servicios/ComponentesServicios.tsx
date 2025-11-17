@@ -1,10 +1,20 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
-import { Servicios } from '../../../types/GeneralTypes';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
-import { useTranslation } from 'react-i18next';
+import IconPlus from '../../../components/Icon/IconPlus';
+import { gestionarServicio } from '../../../components/Utils/data/dataServices';
+import { SelectorEje } from '../../../components/Utils/inputs';
+import { NewModal } from '../../../components/Utils/utils';
+import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import React from 'react';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { Servicios } from '../../../types/GeneralTypes';
+import { EjesBBDD, YearData } from '../../../types/tipadoPlan';
+import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
+import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
+import { EjesBBDDToEjes } from '../EjesHelpers';
 
 interface ResultadoValidacionServicios {
     faltanIndicadoresPlan: boolean;
@@ -299,3 +309,135 @@ export const MostrarAvisoCamposServicios: React.FC<MostrarAvisoCamposServiciosPr
 //         );
 //     }
 // );
+
+interface ModalServicioProps {
+    file?: Servicios;
+}
+
+export const ModalServicio: React.FC<ModalServicioProps> = ({ file }) => {
+    const { t, i18n } = useTranslation();
+    const { anioSeleccionada } = useEstadosPorAnio();
+    const { yearData } = useYear();
+
+    const servicioCompartida = file ? true : false;
+    const { setYearData } = useYear();
+
+    const [ejesPlan, setEjesPlan] = useState<EjesBBDD[]>([]);
+
+    const { regionSeleccionada } = useRegionContext();
+    const [idEjeSeleccionado, setIdEjeSeleccionado] = useState('');
+    const [nuevaAccion, setNuevaAccion] = useState('');
+    const [nuevaLineaActuaccion, setNuevaLineaActuaccion] = useState('');
+
+    const [inputError, setInputError] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const isFetchingRef = useRef(false);
+
+    useEffect(() => {
+        setIdEjeSeleccionado(file ? String(file.idEje) : '');
+        setNuevaAccion(file ? file.nombre : '');
+        setNuevaLineaActuaccion(file ? file.lineaActuaccion : '');
+    }, [file]);
+
+    useEffect(() => {
+        if (!loading && ejesPlan.length === 0) {
+            FetchEjesPlan({
+                regionSeleccionada,
+                acciones: 'Servicios',
+                t,
+                i18n,
+                setErrorMessage,
+                setSuccessMessage,
+                setLoading,
+                setEjesPlan,
+                isFetchingRef,
+            });
+        }
+    }, [yearData, loading]);
+
+    const handleServicioNuevo = async () => {
+        if (file) {
+            const servicioNuevo = {
+                ...file,
+                nombre: nuevaAccion,
+                idEje: Number(idEjeSeleccionado),
+                lineaActuaccion: nuevaLineaActuaccion,
+            };
+            const nuevoServicio = await gestionarServicio({
+                idServicio: file.id,
+                datosEditandoServicio: servicioNuevo,
+                regionSeleccionada: regionSeleccionada!,
+                anioSeleccionada: anioSeleccionada!,
+                setLoading,
+                setSuccessMessage,
+                setErrorMessage,
+                method: 'POST',
+                duplicacionServicio: true,
+            });
+            if (nuevoServicio) {
+                (setYearData as unknown as React.Dispatch<React.SetStateAction<YearData>>)((prev: YearData) => ({
+                    ...prev,
+                    servicios: [...(prev.servicios || []), nuevoServicio],
+                }));
+                setShowModal(false);
+            }
+        }
+    };
+
+    return (
+        <>
+            <LoadingOverlayPersonalizada
+                isLoading={loading}
+                enModal={true}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+            />
+
+            <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setShowModal(true)}>
+                <IconPlus />
+            </button>
+            <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('duplicarServicio')}>
+                <div className="space-y-5">
+                    <SelectorEje idEjeSeleccionado={idEjeSeleccionado} setIdEjeSeleccionado={setIdEjeSeleccionado} ejesPlan={ejesPlan} acciones={'Servicios'} />
+                    <div>
+                        <label className="block font-medium mb-1">{t('NombreServicio')}</label>
+                        <input
+                            type="text"
+                            className={`w-full p-2 border rounded ${inputError && !nuevaAccion.trim() ? 'border-red-400' : ''}`}
+                            value={nuevaAccion}
+                            onChange={(e) => {
+                                setNuevaAccion(e.target.value);
+                                setInputError(false);
+                            }}
+                            placeholder={t('inroduceNombreServicio')}
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium mb-1">{t('LineaActuaccion')}</label>
+                        <div style={{ position: 'relative', minHeight: 40 }}>
+                            <DropdownLineaActuaccion
+                                setNuevaLineaActuaccion={setNuevaLineaActuaccion}
+                                lineaActuaccion={servicioCompartida ? nuevaLineaActuaccion : undefined}
+                                idEjeSeleccionado={`${idEjeSeleccionado}`}
+                                ejesPlan={EjesBBDDToEjes(ejesPlan)}
+                                tipoAccion={'AccionesAccesorias'}
+                            />
+                        </div>
+                    </div>
+                    {inputError && <div className="text-xs text-red-500 text-center">{t('rellenarAmbosCampos')}</div>}
+                    <button onClick={handleServicioNuevo} className={`bg-primary text-white px-4 py-2 rounded hover:bg-green-700 w-full mt-2 transition}`}>
+                        {t('guardar')}
+                    </button>
+                </div>
+            </NewModal>
+        </>
+    );
+};

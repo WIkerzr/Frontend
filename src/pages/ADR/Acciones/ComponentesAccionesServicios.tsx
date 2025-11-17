@@ -254,7 +254,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones,
                                 setNuevaAccion(e.target.value);
                                 setInputError(false);
                             }}
-                            placeholder={t('Introduce nombre acción')}
+                            placeholder={t('inroduceNombreAccion')}
                         />
                     </div>
                     <div>
