@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LlamadaArbolArchivos, LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { ApiTarget } from '../../../components/Utils/data/controlDev';
+import { LlamadaArbolArchivos, LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
 import { BuscarNodo, Nodo, TransformarArchivosAFile } from '../../../components/Utils/data/YearData/yearDataTransformData';
 import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { Aviso, Boton } from '../../../components/Utils/utils';
@@ -217,7 +217,7 @@ const Index = () => {
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('adjuntarAnexos', { zona: txtPantalla })}</h3>
                         <AdjuntarArchivos
                             files={planAnexos}
-                            tipoArchivosAceptables="pdf, doc, docx, xls, xlsx, ppt, pptx, jpg, jpeg, png"
+                            tipoArchivosAceptables="pdf, docx, xlsx, pptx, jpg, jpeg, png"
                             setFiles={setPlanAnexos}
                             multiple={true}
                             onBorrar={(fileName?: string) => handleBorrarAnexo(fileName)}
