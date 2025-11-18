@@ -1,14 +1,15 @@
-import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { AdjuntarArchivos } from '../../../components/Utils/inputs';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useYear } from '../../../contexts/DatosAnualContext';
+import { LlamadaArbolArchivos, LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { ApiTarget } from '../../../components/Utils/data/controlDev';
+import { BuscarNodo, Nodo, TransformarArchivosAFile } from '../../../components/Utils/data/YearData/yearDataTransformData';
+import { AdjuntarArchivos } from '../../../components/Utils/inputs';
 import { Aviso, Boton } from '../../../components/Utils/utils';
+import { useYear } from '../../../contexts/DatosAnualContext';
 import { StatusColors, useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
-import { LlamadaArbolArchivos, LlamadaBBDDEnviarArchivoPlanConAnexos } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
-import { BuscarNodo, Nodo, TransformarArchivosAFile } from '../../../components/Utils/data/YearData/yearDataTransformData';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 
 const Index = () => {
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ const Index = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [loadingGuardado, setLoadingGuardado] = useState<boolean>(false);
     const [guardado, setGuardado] = useState<boolean>(false);
+    const [loadingBorrado, setLoadingBorrado] = useState<boolean>(false);
 
     function renombrarFile(file: File, nuevoNombre: string): File {
         return new File([file], nuevoNombre, { type: file.type });
@@ -67,6 +69,41 @@ const Index = () => {
                 setGuardado(true);
             },
         });
+    };
+
+    const handleBorrarAnexo = async (fileName?: string) => {
+        if (!fileName) return;
+        if (!regionSeleccionada) return;
+        setLoadingBorrado(true);
+        setErrorMessage('');
+        setSuccessMessage('');
+        try {
+            const token = sessionStorage.getItem('access_token');
+            const res = await fetch(`${ApiTarget}/yearData/archivosADR/borrar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    RegionId: Number(regionSeleccionada),
+                    Year: Number(yearData.year),
+                    NombreArchivo: fileName,
+                    RutaArchivo: pantalla, // "Plan" o "Memoria"
+                }),
+            });
+            if (!res.ok) {
+                const txt = await res.text();
+                throw new Error(txt || 'Error borrando archivo');
+            }
+            setPlanAnexos((prev) => prev.filter((f) => f.name !== fileName));
+            setSuccessMessage(t('archivoBorradoCorrectamente'));
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Error desconocido';
+            setErrorMessage(msg);
+        } finally {
+            setLoadingBorrado(false);
+        }
     };
 
     useEffect(() => {
@@ -109,6 +146,16 @@ const Index = () => {
         <div className="panel">
             <LoadingOverlayPersonalizada
                 isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
+            <LoadingOverlayPersonalizada
+                isLoading={loadingBorrado}
                 message={{
                     successMessage,
                     setSuccessMessage,
@@ -168,7 +215,13 @@ const Index = () => {
 
                     <section className="panel p-4 shadow-sm">
                         <h3 className="font-semibold text-gray-700 mb-2 text-xl">{t('adjuntarAnexos', { zona: txtPantalla })}</h3>
-                        <AdjuntarArchivos files={planAnexos} setFiles={setPlanAnexos} multiple={true} />
+                        <AdjuntarArchivos
+                            files={planAnexos}
+                            tipoArchivosAceptables="pdf, doc, docx, xls, xlsx, ppt, pptx, jpg, jpeg, png"
+                            setFiles={setPlanAnexos}
+                            multiple={true}
+                            onBorrar={(fileName?: string) => handleBorrarAnexo(fileName)}
+                        />
                     </section>
 
                     <div className="panel p-4 shadow-sm">
