@@ -172,18 +172,7 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones,
     }, [yearData]);
 
     useEffect(() => {
-        if (showModal && file && file.ejeId) {
-            let idEje = '0';
-            if (file.ejeEs) {
-                idEje = yearData.plan.ejes.find((eje) => eje.NameEs === file.ejeEs)?.Id || '0';
-            }
-            if (file.ejeEu) {
-                if ((yearData.plan.ejes.find((eje) => eje.NameEu === file.ejeEu)?.Id || '0') !== idEje) {
-                    idEje = file.ejeId;
-                }
-            }
-
-            setIdEjeSeleccionado(idEje);
+        if (showModal && file) {
             setNuevaAccion(file.accion);
             setNuevaLineaActuaccion(file.lineaActuaccion);
             setNuevaPlurianual(file.plurianual);
@@ -445,6 +434,170 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                     }}
                                 >
                                     {esAccionParticipante && <IconPlus />}
+                                    {editable ? <IconPencil /> : <IconEye />}
+                                </button>
+                                <div>
+                                    {editable === true && (
+                                        <button
+                                            onClick={() => handleDelete(accion.id)}
+                                            aria-label={`Eliminar acción ${accion.id}`}
+                                            className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
+                                        >
+                                            <IconTrash />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <MostrarAvisoCamposAcciones tiposAccion="Acciones" datos={accion} />
+                        </div>
+                    );
+                })}
+                {accionesMostradas.length === 0 && <MostrarAvisoCamposAcciones tiposAccion="Acciones" />}
+            </div>
+        </div>
+    );
+};
+interface ListadoAccionesPropsCompartidas {
+    eje: Ejes;
+    ejeName: string;
+    idEje: string;
+}
+export const ListadoAccionesCompartidas = ({ ejeName, eje, idEje }: ListadoAccionesPropsCompartidas) => {
+    const navigate = useNavigate();
+    const { EliminarAccion, datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
+    const { regionSeleccionada } = useRegionContext();
+    const { editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { t, i18n } = useTranslation();
+
+    const [acciones, setAcciones] = useState<DatosAccion[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+
+    const [navigated, setNavigated] = useState<boolean>(false);
+
+    useEffect(() => {
+        SeleccionVaciarEditarAccion();
+        setNavigated(true);
+    }, []);
+
+    const hasNavigated = useRef(false);
+
+    useEffect(() => {
+        if (!eje) return;
+        const datosEjes: DatosAccion[] = eje.acciones?.filter((accion) => accion.accionCompartida?.regionLider) ?? [];
+
+        setAcciones(datosEjes);
+    }, [eje]);
+
+    useEffect(() => {
+        // Solo navega si datosEditandoAccion.id no es 0
+        if (navigated && !hasNavigated.current && datosEditandoAccion && datosEditandoAccion.id !== '0') {
+            hasNavigated.current = true;
+            navigate('/adr/acciones/editando', {
+                state: {
+                    tipo: 'acciones',
+                    ejeId: datosEditandoAccion.ejeId,
+                    nombreEjeES: datosEditandoAccion.ejeEs,
+                    nombreEjeEU: datosEditandoAccion.ejeEu,
+                },
+            });
+        }
+    }, [datosEditandoAccion, navigate]);
+
+    const handleDelete = (id: string) => {
+        const confirmar = window.confirm(t('confirmacionEliminarAccion'));
+        if (!confirmar) return;
+        EliminarAccion('Acciones', idEje, id);
+    };
+
+    const handleEdit = async (accion: DatosAccion) => {
+        hasNavigated.current = false;
+        let hacerLlamada = true;
+        const dataYearLocal = JSON.parse(sessionStorage.getItem('DataYear') || '{}');
+        if (dataYearLocal && dataYearLocal.plan && dataYearLocal.plan.ejesPrioritarios) {
+            const eje = dataYearLocal.plan.ejesPrioritarios.find((e: Ejes) => e.Id === idEje);
+            if (eje && eje.acciones) {
+                const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${accion.id}`);
+                if (accionDelEje && accionDelEje.datosPlan) {
+                    hacerLlamada = false;
+                    setIdEjeEditado(idEje);
+                    setDatosEditandoAccion(accionDelEje);
+                }
+            }
+        }
+        if (hacerLlamada) {
+            setLoading(true);
+            const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+            const ejesRegion = ejes.ejesEstrategicos;
+            if (!ejesRegion) {
+                await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
+            }
+            await SeleccionEditarAccion(idEje, 'accion', accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
+        }
+    };
+
+    const mostrarInput = acciones.length < 5;
+    const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
+    if (loadingYearData) return <Loading />;
+
+    return (
+        <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
+            <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{ejeName}</span>
+            <LoadingOverlayPersonalizada
+                isLoading={loading}
+                message={{
+                    successMessage,
+                    setSuccessMessage,
+                    errorMessage,
+                    setErrorMessage,
+                }}
+                timeDelay={false}
+            />
+            <div className="space-y-4">
+                {accionesMostradas.map((accion) => {
+                    let editable = editarPlan || editarMemoria;
+                    let esAccionLider = false;
+                    let esAccionParticipante = false;
+
+                    if (accion.accionCompartida?.regionLider) {
+                        const regionLider = formateaConCeroDelante(
+                            typeof accion.accionCompartida.regionLider === 'object' ? accion.accionCompartida.regionLider.RegionId : accion.accionCompartida.regionLider
+                        );
+                        if (regionLider === regionSeleccionada) {
+                            esAccionLider = true;
+                            editable = editable ? true : false;
+                            esAccionParticipante = false;
+                        }
+
+                        if (regionLider != regionSeleccionada) {
+                            esAccionLider = false;
+                            editable = false;
+                            esAccionParticipante = true;
+                        }
+                    }
+
+                    return (
+                        <div key={accion.id} className={`'bg-white' border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col relative`}>
+                            {(esAccionLider || esAccionParticipante) && (
+                                <span className="badge badge-outline-dark text-xs absolute top-2 right-2">
+                                    {esAccionParticipante ? t('supracomarcalGestionada', { tipo: accion.accionCompartida?.regionLider }) : t('txtsupracomarcal')}
+                                </span>
+                            )}
+                            <span className="text-base">{accion.accion}</span>
+                            <span className="text-base">{`${t('Eje')}: ${TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}`}</span>
+                            <span className="block text-sm text-gray-500 text-left font-medium mb-1">
+                                {t('LineaActuaccion')}: {accion.lineaActuaccion}
+                            </span>
+                            <div className="flex gap-2 justify-end mt-2">
+                                {esAccionParticipante && editarPlan && <ModalAccion acciones={'Acciones'} numAcciones={[0]} file={accion} />}
+
+                                <button
+                                    className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
+                                    onClick={() => {
+                                        handleEdit(accion);
+                                    }}
+                                >
                                     {editable ? <IconPencil /> : <IconEye />}
                                 </button>
                                 <div>

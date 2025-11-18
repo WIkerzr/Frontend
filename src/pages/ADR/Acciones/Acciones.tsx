@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ZonaTitulo } from '../../Configuracion/Users/componentes';
-import { useYear } from '../../../contexts/DatosAnualContext';
 import { useNavigate } from 'react-router-dom';
+import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { ListadoAcciones, ModalAccion } from './ComponentesAccionesServicios';
+import { Ejes } from '../../../types/tipadoPlan';
+import { ZonaTitulo } from '../../Configuracion/Users/componentes';
+import { ListadoAcciones, ListadoAccionesCompartidas, ModalAccion } from './ComponentesAccionesServicios';
 
 interface ModalAvisoProps {
     isOpen: boolean;
@@ -36,6 +37,33 @@ const Index: React.FC = () => {
     const navigate = useNavigate();
     const ejesPrioritarios = yearData.plan.ejesPrioritarios;
     const ejesSeleccionados = ejesPrioritarios.slice(0, 3);
+
+    const ejesCompartidosStorage = sessionStorage.getItem('ejesPrioritariosCompartidos');
+    // const [ejesPrioritariosCompartidos, setEjesPrioritariosCompartidos] = useState<Ejes[]>(ejesCompartidosStorage ? JSON.parse(ejesCompartidosStorage) : []);
+    const [ejesPrioritariosCompartidos] = useState<Ejes[]>(ejesCompartidosStorage ? JSON.parse(ejesCompartidosStorage) : []);
+
+    // const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
+    // useEffect(() => {
+    //     if (ejesPrioritarios.length > 0) {
+    //         const todasAcciones = ejesPrioritarios.flatMap((eje) => eje.acciones ?? []);
+    //         const ids = todasAcciones
+    //             .map((a) => a.accionDuplicadaDeId)
+    //             .map((id) => (id == null ? '' : String(id)))
+    //             .filter((id) => id !== '' && id !== '0');
+
+    //         const idsUnicos = Array.from(new Set(ids));
+    //         setRegionesDuplicadas(idsUnicos);
+    //     }
+    // }, [yearData]);
+
+    // useEffect(() => {
+    //     if (ejesPrioritarios.length === 0) return;
+    //     if (regionesDuplicadas.length === 0) return;
+    //     const ejesCompartidos = yearData.plan.ejesPrioritarios.filter((eje) =>
+    //         regionesDuplicadas.includes(String(eje.acciones.find((accion) => regionesDuplicadas.includes(String(accion.accionDuplicadaDeId)))?.accionDuplicadaDeId))
+    //     );
+    //     setEjesPrioritariosCompartidos(ejesCompartidos);
+    // }, [regionesDuplicadas]);
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
@@ -87,6 +115,27 @@ const Index: React.FC = () => {
                                     </>
                                 )}
                                 <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} number={index} />
+                            </div>
+                        );
+                    })}
+                    {ejesPrioritariosCompartidos.map((eje) => {
+                        return (
+                            <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
+                                {selectedId === eje.Id && (
+                                    <>
+                                        {successMessageYearData && (
+                                            <div className={`mt-4 transition-opacity duration-1000 opacity-100}`}>
+                                                <p className="text-green-500">{successMessageYearData}</p>
+                                            </div>
+                                        )}
+                                        {errorMessageYearData && (
+                                            <div>
+                                                <span className="text-red-500 hover:text-red-700">{errorMessageYearData}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                <ListadoAccionesCompartidas eje={eje} ejeName={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} />
                             </div>
                         );
                     })}

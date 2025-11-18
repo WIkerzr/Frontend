@@ -737,6 +737,8 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
             crearEje(eje, acciones, ejesPrioritarios, ejesRestantes);
         });
 
+        const ejesPrioritariosCompartidos: Ejes[] = [];
+        const ejesRestantesCompartidos: Ejes[] = [];
         datosModificadorCompartidos.forEach((eje) => {
             const acciones: DatosAccion[] = eje.Acciones.map((accion: any) => ({
                 id: `${accion.Id}`,
@@ -752,8 +754,17 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
                     regiones: [],
                 },
             }));
-            crearEje(eje, acciones, ejesPrioritarios, ejesRestantes);
+            if (eje.IsAccessory) {
+                crearEje(eje, acciones, ejesPrioritarios, ejesRestantes);
+            } else {
+                crearEje(eje, acciones, ejesPrioritariosCompartidos, ejesRestantesCompartidos);
+            }
         });
+
+        if (ejesPrioritariosCompartidos.length > 0) {
+            sessionStorage.setItem('ejesPrioritariosCompartidos', JSON.stringify(ejesPrioritariosCompartidos));
+        }
+
         data.data.EjesGlobales.forEach((eje: EjeBBDD) => {
             const nuevoEje: Ejes = {
                 Id: `${eje.Id}`,
