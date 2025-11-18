@@ -22,7 +22,7 @@ export const LlamadaBBDDEjesRegion = async (
     return new Promise((resolve, reject) => {
         LlamadasBBDD({
             method: 'GET',
-            url: `/ejes/${regionSeleccionada}`,
+            url: `ejes/${regionSeleccionada}`,
             setLoading: setLoading ?? (() => {}),
             setErrorMessage: message.setErrorMessage,
             setSuccessMessage: message.setSuccessMessage,
@@ -115,7 +115,7 @@ export const LlamadaBBDDTodosEjes = async (
     return new Promise((resolve, reject) => {
         LlamadasBBDD({
             method: 'GET',
-            url: `/ejes`,
+            url: `ejes`,
             setLoading: setLoading ?? (() => {}),
             setErrorMessage: message.setErrorMessage,
             setSuccessMessage: message.setSuccessMessage,

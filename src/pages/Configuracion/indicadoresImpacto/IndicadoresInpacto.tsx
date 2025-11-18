@@ -2,12 +2,12 @@ import { DataTable, DataTableColumn } from 'mantine-datatable';
 import { useEffect, useState } from 'react';
 // import { listadoIndicadoresImpacto, IndicadoresImpacto, categorias, unidadesMedida, Categorias } from './IndicadoresImpactoTEMP';
 import { useTranslation } from 'react-i18next';
-import { SimpleDropdown } from '../../../components/Utils/inputs';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
-import { useRegionContext } from '../../../contexts/RegionContext';
+import { SimpleDropdown } from '../../../components/Utils/inputs';
 import { NewModal, SeleccioneRegion } from '../../../components/Utils/utils';
+import { useRegionContext } from '../../../contexts/RegionContext';
 import { useUser } from '../../../contexts/UserContext';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
 export interface Relaciones {
     IdIndicator: string;
     IdCategoria: string;
@@ -423,7 +423,7 @@ const Index = () => {
                 if (datosOriginales && datosOriginales.datos && datosOriginales.datos[0].Valores) {
                     LlamadasBBDD({
                         method: 'POST',
-                        url: `/indicators/edit/${regionSeleccionada}`,
+                        url: `indicators/edit/${regionSeleccionada}`,
                         body: datosEliminados,
                         setLoading: setLoading ?? (() => {}),
                         onSuccess() {
@@ -864,7 +864,7 @@ const Index = () => {
                                                   setEditableRowIndex(null);
                                                   LlamadasBBDD({
                                                       method: 'POST',
-                                                      url: `/indicators/edit/${regionSeleccionada}`,
+                                                      url: `indicators/edit/${regionSeleccionada}`,
                                                       body: body,
                                                       setLoading: setLoading ?? (() => {}),
                                                       onSuccess(response) {

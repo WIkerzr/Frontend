@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { GetRegionesResponse, RegionInterface, GetProvinceResponse, ProvinceInterface } from '../components/Utils/data/getRegiones';
-import { useUser } from './UserContext';
-import { InitialDataResponse, yearIniciadoVacio } from '../types/tipadoPlan';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { GetProvinceResponse, GetRegionesResponse, ProvinceInterface, RegionInterface } from '../components/Utils/data/getRegiones';
+import { LlamadasBBDD } from '../components/Utils/data/utilsData';
 import { formateaConCeroDelante } from '../components/Utils/utils';
 import { GenerarCodigosRegiones } from '../pages/Configuracion/Indicadores/Components/componentesIndicadores';
-import { useTranslation } from 'react-i18next';
-import { LlamadasBBDD } from '../components/Utils/data/utilsData';
+import { InitialDataResponse, yearIniciadoVacio } from '../types/tipadoPlan';
+import { useUser } from './UserContext';
 
 interface CodRegiones {
     [key: number]: string;
@@ -122,7 +122,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
                 if (!provinciasStr) {
                     LlamadasBBDD({
                         method: 'GET',
-                        url: `/provinces`,
+                        url: `provinces`,
                         setLoading: setLoading,
                         onSuccess: (data: GetProvinceResponse) => {
                             setProvincias(data.data);
@@ -136,7 +136,7 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
             if (!regionesStr) {
                 LlamadasBBDD({
                     method: 'GET',
-                    url: `/regions`,
+                    url: `regions`,
                     setLoading,
                     onSuccess: (response: GetRegionesResponse) => {
                         const regiones = response.data;

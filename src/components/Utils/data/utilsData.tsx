@@ -206,7 +206,7 @@ export const LlamarDescargarArchivo = async ({ message, body, setLoading, ruta }
 export const LlamadaBBDDBorrarArchivo = async ({ message, body, setLoading, ruta, onSuccess }: ArchivoParams) => {
     LlamadasBBDD({
         method: 'POST',
-        url: `/${ruta}`,
+        url: `${ruta}`,
         body: body,
         setLoading: setLoading ?? (() => {}),
         setErrorMessage: message.setErrorMessage,

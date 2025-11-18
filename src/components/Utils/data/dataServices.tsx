@@ -145,7 +145,7 @@ export const eliminarServicio = async ({ idServicio, setLoading, setSuccessMessa
     return new Promise((resolve) => {
         LlamadasBBDD({
             method: 'DELETE',
-            url: `/services/${idServicio}/deleteService`,
+            url: `services/${idServicio}/deleteService`,
             setLoading: setLoading ?? (() => {}),
             setSuccessMessage,
             setErrorMessage,
