@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-import { useTranslation } from 'react-i18next';
-import { Input } from '../../components/Utils/inputs';
-import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
+import { Input } from '../../components/Utils/inputs';
 
 interface PasswordFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
@@ -24,17 +24,33 @@ const PasswordForm: React.FC<PasswordFormProps> = ({ onSubmit, passwordData, onC
     const [mensaje, setMensaje] = useState<string>('');
 
     useEffect(() => {
-        if (passwordData.contraNueva.length != 0) {
-            if (passwordData.contraNueva.length < 8) {
-                setMensaje(t('minimoPassword'));
-                setConditional(false);
-            } else if (passwordData.contraNueva != passwordData.repetirContra) {
-                setMensaje(t('diferentesPassword'));
-                setConditional(false);
-            } else {
-                setMensaje('');
-                setConditional(true);
-            }
+        const nueva = passwordData.contraNueva || '';
+        const repetir = passwordData.repetirContra || '';
+
+        if (nueva.length === 0) {
+            setMensaje('');
+            setConditional(false);
+            return;
+        }
+
+        const faltantes: string[] = [];
+        if (nueva.length < 12) faltantes.push(t('passwordLongitud12'));
+        if (!/[a-z]/.test(nueva)) faltantes.push(t('passwordMinuscula'));
+        if (!/[A-Z]/.test(nueva)) faltantes.push(t('passwordMayuscula'));
+        if (!/\d/.test(nueva)) faltantes.push(t('passwordNumero'));
+        // Caracter especial: cualquier no alfanumérico
+        if (!/[^A-Za-z0-9]/.test(nueva)) faltantes.push(t('passwordEspecial'));
+
+        if (repetir.length > 0 && nueva !== repetir) {
+            faltantes.push(t('diferentesPassword'));
+        }
+
+        if (faltantes.length > 0) {
+            setMensaje(`${t('passwordRequisitosFaltantes')} ${faltantes.join(', ')}`);
+            setConditional(false);
+        } else {
+            setMensaje('');
+            setConditional(true);
         }
     }, [passwordData, t]);
     return (
