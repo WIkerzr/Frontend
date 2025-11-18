@@ -294,6 +294,7 @@
     "origenFPublicas": "Origen de la financiación pública",
     "OTRO": "OTRO",
     "paginacion": "Mostrando {{from}} de {{to}} con {{totalRecords}} entradas",
+    "pesoMaximo": "Peso máximo permitido por archivo: 5 MB.",
     "PCDR": "PCDR",
     "MuestrasInteres": "Muestra de interés",
     "Plan": "Plan",

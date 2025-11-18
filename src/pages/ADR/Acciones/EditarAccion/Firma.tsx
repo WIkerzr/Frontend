@@ -146,9 +146,7 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
                         </span>
                     </div>
                 )}
-                <div className="flex justify-center">
-                    <Boton tipo="guardar" disabled={firma.length === 0} textoBoton={`${t('descargar')}`} onClick={() => handleClick(firma[0].name, 0, 'Firma')} />
-                </div>
+                <div className="flex justify-center">{firma.length != 0 && <Boton tipo="guardar" textoBoton={`${t('descargar')}`} onClick={() => handleClick(firma[0].name, 0, 'Firma')} />}</div>
 
                 {editarPlan && (
                     <div className="flex justify-center">

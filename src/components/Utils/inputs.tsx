@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { useTranslation } from 'react-i18next';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRegionContext } from '../../contexts/RegionContext';
 import { useUser } from '../../contexts/UserContext';
 import { UserRole } from '../../types/users';
-import { useRegionContext } from '../../contexts/RegionContext';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     nombreInput: string;
@@ -380,6 +380,7 @@ interface AttachProps {
     title?: string;
     borrar?: boolean;
     btnPlantillas?: boolean;
+    onBorrar?: (filename?: string) => void;
     onRestaurar?: () => void;
     hideRestaurar?: boolean;
 }
@@ -388,7 +389,7 @@ export function isImage(file: File) {
     return /^image\//.test(file.type);
 }
 
-export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAceptables, multiple, title, borrar = true, btnPlantillas, onRestaurar, hideRestaurar }: AttachProps) => {
+export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAceptables, multiple, title, borrar = true, btnPlantillas, onBorrar, onRestaurar, hideRestaurar }: AttachProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
     const [isDragging, setIsDragging] = useState(false);
@@ -416,7 +417,7 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
         }
         const archivosDemasiadoGrandes = newFiles.filter((file) => file.size > MAX_FILE_SIZE);
         if (archivosDemasiadoGrandes.length > 0) {
-            alert('Peso máximo permitido por archivo: 5 MB.\n' + archivosDemasiadoGrandes.map((f) => f.name).join(', '));
+            alert(t('pesoMaximo') + '\n' + archivosDemasiadoGrandes.map((f) => f.name).join(', '));
             return;
         }
         if (multiple) {
@@ -463,7 +464,7 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
 
         const archivosDemasiadoGrandes = newFiles.filter((file) => file.size > MAX_FILE_SIZE);
         if (archivosDemasiadoGrandes.length > 0) {
-            alert('Peso máximo permitido por archivo: 5 MB.\n' + archivosDemasiadoGrandes.map((f) => f.name).join(', '));
+            alert(t('pesoMaximo') + '\n' + archivosDemasiadoGrandes.map((f) => f.name).join(', '));
             return;
         }
 
@@ -493,6 +494,14 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
         };
     }, [files]);
 
+    const normalizarAccept = (tipos: string): string => {
+        return tipos
+            .split(',')
+            .map((t) => t.trim())
+            .map((t) => (t.startsWith('.') ? t : `.${t}`))
+            .join(',');
+    };
+
     return (
         <div className="mb-5 flex flex-col">
             {title && <span className="mb-1">{title}</span>}
@@ -509,27 +518,14 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                         onDragLeave={handleDragLeave}
                     >
                         {t('inputArchivos')}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept={
-                                tipoArchivosAceptables
-                                    ? tipoArchivosAceptables.startsWith('.') || tipoArchivosAceptables.includes('/')
-                                        ? tipoArchivosAceptables
-                                        : `.${(tipoArchivosAceptables || '').toLowerCase()}`
-                                    : '*'
-                            }
-                            multiple={multiple}
-                            style={{ display: 'none' }}
-                            onChange={handleChange}
-                        />
+                        <input ref={fileInputRef} type="file" accept={normalizarAccept(tipoArchivosAceptables || '.pdf')} multiple={multiple} style={{ display: 'none' }} onChange={handleChange} />
                     </div>
                     <button type="button" className="px-4 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-all" onClick={() => fileInputRef.current?.click()}>
                         {t('Explorar')}
                     </button>
                 </div>
             )}
-            {!disabled && <div className="text-xs text-gray-500 mt-1">Peso máximo permitido por archivo: 5 MB.</div>}
+            {!disabled && <div className="text-xs text-gray-500 mt-1">{t('pesoMaximo')}</div>}
             <div className="mt-4 space-y-2">
                 {files.map((file, idx) => (
                     <div key={file.name + idx} className="flex items-center gap-2 p-2 border rounded bg-gray-50">
@@ -543,6 +539,9 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
                                     onClick={() => {
                                         const newFiles = files.filter((_, i) => i !== idx);
                                         setFiles(newFiles);
+                                        if (onBorrar) {
+                                            onBorrar(file.name);
+                                        }
                                     }}
                                     aria-label={`Eliminar archivo ${file.name}`}
                                 >
@@ -585,11 +584,11 @@ export const AdjuntarArchivos = ({ files, setFiles, disabled, tipoArchivosAcepta
     );
 };
 
-import CreatableSelect from 'react-select/creatable';
 import { SingleValue } from 'react-select';
-import { EjesBBDD } from '../../types/tipadoPlan';
+import CreatableSelect from 'react-select/creatable';
 import { TiposAccion } from '../../contexts/DatosAnualContext';
 import { Informes, tiposInformes } from '../../pages/Configuracion/Informes/Informes';
+import { EjesBBDD } from '../../types/tipadoPlan';
 import { Boton, downloadFile, formateaConCeroDelante } from './utils';
 interface OptionType {
     value: string;

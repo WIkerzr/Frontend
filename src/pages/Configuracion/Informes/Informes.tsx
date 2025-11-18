@@ -1,23 +1,23 @@
-import { useTranslation } from 'react-i18next';
-import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
-import { SelectorInformes } from '../../../components/Utils/inputs';
-import { useEffect, useState } from 'react';
-import Multiselect from 'multiselect-react-dropdown';
-import { useRegionContext } from '../../../contexts/RegionContext';
-import { RegionInterface } from '../../../components/Utils/data/getRegiones';
-import { Boton } from '../../../components/Utils/utils';
-import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
-import { GenerarInformePrestamo } from './informePresupuesto';
-import { GenerarInformeObjetivos, crearGeneradorNombresUnicos } from './informeObjetivo';
-import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
-import { generarInformeAcciones } from './informeAcciones';
-import { generarInformeTratamientoComarcal, generarInformeTratamientoComarcalSeparado } from './InformesTratamientoComarcal';
-import { generarInformeIndicadoresImpacto } from './informeIndicadoresImpacto';
-import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
-import { useUser } from '../../../contexts/UserContext';
+import { Checkbox } from '@mantine/core';
 import ExcelJS from 'exceljs';
 import saveAs from 'file-saver';
-import { Checkbox } from '@mantine/core';
+import Multiselect from 'multiselect-react-dropdown';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RegionInterface } from '../../../components/Utils/data/getRegiones';
+import { LlamadasBBDD } from '../../../components/Utils/data/utilsData';
+import { SelectorInformes } from '../../../components/Utils/inputs';
+import { Boton } from '../../../components/Utils/utils';
+import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useIndicadoresContext } from '../../../contexts/IndicadoresContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { useUser } from '../../../contexts/UserContext';
+import { LoadingOverlayPersonalizada, ZonaTitulo } from '../Users/componentes';
+import { generarInformeAcciones } from './informeAcciones';
+import { generarInformeIndicadoresImpacto } from './informeIndicadoresImpacto';
+import { GenerarInformeObjetivos, crearGeneradorNombresUnicos } from './informeObjetivo';
+import { GenerarInformePrestamo } from './informePresupuesto';
+import { generarInformeTratamientoComarcal, generarInformeTratamientoComarcalSeparado } from './InformesTratamientoComarcal';
 
 export type Informes =
     | 'InfObjetivos'
@@ -532,16 +532,16 @@ const Index = () => {
                     <div className="panel w-[300px] ">
                         <SelectorInformes informeSeleccionado={informeSeleccionado} setInformeSeleccionado={setInformeSeleccionado} SeparadosComarcas={SeparadosComarcas} />
                     </div>
-                    <div className="panel w-[120px] ">
-                        {user && user.role === 'HAZI' && informeSeleccionado != 'InfIndicadoresImpacto' && (
+                    {user && user.role === 'HAZI' && informeSeleccionado != 'InfIndicadoresImpacto' && (
+                        <div className="panel w-[120px] ">
                             <div className="flex flex-col items-center h-10 ">
                                 <label className="w-[110px] text-center">{t('informesSeparados')}</label>
                                 <Checkbox className="mt-2" checked={SeparadosComarcas} title={t('informesSeparados')} onChange={(e) => setSeparadosComarcas(e.target.checked)} />
                             </div>
-                        )}
-                    </div>
-                    <div className="panel flex-1">
-                        {user && user.role === 'HAZI' && (
+                        </div>
+                    )}
+                    {user && user.role === 'HAZI' && (
+                        <div className="panel flex-1">
                             <div className="w-full resize-y ">
                                 <label className="block mb-1 w-full">{t('seleccionaComarca')}</label>
                                 <div className="flex flex-row gap-x-4 w-full">
@@ -588,8 +588,8 @@ const Index = () => {
                                     {/* <Boton tipo="guardar" textoBoton={t('descargar')} onClick={handlePruebas} /> */}
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-col items-center w-full mt-4">

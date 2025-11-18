@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ApiTarget } from '../../components/Utils/data/controlDev';
 import { LlamadasBBDD } from '../../components/Utils/data/utilsData';
-import { LoadingOverlayPersonalizada } from './Users/componentes';
 import { AdjuntarArchivos } from '../../components/Utils/inputs';
 import { Boton } from '../../components/Utils/utils';
-import { ApiTarget } from '../../components/Utils/data/controlDev';
+import { LoadingOverlayPersonalizada } from './Users/componentes';
 
 export const plantillasOriginales = [
     { url: '/Plantillas/plantillaPlanEsOriginal.docx', name: 'plantillaPlanEsOriginal.docx' },
@@ -84,44 +84,6 @@ const Index = () => {
         };
         loadDefaultFiles();
     }, [plantillaPlanEs, plantillaPlanEu, plantillaMemoriaEs, plantillaMemoriaEu, primeraLlamada]);
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         setLoading(true);
-
-    //         try {
-    //             const accessToken = sessionStorage.getItem('access_token');
-
-    //             const res = await fetch(`${ApiTarget}/plantillas/download/all`, {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     Authorization: `Bearer ${accessToken}`,
-    //                 },
-    //             });
-
-    //             if (!res.ok) {
-    //                 const text = await res.text();
-    //                 setErrorMessage(`Error en la carga de plantillas: ${text}`);
-    //                 throw new Error(text);
-    //             }
-
-    //             const data = await res.json();
-
-    //             // setPlantillaPlanEs(files[0]);
-    //             // setPlantillaPlanEu(data.files[1]);
-    //             // setPlantillaMemoriaEs(data.files[2]);
-    //             // setPlantillaMemoriaEu(data.files[3]);
-    //             setSuccessMessage('Archivos cargados correctamente');
-
-    //             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //         } catch (err: any) {
-    //             setErrorMessage(`Error en la petición: ${err.message}`);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //     fetchData();
-    // }, []);
 
     const handleGuardar = async () => {
         const formData = new FormData();
@@ -225,6 +187,7 @@ const Index = () => {
                         }}
                         title={t('plantillaPlanEs')}
                         borrar={false}
+                        tipoArchivosAceptables="docx"
                         btnPlantillas={true}
                         onRestaurar={() => handleRestaurarPlantilla('planES')}
                         hideRestaurar={isPlanEsOriginal}
@@ -237,6 +200,7 @@ const Index = () => {
                         }}
                         title={t('plantillaPlanEu')}
                         borrar={false}
+                        tipoArchivosAceptables="docx"
                         btnPlantillas={true}
                         onRestaurar={() => handleRestaurarPlantilla('planEU')}
                         hideRestaurar={isPlanEuOriginal}
@@ -254,6 +218,7 @@ const Index = () => {
                         }}
                         title={t('plantillaMemoriaEs')}
                         borrar={false}
+                        tipoArchivosAceptables="docx"
                         btnPlantillas={true}
                         onRestaurar={() => handleRestaurarPlantilla('memoriaEs')}
                         hideRestaurar={isMemoriaEsOriginal}
@@ -266,6 +231,7 @@ const Index = () => {
                         }}
                         title={t('plantillaMemoriaEu')}
                         borrar={false}
+                        tipoArchivosAceptables="docx"
                         btnPlantillas={true}
                         onRestaurar={() => handleRestaurarPlantilla('memoriaEu')}
                         hideRestaurar={isMemoriaEuOriginal}

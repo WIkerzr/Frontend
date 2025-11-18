@@ -187,6 +187,7 @@
     "fecha": "Data",
     "finalizar": "{{zona}} amaitu",
     "finalizarYEnviar": "{{zona}} amaitu eta bidali",
+    "pesoMaximo": "Fitxategi bakoitzeko onartutako pisu maximoa: 5 MB.",
     "firma": "Sinadura",
     "fPublicas": "Finantzaketa publikoak",
     "fuenteDeFinanciacion": "Finantzaketa iturria",
