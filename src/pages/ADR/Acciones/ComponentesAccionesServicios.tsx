@@ -400,6 +400,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     let editable = editarPlan || editarMemoria;
                     let colorAccion = 'bg-white';
                     let esAccionLider = false;
+                    let esAccionParticipante = false;
 
                     if (accion.accionCompartida?.regionLider) {
                         const regionLider = formateaConCeroDelante(
@@ -411,6 +412,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                         }
 
                         if (regionLider != regionSeleccionada) {
+                            esAccionParticipante = true;
                             editable = false;
                             esAccionLider = false;
                         }
@@ -421,7 +423,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 
                     return (
                         <div key={accion.id} className={`${colorAccion} relative border border-gray-200 px-6 py-8 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
-                            {esAccionLider && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>}
+                            {(esAccionLider || esAccionParticipante) && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>}
                             <span className="text-base">{accion.accion}</span>
                             <span className="text-base">{`${t('Eje')}: ${TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}`}</span>
                             <span className="block text-sm text-gray-500 text-left font-medium mb-1">
@@ -517,7 +519,7 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
     const mostrarInput = acciones.length < 5;
     const accionesMostradas = mostrarInput ? acciones.slice(0, 5 - 1) : acciones.slice(0, 5);
     if (loadingYearData) return <Loading />;
-
+    if (accionesMostradas.length === 0) return;
     return (
         <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
             <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">
@@ -670,6 +672,7 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
             </div>
         );
     }
+
     if (datos.camposFaltantes === 'verificado') return;
     let faltanCamposPlan = false;
     let faltanCamposMemoria = false;
@@ -697,7 +700,9 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
             }
         }
     } else {
-        faltanIndicadores = !VerificadorIndicadores(datos, editarPlan, editarMemoria);
+        if (datos.indicadorAccion) {
+            faltanIndicadores = !VerificadorIndicadores(datos, editarPlan, editarMemoria);
+        }
         const camposFaltantes = VerificarAccionFinal(datos, editarPlan, false, tiposAccion, true);
         const camposFaltantesMem = VerificarAccionFinal(datos, editarPlan, true, tiposAccion, true);
         faltanCamposPlan = camposFaltantes ? camposFaltantes.length != 0 : false;

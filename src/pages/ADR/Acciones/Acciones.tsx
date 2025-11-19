@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { DatosAccion } from '../../../types/TipadoAccion';
 import { Ejes } from '../../../types/tipadoPlan';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { ListadoAcciones, ListadoAccionesCompartidas, ModalAccion } from './ComponentesAccionesServicios';
@@ -39,31 +40,31 @@ const Index: React.FC = () => {
     const ejesSeleccionados = ejesPrioritarios.slice(0, 3);
 
     const ejesCompartidosStorage = sessionStorage.getItem('ejesPrioritariosCompartidos');
-    // const [ejesPrioritariosCompartidos, setEjesPrioritariosCompartidos] = useState<Ejes[]>(ejesCompartidosStorage ? JSON.parse(ejesCompartidosStorage) : []);
-    const [ejesPrioritariosCompartidos] = useState<Ejes[]>(ejesCompartidosStorage ? JSON.parse(ejesCompartidosStorage) : []);
+    const [ejesPrioritariosCompartidos, setEjesPrioritariosCompartidos] = useState<Ejes[]>(ejesCompartidosStorage ? JSON.parse(ejesCompartidosStorage) : []);
 
-    // const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
-    // useEffect(() => {
-    //     if (ejesPrioritarios.length > 0) {
-    //         const todasAcciones = ejesPrioritarios.flatMap((eje) => eje.acciones ?? []);
-    //         const ids = todasAcciones
-    //             .map((a) => a.accionDuplicadaDeId)
-    //             .map((id) => (id == null ? '' : String(id)))
-    //             .filter((id) => id !== '' && id !== '0');
+    const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
+    useEffect(() => {
+        if (ejesPrioritarios.length > 0) {
+            const todasAcciones = ejesPrioritarios.flatMap((eje) => eje.acciones ?? []);
+            const ids = todasAcciones
+                .map((a) => a.accionDuplicadaDeId)
+                .map((id) => (id == null ? '' : String(id)))
+                .filter((id) => id !== '' && id !== '0');
 
-    //         const idsUnicos = Array.from(new Set(ids));
-    //         setRegionesDuplicadas(idsUnicos);
-    //     }
-    // }, [yearData]);
+            const idsUnicos = Array.from(new Set(ids));
+            setRegionesDuplicadas(idsUnicos);
+        }
+    }, [yearData]);
 
-    // useEffect(() => {
-    //     if (ejesPrioritarios.length === 0) return;
-    //     if (regionesDuplicadas.length === 0) return;
-    //     const ejesCompartidos = yearData.plan.ejesPrioritarios.filter((eje) =>
-    //         regionesDuplicadas.includes(String(eje.acciones.find((accion) => regionesDuplicadas.includes(String(accion.accionDuplicadaDeId)))?.accionDuplicadaDeId))
-    //     );
-    //     setEjesPrioritariosCompartidos(ejesCompartidos);
-    // }, [regionesDuplicadas]);
+    useEffect(() => {
+        if (ejesPrioritarios.length === 0) return;
+        if (regionesDuplicadas.length === 0) return;
+        const ejesCompartidos = yearData.plan.ejesPrioritarios.filter((eje) =>
+            regionesDuplicadas.includes(String(eje.acciones.find((accion) => regionesDuplicadas.includes(String(accion.accionDuplicadaDeId)))?.accionDuplicadaDeId))
+        );
+
+        setEjesPrioritariosCompartidos(ejesCompartidos);
+    }, [regionesDuplicadas]);
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
@@ -118,7 +119,10 @@ const Index: React.FC = () => {
                             </div>
                         );
                     })}
+
                     {ejesPrioritariosCompartidos.map((eje) => {
+                        const datosEjes: DatosAccion[] = eje.acciones?.filter((accion) => accion.accionCompartida?.regionLider) ?? [];
+                        if (datosEjes.length === 0) return;
                         return (
                             <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
                                 <ListadoAccionesCompartidas eje={eje} idEje={eje.Id} />

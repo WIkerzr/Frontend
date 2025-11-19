@@ -1,28 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { forwardRef, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useYear } from '../../../contexts/DatosAnualContext';
-import { Ejes, GeneralOperationADR, Memoria, MemoriaLlamadaGestion, OperationalIndicators, Plan, YearData } from '../../../types/tipadoPlan';
+import { nanoid } from '@reduxjs/toolkit';
 import Tippy from '@tippyjs/react';
-import { DataTableSortStatus, DataTable } from 'mantine-datatable';
+import { t } from 'i18next';
+import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrash from '../../../components/Icon/IconTrash';
-import { Aviso, Boton, NewModal } from '../../../components/Utils/utils';
-import { IRootState } from '../../../store';
-import { Input } from '../../../components/Utils/inputs';
-import { nanoid } from '@reduxjs/toolkit';
-import { t } from 'i18next';
-import { useUser } from '../../../contexts/UserContext';
-import { useEstadosPorAnio, useEstadosPorAnioContext } from '../../../contexts/EstadosPorAnioContext';
-import { LlamadaBBDDActualizarMemoria, LlamadaBBDDActualizarPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
-import { useRegionContext } from '../../../contexts/RegionContext';
-import { Servicios } from '../../../types/GeneralTypes';
-import { VerificarCamposIndicadoresPorRellenar, VerificarAccionFinal, VerificadorIndicadores } from '../Acciones/EditarAccion/EditarAccionComponent';
-import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
-import React from 'react';
 import { ComprobacionYAvisosDeCambios } from '../../../components/Utils/animations';
+import { LlamadaBBDDActualizarMemoria, LlamadaBBDDActualizarPlan } from '../../../components/Utils/data/YearData/dataGestionPlanMemoria';
+import { Input } from '../../../components/Utils/inputs';
+import { Aviso, Boton, NewModal } from '../../../components/Utils/utils';
+import { useYear } from '../../../contexts/DatosAnualContext';
+import { useEstadosPorAnio, useEstadosPorAnioContext } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
+import { useUser } from '../../../contexts/UserContext';
+import { IRootState } from '../../../store';
+import { Servicios } from '../../../types/GeneralTypes';
+import { Ejes, GeneralOperationADR, Memoria, MemoriaLlamadaGestion, OperationalIndicators, Plan, YearData } from '../../../types/tipadoPlan';
+import { LoadingOverlayPersonalizada } from '../../Configuracion/Users/componentes';
+import { VerificadorIndicadores, VerificarAccionFinal, VerificarCamposIndicadoresPorRellenar } from '../Acciones/EditarAccion/EditarAccionComponent';
 
 export type PlanOMemoria = 'Plan' | 'Memoria';
 
@@ -596,6 +595,7 @@ export function validarAccionesEjesAccesorias(ejes: Ejes[], editarPlan: boolean,
         if (!eje.IsAccessory) return true;
         if (eje.acciones.length === 0) return false;
         return eje.acciones.every((accion) => {
+            if (accion.accionPrioritaria) return true;
             const indicadoresCorrecto = VerificadorIndicadores(accion, editarPlan, editarMemoria);
             const camposFaltantes = VerificarAccionFinal(accion, editarPlan, false, 'AccionesAccesorias', true);
             const camposFaltantesMem = VerificarAccionFinal(accion, editarPlan, true, 'AccionesAccesorias', true);

@@ -895,20 +895,22 @@ export const RegionDataProvider = ({ children }: { children: ReactNode }) => {
         const ejesPrioritariosCompartidos: Ejes[] = [];
         const ejesRestantesCompartidos: Ejes[] = [];
         datosModificadorCompartidos.forEach((eje) => {
-            const acciones: DatosAccion[] = eje.Acciones.map((accion: any) => ({
-                id: `${accion.Id}`,
-                accion: accion.Nombre,
-                ejeEs: eje.EjeGlobal.NameEs,
-                ejeEu: eje.EjeGlobal.NameEu,
-                lineaActuaccion: accion.LineaActuaccion,
-                plurianual: accion.Plurianual,
-                camposFaltantes: accion.CamposFaltantes,
-                accionPrioritaria: accion.AccionPrioritaria,
-                accionCompartida: {
-                    regionLider: accion.RegionLiderId,
-                    regiones: [],
-                },
-            }));
+            const acciones: DatosAccion[] = todasLasAcciones
+                ? accionesTransformadasBackAFront(eje)
+                : eje.Acciones.map((accion: any) => ({
+                      id: `${accion.Id}`,
+                      accion: accion.Nombre,
+                      ejeEs: eje.EjeGlobal.NameEs,
+                      ejeEu: eje.EjeGlobal.NameEu,
+                      lineaActuaccion: accion.LineaActuaccion,
+                      plurianual: accion.Plurianual,
+                      camposFaltantes: accion.CamposFaltantes,
+                      accionPrioritaria: accion.AccionPrioritaria,
+                      accionCompartida: {
+                          regionLider: accion.RegionLiderId,
+                          regiones: [],
+                      },
+                  }));
             if (eje.IsAccessory) {
                 crearEje(eje, acciones, ejesPrioritarios, ejesRestantes);
             } else {

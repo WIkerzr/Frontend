@@ -135,7 +135,7 @@ const Index: React.FC = () => {
             await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
         }
     };
-
+    if (accionesGrup.length === 0) return;
     return (
         <div className="panel">
             <LoadingOverlayPersonalizada
