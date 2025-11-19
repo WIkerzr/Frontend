@@ -17,6 +17,7 @@ import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
 import { useRegionContext } from '../../../contexts/RegionContext';
 import { opcionesSupraComarcal, Servicios } from '../../../types/GeneralTypes';
+import { DatosAccion } from '../../../types/TipadoAccion';
 import { EjesBBDD, YearData } from '../../../types/tipadoPlan';
 import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Users/componentes';
 import { DropdownLineaActuaccion, FetchEjesPlan } from '../Acciones/ComponentesAccionesServicios';
@@ -32,6 +33,10 @@ export const ejeGeneralServicios: EjesBBDD = {
     acciones: [],
     LineasActuaccion: [],
 };
+
+function convertirIndicadoresAccionAServicio(datosEditandoAccion: DatosAccion) {
+    return ConvertirIndicadoresAccionAServicio(datosEditandoAccion.indicadorAccion);
+}
 
 const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -128,6 +133,7 @@ const Index: React.FC = () => {
     const handleChangeCampos = (campo: keyof Servicios, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setDatosEditandoServicio({
             ...datosEditandoServicio,
+            indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
             [campo]: e.target.value || '',
         });
     };
@@ -136,6 +142,7 @@ const Index: React.FC = () => {
         if (!lineaActuaccion || lineaActuaccion === '') return;
         setDatosEditandoServicio({
             ...datosEditandoServicio,
+            indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
             lineaActuaccion: lineaActuaccion,
         });
     }, [lineaActuaccion]);
@@ -392,7 +399,7 @@ const Index: React.FC = () => {
                 <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                     <TabPanels>
                         <TabPanel>
-                            <PestanaIndicadores bloqueo={bloqueo} />
+                            <PestanaIndicadores bloqueo={bloqueo} contolCompartido={!datosEditandoServicio?.ServicioDuplicadaDeId} />
                         </TabPanel>
                         <TabPanel>
                             <div className="p-5 flex flex-col gap-4 w-full">
@@ -478,7 +485,7 @@ interface RegionSelectProps {
 }
 const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
     const { t, i18n } = useTranslation();
-    const { datosEditandoServicio, setDatosEditandoServicio } = useYear();
+    const { datosEditandoServicio, setDatosEditandoServicio, datosEditandoAccion } = useYear();
     const { regiones, regionActual } = useRegionContext();
     const [regionesSupracomarcal, setRegionesSupracomarcal] = useState<boolean>(false);
     const opcionesSupraComarcalSegunIdioma = t('object:opcionesSupraComarcal', { returnObjects: true }) as string[];
@@ -526,6 +533,13 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
 
     const handleChangeCheckboxSupracomarcal = (supracomarcal: boolean) => {
         if (bloqueo) return;
+        const realizaciones = datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? [];
+        const resultados = datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? [];
+
+        if (supracomarcal && (realizaciones.some((ind) => ind.descripcion?.[4] !== '.') || resultados.some((ind) => ind.descripcion?.[4] !== '.'))) {
+            alert(t('error:errorIndicadoresNoValidoParaSupracomarcal'));
+            return;
+        }
         if (supracomarcal) {
             if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
                 alert(t('error:errorFaltaRegionLider'));
@@ -534,32 +548,38 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
             if (!datosEditandoServicio?.serviciosCompartidaId) {
                 setDatosEditandoServicio({
                     ...datosEditandoServicio,
-                    serviciosCompartidas: {
-                        idCompartida: datosEditandoServicio?.serviciosCompartidaId,
-                        regionLider: {
-                            id: regionActual.RegionId,
-                            RegionId: regionActual.RegionId,
-                            NameEs: '',
-                            NameEu: '',
-                        },
-                        regiones: [],
-                    },
+                    indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
+                    serviciosCompartidas: undefined,
+                    // serviciosCompartidas: {
+                    //     idCompartida: datosEditandoServicio?.serviciosCompartidaId,
+                    //     regionLider: {
+                    //         id: regionActual.RegionId,
+                    //         RegionId: regionActual.RegionId,
+                    //         NameEs: '',
+                    //         NameEu: '',
+                    //     },
+                    //     regiones: [],
+                    // },
                 });
             }
         } else {
             if (!datosEditandoServicio?.serviciosCompartidaId) {
                 setDatosEditandoServicio({
                     ...datosEditandoServicio,
+                    indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
                     serviciosCompartidas: undefined,
                 });
             } else {
                 setDatosEditandoServicio({
                     ...datosEditandoServicio,
-                    serviciosCompartidas: {
-                        idCompartida: datosEditandoServicio?.serviciosCompartidaId,
-                        regiones: [],
-                        regionLider: datosEditandoServicio.serviciosCompartidas!.regionLider,
-                    },
+                    indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
+                    serviciosCompartidas: undefined,
+
+                    // serviciosCompartidas: {
+                    //     idCompartida: datosEditandoServicio?.serviciosCompartidaId,
+                    //     regiones: [],
+                    //     regionLider: datosEditandoServicio.serviciosCompartidas!.regionLider,
+                    // },
                 });
             }
             setDataMultiselect([]);
@@ -571,6 +591,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
         if (bloqueo) return;
         setDatosEditandoServicio({
             ...datosEditandoServicio,
+            indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
             supraComarcal: e.target.value || '',
         });
     };
@@ -581,6 +602,7 @@ const Supracomarcal: React.FC<RegionSelectProps> = ({ bloqueo }) => {
 
         setDatosEditandoServicio({
             ...datosEditandoServicio,
+            indicadores: convertirIndicadoresAccionAServicio(datosEditandoAccion),
             serviciosCompartidas: {
                 regionLider: {
                     RegionId: regionActual?.RegionId ?? '0',

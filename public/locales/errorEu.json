@@ -22,5 +22,6 @@
   "errorAnioFinMenorInicio": "Amaiera urtea hasiera urtea baino handiagoa izan behar da",
   "errorAnioInicioMayorFin": "Hasiera urtea amaiera urtea baino txikiagoa izan behar da",
   "errorDebeRellenarAmbosAnios": "Tarteko bi urteak bete behar dituzu",
-  "localStorageNotFound": "Error al leer usuario de localStorage"
+  "localStorageNotFound": "Errorea localStorage-ko erabiltzailea irakurtzean",
+  "errorIndicadoresNoValidoParaSupracomarcal": "Suprakomarkako ekintzetarako baliogabeko adierazleak daude"
 }

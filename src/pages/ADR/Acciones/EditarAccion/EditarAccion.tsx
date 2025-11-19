@@ -394,7 +394,7 @@ const Index: React.FC = () => {
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>
                             <TabPanel>
-                                <PestanaIndicadores bloqueo={bloqueo} />
+                                <PestanaIndicadores bloqueo={bloqueo} contolCompartido={!datosEditandoAccion?.accionDuplicadaDeId} />
                             </TabPanel>
                             <TabPanel>
                                 <PestanaPlan />

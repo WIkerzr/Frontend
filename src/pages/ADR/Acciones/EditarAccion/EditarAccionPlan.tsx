@@ -181,9 +181,16 @@ export const PestanaPlan = forwardRef<HTMLButtonElement>(() => {
     };
 
     const handleChangeCheckboxSupracomarcal = (supracomarcal: boolean) => {
+        const realizaciones = datosEditandoAccion.indicadorAccion?.indicadoreRealizacion ?? [];
+        const resultados = datosEditandoAccion.indicadorAccion?.indicadoreResultado ?? [];
+
+        if (supracomarcal && (realizaciones.some((ind) => ind.descripcion?.[4] !== '.') || resultados.some((ind) => ind.descripcion?.[4] !== '.'))) {
+            alert(t('error:errorIndicadoresNoValidoParaSupracomarcal'));
+            return;
+        }
         if (supracomarcal) {
             if (!regionActual || (typeof regionActual === 'object' && Object.keys(regionActual).length === 0)) {
-                alert(t('error:errorFaltaRegionLider'));
+                alert(t('error:errorIndicadoresNoValidoParaSupracomarcal'));
                 return;
             }
             setDatosEditandoAccion({

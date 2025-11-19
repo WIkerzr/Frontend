@@ -83,6 +83,7 @@
     "confirmarEliminar": "¿Seguro que quieres eliminar {{nombre}}?",
     "confirmarEliminarIndicador": "¿Esta seguro que quiere eliminar el indicador?",
     "confirmarEliminarIndicadorResultados": "Se procedera a eliminar los siguientes indicadores de resultado:",
+    "confirmarEliminarIndicadorRealizacion": "Se procedera a eliminar los siguientes indicadores de realización:",
     "contraNueva": "Contraseña nueva",
     "contrasena": "Contraseña",
     "ContrasenaNoCoincide": "Las contraseñas no coinciden.",

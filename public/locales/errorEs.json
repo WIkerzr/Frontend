@@ -22,5 +22,6 @@
         "errorAnioFinMenorInicio": "El año fin debe ser mayor que el año inicio",
         "errorAnioInicioMayorFin": "El año inicio debe ser menor que el año fin",
         "errorDebeRellenarAmbosAnios": "Debe rellenar ambos años del rango",
-        "localStorageNotFound": "Error al leer usuario de localStorage"
+        "localStorageNotFound": "Error al leer usuario de localStorage",
+        "errorIndicadoresNoValidoParaSupracomarcal": "Hay indicadores no válidos para acciones supracomarcales"
 }

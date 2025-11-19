@@ -11,9 +11,10 @@ import { TablaIndicadorAccion } from './EditarAccionComponent';
 
 interface PestanaIndicadoresProps {
     bloqueo: { plan: boolean; memoria: boolean; bloqueoTotal: boolean };
+    contolCompartido: boolean;
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo }, _ref) => {
+export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaIndicadoresProps>(({ bloqueo, contolCompartido }, _ref) => {
     const { t } = useTranslation();
     const { datosEditandoAccion, setDatosEditandoAccion, block } = useYear();
     const [open, setOpen] = useState(false);
@@ -227,6 +228,8 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
                 const nuevosIndicadoresResultado =
                     resultadosAEliminar && resultadosAEliminar.length > 0 ? indicadoresResultadoTabla.filter((r) => !resultadosAEliminar.includes(r.id)) : indicadoresResultadoTabla;
 
+                setIndicadoresResultadoTabla(sortBy(nuevosIndicadoresResultado, 'id'));
+
                 setDatosEditandoAccion({
                     ...datosEditandoAccion!,
                     indicadorAccion: {
@@ -238,13 +241,39 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
         }
 
         if (tipoIndicador === 'resultado') {
-            if (window.confirm(t('confirmarEliminarIndicador'))) {
+            const indicadorResultadoAEliminar = indicadoresResultadoTabla.filter((_row, idx) => idx === rowIndex);
+            const nombreResultado = indicadorResultadoAEliminar[0]?.descripcion ?? indicadoresResultadoTabla[rowIndex]?.descripcion ?? '';
+
+            // Identificar el id del resultado eliminado
+            const resultadoEliminadoId = indicadoresResultadoTabla[rowIndex]?.id;
+
+            // Buscar realizaciones que estén relacionadas con ese resultado (según listado de relaciones)
+            const realizacionesAEliminarIds = listadoNombresIndicadoresRealizacion
+                .filter((r) => r.idsResultados && resultadoEliminadoId !== undefined && r.idsResultados.includes(resultadoEliminadoId))
+                .map((r) => r.id);
+
+            // Construir texto de confirmación similar al de 'realizacion'
+            let textoEliminarRes = `${t('confirmarEliminarIndicador')} \n-${nombreResultado} \n`;
+            if (realizacionesAEliminarIds && realizacionesAEliminarIds.length > 0) {
+                textoEliminarRes += '\n';
+                textoEliminarRes += t('confirmarEliminarIndicadorRealizacion');
+                realizacionesAEliminarIds.forEach((idRel) => {
+                    const rel = listadoNombresIndicadoresRealizacion.find((r) => r.id === idRel);
+                    if (rel) textoEliminarRes += `\n-${rel.nombre}`;
+                });
+            }
+
+            if (window.confirm(textoEliminarRes)) {
                 const nuevosIndicadores = indicadoresResultadoTabla.filter((_row, idx) => idx !== rowIndex);
+                const nuevosIndicadoresRealizacion = indicadoresRealizacionTabla.filter((r) => !realizacionesAEliminarIds.includes(r.id));
+
                 setIndicadoresResultadoTabla(sortBy(nuevosIndicadores, 'id'));
+                setIndicadoresRealizacionTabla(sortBy(nuevosIndicadoresRealizacion, 'id'));
+
                 setDatosEditandoAccion({
                     ...datosEditandoAccion!,
                     indicadorAccion: {
-                        indicadoreRealizacion: datosEditandoAccion!.indicadorAccion?.indicadoreRealizacion ?? [],
+                        indicadoreRealizacion: nuevosIndicadoresRealizacion,
                         indicadoreResultado: nuevosIndicadores,
                     },
                 });
@@ -267,9 +296,9 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
             reglasEspeciales={reglasEspeciales}
             editarPlan={!bloqueo.plan}
             editarMemoria={!bloqueo.memoria}
-            disableEliminar={datosEditandoAccion.accionDuplicadaDeId !== undefined}
+            disableEliminar={!contolCompartido}
             botonNuevoIndicadorAccion={
-                datosEditandoAccion.accionDuplicadaDeId === undefined && (
+                contolCompartido && (
                     <BtnNuevoIndicadorAccion
                         indicadoresRealizacionTabla={indicadoresRealizacionTabla}
                         indicadoresResultadoTabla={indicadoresResultadoTabla}
@@ -279,6 +308,7 @@ export const PestanaIndicadores = React.forwardRef<HTMLButtonElement, PestanaInd
                         setOpen={setOpen}
                         handleOpenModal={handleOpenModal}
                         handleSave={handleSave}
+                        supracomarcal={datosEditandoAccion.accionCompartida && datosEditandoAccion.accionCompartida.regionLider ? true : false}
                     />
                 )
             }
@@ -295,9 +325,20 @@ interface BtnNuevoIndicadorProps {
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     handleOpenModal: () => void;
     handleSave: (data: any) => void;
+    supracomarcal?: boolean | undefined;
 }
 
-const BtnNuevoIndicadorAccion: React.FC<BtnNuevoIndicadorProps> = ({ indicadoresRealizacionTabla, indicadoresResultadoTabla, block, editarPlan, open, setOpen, handleOpenModal, handleSave }) => {
+const BtnNuevoIndicadorAccion: React.FC<BtnNuevoIndicadorProps> = ({
+    indicadoresRealizacionTabla,
+    indicadoresResultadoTabla,
+    block,
+    editarPlan,
+    open,
+    setOpen,
+    handleOpenModal,
+    handleSave,
+    supracomarcal,
+}) => {
     const { t } = useTranslation();
 
     return (
@@ -314,6 +355,7 @@ const BtnNuevoIndicadorAccion: React.FC<BtnNuevoIndicadorProps> = ({ indicadores
                             open={open}
                             onClose={() => setOpen(false)}
                             onSave={handleSave}
+                            supracomarcal={supracomarcal}
                         />
                     )}
                 </div>
@@ -331,10 +373,11 @@ interface ModalNuevoIndicadorAccionProps {
     onClose: () => void;
     // realizaciones: Indicador[];
     onSave?: (seleccion: { idRealizacion: number; idsResultadosEnRealizacion: number[] }) => void;
+    supracomarcal?: boolean | undefined;
 }
 
 export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIndicadorAccionProps>(function ModalNuevoIndicadorAccion(props, ref) {
-    const { open, onClose, onSave } = props;
+    const { open, onClose, onSave, supracomarcal } = props;
 
     const [indicadorRealizacionId, setIndicadorRealizacionId] = useState<number | null>(null);
     const [resultadosRelacionados, setResultadosRelacionados] = useState<Indicador[]>([]);
@@ -381,8 +424,8 @@ export const ModalNuevoIndicadorAccion = forwardRef<HTMLDivElement, ModalNuevoIn
                     <option value="" disabled>
                         {t('seleccionaIndicador')}
                     </option>
-                    {listadoNombresIndicadoresRealizacion.map((r) => (
-                        <option className={`${r.nombre[4] === '.' ? 'bg-blue-200' : 'bg-white'}`} value={r.id} key={r.id}>
+                    {(supracomarcal ? listadoNombresIndicadoresRealizacion.filter((r) => r.nombre?.[4] === '.') : listadoNombresIndicadoresRealizacion).map((r) => (
+                        <option className={`${r.nombre?.[4] === '.' ? 'bg-blue-200' : 'bg-white'}`} value={r.id} key={r.id}>
                             {r.nombre}
                         </option>
                     ))}

@@ -463,7 +463,7 @@ interface ListadoAccionesPropsCompartidas {
 }
 export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsCompartidas) => {
     const navigate = useNavigate();
-    const { datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccionCompartida, loadingYearData } = useYear();
+    const { yearData, datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccionCompartida, loadingYearData } = useYear();
     const { regionSeleccionada, nombreRegionSeleccionada, regiones } = useRegionContext();
     const { editarPlan } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
@@ -572,7 +572,8 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
                             </div>
                             {esAccionParticipante && editarPlan && (
                                 <ModalAccion
-                                    acciones={'AccionesAccesorias'}
+                                    acciones={'Acciones'}
+                                    numAcciones={yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length)}
                                     file={accion}
                                     button={(open) => {
                                         const ownerRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
