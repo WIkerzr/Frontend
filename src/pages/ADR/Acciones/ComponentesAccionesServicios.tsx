@@ -28,9 +28,9 @@ interface ModalAccionProps {
     acciones: TiposAccion;
     numAcciones?: number[];
     file?: DatosAccion;
+    button?: (open: () => void) => React.ReactNode;
 }
-
-export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones, file }) => {
+export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones, file, button }) => {
     const { t, i18n } = useTranslation();
     const { yearData, AgregarAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
@@ -218,6 +218,8 @@ export const ModalAccion: React.FC<ModalAccionProps> = ({ acciones, numAcciones,
                             {t('anadirAccion')}
                         </button>
                     </div>
+                ) : button ? (
+                    button(() => setShowModal(true))
                 ) : (
                     <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setShowModal(true)}>
                         <IconPlus />
@@ -397,22 +399,20 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                 {accionesMostradas.map((accion) => {
                     let editable = editarPlan || editarMemoria;
                     let colorAccion = 'bg-white';
-                    let esAccionParticipante = false;
+                    let esAccionLider = false;
 
                     if (accion.accionCompartida?.regionLider) {
                         const regionLider = formateaConCeroDelante(
                             typeof accion.accionCompartida.regionLider === 'object' ? accion.accionCompartida.regionLider.RegionId : accion.accionCompartida.regionLider
                         );
                         if (regionLider === regionSeleccionada) {
-                            colorAccion = 'bg-teal-100';
                             editable = editable ? true : false;
-                            esAccionParticipante = false;
+                            esAccionLider = true;
                         }
 
                         if (regionLider != regionSeleccionada) {
-                            colorAccion = 'bg-gray-300';
                             editable = false;
-                            esAccionParticipante = true;
+                            esAccionLider = false;
                         }
                     }
                     if (accion.id === accionNueva) {
@@ -420,7 +420,8 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     }
 
                     return (
-                        <div key={accion.id} className={`${colorAccion} border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
+                        <div key={accion.id} className={`${colorAccion} relative border border-gray-200 px-6 py-8 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
+                            {esAccionLider && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>}
                             <span className="text-base">{accion.accion}</span>
                             <span className="text-base">{`${t('Eje')}: ${TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}`}</span>
                             <span className="block text-sm text-gray-500 text-left font-medium mb-1">
@@ -433,7 +434,6 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                         handleEdit(accion);
                                     }}
                                 >
-                                    {esAccionParticipante && <IconPlus />}
                                     {editable ? <IconPencil /> : <IconEye />}
                                 </button>
                                 <div>
@@ -459,14 +459,13 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
 };
 interface ListadoAccionesPropsCompartidas {
     eje: Ejes;
-    ejeName: string;
     idEje: string;
 }
-export const ListadoAccionesCompartidas = ({ ejeName, eje, idEje }: ListadoAccionesPropsCompartidas) => {
+export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsCompartidas) => {
     const navigate = useNavigate();
-    const { EliminarAccion, datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
-    const { regionSeleccionada } = useRegionContext();
-    const { editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, loadingYearData } = useYear();
+    const { regionSeleccionada, nombreRegionSeleccionada, regiones } = useRegionContext();
+    const { editarPlan } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
 
     const [acciones, setAcciones] = useState<DatosAccion[]>([]);
@@ -505,36 +504,17 @@ export const ListadoAccionesCompartidas = ({ ejeName, eje, idEje }: ListadoAccio
         }
     }, [datosEditandoAccion, navigate]);
 
-    const handleDelete = (id: string) => {
-        const confirmar = window.confirm(t('confirmacionEliminarAccion'));
-        if (!confirmar) return;
-        EliminarAccion('Acciones', idEje, id);
-    };
-
-    const handleEdit = async (accion: DatosAccion) => {
+    const handleEditCompartida = async (accion: any) => {
         hasNavigated.current = false;
-        let hacerLlamada = true;
-        const dataYearLocal = JSON.parse(sessionStorage.getItem('DataYear') || '{}');
-        if (dataYearLocal && dataYearLocal.plan && dataYearLocal.plan.ejesPrioritarios) {
-            const eje = dataYearLocal.plan.ejesPrioritarios.find((e: Ejes) => e.Id === idEje);
-            if (eje && eje.acciones) {
-                const accionDelEje: DatosAccion = eje.acciones.find((a: DatosAccion) => `${a.id}` === `${accion.id}`);
-                if (accionDelEje && accionDelEje.datosPlan) {
-                    hacerLlamada = false;
-                    setIdEjeEditado(idEje);
-                    setDatosEditandoAccion(accionDelEje);
-                }
-            }
+
+        setLoading(true);
+        const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
+        const ejesRegion = ejes.ejesEstrategicos;
+        if (!ejesRegion) {
+            await LlamadaBBDDEjesRegion(accion.regionLider, t, i18n, { setErrorMessage, setSuccessMessage });
         }
-        if (hacerLlamada) {
-            setLoading(true);
-            const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
-            const ejesRegion = ejes.ejesEstrategicos;
-            if (!ejesRegion) {
-                await LlamadaBBDDEjesRegion(regionSeleccionada, t, i18n, { setErrorMessage, setSuccessMessage });
-            }
-            await SeleccionEditarAccion(idEje, 'accion', accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
-        }
+
+        await SeleccionEditarAccion(idEje, 'accion', accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
     };
 
     const mostrarInput = acciones.length < 5;
@@ -543,7 +523,9 @@ export const ListadoAccionesCompartidas = ({ ejeName, eje, idEje }: ListadoAccio
 
     return (
         <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
-            <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">{ejeName}</span>
+            <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">
+                {t('supracomarcalIncorporarAccion', { participant: nombreRegionSeleccionada })}
+            </span>
             <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
@@ -556,62 +538,69 @@ export const ListadoAccionesCompartidas = ({ ejeName, eje, idEje }: ListadoAccio
             />
             <div className="space-y-4">
                 {accionesMostradas.map((accion) => {
-                    let editable = editarPlan || editarMemoria;
-                    let esAccionLider = false;
                     let esAccionParticipante = false;
+                    let nombreRegionLider = '';
 
                     if (accion.accionCompartida?.regionLider) {
                         const regionLider = formateaConCeroDelante(
                             typeof accion.accionCompartida.regionLider === 'object' ? accion.accionCompartida.regionLider.RegionId : accion.accionCompartida.regionLider
                         );
-                        if (regionLider === regionSeleccionada) {
-                            esAccionLider = true;
-                            editable = editable ? true : false;
-                            esAccionParticipante = false;
-                        }
 
                         if (regionLider != regionSeleccionada) {
-                            esAccionLider = false;
-                            editable = false;
                             esAccionParticipante = true;
+                            const foundRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
+                            nombreRegionLider = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : accion.accionCompartida?.regionLider.toString();
                         }
                     }
 
                     return (
-                        <div key={accion.id} className={`'bg-white' border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col relative`}>
-                            {(esAccionLider || esAccionParticipante) && (
-                                <span className="badge badge-outline-dark text-xs absolute top-2 right-2">
-                                    {esAccionParticipante ? t('supracomarcalGestionada', { tipo: accion.accionCompartida?.regionLider }) : t('txtsupracomarcal')}
-                                </span>
-                            )}
+                        <div key={accion.id} className={`'bg-white' border border-gray-200 px-6 py-8 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col relative`}>
+                            {esAccionParticipante && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('supracomarcalGestionada', { tipo: nombreRegionLider })}</span>}
                             <span className="text-base">{accion.accion}</span>
                             <span className="text-base">{`${t('Eje')}: ${TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}`}</span>
                             <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                 {t('LineaActuaccion')}: {accion.lineaActuaccion}
                             </span>
                             <div className="flex gap-2 justify-end mt-2">
-                                {esAccionParticipante && editarPlan && <ModalAccion acciones={'Acciones'} numAcciones={[0]} file={accion} />}
-
                                 <button
                                     className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
                                     onClick={() => {
-                                        handleEdit(accion);
+                                        if (accion.accionCompartida) {
+                                            handleEditCompartida(accion.accionCompartida);
+                                        }
                                     }}
                                 >
-                                    {editable ? <IconPencil /> : <IconEye />}
+                                    <IconEye />
                                 </button>
-                                <div>
-                                    {editable === true && (
-                                        <button
-                                            onClick={() => handleDelete(accion.id)}
-                                            aria-label={`Eliminar acción ${accion.id}`}
-                                            className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
-                                        >
-                                            <IconTrash />
-                                        </button>
-                                    )}
-                                </div>
                             </div>
+                            {esAccionParticipante && editarPlan && (
+                                <ModalAccion
+                                    acciones={'AccionesAccesorias'}
+                                    file={accion}
+                                    button={(open) => {
+                                        const ownerRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
+                                        const ownerName = ownerRegion ? (i18n.language === 'es' ? ownerRegion.NameEs : ownerRegion.NameEu) : String(accion.accionCompartida?.regionLider ?? 'XXXX');
+                                        const participantRegion = regiones.find((r) => String(r.RegionId) === String(regionSeleccionada));
+                                        const participantName = participantRegion
+                                            ? i18n.language === 'es'
+                                                ? participantRegion.NameEs
+                                                : participantRegion.NameEu
+                                            : String(regionSeleccionada ?? 'YYYYY');
+
+                                        return (
+                                            <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
+                                                <p>
+                                                    {t('supracomarcalIncorporarAccion_part1', { owner: ownerName, participant: participantName })}{' '}
+                                                    <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
+                                                        {t('Aqui')}
+                                                    </span>{' '}
+                                                    {t('supracomarcalIncorporarAccion_part2')}
+                                                </p>
+                                            </div>
+                                        );
+                                    }}
+                                />
+                            )}
                             <MostrarAvisoCamposAcciones tiposAccion="Acciones" datos={accion} />
                         </div>
                     );
@@ -673,7 +662,7 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
 
     if (!datos) {
         return (
-            <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
+            <div className="bg-[#ECC680] text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
                 <>
                     <IconInfoCircle />
                     <span>
@@ -728,7 +717,7 @@ export const MostrarAvisoCamposAcciones: React.FC<MostrarAvisoCamposAccionesProp
     }
 
     return (
-        <div className="bg-warning text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
+        <div className="bg-[#ECC680] text-black text-sm rounded px-3 py-2 mb-4 flex items-center gap-2">
             {faltanCamposPlan || (!editarPlan && faltanCamposMemoria) ? (
                 <>
                     <IconInfoCircle />

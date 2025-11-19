@@ -121,21 +121,7 @@ const Index: React.FC = () => {
                     {ejesPrioritariosCompartidos.map((eje) => {
                         return (
                             <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
-                                {selectedId === eje.Id && (
-                                    <>
-                                        {successMessageYearData && (
-                                            <div className={`mt-4 transition-opacity duration-1000 opacity-100}`}>
-                                                <p className="text-green-500">{successMessageYearData}</p>
-                                            </div>
-                                        )}
-                                        {errorMessageYearData && (
-                                            <div>
-                                                <span className="text-red-500 hover:text-red-700">{errorMessageYearData}</span>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                                <ListadoAccionesCompartidas eje={eje} ejeName={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} />
+                                <ListadoAccionesCompartidas eje={eje} idEje={eje.Id} />
                             </div>
                         );
                     })}

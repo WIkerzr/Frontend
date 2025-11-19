@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import IconInfoCircle from '../../../components/Icon/IconInfoCircle';
 import IconInfoTriangle from '../../../components/Icon/IconInfoTriangle';
-import IconPlus from '../../../components/Icon/IconPlus';
 import { gestionarServicio } from '../../../components/Utils/data/dataServices';
 import { SelectorEje } from '../../../components/Utils/inputs';
 import { NewModal } from '../../../components/Utils/utils';
@@ -311,10 +310,11 @@ export const MostrarAvisoCamposServicios: React.FC<MostrarAvisoCamposServiciosPr
 // );
 
 interface ModalServicioProps {
+    button: (open: () => void) => React.ReactNode;
     file?: Servicios;
 }
 
-export const ModalServicio: React.FC<ModalServicioProps> = ({ file }) => {
+export const ModalServicio: React.FC<ModalServicioProps> = ({ file, button }) => {
     const { t, i18n } = useTranslation();
     const { anioSeleccionada } = useEstadosPorAnio();
     const { yearData } = useYear();
@@ -401,9 +401,7 @@ export const ModalServicio: React.FC<ModalServicioProps> = ({ file }) => {
                 }}
             />
 
-            <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setShowModal(true)}>
-                <IconPlus />
-            </button>
+            {button(() => setShowModal(true))}
             <NewModal open={showModal} onClose={() => setShowModal(false)} title={t('duplicarServicio')}>
                 <div className="space-y-5">
                     <SelectorEje idEjeSeleccionado={idEjeSeleccionado} setIdEjeSeleccionado={setIdEjeSeleccionado} ejesPlan={ejesPlan} acciones={'Servicios'} />

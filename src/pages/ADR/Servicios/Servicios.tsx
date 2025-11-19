@@ -25,13 +25,13 @@ const Index: React.FC = () => {
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, regiones } = useRegionContext();
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
     }, []);
 
-    const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
+    const [regionesDuplicadas, setRegionesDuplicadas] = useState<{ id: string; regionId: string }[]>([]);
     useEffect(() => {
         const todosServicios = yearData?.servicios ?? [];
         const ids = todosServicios
@@ -39,14 +39,28 @@ const Index: React.FC = () => {
             .map((id) => (id == null ? '' : String(id)))
             .filter((id) => id !== '' && id !== '0');
 
-        setRegionesDuplicadas(ids.map((id) => formateaConCeroDelante(String(id))));
+        const idsUnicos = Array.from(new Set(ids));
+
+        const mapped = idsUnicos.map((id) => {
+            const match = todosServicios.find((s) => String(s.id) === id);
+            let regionId = '';
+            if (match) {
+                const lider = match.serviciosCompartidas?.regionLider;
+                if (lider != null) {
+                    regionId = typeof lider === 'object' ? String(lider.RegionId) : String(lider);
+                }
+            }
+            return { id, regionId };
+        });
+
+        setRegionesDuplicadas(mapped);
     }, [yearData]);
 
     useEffect(() => {
         if (!yearData.servicios) return;
 
         const serviciosOrdenados = [...yearData.servicios].sort((a, b) => a.id - b.id);
-        const serviciosFiltrados = serviciosOrdenados.filter((servicio) => !regionesDuplicadas.includes(formateaConCeroDelante(String(servicio.id))));
+        const serviciosFiltrados = serviciosOrdenados.filter((servicio) => !regionesDuplicadas.some((r) => r.id === formateaConCeroDelante(String(servicio.id))));
         setServiciosGrup(grup5(serviciosFiltrados, 4));
     }, [yearData, regionesDuplicadas]);
 
@@ -112,6 +126,9 @@ const Index: React.FC = () => {
                             let editable = editarPlan || editarMemoria;
                             let nombreEje = '';
                             let esServicioParticipante = false;
+                            let esServicioLider = false;
+                            let esDuplicado = false;
+                            let nombreRegionLider = '';
 
                             if (servicio.idEje === 'general') {
                                 nombreEje = i18n.language === 'eu' ? ejeGeneralServicios.NameEu : ejeGeneralServicios.NameEs;
@@ -119,27 +136,50 @@ const Index: React.FC = () => {
                                 const eje = yearData.plan.ejes.find((e) => e.Id == servicio.idEje);
                                 nombreEje = i18n.language === 'eu' ? eje?.NameEu ?? '' : eje?.NameEs ?? '';
                             }
-                            let colorAccion = 'bg-white';
 
                             if (servicio.serviciosCompartidas?.regionLider) {
                                 const regionLider = formateaConCeroDelante(`${servicio.serviciosCompartidas.regionLider.RegionId}`) === regionSeleccionada;
                                 if (regionLider) {
-                                    colorAccion = 'bg-teal-100';
                                     editable = editable ? true : false;
                                     esServicioParticipante = false;
+                                    esServicioLider = true;
                                 }
                                 const regionCooperando = servicio.serviciosCompartidas.regiones?.some((region) => formateaConCeroDelante(`${region.RegionId}`) === regionSeleccionada);
                                 if (regionCooperando) {
-                                    colorAccion = 'bg-gray-300';
                                     editable = false;
                                     esServicioParticipante = true;
+                                    esServicioLider = false;
                                 }
+                            }
+                            if (servicio.ServicioDuplicadaDeId) {
+                                editable = true;
+                                esDuplicado = true;
+                                const dupId = String(servicio.ServicioDuplicadaDeId);
+                                // buscar en regionesDuplicadas por id (acepta raw o formateado)
+                                const match = regionesDuplicadas.find((r) => r.id === dupId || r.id === formateaConCeroDelante(dupId));
+                                nombreRegionLider = match?.regionId ?? '';
                             }
                             return (
                                 <div
                                     key={servicio.id}
-                                    className={`flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col ${colorAccion}`}
+                                    className={`relative flex-1 max-w-[25%] min-w-[180px] border border-gray-200 px-6 py-8 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col bg-white`}
                                 >
+                                    {esServicioLider && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>}
+                                    {(esServicioLider || esServicioParticipante || esDuplicado) &&
+                                        (() => {
+                                            const tipoNombre = esDuplicado
+                                                ? i18n.language === 'es'
+                                                    ? regiones.find((r) => String(r.RegionId) === nombreRegionLider)?.NameEs ?? nombreRegionLider
+                                                    : regiones.find((r) => String(r.RegionId) === nombreRegionLider)?.NameEu ?? nombreRegionLider
+                                                : i18n.language === 'es'
+                                                ? servicio.serviciosCompartidas?.regionLider?.NameEs ?? ''
+                                                : servicio.serviciosCompartidas?.regionLider?.NameEu ?? '';
+                                            return (
+                                                <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">
+                                                    {esServicioParticipante || esDuplicado ? t('supracomarcalGestionada', { tipo: tipoNombre }) : t('txtsupracomarcal')}
+                                                </span>
+                                            );
+                                        })()}
                                     <span className="text-base">{servicio.nombre}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('Eje')}: {nombreEje}
@@ -155,8 +195,6 @@ const Index: React.FC = () => {
                                         </span>
                                     )}
                                     <div className="flex gap-2 justify-end mt-2">
-                                        {esServicioParticipante && editarPlan && <ModalServicio file={servicio} />}
-
                                         <NavLink to="/adr/servicios/editando" state={{ tipo: 'servicio' }} className="group">
                                             <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => setDatosEditandoServicio({ ...servicio })}>
                                                 {editable ? <IconPencil /> : <IconEye />}
@@ -172,6 +210,37 @@ const Index: React.FC = () => {
                                             </button>
                                         )}
                                     </div>
+                                    {esServicioParticipante && editarPlan && (
+                                        <ModalServicio
+                                            file={servicio}
+                                            button={(open) => {
+                                                const ownerRegion = servicio.serviciosCompartidas?.regionLider;
+                                                const ownerName = ownerRegion
+                                                    ? i18n.language === 'es'
+                                                        ? ownerRegion.NameEs
+                                                        : ownerRegion.NameEu
+                                                    : String(servicio.serviciosCompartidas?.regionLider ?? 'XXXX');
+                                                const participantRegion = regiones.find((r) => String(r.RegionId) === String(regionSeleccionada));
+                                                const participantName = participantRegion
+                                                    ? i18n.language === 'es'
+                                                        ? participantRegion.NameEs
+                                                        : participantRegion.NameEu
+                                                    : String(regionSeleccionada ?? 'YYYYY');
+
+                                                return (
+                                                    <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
+                                                        <p>
+                                                            {t('supracomarcalIncorporarAccion_part1', { owner: ownerName, participant: participantName })}{' '}
+                                                            <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
+                                                                {t('Aqui')}
+                                                            </span>{' '}
+                                                            {t('supracomarcalIncorporarAccion_part2')}
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }}
+                                        />
+                                    )}
                                     <MostrarAvisoCamposServicios datos={servicio} />
                                 </div>
                             );

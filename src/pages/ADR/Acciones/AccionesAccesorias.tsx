@@ -15,7 +15,7 @@ import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Use
 import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 const Index: React.FC = () => {
     const navigate = useNavigate();
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, regiones } = useRegionContext();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
     const { yearData, EliminarAccion, datosEditandoAccion, SeleccionEditarAccion, SeleccionVaciarEditarAccion, LoadingYearData } = useYear();
@@ -27,7 +27,7 @@ const Index: React.FC = () => {
 
     const [navigated, setNavigated] = useState<boolean>(false);
 
-    const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
+    const [regionesDuplicadas, setRegionesDuplicadas] = useState<{ id: string; regionId: string }[]>([]);
     useEffect(() => {
         if (yearData.plan.ejesRestantes) {
             const ejesRestantes = yearData?.plan?.ejesRestantes ?? [];
@@ -38,7 +38,7 @@ const Index: React.FC = () => {
                 .filter((id) => id !== '' && id !== '0');
 
             const idsUnicos = Array.from(new Set(ids));
-            setRegionesDuplicadas(idsUnicos);
+            setRegionesDuplicadas(idsUnicos.map((id) => ({ id, regionId: '' })));
         }
     }, [yearData]);
 
@@ -96,7 +96,7 @@ const Index: React.FC = () => {
             }))
         );
 
-        const dataFiltrado = data.filter((accion) => !regionesDuplicadas.includes(String(accion.id)));
+        const dataFiltrado = data.filter((accion) => !regionesDuplicadas.some((r) => r.id === String(accion.id)));
         setAccionesGrup(grup5(dataFiltrado, 4));
     }, [yearData, anioSeleccionada, regionesDuplicadas]);
 
@@ -165,30 +165,57 @@ const Index: React.FC = () => {
                     <div key={filaIndex} className="flex w-full justify-start mb-4 gap-4 flex-wrap">
                         {fila.map((accion: DatosAccion) => {
                             let editable = editarPlan || editarMemoria;
-                            let colorAccion = 'bg-white';
+                            let esAccionLider = false;
                             let esAccionParticipante = false;
+                            let esAccionDuplicada = false;
+                            let nombreRegion = '';
 
                             if (accion.accionCompartida?.regionLider) {
                                 const regionLider = formateaConCeroDelante(
                                     typeof accion.accionCompartida.regionLider === 'object' ? accion.accionCompartida.regionLider.RegionId : accion.accionCompartida.regionLider
                                 );
                                 if (regionLider === regionSeleccionada) {
-                                    colorAccion = 'bg-teal-100';
                                     editable = editable ? true : false;
                                     esAccionParticipante = false;
+                                    esAccionLider = true;
                                 }
 
                                 if (regionLider != regionSeleccionada) {
-                                    colorAccion = 'bg-gray-300';
                                     editable = false;
                                     esAccionParticipante = true;
+                                    esAccionLider = false;
+                                }
+                            }
+                            if (accion.accionDuplicadaDeId) {
+                                const dupId = String(accion.accionDuplicadaDeId);
+                                const found = yearData?.plan?.ejesRestantes?.flatMap((e) => e.acciones ?? []).find((a) => String(a.id) === dupId);
+                                if (found) {
+                                    esAccionDuplicada = true;
+                                    const lider = found.accionCompartida?.regionLider;
+                                    nombreRegion = lider != null ? (typeof lider === 'object' ? String(lider.RegionId) : String(lider)) : '';
                                 }
                             }
                             return (
                                 <div
                                     key={accion.id}
-                                    className={`${colorAccion} flex-1 max-w-[25%] min-w-[180px] border border-gray-200 p-6 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}
+                                    className={`'bg-white' relative flex-1 max-w-[25%] min-w-[180px] border border-gray-200 px-6 py-8 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}
                                 >
+                                    {(esAccionLider || esAccionParticipante || esAccionDuplicada) &&
+                                        (() => {
+                                            let tipoNombre = '';
+                                            if (nombreRegion) {
+                                                const foundRegion = regiones.find((r) => String(r.RegionId) === String(nombreRegion));
+                                                tipoNombre = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : nombreRegion;
+                                            } else if (esAccionParticipante) {
+                                                const foundRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
+                                                tipoNombre = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : nombreRegion;
+                                            }
+                                            return (
+                                                <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">
+                                                    {nombreRegion || esAccionParticipante ? t('supracomarcalGestionada', { tipo: tipoNombre }) : t('txtsupracomarcal')}
+                                                </span>
+                                            );
+                                        })()}
                                     <span className="text-base">{accion.accion}</span>
                                     <span className="block text-sm text-gray-500 text-left font-medium mb-1">
                                         {t('Eje')}: {TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}
@@ -201,9 +228,8 @@ const Index: React.FC = () => {
                                             {t('accionPropietaria')}: {accion.accionCompartida?.regionLider?.NameEs}
                                         </span>
                                     )}
-                                    <div className="flex gap-2 justify-end mt-2">
-                                        {esAccionParticipante && editarPlan && <ModalAccion acciones={'AccionesAccesorias'} file={accion} />}
 
+                                    <div className="flex gap-2 justify-end mt-2">
                                         <button className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition" onClick={() => handleEdit(accion)}>
                                             {editable ? <IconPencil /> : <IconEye />}
                                         </button>
@@ -217,6 +243,38 @@ const Index: React.FC = () => {
                                             </button>
                                         )}
                                     </div>
+                                    {esAccionParticipante && editarPlan && (
+                                        <ModalAccion
+                                            acciones={'AccionesAccesorias'}
+                                            file={accion}
+                                            button={(open) => {
+                                                const ownerRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
+                                                const ownerName = ownerRegion
+                                                    ? i18n.language === 'es'
+                                                        ? ownerRegion.NameEs
+                                                        : ownerRegion.NameEu
+                                                    : String(accion.accionCompartida?.regionLider ?? 'XXXX');
+                                                const participantRegion = regiones.find((r) => String(r.RegionId) === String(regionSeleccionada));
+                                                const participantName = participantRegion
+                                                    ? i18n.language === 'es'
+                                                        ? participantRegion.NameEs
+                                                        : participantRegion.NameEu
+                                                    : String(regionSeleccionada ?? 'YYYYY');
+
+                                                return (
+                                                    <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
+                                                        <p>
+                                                            {t('supracomarcalIncorporarAccion_part1', { owner: ownerName, participant: participantName })}{' '}
+                                                            <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
+                                                                {t('Aqui')}
+                                                            </span>{' '}
+                                                            {t('supracomarcalIncorporarAccion_part2')}
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }}
+                                        />
+                                    )}
                                     <MostrarAvisoCamposAcciones datos={accion} tiposAccion="AccionesAccesorias" />
                                 </div>
                             );

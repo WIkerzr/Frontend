@@ -1,22 +1,21 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import i18n from 'i18next';
 import { Dialog, Transition } from '@headlessui/react';
+import i18n, { t } from 'i18next';
 import { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { UserRole } from '../../types/users';
 import { useTranslation } from 'react-i18next';
-import { ErrorMessage } from './animations';
-import { t } from 'i18next';
-import IconInfoTriangle from '../Icon/IconInfoTriangle';
-import IconXCircle from '../Icon/IconXCircle';
-import IconThumbUp from '../Icon/IconThumbUp';
-import { ApiTargetToken } from './data/controlDev';
-import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ListadoNombresIdicadoresItem } from '../../pages/Configuracion/Informes/informeObjetivo';
 import { HMTServicios, IndicadoresServicios, IndicadoresServiciosDTO } from '../../types/GeneralTypes';
 import { HMT, IndicadorRealizacionAccion, IndicadorResultadoAccion } from '../../types/Indicadores';
 import { DatosAccion, IndicadorRealizacionAccionDTO, IndicadorResultadoAccionDTO } from '../../types/TipadoAccion';
-import { ListadoNombresIdicadoresItem } from '../../pages/Configuracion/Informes/informeObjetivo';
+import { EjeIndicadorBBDD } from '../../types/tipadoPlan';
+import { UserRole } from '../../types/users';
+import IconInfoTriangle from '../Icon/IconInfoTriangle';
+import IconThumbUp from '../Icon/IconThumbUp';
+import IconXCircle from '../Icon/IconXCircle';
+import { ErrorMessage } from './animations';
+import { ApiTargetToken } from './data/controlDev';
 
 export const SinDatos = () => {
     return (
