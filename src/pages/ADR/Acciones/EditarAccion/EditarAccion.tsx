@@ -35,7 +35,7 @@ const Index: React.FC = () => {
     const rutaAnterior = accionAccesoria ? '/adr/accionesYproyectos/' : '/adr/acciones/';
     const { regionSeleccionada } = useRegionContext();
 
-    const { yearData, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, controlguardado, setControlguardado, GuardarLaEdicionAccion } = useYear();
+    const { yearData, mostrandoAccionInvitado, datosEditandoAccion, setDatosEditandoAccion, SeleccionEditarGuardar, controlguardado, setControlguardado, GuardarLaEdicionAccion } = useYear();
     const navigate = useNavigate();
 
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
@@ -225,8 +225,10 @@ const Index: React.FC = () => {
         GuardarLaEdicionAccion(accionAccesoria ? 'AccionesAccesorias' : 'Acciones', setLoading, { setErrorMessage, setSuccessMessage });
     };
 
-    if (!ejeSeleccionado) {
-        return <Loading />;
+    if (!mostrandoAccionInvitado) {
+        if (!ejeSeleccionado) {
+            return <Loading />;
+        }
     }
 
     return (
@@ -284,10 +286,10 @@ const Index: React.FC = () => {
                                         <span className="font-normal text-lg">{i18n.language === 'eu' ? nombreEjeEU : nombreEjeES}</span>
                                     </span>
                                     <span className="block  font-semibold">
-                                        {!bloqueo.plan ? (
+                                        {!mostrandoAccionInvitado && !bloqueo.plan ? (
                                             <DropdownLineaActuaccion
                                                 setNuevaLineaActuaccion={setLineaActuaccion}
-                                                idEjeSeleccionado={ejeSeleccionado.EjeId}
+                                                idEjeSeleccionado={ejeSeleccionado?.EjeId ?? ''}
                                                 lineaActuaccion={lineaActuaccion}
                                                 ejesPlan={EjesBBDDToEjes(ejesPlan)}
                                                 tipoAccion={accionAccesoria ? 'AccionesAccesorias' : 'Acciones'}
@@ -370,22 +372,24 @@ const Index: React.FC = () => {
                                 </button>
                             )}
                         </Tab>
-                        <Tab as={Fragment}>
-                            {({ selected }) => (
-                                <button
-                                    className={`${
-                                        selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
-                                    }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
-                                >
-                                    <div className={`flex items-center`}>
-                                        <div className="relative">
-                                            <img src={IconPlan} alt={t(`${'MuestrasInteres'}`)} className="w-6 h-6" />
+                        {!mostrandoAccionInvitado && (
+                            <Tab as={Fragment}>
+                                {({ selected }) => (
+                                    <button
+                                        className={`${
+                                            selected ? '!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black' : ''
+                                        }  -mb-[1px] block border border-transparent p-3.5 py-2 hover:border-white-light hover:border-b-white dark:hover:border-[#191e3a] dark:hover:border-b-black`}
+                                    >
+                                        <div className={`flex items-center`}>
+                                            <div className="relative">
+                                                <img src={IconPlan} alt={t(`${'MuestrasInteres'}`)} className="w-6 h-6" />
+                                            </div>
+                                            <span className={`font-semibold`}>{t(`${'MuestrasInteres'}`)}</span>
                                         </div>
-                                        <span className={`font-semibold`}>{t(`${'MuestrasInteres'}`)}</span>
-                                    </div>
-                                </button>
-                            )}
-                        </Tab>
+                                    </button>
+                                )}
+                            </Tab>
+                        )}
                     </TabList>
                     <div className="w-full border border-white-light dark:border-[#191e3a] rounded-lg">
                         <TabPanels>

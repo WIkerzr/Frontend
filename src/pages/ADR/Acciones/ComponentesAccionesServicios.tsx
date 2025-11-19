@@ -463,7 +463,7 @@ interface ListadoAccionesPropsCompartidas {
 }
 export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsCompartidas) => {
     const navigate = useNavigate();
-    const { datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, loadingYearData } = useYear();
+    const { datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccionCompartida, loadingYearData } = useYear();
     const { regionSeleccionada, nombreRegionSeleccionada, regiones } = useRegionContext();
     const { editarPlan } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
@@ -508,13 +508,10 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
         hasNavigated.current = false;
 
         setLoading(true);
-        const ejes = JSON.parse(sessionStorage.getItem('ejesRegion') || '{}');
-        const ejesRegion = ejes.ejesEstrategicos;
-        if (!ejesRegion) {
-            await LlamadaBBDDEjesRegion(accion.regionLider, t, i18n, { setErrorMessage, setSuccessMessage });
-        }
+        if (idEje === '') return;
+        if (accion.id === '') return;
 
-        await SeleccionEditarAccion(idEje, 'accion', accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
+        await SeleccionEditarAccionCompartida(idEje, accion.id, { setErrorMessage, setSuccessMessage }, setLoading);
     };
 
     const mostrarInput = acciones.length < 5;
@@ -565,8 +562,8 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
                                 <button
                                     className="hover:bg-blue-50 text-gray-500 hover:text-blue-600 p-1.5 rounded transition"
                                     onClick={() => {
-                                        if (accion.accionCompartida) {
-                                            handleEditCompartida(accion.accionCompartida);
+                                        if (accion) {
+                                            handleEditCompartida(accion);
                                         }
                                     }}
                                 >

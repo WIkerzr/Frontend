@@ -14,7 +14,7 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
     const { t } = useTranslation();
     const [firma, setFirma] = useState<File[]>([]);
     const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const { yearData, datosEditandoAccion } = useYear();
+    const { yearData, mostrandoAccionInvitado, datosEditandoAccion } = useYear();
     const { editarPlan } = useEstadosPorAnio();
 
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -105,6 +105,10 @@ export const PestanaFirma = forwardRef<HTMLButtonElement>(() => {
             cambiarNombreArchivo();
         }
     }, [firma]);
+
+    if (mostrandoAccionInvitado) {
+        return null;
+    }
 
     return (
         <>
