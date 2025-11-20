@@ -420,7 +420,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     }
                     if (accion.accionDuplicadaDeId) {
                         esAccionParticipante = true;
-                        editable = true;
+                        editable = editable ? true : false;
                         esAccionLider = true;
                         const regionLiderObj = accion.regionesAccionDuplicada?.find((rad) => String(rad?.Id) === '0')?.RegionId;
                         const regionEncontrada = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === `${regionLiderObj}`);

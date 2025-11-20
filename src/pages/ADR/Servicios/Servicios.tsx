@@ -152,7 +152,7 @@ const Index: React.FC = () => {
                                 }
                             }
                             if (servicio.ServicioDuplicadaDeId) {
-                                editable = true;
+                                editable = editable ? true : false;
                                 esDuplicado = true;
                                 const dupId = String(servicio.ServicioDuplicadaDeId);
                                 // buscar en regionesDuplicadas por id (acepta raw o formateado)

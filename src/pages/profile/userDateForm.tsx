@@ -1,14 +1,14 @@
 /* eslint-disable no-unused-vars */
-import { useTranslation } from 'react-i18next';
-import { Input } from '../../components/Utils/inputs';
-import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
-import { User, UserID } from '../../types/users';
 import { useEffect, useState } from 'react';
-import { newUser } from '../Configuracion/Users/componentes';
+import { useTranslation } from 'react-i18next';
+import BtnFormsSaveCancel from '../../components/Utils/BtnSaveCancel';
+import { Input } from '../../components/Utils/inputs';
 import { formateaConCeroDelante } from '../../components/Utils/utils';
+import { useRegionContext } from '../../contexts/RegionContext';
 import { useUser } from '../../contexts/UserContext';
 import { useUsers } from '../../contexts/UsersContext';
-import { useRegionContext } from '../../contexts/RegionContext';
+import { User, UserID } from '../../types/users';
+import { newUser } from '../Configuracion/Users/componentes';
 
 interface UserDataFormProps {
     onSubmit: React.FormEventHandler<HTMLFormElement>;
@@ -171,6 +171,7 @@ const UserDataForm: React.FC<UserDataFormProps> = ({ onSubmit, userData, onChang
                                 style={{ minWidth: 'calc(100% + 10px)' }}
                                 value={i18n.language === 'eu' ? regionSeleccionada?.NameEu : regionSeleccionada?.NameEs}
                                 name="RegionName"
+                                disabled={roleDisabled}
                                 onChange={(e) => {
                                     const regionIdSeleccionado = e.target.value;
                                     const region = regiones.find((r) => (i18n.language === 'eu' ? r.NameEu : r.NameEs) === regionIdSeleccionado);
