@@ -1,16 +1,16 @@
 /* eslint-disable no-unused-vars */
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useUser } from './UserContext';
 
-import { useYear } from './DatosAnualContext';
-import { Estado } from '../types/GeneralTypes';
 import { ApiTarget, ModoDevEdicionTotal } from '../components/Utils/data/controlDev';
-import { FetchConRefreshRetry, gestionarErrorServidor } from '../components/Utils/utils';
-import { useAuth } from './AuthContext';
-import { useRegionContext } from './RegionContext';
-import { UserRole } from '../types/users';
 import { LlamadasBBDD } from '../components/Utils/data/utilsData';
+import { FetchConRefreshRetry, gestionarErrorServidor } from '../components/Utils/utils';
+import { Estado } from '../types/GeneralTypes';
 import { YearData } from '../types/tipadoPlan';
+import { UserRole } from '../types/users';
+import { useAuth } from './AuthContext';
+import { useYear } from './DatosAnualContext';
+import { useRegionContext } from './RegionContext';
 
 export const StatusColorsFonds: Record<Estado, string> = {
     proceso: 'bg-info',
@@ -66,8 +66,8 @@ const EstadosContext = createContext<EstadosContextType>({
 export const useEstadosPorAnioContext = () => useContext(EstadosContext);
 
 export const EstadosProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
-    const { yearData, setYearData, llamadaBBDDYearData } = useYear();
+    const { regionSeleccionada } = useRegionContext();
+    const { yearData, setYearData } = useYear();
 
     const { user } = useUser();
     const { login } = useAuth();
@@ -197,14 +197,15 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-                await llamadaBBDDYearData(anioSeleccionada, false);
-            }
-        };
-        fetchData();
-    }, [anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada]);
+    //TODO llamadaEficiente anulada por ingreso a cuadro de mando al logearse el ADR ya que se necesita una completa en cuadro de mando
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
+    //             await llamadaBBDDYearData(anioSeleccionada, false);
+    //         }
+    //     };
+    //     fetchData();
+    // }, [anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada]);
 
     useEffect(() => {
         if (anioSeleccionada === null || !yearData) return;
