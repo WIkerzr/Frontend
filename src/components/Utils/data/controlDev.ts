@@ -1,13 +1,16 @@
-export const ModoDev = false;
-export const ApiTarget = ModoDev
-    ? 'https://localhost:44300/api' // API local
-    : 'https://api.hazi.grupo-campus.com/api'; // API real
-export const ApiTargetToken = ModoDev ? 'https://localhost:44300/token' : 'https://api.hazi.grupo-campus.com/token';
-export let Fases = 8;
+export const Modos: 'DEV' | 'HAZI' | 'Produccion' = 'DEV';
+export const ModoDev = Modos === 'DEV';
+const EdicionTotal = false;
+export const ModoDevEdicionTotal = ModoDev ? EdicionTotal : false;
 
-if (!ModoDev) {
-    //Modificar el siguiente a la fase actual si no esta en desarrollo
-    Fases = 2;
-}
+export const ApiTarget =
+    Modos === 'DEV'
+        ? 'https://localhost:44300/api' // API local DEV
+        : Modos === 'HAZI'
+        ? 'https://localhost:44333/api' // API local HAZI
+        : 'https://api.hazi.grupo-campus.com/api'; // API real (Produccion)
 
-//npx eslint .
+export const ApiTargetToken = Modos === 'DEV' ? 'https://localhost:44300/token' : Modos === 'HAZI' ? 'https://localhost:44333/token' : 'https://api.hazi.grupo-campus.com/token';
+
+//npx eslint
+export const DesactivarAvisos = false; // Si es true, desactiva los avisos de cambios sin guardar en las páginas
