@@ -289,7 +289,7 @@ interface ListadoAccionesProps {
 export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
     const navigate = useNavigate();
     const { yearData, EliminarAccion, datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
-    const { regionSeleccionada } = useRegionContext();
+    const { regionSeleccionada, regiones } = useRegionContext();
     const { editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
 
@@ -401,6 +401,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                     let colorAccion = 'bg-white';
                     let esAccionLider = false;
                     let esAccionParticipante = false;
+                    let nombreRegionLider = '';
 
                     if (accion.accionCompartida?.regionLider) {
                         const regionLider = formateaConCeroDelante(
@@ -417,13 +418,41 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                             esAccionLider = false;
                         }
                     }
+                    if (accion.accionDuplicadaDeId) {
+                        esAccionParticipante = true;
+                        editable = true;
+                        esAccionLider = true;
+                        const regionLiderObj = accion.regionesAccionDuplicada?.find((rad) => String(rad?.Id) === '0')?.RegionId;
+                        const regionEncontrada = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === `${regionLiderObj}`);
+                        nombreRegionLider = regionEncontrada ? (i18n.language === 'es' ? regionEncontrada.NameEs : regionEncontrada.NameEu) : '';
+                        if (!nombreRegionLider) {
+                            const ejesCompartidosStorage = sessionStorage.getItem('ejesPrioritariosCompartidos');
+
+                            if (ejesCompartidosStorage) {
+                                const ejesPrioritariosCompartidos: Ejes[] = JSON.parse(ejesCompartidosStorage);
+                                ejesPrioritariosCompartidos.map((ejes) => {
+                                    ejes.acciones.find((accionEje) => {
+                                        if (String(accionEje.id) === String(accion.accionDuplicadaDeId)) {
+                                            const regionLiderId = accionEje.accionCompartida?.regionLider;
+                                            const regionEncontrada2 = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === String(regionLiderId));
+                                            nombreRegionLider = regionEncontrada2 ? (i18n.language === 'es' ? regionEncontrada2.NameEs : regionEncontrada2.NameEu) : '';
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                    }
                     if (accion.id === accionNueva) {
                         colorAccion = 'bg-green-100';
                     }
 
                     return (
                         <div key={accion.id} className={`${colorAccion} relative border border-gray-200 px-6 py-8 shadow-sm rounded-lg hover:shadow-md transition-shadow flex flex-col`}>
-                            {(esAccionLider || esAccionParticipante) && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>}
+                            {esAccionLider && esAccionParticipante && nombreRegionLider ? (
+                                <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('supracomarcalGestionada', { tipo: nombreRegionLider })}</span>
+                            ) : (
+                                (esAccionLider || esAccionParticipante) && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>
+                            )}
                             <span className="text-base">{accion.accion}</span>
                             <span className="text-base">{`${t('Eje')}: ${TextoSegunIdioma(accion.ejeEs, accion.ejeEu)}`}</span>
                             <span className="block text-sm text-gray-500 text-left font-medium mb-1">

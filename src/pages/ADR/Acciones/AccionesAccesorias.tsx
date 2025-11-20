@@ -194,6 +194,11 @@ const Index: React.FC = () => {
                                     const lider = found.accionCompartida?.regionLider;
                                     nombreRegion = lider != null ? (typeof lider === 'object' ? String(lider.RegionId) : String(lider)) : '';
                                 }
+                                if (!nombreRegion) {
+                                    const regionLiderObj = accion.regionesAccionDuplicada?.find((rad) => String(rad?.Id) === '0')?.RegionId;
+                                    const regionEncontrada = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === `${regionLiderObj}`);
+                                    nombreRegion = regionEncontrada ? (i18n.language === 'es' ? regionEncontrada.NameEs : regionEncontrada.NameEu) : '';
+                                }
                             }
                             return (
                                 <div

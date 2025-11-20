@@ -1,5 +1,6 @@
 export interface RegionInterface {
     id?: string;
+    Id?: string;
     RegionId: string;
     NameEs: string;
     NameEu: string;
