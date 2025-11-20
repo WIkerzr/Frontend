@@ -14,8 +14,6 @@ interface IndicadoresResponse<T> {
 }
 
 export function transformarIndicador(indicador: IndicadorRealizacion & { RelatedAxes: string }) {
-    //TODO borrar cuando se implemente el backend
-
     const relatedAxesArray = indicador.RelatedAxes
         ? indicador.RelatedAxes.split(',')
               .map((s) => s.replace(/'/g, '').trim())
@@ -42,8 +40,6 @@ export function transformarIndicador(indicador: IndicadorRealizacion & { Related
 }
 
 export function transformarIndicadorStringAArray(indicador: IndicadorRealizacion, ejesIndicador: EjeIndicadorBBDD[]): IndicadorRealizacion {
-    //TODO borrar cuando se implemente el backend
-
     const indicadorFinal: IndicadorRealizacion = {
         ...indicador,
         RelatedAxes:

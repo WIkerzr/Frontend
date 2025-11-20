@@ -484,7 +484,6 @@ export const BotonesAceptacionYRechazo = forwardRef<HTMLDivElement, PantallaProp
                     className="px-4 py-2 bg-primary text-white rounded"
                     onClick={() => {
                         if (window.confirm(t('confirmacionAceptar', { zona: zona, fecha: anioSeleccionada }))) {
-                            //TODO Cambio de status a aceptado y envio de notificacion al ADR
                             if (pantalla === 'Plan') {
                                 cambiarEstadoPlan('aceptado');
                             } else if (pantalla === 'Memoria') {

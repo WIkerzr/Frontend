@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from 'react';
+import Tippy from '@tippyjs/react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { IndicadorResultado, IndicadorRealizacion, indicadorInicial, indicadorResultadoinicial } from '../../../../types/Indicadores';
-import Tippy from '@tippyjs/react';
+import IconEye from '../../../../components/Icon/IconEye';
 import IconPencil from '../../../../components/Icon/IconPencil';
 import IconTrash from '../../../../components/Icon/IconTrash';
-import React from 'react';
-import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
-import { Acciones, useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { ApiTarget } from '../../../../components/Utils/data/controlDev';
-import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../../../components/Utils/utils';
 import { editIndicadorRealizacionBack, editIndicadorResultadoBack, guardarNuevoRealizacionBack } from '../../../../components/Utils/data/dataIndicadores';
+import { RegionInterface } from '../../../../components/Utils/data/getRegiones';
+import { Aviso, FetchConRefreshRetry, formateaConCeroDelante, gestionarErrorServidor } from '../../../../components/Utils/utils';
+import { Acciones, useIndicadoresContext } from '../../../../contexts/IndicadoresContext';
 import { useRegionContext } from '../../../../contexts/RegionContext';
 import { useUser } from '../../../../contexts/UserContext';
-import IconEye from '../../../../components/Icon/IconEye';
+import { IndicadorRealizacion, IndicadorResultado, indicadorInicial, indicadorResultadoinicial } from '../../../../types/Indicadores';
 import { LoadingOverlayPersonalizada } from '../../Users/componentes';
 
 export type TipoIndicador = 'realizacion' | 'resultado';
@@ -847,8 +846,6 @@ export const ModalNuevoIndicador: React.FC<ModalNuevoIndicadorProps> = ({ isOpen
 
     const handleEditarIndicador = async () => {
         try {
-            console.log(datosIndicador);
-
             let datosGuardado = descripcionEditable;
             // if (descripcionEditable.RegionsId === null) {
             //     datosGuardado = {

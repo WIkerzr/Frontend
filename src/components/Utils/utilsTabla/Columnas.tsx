@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { get, set } from 'lodash';
 import { DataTableColumnTextAlign } from 'mantine-datatable';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado } from '../../../types/Indicadores';
 import IconArrowLeft from '../../Icon/IconArrowLeft';
 import IconEqual from '../../Icon/IconEqual';
-import { useState } from 'react';
-import { IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado } from '../../../types/Indicadores';
-import { useTranslation } from 'react-i18next';
 const totalKeys = {
     'metaAnual.total': { root: 'metaAnual', hombres: 'metaAnual.hombres', mujeres: 'metaAnual.mujeres', total: 'metaAnual.total' },
     'metaFinal.total': { root: 'metaFinal', hombres: 'metaFinal.hombres', mujeres: 'metaFinal.mujeres', total: 'metaFinal.total' },
@@ -151,7 +151,9 @@ export function useEditableColumnByPath<T extends object>(
                                 )}
                             </div>
                         ) : (
-                            <span style={commonStyleNumber} onMouseDown={() => onActivate?.(index)}>{ambosCero ? total : hombres + mujeres}</span>
+                            <span style={commonStyleNumber} onMouseDown={() => onActivate?.(index)}>
+                                {ambosCero ? total : hombres + mujeres}
+                            </span>
                         )}
                     </div>
                 );
@@ -198,7 +200,9 @@ export function useEditableColumnByPath<T extends object>(
                                 }}
                             />
                         ) : (
-                            <span style={commonStyleNumber} onMouseDown={() => onActivate?.(index)}>{visual}</span>
+                            <span style={commonStyleNumber} onMouseDown={() => onActivate?.(index)}>
+                                {visual}
+                            </span>
                         )}
                     </div>
                 );
@@ -228,7 +232,9 @@ export function useEditableColumnByPath<T extends object>(
                             }}
                         />
                     ) : (
-                        <span style={commonStyleText} onMouseDown={() => onActivate?.(index)}>{visual}</span>
+                        <span style={commonStyleText} onMouseDown={() => onActivate?.(index)}>
+                            {visual}
+                        </span>
                     )}
                 </div>
             );
@@ -255,9 +261,6 @@ export function editableColumnByPathInput<T extends { id: number }, V = unknown>
         title,
         width: anchura,
         render: (row: T, index: number) => {
-            if (accessor === 'year1' || accessor === 'year2') {
-                console.log(accessor);
-            }
             const value = get(row, accessor) as V;
 
             const style: React.CSSProperties = {

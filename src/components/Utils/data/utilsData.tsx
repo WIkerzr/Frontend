@@ -66,7 +66,7 @@ export const LlamadasBBDD = async <T = any, TBody = any>({
             if (!res.ok) {
                 const errorInfo = gestionarErrorServidor(res, data);
                 setErrorMessage?.(errorInfo.mensaje);
-                console.log(errorInfo.mensaje);
+                console.error(errorInfo.mensaje);
                 return;
             }
             if (onSuccess) {
@@ -81,7 +81,7 @@ export const LlamadasBBDD = async <T = any, TBody = any>({
             if (onError) {
                 onError(errorInfo);
             }
-            console.log(errorInfo.mensaje);
+            console.error(errorInfo.mensaje);
         } finally {
             if (onFinally) {
                 onFinally();

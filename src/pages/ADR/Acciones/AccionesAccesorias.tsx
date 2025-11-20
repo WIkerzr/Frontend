@@ -104,11 +104,7 @@ const Index: React.FC = () => {
         const data = yearData.plan.ejesRestantes!.flatMap((eje) => eje.acciones);
         const accionAccesoria = data.find((item) => String(item.id) === String(id));
 
-        if (!idEje) {
-            console.log('Sin idEje');
-
-            return;
-        }
+        if (!idEje) return;
         if (
             accionAccesoria &&
             window.confirm(

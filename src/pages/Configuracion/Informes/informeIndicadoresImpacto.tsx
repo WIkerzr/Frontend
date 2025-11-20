@@ -1,6 +1,6 @@
+import ExcelJS from 'exceljs';
 import saveAs from 'file-saver';
 import { TFunction } from 'i18next';
-import ExcelJS from 'exceljs';
 import i18n from '../../../i18n';
 
 export interface Valor {
@@ -511,7 +511,7 @@ export const generarInformeIndicadoresImpacto = async ({ datosOriginales, datosC
                 if (texto.startsWith(t('si'))) {
                     contadorValida++;
                 } else {
-                    // Todo lo demás se considera no válida (incluye 'sinDatosInforme' y 'no')
+                    // lo demás se considera no válida (incluye 'sinDatosInforme' y 'no')
                     contadorNoValida++;
                 }
             }

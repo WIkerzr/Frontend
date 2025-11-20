@@ -197,7 +197,8 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    //TODO llamadaEficiente anulada por ingreso a cuadro de mando al logearse el ADR ya que se necesita una completa en cuadro de mando
+    // llamadaEficiente anulada por ingreso a cuadro de mando al logearse el ADR ya que se necesita una completa en cuadro de mando
+
     // useEffect(() => {
     //     const fetchData = async () => {
     //         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
@@ -243,7 +244,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                 const data = await res.data;
                 if (!res.ok) {
                     const errorInfo = gestionarErrorServidor(res, data);
-                    console.log(errorInfo.mensaje);
+                    console.error(errorInfo.mensaje);
                     setAnios([]);
                     return;
                 }
@@ -251,7 +252,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
             } catch (err: unknown) {
                 const errorInfo = gestionarErrorServidor(err);
                 setAnios([]);
-                console.log(errorInfo.mensaje);
+                console.error(errorInfo.mensaje);
                 return;
             }
         };
@@ -272,7 +273,7 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
                 const data = await res.data;
                 if (!res.ok) {
                     const errorInfo = gestionarErrorServidor(res, data);
-                    console.log(errorInfo.mensaje);
+                    console.error(errorInfo.mensaje);
                     return;
                 }
                 sessionStorage.setItem('aniosRegion', JSON.stringify(data.data));

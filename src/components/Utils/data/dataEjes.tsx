@@ -102,7 +102,6 @@ export const LlamadaBBDDEjesRegion = async (
     });
 };
 
-//TODO sin utilizar temporalmente planeado para plan y/o memoria
 export const LlamadaBBDDTodosEjes = async (
     regionSeleccionada: string | null,
     t: (key: string) => string,

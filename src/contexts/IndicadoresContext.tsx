@@ -299,7 +299,6 @@ export const IndicadoresProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const ControlDeFallosIndicadorSeleccionado = (): IndicadorSeleccionado => {
         if (!indicadorSeleccionado || !indicadorSeleccionado.indicador) {
-            console.log(indicadorSeleccionado);
             const error = new Error('Se ha intentado acceder al indicador seleccionado sin haberlo definido correctamente.');
             const stackLines = error.stack?.split('\n') || [];
 

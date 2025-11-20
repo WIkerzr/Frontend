@@ -99,7 +99,7 @@ export const categorias: Categorias[] = [
 
 export const listadoIndicadoresImpacto: IndicadoresImpacto[] = [
     { id: 1, nameEs: 'Población Total. Situación y evolución', nameEu: 'Biztanleria, guztira. Egoera eta bilakaera', unidadMedida: 1 },
-    { id: 2, nameEs: 'Tasa de masculinidad total y por tramos de 15 años', nameEu: 'Maskulinitate-tasa guztira eta 15 urteko tarteen arabera', categorias: [8, 9, 10, 11, 12, 13, 14] }, //TODO Revisar categorias: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    { id: 2, nameEs: 'Tasa de masculinidad total y por tramos de 15 años', nameEu: 'Maskulinitate-tasa guztira eta 15 urteko tarteen arabera', categorias: [8, 9, 10, 11, 12, 13, 14] },
     { id: 3, nameEs: 'Índice de envejecimiento', nameEu: 'Zahartze-indizea', categorias: [52, 55, 58] },
     { id: 4, nameEs: 'Superficie Forestal Certificada', nameEu: 'Ziurtatutako baso-azalera', unidadMedida: 3 },
     { id: 5, nameEs: 'Superficie de eco regímenes', nameEu: 'Eko-araubideak barne hartzen dituen nekazaritza-azalera', categorias: [22] },
@@ -151,7 +151,7 @@ export const listadoIndicadoresImpacto: IndicadoresImpacto[] = [
     { id: 41, nameEs: 'VAB agrario:agrícola, ganadero y forestal', nameEu: 'Nekazaritzako BEG: nekazaritza, abeltzaintza eta basogintza', categorias: [39, 40, 41, 42, 43, 44, 48] },
     { id: 42, nameEs: 'Alojamientos turísticos', nameEu: 'Turismo-ostatuak', unidadMedida: 1 },
     { id: 43, nameEs: 'Plazas en alojamientos turísticos', nameEu: 'Ostatu turistikoetako plazak', unidadMedida: 1 },
-    { id: 44, nameEs: 'Diferencia de renta de trabajo entre hombres y mujeres', nameEu: 'Lan-errentaren aldea gizonen eta emakumeen artean', unidadMedida: 2 }, //TODO unidadMedida: [1,2,3] ?
+    { id: 44, nameEs: 'Diferencia de renta de trabajo entre hombres y mujeres', nameEu: 'Lan-errentaren aldea gizonen eta emakumeen artean', unidadMedida: 2 },
     { id: 45, nameEs: 'Tasa de paro', nameEu: 'Langabezia-tasa', unidadMedida: 2 },
     { id: 46, nameEs: 'Personas autónomas', nameEu: 'Autonomoak', unidadMedida: 2 },
     { id: 47, nameEs: 'Espacios Bien de Interés Cultural o Patrimonio Cultural de Euskadi', nameEu: 'Euskadiko kultura-intereseko edo kultura-ondareko espazioak', unidadMedida: 1 },

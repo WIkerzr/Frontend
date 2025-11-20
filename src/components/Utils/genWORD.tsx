@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
-import { DatosAnioCuadroMandoBorrador, Ejes, OperationalIndicators, YearData } from '../../types/tipadoPlan';
-import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
-import { DatosAccion } from '../../types/TipadoAccion';
-import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
-import { HMT, IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado, IndicadorResultadoAccion } from '../../types/Indicadores';
-import IconDownloand from '../../components/Icon/IconDownloand.svg';
-import { PlanOMemoria } from '../../pages/ADR/PlanMemoria/PlanMemoriaComponents';
-import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
-import { obtenerFilasPorTipoAccion, TransformarYearDataACuadroBorrador } from '../../pages/Configuracion/CuadroMando/ConversorCuadroMando';
-import { useYear } from '../../contexts/DatosAnualContext';
-import { LlamadasBBDD } from './data/utilsData';
+import PizZip from 'pizzip';
 import { useState } from 'react';
-import { LoadingOverlayPersonalizada } from '../../pages/Configuracion/Users/componentes';
+import IconDownloand from '../../components/Icon/IconDownloand.svg';
+import { useYear } from '../../contexts/DatosAnualContext';
+import { useIndicadoresContext } from '../../contexts/IndicadoresContext';
+import { PlanOMemoria } from '../../pages/ADR/PlanMemoria/PlanMemoriaComponents';
+import { obtenerFilasPorTipoAccion, TransformarYearDataACuadroBorrador } from '../../pages/Configuracion/CuadroMando/ConversorCuadroMando';
 import { convertirPlantillaAFileValidado, onSuccessFillFiles, plantillasOriginales } from '../../pages/Configuracion/Plantillas';
+import { LoadingOverlayPersonalizada } from '../../pages/Configuracion/Users/componentes';
+import { IndicadoresServicios, Servicios } from '../../types/GeneralTypes';
+import { HMT, IndicadorRealizacion, IndicadorRealizacionAccion, IndicadorResultado, IndicadorResultadoAccion } from '../../types/Indicadores';
+import { DatosAccion } from '../../types/TipadoAccion';
+import { DatosAnioCuadroMandoBorrador, Ejes, OperationalIndicators, YearData } from '../../types/tipadoPlan';
 import { SaberLogoEnGenWORD } from '../Layouts/LayoutsComponents';
+import { LlamadasBBDD } from './data/utilsData';
 import { TraductorAutomaticoNAMES } from './utils';
 // Helpers para insertar/reemplazar imágenes en el paquete .docx (ZIP)
 const getNextRId = (relsXml: string) => {
@@ -138,8 +138,6 @@ export const GeneracionDelDocumentoWordPlan = async (
         const accionesPrioritarias: Ejes[] = datos.plan.ejesPrioritarios;
 
         // Funcion Hipotesis
-        //TODO Verificar Funcion Hipotesis
-
         const hipotesis = () => {
             const indicadoresRA: {
                 nombre: string;
@@ -185,8 +183,6 @@ export const GeneracionDelDocumentoWordPlan = async (
             return [indicadoresRA, indicadoresRS];
         };
         const [hipotesisRA, hipotesisRS] = hipotesis();
-
-        console.log(match ? match[1] : '');
 
         // 4. Datos a sustituir
 

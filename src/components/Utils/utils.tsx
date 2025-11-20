@@ -400,7 +400,7 @@ export async function FetchConRefreshRetry<T = any>(input: RequestInfo, init?: R
 
         if (refreshResponse.ok) {
             const datosRefresh = await refreshResponse.json();
-            console.log('%c✅ Sesión recuperada correctamente', 'color: green; font-weight: bold;');
+            console.info('%c✅ Sesión recuperada correctamente', 'color: green; font-weight: bold;');
 
             // Guardamos tokens nuevos
             sessionStorage.setItem('access_token', datosRefresh.access_token);
@@ -604,18 +604,6 @@ export function compararObjetosGenerico(prev: Record<string, any>, actual: Recor
 
     return cambios;
 }
-
-//ejemplo
-//     const prevDatosPlan = useEffectPrevio(datosEditandoAccion);
-//
-//     useEffect(() => {
-//         if (datosEditandoAccion.accionCompartida) {
-//             if (prevDatosPlan) {
-//                 const cambios = compararObjetosGenerico(prevDatosPlan, datosEditandoAccion);
-//                 console.log('Cambios detectados:', cambios);
-//             }
-//         }
-//     }, [datosEditandoAccion]);
 
 export function useEffectPrevio<T>(value: T): T | undefined {
     const ref = useRef<T>();
