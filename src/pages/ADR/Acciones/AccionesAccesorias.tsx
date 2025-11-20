@@ -15,7 +15,7 @@ import { LoadingOverlayPersonalizada, ZonaTitulo } from '../../Configuracion/Use
 import { ModalAccion, MostrarAvisoCamposAcciones } from './ComponentesAccionesServicios';
 const Index: React.FC = () => {
     const navigate = useNavigate();
-    const { regionSeleccionada, regiones } = useRegionContext();
+    const { regionSeleccionada, nombreRegionSeleccionada, regiones } = useRegionContext();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
     const { t, i18n } = useTranslation();
     const { yearData, EliminarAccion, datosEditandoAccion, SeleccionEditarAccion, SeleccionVaciarEditarAccion, LoadingYearData } = useYear();
@@ -184,6 +184,8 @@ const Index: React.FC = () => {
                                     editable = false;
                                     esAccionParticipante = true;
                                     esAccionLider = false;
+                                    const regionEncontrada2 = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === String(regionLider));
+                                    nombreRegion = regionEncontrada2 ? (i18n.language === 'es' ? regionEncontrada2.NameEs : regionEncontrada2.NameEu) : '';
                                 }
                             }
                             if (accion.accionDuplicadaDeId) {
@@ -193,6 +195,8 @@ const Index: React.FC = () => {
                                     esAccionDuplicada = true;
                                     const lider = found.accionCompartida?.regionLider;
                                     nombreRegion = lider != null ? (typeof lider === 'object' ? String(lider.RegionId) : String(lider)) : '';
+                                    const regionEncontrada = regiones.find((reg) => String(reg.RegionId).padStart(2, '0') === `${nombreRegion}`);
+                                    nombreRegion = regionEncontrada ? (i18n.language === 'es' ? regionEncontrada.NameEs : regionEncontrada.NameEu) : '';
                                 }
                                 if (!nombreRegion) {
                                     const regionLiderObj = accion.regionesAccionDuplicada?.find((rad) => String(rad?.Id) === '0')?.RegionId;
@@ -207,17 +211,9 @@ const Index: React.FC = () => {
                                 >
                                     {(esAccionLider || esAccionParticipante || esAccionDuplicada) &&
                                         (() => {
-                                            let tipoNombre = '';
-                                            if (nombreRegion) {
-                                                const foundRegion = regiones.find((r) => String(r.RegionId) === String(nombreRegion));
-                                                tipoNombre = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : nombreRegion;
-                                            } else if (esAccionParticipante) {
-                                                const foundRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
-                                                tipoNombre = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : nombreRegion;
-                                            }
                                             return (
                                                 <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">
-                                                    {nombreRegion || esAccionParticipante ? t('supracomarcalGestionada', { tipo: tipoNombre }) : t('txtsupracomarcal')}
+                                                    {nombreRegion || esAccionParticipante ? t('supracomarcalGestionada', { tipo: nombreRegion }) : t('txtsupracomarcal')}
                                                 </span>
                                             );
                                         })()}
@@ -253,23 +249,10 @@ const Index: React.FC = () => {
                                             acciones={'AccionesAccesorias'}
                                             file={accion}
                                             button={(open) => {
-                                                const ownerRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
-                                                const ownerName = ownerRegion
-                                                    ? i18n.language === 'es'
-                                                        ? ownerRegion.NameEs
-                                                        : ownerRegion.NameEu
-                                                    : String(accion.accionCompartida?.regionLider ?? 'XXXX');
-                                                const participantRegion = regiones.find((r) => String(r.RegionId) === String(regionSeleccionada));
-                                                const participantName = participantRegion
-                                                    ? i18n.language === 'es'
-                                                        ? participantRegion.NameEs
-                                                        : participantRegion.NameEu
-                                                    : String(regionSeleccionada ?? 'YYYYY');
-
                                                 return (
                                                     <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
                                                         <p>
-                                                            {t('supracomarcalIncorporarAccion_part1', { owner: ownerName, participant: participantName })}{' '}
+                                                            {t('supracomarcalIncorporarAccion_part1', { region: nombreRegion, participant: nombreRegionSeleccionada })}{' '}
                                                             <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
                                                                 {t('Aqui')}
                                                             </span>{' '}

@@ -254,6 +254,8 @@ export interface DatosAccionDTO {
     IndicadorResultadoAcciones?: IndicadorResultadoAccionDTO[];
     IndicadoresRealizacionAccion?: IndicadorRealizacionAccionDTO[];
     IndicadoresResultadoAccion?: IndicadorResultadoAccionDTO[];
+    AccionPrioritaria?: boolean;
+    RegionLiderId?: number;
 }
 export interface DatosPlanDTO {
     Id: number;

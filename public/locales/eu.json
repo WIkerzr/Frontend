@@ -252,7 +252,7 @@
     "MemoriaSA": "Urteko_jarraipen_memoria",
     "supracomarcalGestionada": "Suprakomarkala kudeatzen duen eskualdea {{tipo}}",
     "supracomarcalIncorporarAccion": "Suprakomarkaleko ekintzak non {{participant}} sartu den",
-    "supracomarcalIncorporarAccion_part1": "{{owner}}k suprakomarkaleko ekintza bat sortu du eta {{participant}} bertan sartu du. Egin klik",
+    "supracomarcalIncorporarAccion_part1": "{{region}}k suprakomarkaleko ekintza bat sortu du eta {{participant}} bertan sartu du. Egin klik",
     "supracomarcalIncorporarAccion_part2": "zure Kudeaketa Planera ekintza gehitzeko.",
     "memoriasAnuales": "Urteko memoriak",
     "memoriaTitulo": "Urteko jarraipen memoria",

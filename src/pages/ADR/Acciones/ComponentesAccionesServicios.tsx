@@ -576,8 +576,8 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
 
                         if (regionLider != regionSeleccionada) {
                             esAccionParticipante = true;
-                            const foundRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
-                            nombreRegionLider = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : accion.accionCompartida?.regionLider.toString();
+                            const foundRegion = regiones.find((r) => String(r.RegionId) === String(regionLider));
+                            nombreRegionLider = foundRegion ? (i18n.language === 'es' ? foundRegion.NameEs : foundRegion.NameEu) : regionLider;
                         }
                     }
 
@@ -607,19 +607,10 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
                                     numAcciones={yearData.plan.ejesPrioritarios.map((eje) => eje.acciones.length)}
                                     file={accion}
                                     button={(open) => {
-                                        const ownerRegion = regiones.find((r) => String(r.RegionId) === String(accion.accionCompartida?.regionLider));
-                                        const ownerName = ownerRegion ? (i18n.language === 'es' ? ownerRegion.NameEs : ownerRegion.NameEu) : String(accion.accionCompartida?.regionLider ?? 'XXXX');
-                                        const participantRegion = regiones.find((r) => String(r.RegionId) === String(regionSeleccionada));
-                                        const participantName = participantRegion
-                                            ? i18n.language === 'es'
-                                                ? participantRegion.NameEs
-                                                : participantRegion.NameEu
-                                            : String(regionSeleccionada ?? 'YYYYY');
-
                                         return (
                                             <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
                                                 <p>
-                                                    {t('supracomarcalIncorporarAccion_part1', { owner: ownerName, participant: participantName })}{' '}
+                                                    {t('supracomarcalIncorporarAccion_part1', { region: nombreRegionLider, participant: nombreRegionSeleccionada })}{' '}
                                                     <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
                                                         {t('Aqui')}
                                                     </span>{' '}

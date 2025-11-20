@@ -394,7 +394,7 @@
     "supracomarcal": "Tratamiento territorial supracomarcal",
     "supracomarcalGestionada": "Supracomarcal gestionada por {{tipo}}",
     "supracomarcalIncorporarAccion": "Acciones supracomarcales en la que ha incluido a {{participant}}",
-    "supracomarcalIncorporarAccion_part1": "{{owner}} ha creado una acción supracomarcal en la que ha incluido a {{participant}}. Haz click",
+    "supracomarcalIncorporarAccion_part1": "{{region}} ha creado una acción supracomarcal en la que ha incluido a {{participant}}. Haz click",
     "supracomarcalIncorporarAccion_part2": "para incorporar la acción al Plan de gestión.",
     "tabMemoria": "Información para la Memoria",
     "tabPlan": "Información para el Plan",

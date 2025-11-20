@@ -25,7 +25,7 @@ const Index: React.FC = () => {
     const [successMessage, setSuccessMessage] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const { regionSeleccionada, regiones } = useRegionContext();
+    const { regionSeleccionada, nombreRegionSeleccionada, regiones } = useRegionContext();
 
     useEffect(() => {
         SeleccionVaciarEditarAccion();
@@ -159,6 +159,15 @@ const Index: React.FC = () => {
                                 const match = regionesDuplicadas.find((r) => r.id === dupId || r.id === formateaConCeroDelante(dupId));
                                 nombreRegionLider = match?.regionId ?? '';
                             }
+                            if (nombreRegionLider && !isNaN(Number(nombreRegionLider))) {
+                                nombreRegionLider = esDuplicado
+                                    ? i18n.language === 'es'
+                                        ? regiones.find((r) => String(r.RegionId) === nombreRegionLider)?.NameEs ?? nombreRegionLider
+                                        : regiones.find((r) => String(r.RegionId) === nombreRegionLider)?.NameEu ?? nombreRegionLider
+                                    : i18n.language === 'es'
+                                    ? servicio.serviciosCompartidas?.regionLider?.NameEs ?? ''
+                                    : servicio.serviciosCompartidas?.regionLider?.NameEu ?? '';
+                            }
                             return (
                                 <div
                                     key={servicio.id}
@@ -167,16 +176,9 @@ const Index: React.FC = () => {
                                     {esServicioLider && <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">{t('txtsupracomarcal')}</span>}
                                     {(esServicioLider || esServicioParticipante || esDuplicado) &&
                                         (() => {
-                                            const tipoNombre = esDuplicado
-                                                ? i18n.language === 'es'
-                                                    ? regiones.find((r) => String(r.RegionId) === nombreRegionLider)?.NameEs ?? nombreRegionLider
-                                                    : regiones.find((r) => String(r.RegionId) === nombreRegionLider)?.NameEu ?? nombreRegionLider
-                                                : i18n.language === 'es'
-                                                ? servicio.serviciosCompartidas?.regionLider?.NameEs ?? ''
-                                                : servicio.serviciosCompartidas?.regionLider?.NameEu ?? '';
                                             return (
                                                 <span className="badge badge-outline-dark text-xs absolute top-0.5 right-2">
-                                                    {esServicioParticipante || esDuplicado ? t('supracomarcalGestionada', { tipo: tipoNombre }) : t('txtsupracomarcal')}
+                                                    {esServicioParticipante || esDuplicado ? t('supracomarcalGestionada', { tipo: nombreRegionLider }) : t('txtsupracomarcal')}
                                                 </span>
                                             );
                                         })()}
@@ -214,23 +216,10 @@ const Index: React.FC = () => {
                                         <ModalServicio
                                             file={servicio}
                                             button={(open) => {
-                                                const ownerRegion = servicio.serviciosCompartidas?.regionLider;
-                                                const ownerName = ownerRegion
-                                                    ? i18n.language === 'es'
-                                                        ? ownerRegion.NameEs
-                                                        : ownerRegion.NameEu
-                                                    : String(servicio.serviciosCompartidas?.regionLider ?? 'XXXX');
-                                                const participantRegion = regiones.find((r) => String(r.RegionId) === String(regionSeleccionada));
-                                                const participantName = participantRegion
-                                                    ? i18n.language === 'es'
-                                                        ? participantRegion.NameEs
-                                                        : participantRegion.NameEu
-                                                    : String(regionSeleccionada ?? 'YYYYY');
-
                                                 return (
                                                     <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
                                                         <p>
-                                                            {t('supracomarcalIncorporarAccion_part1', { owner: ownerName, participant: participantName })}{' '}
+                                                            {t('supracomarcalIncorporarAccion_part1', { region: nombreRegionLider, participant: nombreRegionSeleccionada })}{' '}
                                                             <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
                                                                 {t('Aqui')}
                                                             </span>{' '}
