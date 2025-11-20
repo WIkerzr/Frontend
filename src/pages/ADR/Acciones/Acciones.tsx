@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useYear } from '../../../contexts/DatosAnualContext';
 import { useEstadosPorAnio } from '../../../contexts/EstadosPorAnioContext';
+import { useRegionContext } from '../../../contexts/RegionContext';
 import { DatosAccion } from '../../../types/TipadoAccion';
 import { Ejes } from '../../../types/tipadoPlan';
 import { ZonaTitulo } from '../../Configuracion/Users/componentes';
@@ -34,6 +35,7 @@ const Index: React.FC = () => {
     const { t, i18n } = useTranslation();
     const { yearData, errorMessageYearData, successMessageYearData, selectedId, SeleccionVaciarEditarAccion, LoadingYearData } = useYear();
     const { anioSeleccionada, editarPlan, editarMemoria } = useEstadosPorAnio();
+    const { nombreRegionSeleccionada } = useRegionContext();
 
     const navigate = useNavigate();
     const ejesPrioritarios = yearData.plan.ejesPrioritarios;
@@ -43,6 +45,7 @@ const Index: React.FC = () => {
     const [ejesPrioritariosCompartidos, setEjesPrioritariosCompartidos] = useState<Ejes[]>(ejesCompartidosStorage ? JSON.parse(ejesCompartidosStorage) : []);
 
     const [regionesDuplicadas, setRegionesDuplicadas] = useState<string[]>([]);
+
     useEffect(() => {
         if (ejesPrioritarios.length > 0) {
             const todasAcciones = ejesPrioritarios.flatMap((eje) => eje.acciones ?? []);
@@ -57,13 +60,20 @@ const Index: React.FC = () => {
     }, [yearData]);
 
     useEffect(() => {
-        if (ejesPrioritarios.length === 0) return;
         if (regionesDuplicadas.length === 0) return;
-        const ejesCompartidos = yearData.plan.ejesPrioritarios.filter((eje) =>
-            regionesDuplicadas.includes(String(eje.acciones.find((accion) => regionesDuplicadas.includes(String(accion.accionDuplicadaDeId)))?.accionDuplicadaDeId))
-        );
+        if (!ejesPrioritariosCompartidos || ejesPrioritariosCompartidos.length === 0) return;
 
-        setEjesPrioritariosCompartidos(ejesCompartidos);
+        const ejesFiltrados = ejesPrioritariosCompartidos
+            .map((eje) => {
+                const accionesFiltradas = (eje.acciones ?? []).filter((accion) => {
+                    const accionId = String(accion.id);
+                    return !regionesDuplicadas.includes(accionId);
+                });
+                return { ...eje, acciones: accionesFiltradas };
+            })
+            .filter((eje) => (eje.acciones ?? []).length > 0);
+
+        setEjesPrioritariosCompartidos(ejesFiltrados);
     }, [regionesDuplicadas]);
 
     useEffect(() => {
@@ -115,20 +125,25 @@ const Index: React.FC = () => {
                                         )}
                                     </>
                                 )}
-                                <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} number={index} />
+                                <ListadoAcciones eje={i18n.language === 'es' ? eje.NameEs : eje.NameEu} idEje={eje.Id} number={index} setEjesPrioritariosCompartidos={setEjesPrioritariosCompartidos} />
                             </div>
                         );
                     })}
-
-                    {ejesPrioritariosCompartidos.map((eje) => {
-                        const datosEjes: DatosAccion[] = eje.acciones?.filter((accion) => accion.accionCompartida?.regionLider) ?? [];
-                        if (datosEjes.length === 0) return;
-                        return (
-                            <div key={eje.Id} className="flex flex-col flex-1 items-center justify-center p-1">
-                                <ListadoAccionesCompartidas eje={eje} idEje={eje.Id} />
+                    {ejesPrioritariosCompartidos.length > 0 && (
+                        <div className="flex flex-col flex-1 items-center justify-center p-1">
+                            <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
+                                <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">
+                                    {t('supracomarcalIncorporarAccion', { participant: nombreRegionSeleccionada })}
+                                    {ejesPrioritariosCompartidos.map((eje) => {
+                                        console.log(JSON.stringify(eje));
+                                        const datosEjes: DatosAccion[] = eje.acciones?.filter((accion) => accion.accionCompartida?.regionLider) ?? [];
+                                        if (datosEjes.length === 0) return;
+                                        return <ListadoAccionesCompartidas key={eje.Id} eje={eje} idEje={eje.Id} />;
+                                    })}
+                                </span>
                             </div>
-                        );
-                    })}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -66,8 +66,8 @@ const EstadosContext = createContext<EstadosContextType>({
 export const useEstadosPorAnioContext = () => useContext(EstadosContext);
 
 export const EstadosProvider = ({ children }: { children: ReactNode }) => {
-    const { regionSeleccionada } = useRegionContext();
-    const { yearData, setYearData } = useYear();
+    const { regionSeleccionada, nombreRegionSeleccionada } = useRegionContext();
+    const { yearData, setYearData, llamadaBBDDYearData } = useYear();
 
     const { user } = useUser();
     const { login } = useAuth();
@@ -197,16 +197,14 @@ export const EstadosProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    // llamadaEficiente anulada por ingreso a cuadro de mando al logearse el ADR ya que se necesita una completa en cuadro de mando
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
-    //             await llamadaBBDDYearData(anioSeleccionada, false);
-    //         }
-    //     };
-    //     fetchData();
-    // }, [anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada]);
+    useEffect(() => {
+        const fetchData = async () => {
+            if (anioSeleccionada !== null && regionSeleccionada && nombreRegionSeleccionada) {
+                await llamadaBBDDYearData(anioSeleccionada, false);
+            }
+        };
+        fetchData();
+    }, [anioSeleccionada, regionSeleccionada, nombreRegionSeleccionada]);
 
     useEffect(() => {
         if (anioSeleccionada === null || !yearData) return;

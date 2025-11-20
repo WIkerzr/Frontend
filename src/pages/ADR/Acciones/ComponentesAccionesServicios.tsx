@@ -285,8 +285,9 @@ interface ListadoAccionesProps {
     eje: string;
     number: number;
     idEje: string;
+    setEjesPrioritariosCompartidos: React.Dispatch<React.SetStateAction<Ejes[]>>;
 }
-export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) => {
+export const ListadoAcciones = ({ eje, number, idEje, setEjesPrioritariosCompartidos }: ListadoAccionesProps) => {
     const navigate = useNavigate();
     const { yearData, EliminarAccion, datosEditandoAccion, SeleccionVaciarEditarAccion, SeleccionEditarAccion, setIdEjeEditado, setDatosEditandoAccion, loadingYearData } = useYear();
     const { regionSeleccionada, regiones } = useRegionContext();
@@ -346,10 +347,16 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
         }
     }, [datosEditandoAccion, navigate]);
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (accion: DatosAccion) => {
         const confirmar = window.confirm(t('confirmacionEliminarAccion'));
         if (!confirmar) return;
-        EliminarAccion('Acciones', idEje, id);
+        if (accion.accionDuplicadaDeId) {
+            const ejesCompartidosStorage = sessionStorage.getItem('ejesPrioritariosCompartidos');
+            if (ejesCompartidosStorage) {
+                setEjesPrioritariosCompartidos(JSON.parse(ejesCompartidosStorage));
+            }
+        }
+        EliminarAccion('Acciones', idEje, accion.id);
     };
 
     const handleEdit = async (accion: DatosAccion) => {
@@ -470,7 +477,7 @@ export const ListadoAcciones = ({ eje, number, idEje }: ListadoAccionesProps) =>
                                 <div>
                                     {editable === true && (
                                         <button
-                                            onClick={() => handleDelete(accion.id)}
+                                            onClick={() => handleDelete(accion)}
                                             aria-label={`Eliminar acción ${accion.id}`}
                                             className="hover:bg-blue-50 text-gray-500 hover:text-red-600 p-1.5 rounded transition"
                                         >
@@ -550,10 +557,7 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
     if (loadingYearData) return <Loading />;
     if (accionesMostradas.length === 0) return;
     return (
-        <div className="rounded-lg space-y-5  p-2 border border-gray-200 bg-white max-w-lg w-full mx-auto shadow-sm">
-            <span className="min-h-[90px] text-xl text-center font-semibold text-gray-700 tracking-wide block mb-2">
-                {t('supracomarcalIncorporarAccion', { participant: nombreRegionSeleccionada })}
-            </span>
+        <div className="text-left font-semibold text-gray-700 tracking-wide block mb-2">
             <LoadingOverlayPersonalizada
                 isLoading={loading}
                 message={{
@@ -608,7 +612,7 @@ export const ListadoAccionesCompartidas = ({ eje, idEje }: ListadoAccionesPropsC
                                     file={accion}
                                     button={(open) => {
                                         return (
-                                            <div className="w-full flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
+                                            <div className="w-full text-sm flex flex-col text-warning bg-warning-light dark:bg-warning-dark-light p-3.5">
                                                 <p>
                                                     {t('supracomarcalIncorporarAccion_part1', { region: nombreRegionLider, participant: nombreRegionSeleccionada })}{' '}
                                                     <span onClick={() => open()} style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>

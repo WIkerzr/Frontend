@@ -1,6 +1,6 @@
-export const Modos: 'DEV' | 'HAZI' | 'Produccion' = 'DEV';
-export const ModoDev = Modos === 'DEV';
-const EdicionTotal = false;
+export const Modos = 'DEV' as 'DEV' | 'HAZI' | 'Produccion';
+export const ModoDev = Modos === 'DEV' ? true : false;
+const EdicionTotal = true;
 export const ModoDevEdicionTotal = ModoDev ? EdicionTotal : false;
 
 export const ApiTarget =
