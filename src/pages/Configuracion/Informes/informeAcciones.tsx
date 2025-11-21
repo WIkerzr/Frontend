@@ -168,7 +168,7 @@ export const generarInformeAcciones = async (
     // Detectar si hay múltiples regiones (para InfAcciones con varias comarcas)
     const regionesUnicas = new Set(anios.map((a) => a.RegionId));
     const multiRegion = regionesUnicas.size > 1;
-    const resumenesUnicos = generarResumenPorEje(todosLosDatos, i18n, multiRegion);
+    const resumenesUnicos = generarResumenPorEje(todosLosDatos, i18n, multiRegion).sort((a, b) => a.NombreEje.localeCompare(b.NombreEje));
     let totalAcciones = 0;
     resumenesUnicos.forEach((r: ResumenEje) => {
         sheet.addRow([r.NombreEje, r.NumeroAcciones]);
@@ -205,7 +205,7 @@ export const generarInformeAcciones = async (
     filaEncabezado2.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
     // Acumular datos de todos los años y generar resumen único por Objetivo (generales)
-    const resumenesGeneralesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 0, multiRegion);
+    const resumenesGeneralesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 0, multiRegion).sort((a, b) => a.NombreObjetivo.localeCompare(b.NombreObjetivo));
     let totalAccionesGenerales = 0;
     resumenesGeneralesUnicos.forEach((r: ResumenObjetivoPorEje) => {
         sheet.addRow([r.NombreObjetivo, r.NumeroAcciones]);
@@ -242,7 +242,7 @@ export const generarInformeAcciones = async (
     filaEncabezado3.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
     // Acumular datos de todos los años y generar resumen único por Objetivo (sectoriales)
-    const resumenesSectorialesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 1, multiRegion);
+    const resumenesSectorialesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 1, multiRegion).sort((a, b) => a.NombreObjetivo.localeCompare(b.NombreObjetivo));
     let totalAccionesSectoriales = 0;
     resumenesSectorialesUnicos.forEach((r: ResumenObjetivoPorEje) => {
         sheet.addRow([r.NombreObjetivo, r.NumeroAcciones]);

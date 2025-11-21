@@ -4,8 +4,11 @@ type ModoNombre = 'DEV' | 'HAZI' | 'Produccion';
 const ModoSeleccionado: ModoConfig = 0;
 
 const mapearModo = (modo: ModoConfig): ModoNombre => {
-    if (modo === 0 || modo === 'DEV') return 'DEV';
-    if (modo === 1 || modo === 'HAZI') return 'HAZI';
+    // Si estamos en producción (build) y el modo es DEV (0), cambiar a Produccion (2)
+    const modoBuild = import.meta.env.PROD && (modo === 0 || modo === 'DEV') ? 2 : modo;
+
+    if (modoBuild === 0 || modoBuild === 'DEV') return 'DEV';
+    if (modoBuild === 1 || modoBuild === 'HAZI') return 'HAZI';
     return 'Produccion';
 };
 
