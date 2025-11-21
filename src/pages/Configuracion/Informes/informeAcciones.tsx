@@ -28,27 +28,38 @@ interface RegionAnio {
 
 // La información de regiones ya no se usa en este informe (agrupamos por ejes)
 
-// Genera resumen agrupado por EJE (ignorando comarcas)
-const generarResumenPorEje = (datos: DatoEje[], i18n: { language: string }): ResumenEje[] => {
-    const mapa = new Map<number, ResumenEje>();
-
+// Genera resumen agrupado por EJE
+// Si multiRegion=true, primero obtiene ejes únicos por región, luego agrupa por nombre sumando acciones
+// Si multiRegion=false, agrupa solo por EjeId (para informes de una sola región)
+const generarResumenPorEje = (datos: DatoEje[], i18n: { language: string }, multiRegion: boolean = false): ResumenEje[] => {
+    // Paso 1: Obtener ejes únicos por región (evitar duplicados dentro de la misma región)
+    const ejesUnicos = new Map<string, DatoEje>();
     for (const item of datos) {
-        const key = item.EjeId;
-        let resumen = mapa.get(key);
+        const key = multiRegion ? `${item.RegionId}-${item.EjeId}` : String(item.EjeId);
+        if (!ejesUnicos.has(key)) {
+            ejesUnicos.set(key, item);
+        }
+    }
+
+    // Paso 2: Agrupar por nombre de eje sumando acciones de diferentes regiones
+    const mapaFinal = new Map<string, ResumenEje>();
+    for (const item of ejesUnicos.values()) {
+        const nombreEje = i18n.language === 'es' ? item.NombreEje : item.IzenaEje;
+        let resumen = mapaFinal.get(nombreEje);
 
         if (!resumen) {
             resumen = {
-                RegionId: '', // no usado ahora, mantenemos la interfaz
-                NombreEje: i18n.language === 'es' ? item.NombreEje : item.IzenaEje,
+                RegionId: item.RegionId,
+                NombreEje: nombreEje,
                 NumeroAcciones: item.NumeroAcciones,
             };
-            mapa.set(key, resumen);
+            mapaFinal.set(nombreEje, resumen);
         } else {
             resumen.NumeroAcciones += item.NumeroAcciones;
         }
     }
 
-    return Array.from(mapa.values());
+    return Array.from(mapaFinal.values());
 };
 
 // (se eliminó el resumen por comarca: ahora agrupamos por eje)
@@ -60,28 +71,38 @@ interface ResumenObjetivoPorEje {
     NumeroAcciones: number;
 }
 
-const generarResumenObjetivosPorEje = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1): ResumenObjetivoPorEje[] => {
-    const mapa = new Map<number, ResumenObjetivoPorEje>();
-
+const generarResumenObjetivosPorEje = (datos: DatoEje[], i18n: { language: string }, tipoEje: 0 | 1, multiRegion: boolean = false): ResumenObjetivoPorEje[] => {
     const datosFiltrados = datos.filter((d) => d.AxisType === tipoEje);
 
+    // Primero obtener solo el primer registro por cada combinación única
+    // Si multiRegion=true, usar RegionId+EjeId; si no, solo EjeId
+    const ejesUnicos = new Map<string, DatoEje>();
     for (const item of datosFiltrados) {
-        const key = item.ObjetivoId;
-        let resumen = mapa.get(key);
+        const claveEje = multiRegion ? `${item.RegionId}-${item.EjeId}` : String(item.EjeId);
+        if (!ejesUnicos.has(claveEje)) {
+            ejesUnicos.set(claveEje, item);
+        }
+    }
+
+    // Ahora agrupar por nombre de objetivo sumando las acciones de los ejes únicos
+    const mapaFinal = new Map<string, ResumenObjetivoPorEje>();
+    for (const item of ejesUnicos.values()) {
+        const nombreObjetivo = i18n.language === 'es' ? item.NombreObjetivo : item.IzenaObjetivo;
+        let resumen = mapaFinal.get(nombreObjetivo);
 
         if (!resumen) {
             resumen = {
                 NombreEje: '',
-                NombreObjetivo: i18n.language === 'es' ? item.NombreObjetivo : item.IzenaObjetivo,
+                NombreObjetivo: nombreObjetivo,
                 NumeroAcciones: item.NumeroAcciones,
             };
-            mapa.set(key, resumen);
+            mapaFinal.set(nombreObjetivo, resumen);
         } else {
             resumen.NumeroAcciones += item.NumeroAcciones;
         }
     }
 
-    return Array.from(mapa.values());
+    return Array.from(mapaFinal.values());
 };
 
 export const generarInformeAcciones = async (
@@ -144,7 +165,10 @@ export const generarInformeAcciones = async (
 
     // Acumular datos de todos los años y generar resumen único por Eje
     const todosLosDatos = anios.flatMap((a) => a.Datos || []);
-    const resumenesUnicos = generarResumenPorEje(todosLosDatos, i18n);
+    // Detectar si hay múltiples regiones (para InfAcciones con varias comarcas)
+    const regionesUnicas = new Set(anios.map((a) => a.RegionId));
+    const multiRegion = regionesUnicas.size > 1;
+    const resumenesUnicos = generarResumenPorEje(todosLosDatos, i18n, multiRegion);
     let totalAcciones = 0;
     resumenesUnicos.forEach((r: ResumenEje) => {
         sheet.addRow([r.NombreEje, r.NumeroAcciones]);
@@ -181,7 +205,7 @@ export const generarInformeAcciones = async (
     filaEncabezado2.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
     // Acumular datos de todos los años y generar resumen único por Objetivo (generales)
-    const resumenesGeneralesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 0);
+    const resumenesGeneralesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 0, multiRegion);
     let totalAccionesGenerales = 0;
     resumenesGeneralesUnicos.forEach((r: ResumenObjetivoPorEje) => {
         sheet.addRow([r.NombreObjetivo, r.NumeroAcciones]);
@@ -218,7 +242,7 @@ export const generarInformeAcciones = async (
     filaEncabezado3.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
 
     // Acumular datos de todos los años y generar resumen único por Objetivo (sectoriales)
-    const resumenesSectorialesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 1);
+    const resumenesSectorialesUnicos = generarResumenObjetivosPorEje(todosLosDatos, i18n, 1, multiRegion);
     let totalAccionesSectoriales = 0;
     resumenesSectorialesUnicos.forEach((r: ResumenObjetivoPorEje) => {
         sheet.addRow([r.NombreObjetivo, r.NumeroAcciones]);

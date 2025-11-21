@@ -1,4 +1,15 @@
-export const Modos = 'DEV' as 'DEV' | 'HAZI' | 'Produccion';
+type ModoConfig = 'DEV' | 'HAZI' | 'Produccion' | 0 | 1 | 2;
+type ModoNombre = 'DEV' | 'HAZI' | 'Produccion';
+
+const ModoSeleccionado: ModoConfig = 0;
+
+const mapearModo = (modo: ModoConfig): ModoNombre => {
+    if (modo === 0 || modo === 'DEV') return 'DEV';
+    if (modo === 1 || modo === 'HAZI') return 'HAZI';
+    return 'Produccion';
+};
+
+export const Modos = mapearModo(ModoSeleccionado);
 export const ModoDev = Modos === 'DEV' ? true : false;
 const EdicionTotal = true;
 export const ModoDevEdicionTotal = ModoDev ? EdicionTotal : false;
